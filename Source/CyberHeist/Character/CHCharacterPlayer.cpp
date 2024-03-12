@@ -7,6 +7,7 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Weapon/Gun/CHGun.h"
 
 ACHCharacterPlayer::ACHCharacterPlayer()
 {
@@ -19,6 +20,17 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	// Gun
+	// Gun = CreateDefaultSubobject<ACHGun>(TEXT("Weapon")); // 컴포넌트 생성
+	// Gun->SetupAttachment(GetMesh(), TEXT("hand_rSocket"));
+	// 
+	// static ConstructorHelpers::FObjectFinder<ACHGun> GunRef(TEXT(""));
+	// if (nullptr != GunRef.Object)
+	// {
+	// 	Gun = GunRef.Object;
+	// }
+	
 
 	// Input
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/CyberHeist/Input/IMC_Default.IMC_Default'"));
@@ -44,6 +56,12 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	{
 		LookAction = InputActionLookRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShootRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Shoot.IA_Shoot'"));
+	if (nullptr != InputActionShootRef.Object)
+	{
+		ShootAction = InputActionShootRef.Object;
+	}
 }
 
 void ACHCharacterPlayer::BeginPlay()
@@ -54,8 +72,8 @@ void ACHCharacterPlayer::BeginPlay()
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		//Subsystem->RemoveMappingContext(DefaultMappingContext);
 	}
+
 }
 
 void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -68,6 +86,12 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::Move);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::Look);
+	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::Shoot);
+}
+
+void ACHCharacterPlayer::Shoot()
+{
+	Weapon->PullTrigger();
 }
 
 void ACHCharacterPlayer::Move(const FInputActionValue& Value)

@@ -4,6 +4,7 @@
 #include "Character/CHCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Weapon/Gun/CHGun.h"
 
 // Sets default values
 ACHCharacterBase::ACHCharacterBase()
@@ -42,13 +43,28 @@ ACHCharacterBase::ACHCharacterBase()
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
+
+	//static ConstructorHelpers::FClassFinder<ACHGun> ACHGunClassRef(TEXT("/Script/CyberHeist.CHGunLauncher"));
+	//if (ACHGunClassRef.Class)
+	//{
+	//	Weapon = GetWorld()->SpawnActor<ACHGun>(ACHGunClassRef.Class);	
+	//	// ACHGunClassRef.Class;
+	//}
 }
 
 // Called when the game starts or when spawned
 void ACHCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	Weapon = GetWorld()->SpawnActor<ACHGun>();
+	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
+
+	if (Weapon)
+	{
+		Weapon->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon_rSocket"));
+		Weapon->SetOwner(this);
+	}
 }
 
 // Called every frame

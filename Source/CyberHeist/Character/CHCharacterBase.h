@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Weapon/Gun/CHGun.h"
 #include "CHCharacterBase.generated.h"
 
 UCLASS()
@@ -25,5 +26,10 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class ACHGun> Weapon;
+
 
 };
