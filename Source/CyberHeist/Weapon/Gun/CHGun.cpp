@@ -4,6 +4,7 @@
 #include "Weapon/Gun/CHGun.h"
 #include "KisMet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 ACHGun::ACHGun()
@@ -68,7 +69,7 @@ void ACHGun::PullTrigger()
 	FRotator Rotation;
 	OwnerController->GetPlayerViewPoint(Location, Rotation);
 
-	DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
+	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
 
 	FVector End = Location + Rotation.Vector() * MaxRange;
 
@@ -78,8 +79,15 @@ void ACHGun::PullTrigger()
 	if (bSuccess)
 	{
 		FVector ShotDirection = -Rotation.Vector();
-		DrawDebugPoint(GetWorld(), Hit.Location, 20, FColor::Red, true);
+		// DrawDebugPoint(GetWorld(), Hit.Location, 20, FColor::Red, true);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),ImpactEffect, Hit.Location, ShotDirection.Rotation());
+
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor != nullptr)
+		{
+			FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
+			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
+		}
 	}
 }
 
