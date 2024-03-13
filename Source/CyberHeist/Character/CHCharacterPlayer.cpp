@@ -14,23 +14,14 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	// Camera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f;
+	CameraBoom->TargetArmLength = 300.0f;
+	CameraBoom->SocketOffset = FVector(0.0f, 60.0f, 0.0f);
 	CameraBoom->bUsePawnControlRotation = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	// Gun
-	// Gun = CreateDefaultSubobject<ACHGun>(TEXT("Weapon")); // 컴포넌트 생성
-	// Gun->SetupAttachment(GetMesh(), TEXT("hand_rSocket"));
-	// 
-	// static ConstructorHelpers::FObjectFinder<ACHGun> GunRef(TEXT(""));
-	// if (nullptr != GunRef.Object)
-	// {
-	// 	Gun = GunRef.Object;
-	// }
-	
 
 	// Input
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/CyberHeist/Input/IMC_Default.IMC_Default'"));

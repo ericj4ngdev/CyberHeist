@@ -30,11 +30,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class USkeletalMeshComponent> Mesh;
 
-	UPROPERTY(VisibleAnywhere, Category = Effect)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<class UParticleSystemComponent> Effect;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	TObjectPtr<class UParticleSystem> MuzzleFlash;  // UParticleSystemComponent
+	UPROPERTY(VisibleAnywhere, Category = "Effect")
+	TObjectPtr<class UParticleSystem> MuzzleFlash;  // UParticleSystem
+
+	UPROPERTY(VisibleAnywhere, Category = "Effect")
+	TObjectPtr<class UParticleSystem> ImpactEffect;  // UParticleSystem
+
+
+private:
+	UPROPERTY(EditAnywhere)
+		float MaxRange = 1000;
 
 public:
 	void PullTrigger();
