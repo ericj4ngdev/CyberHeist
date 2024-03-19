@@ -9,7 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Weapon/Gun/CHGun.h"
 #include "CHCharacterControlData.h"
-#include "Animation/AnimMontage.h"
+#include "Animation/CHAnimInstance.h"
 
 ACHCharacterPlayer::ACHCharacterPlayer()
 {
@@ -183,11 +183,17 @@ void ACHCharacterPlayer::StartAim()
 	if (CurrentCharacterControlType == ECharacterControlType::Third)
 	{
 		SetCharacterControl(ECharacterControlType::ThirdAim);
-		Aim();
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-		// AnimInstance->SetCombat(true);
-		// CameraBoom->TargetArmLength = AimDistance;
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
+			if (CHAnimInstance)
+			{
+				CHAnimInstance->SetCombatMode(true);
+			}
+		}
+
 	}
 }
 
@@ -196,7 +202,15 @@ void ACHCharacterPlayer::StopAim()
 	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
 		SetCharacterControl(ECharacterControlType::Third);
-		// CameraBoom->TargetArmLength = DefaultCameraDistance;
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
+			if (CHAnimInstance)
+			{
+				CHAnimInstance->SetCombatMode(false);
+			}
+		}
 	}
 }
 
