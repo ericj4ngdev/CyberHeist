@@ -7,6 +7,13 @@
 #include "Weapon/Gun/CHGun.h"
 #include "CHCharacterBase.generated.h"
 
+UENUM()
+enum class ECharacterControlType : uint8
+{
+	First,
+	Third
+};
+
 UCLASS()
 class CYBERHEIST_API ACHCharacterBase : public ACharacter
 {
@@ -19,6 +26,12 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+protected:
+	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData);
+
+	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
+	TMap<ECharacterControlType, class UCHCharacterControlData*> CharacterControlManager;
 
 public:	
 	// Called every frame

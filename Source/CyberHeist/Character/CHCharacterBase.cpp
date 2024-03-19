@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon/Gun/CHGun.h"
+#include "Character/CHCharacterControlData.h"
 
 // Sets default values
 ACHCharacterBase::ACHCharacterBase()
@@ -44,12 +45,17 @@ ACHCharacterBase::ACHCharacterBase()
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
 
-	//static ConstructorHelpers::FClassFinder<ACHGun> ACHGunClassRef(TEXT("/Script/CyberHeist.CHGunLauncher"));
-	//if (ACHGunClassRef.Class)
-	//{
-	//	Weapon = GetWorld()->SpawnActor<ACHGun>(ACHGunClassRef.Class);	
-	//	// ACHGunClassRef.Class;
-	//}
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FirstPerson.CHC_FirstPerson'"));
+	if (FirstPersonDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::First, FirstPersonDataRef.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson.CHC_ThirdPerson'"));
+	if (ThirdPersonDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::Third, ThirdPersonDataRef.Object);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -63,6 +69,18 @@ void ACHCharacterBase::BeginPlay()
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
 	Weapon->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon_rSocket"));
 	Weapon->SetOwner(this);	
+}
+
+void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
+{
+	// Pawn
+	bUseControllerRotationYaw = CharacterControlData->bUseControllerRotationYaw;
+
+	// CharacteMovement
+	GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;
+	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
+	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
+
 }
 
 // Called every frame

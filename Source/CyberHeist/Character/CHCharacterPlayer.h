@@ -28,33 +28,49 @@ protected:
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
+	void ChangeCharacterControl();
+	void SetCharacterControl(ECharacterControlType NewCharacterControlType);
+	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData) override;
 // Camera Section
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<class USpringArmComponent> CameraBoom;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UCameraComponent> FirstPersonCamera;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UCameraComponent> FollowCamera;
+		TObjectPtr<class UCameraComponent> ThirdPersonCamera;
 
 	// Input Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UInputMappingContext> DefaultMappingContext;
+		TObjectPtr<class UInputAction> ChangeControlAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UInputAction> JumpAction;
+	TObjectPtr<class UInputAction> JumpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UInputAction> MoveAction;
+	TObjectPtr<class UInputAction> FirstMoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UInputAction> LookAction;
+	TObjectPtr<class UInputAction> FirstLookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ThirdMoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ThirdLookAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShootAction;
 
 	void Shoot();
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
+	void FirstMove(const FInputActionValue& Value);
+	void FirstLook(const FInputActionValue& Value);
+	void ThirdMove(const FInputActionValue& Value);
+	void ThirdLook(const FInputActionValue& Value);
 
+	ECharacterControlType CurrentCharacterControlType;
 };
