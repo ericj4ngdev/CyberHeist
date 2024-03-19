@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon/Gun/CHGun.h"
 #include "Character/CHCharacterControlData.h"
+#include "Animation/AnimMontage.h"
 
 // Sets default values
 ACHCharacterBase::ACHCharacterBase()
@@ -56,6 +57,20 @@ ACHCharacterBase::ACHCharacterBase()
 	{
 		CharacterControlManager.Add(ECharacterControlType::Third, ThirdPersonDataRef.Object);
 	}
+
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FirstPerson_Aim.CHC_FirstPerson_Aim'"));
+	if (FirstPersonAimDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::FirstAim, FirstPersonAimDataRef.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson_Aim.CHC_ThirdPerson_Aim'"));
+	if (ThirdPersonAimDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::ThirdAim, ThirdPersonAimDataRef.Object);
+	}
+
+	MaxHealth = 100;
 }
 
 // Called when the game starts or when spawned
@@ -81,6 +96,13 @@ void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* Ch
 	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
 	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
 
+}
+
+void ACHCharacterBase::Aim()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	AnimInstance->Montage_Play(AimActionMontage);
 }
 
 // Called every frame

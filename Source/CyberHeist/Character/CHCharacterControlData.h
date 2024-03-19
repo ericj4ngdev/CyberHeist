@@ -36,9 +36,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		TObjectPtr<class UInputMappingContext> InputMappingContext;
 
-	//// Camera
-	//UPROPERTY(EditAnywhere, Category = Pawn)
-	//TObjectPtr<class UCameraComponent> Camera;
+	// Camera
+	UPROPERTY(EditAnywhere, Category = Camera)
+	FVector CameraPosition;
 
 	// 스프링 
 	UPROPERTY(EditAnywhere, Category = SpringArm)

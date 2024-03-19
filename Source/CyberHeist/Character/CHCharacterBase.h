@@ -11,7 +11,9 @@ UENUM()
 enum class ECharacterControlType : uint8
 {
 	First,
-	Third
+	Third,
+	FirstAim,
+	ThirdAim
 };
 
 UCLASS()
@@ -33,6 +35,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
 	TMap<ECharacterControlType, class UCHCharacterControlData*> CharacterControlManager;
 
+	// Aim
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> AimActionMontage;
+
+	void Aim();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -47,7 +56,7 @@ public:
 		TObjectPtr<class ACHGun> Weapon;
 
 	UPROPERTY(EditAnywhere)
-		float MaxHealth = 100;
+		float MaxHealth;
 
 	UPROPERTY(EditAnywhere)
 		float Health;

@@ -9,18 +9,21 @@
 #include "EnhancedInputSubsystems.h"
 #include "Weapon/Gun/CHGun.h"
 #include "CHCharacterControlData.h"
+#include "Animation/AnimMontage.h"
 
 ACHCharacterPlayer::ACHCharacterPlayer()
 {
 	// ThirdPersonCamera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f;
-	CameraBoom->SocketOffset = FVector(0.0f, 60.0f, 0.0f);
+	CameraBoom->TargetArmLength = DefaultCameraDistance;
+	// CameraBoom->SocketOffset = FVector(0.0f, 0.0f, 0.0f);
 	CameraBoom->bUsePawnControlRotation = true;
 
 	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
 	ThirdPersonCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	// ThirdPersonCamera->SetRelativeLocation()
+	// (X = 75.000000, Y = 60.000000, Z = 50.000000)
 	ThirdPersonCamera->bUsePawnControlRotation = false;
 
 	// FirstPersonCamera
@@ -72,6 +75,13 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 		ShootAction = InputActionShootRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionAimRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Aim.IA_Aim'"));
+	if (nullptr != InputActionAimRef.Object)
+	{
+		AimAction = InputActionAimRef.Object;
+	}
+	
+	// AimDistance = 100;
 	CurrentCharacterControlType = ECharacterControlType::Third;
 }
 
@@ -97,10 +107,13 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ThirdLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdLook);
 	
 	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::Shoot);
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartAim);
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopAim);
 }
 
 void ACHCharacterPlayer::ChangeCharacterControl()
 {
+	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim) return;
 	if (CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		SetCharacterControl(ECharacterControlType::Third);
@@ -145,18 +158,46 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 {
 	Super::SetCharacterControlData(CharacterControlData);
 
-	CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
-	CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
-	CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
-	CameraBoom->bInheritPitch = CharacterControlData->bInheritPitch;
-	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
-	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
-	CameraBoom->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
+	if (CurrentCharacterControlType == ECharacterControlType::Third || 
+		CurrentCharacterControlType == ECharacterControlType::ThirdAim)
+	{
+		ThirdPersonCamera->SetRelativeLocation(CharacterControlData->CameraPosition);
+
+		CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
+		CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
+		CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
+		CameraBoom->bInheritPitch = CharacterControlData->bInheritPitch;
+		CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
+		CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
+		CameraBoom->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
+	}
 }
 
 void ACHCharacterPlayer::Shoot()
 {
 	Weapon->PullTrigger();
+}
+
+void ACHCharacterPlayer::StartAim()
+{
+	if (CurrentCharacterControlType == ECharacterControlType::Third)
+	{
+		SetCharacterControl(ECharacterControlType::ThirdAim);
+		Aim();
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		// AnimInstance->SetCombat(true);
+		// CameraBoom->TargetArmLength = AimDistance;
+	}
+}
+
+void ACHCharacterPlayer::StopAim()
+{
+	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim)
+	{
+		SetCharacterControl(ECharacterControlType::Third);
+		// CameraBoom->TargetArmLength = DefaultCameraDistance;
+	}
 }
 
 void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)

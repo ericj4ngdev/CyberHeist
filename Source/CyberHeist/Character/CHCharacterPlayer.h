@@ -43,10 +43,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<class UCameraComponent> ThirdPersonCamera;
 
+	UPROPERTY(EditAnywhere)
+	float AimDistance;
+
+	UPROPERTY(EditAnywhere)
+	float DefaultCameraDistance;
+
 	// Input Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UInputAction> ChangeControlAction;
+	TObjectPtr<class UInputAction> ChangeControlAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> JumpAction;
@@ -66,7 +72,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShootAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> AimAction;
+
 	void Shoot();
+	void StartAim();
+	void StopAim();
 	void FirstMove(const FInputActionValue& Value);
 	void FirstLook(const FInputActionValue& Value);
 	void ThirdMove(const FInputActionValue& Value);

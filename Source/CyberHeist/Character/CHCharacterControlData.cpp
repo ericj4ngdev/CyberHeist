@@ -5,5 +5,5 @@
 
 UCHCharacterControlData::UCHCharacterControlData() 
 {
-	TargetArmLength = 300.0f;
+	// TargetArmLength = 200.0f;
 }
