@@ -51,14 +51,27 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+// protected :
+
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<class ACHGun> Weapon;
 
 	UPROPERTY(EditAnywhere)
-		float MaxHealth;
+	float MaxHealth;
 
 	UPROPERTY(EditAnywhere)
-		float Health;
+	float Health;
 
+	// Walk speed
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float WalkSpeed;
+
+	// Run speed
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float RunSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	uint8 bSprint : 1;
 };

@@ -4,6 +4,7 @@
 #include "Character/CHCharacterPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -80,6 +81,9 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	{
 		AimAction = InputActionAimRef.Object;
 	}
+
+	// RunSpeed = 350;
+	// WalkSpeed = 150;
 	
 	// AimDistance = 100;
 	CurrentCharacterControlType = ECharacterControlType::Third;
@@ -109,6 +113,9 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::Shoot);
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartAim);
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopAim);
+
+	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartSprint);
+	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopSprint);
 }
 
 void ACHCharacterPlayer::ChangeCharacterControl()
@@ -158,19 +165,21 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 {
 	Super::SetCharacterControlData(CharacterControlData);
 
-	if (CurrentCharacterControlType == ECharacterControlType::Third || 
+	ThirdPersonCamera->SetRelativeLocation(CharacterControlData->CameraPosition);
+
+	CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
+	CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
+	CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
+	CameraBoom->bInheritPitch = CharacterControlData->bInheritPitch;
+	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
+	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
+	CameraBoom->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
+
+	/*if (CurrentCharacterControlType == ECharacterControlType::Third || 
 		CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
-		ThirdPersonCamera->SetRelativeLocation(CharacterControlData->CameraPosition);
-
-		CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
-		CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
-		CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
-		CameraBoom->bInheritPitch = CharacterControlData->bInheritPitch;
-		CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
-		CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
-		CameraBoom->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
-	}
+		
+	}*/
 }
 
 void ACHCharacterPlayer::Shoot()
@@ -193,7 +202,20 @@ void ACHCharacterPlayer::StartAim()
 				CHAnimInstance->SetCombatMode(true);
 			}
 		}
-
+	}
+	if (CurrentCharacterControlType == ECharacterControlType::First)
+	{
+		SetCharacterControl(ECharacterControlType::FirstAim);
+		
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
+			if (CHAnimInstance)
+			{
+				CHAnimInstance->SetCombatMode(true);
+			}
+		}
 	}
 }
 
@@ -212,11 +234,25 @@ void ACHCharacterPlayer::StopAim()
 			}
 		}
 	}
+	if (CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	{
+		SetCharacterControl(ECharacterControlType::First);
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
+			if (CHAnimInstance)
+			{
+				CHAnimInstance->SetCombatMode(false);
+			}
+		}
+	}
 }
 
 void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
 {
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	FVector2D MovementVector = Value.Get<FVector2D>().GetSafeNormal();
 
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -224,8 +260,14 @@ void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-	AddMovementInput(ForwardDirection, MovementVector.Y);
-	AddMovementInput(RightDirection, MovementVector.X);
+	float speed = bSprint ? RunSpeed : WalkSpeed;
+
+	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
+	AddMovementInput(RightDirection, MovementVector.X * speed);
+
+	GetCharacterMovement()->MaxWalkSpeed = speed;
+
+	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d	WalkSpeed : %f	RunSpeed : %f	speed : %f"), bSprint, WalkSpeed, RunSpeed, speed);
 }
 
 void ACHCharacterPlayer::FirstLook(const FInputActionValue& Value)
@@ -238,7 +280,7 @@ void ACHCharacterPlayer::FirstLook(const FInputActionValue& Value)
 
 void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 {
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	FVector2D MovementVector = Value.Get<FVector2D>().GetSafeNormal();
 
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -246,8 +288,14 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-	AddMovementInput(ForwardDirection, MovementVector.Y);
-	AddMovementInput(RightDirection, MovementVector.X);
+	float speed = bSprint ? RunSpeed : WalkSpeed;
+
+	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
+	AddMovementInput(RightDirection, MovementVector.X * speed);
+	
+	GetCharacterMovement()->MaxWalkSpeed = speed;
+
+	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d	WalkSpeed : %f	RunSpeed : %f	speed : %f"), bSprint, WalkSpeed, RunSpeed, speed);
 }
 
 void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
@@ -256,4 +304,17 @@ void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);		// modify
+}
+
+void ACHCharacterPlayer::StartSprint() 
+{
+	bSprint = true;
+	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d"), bSprint);
+	// CH_LOG(LogCH, Log, TEXT("%s"), TEXT("Begin"));
+}
+void ACHCharacterPlayer::StopSprint()
+{ 
+	bSprint = false; 
+	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d"), bSprint);
+	UE_LOG(LogTemp, Log, TEXT("bSprint is %s"), bSprint ? TEXT("true") : TEXT("false"));
 }

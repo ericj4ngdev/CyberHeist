@@ -29,6 +29,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (Movement)
 	{
+		// Velocity = Owner->
 		Velocity = Movement->Velocity;
 		GroundSpeed = Velocity.Size2D();
 		// bIsIdle = GroundSpeed < MovingThreshould;
