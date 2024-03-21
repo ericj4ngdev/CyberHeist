@@ -7,6 +7,10 @@
 #include "Weapon/Gun/CHGun.h"
 #include "Character/CHCharacterControlData.h"
 #include "Animation/AnimMontage.h"
+#include "CharacterStat/CHCharacterStatComponent.h"
+#include "UI/CHWidgetComponent.h"
+#include "UI/CHHpBarWidget.h"
+// #include "CharacterStat/CHCharaterStatComponent.h"
 
 // Sets default values
 ACHCharacterBase::ACHCharacterBase()
@@ -70,15 +74,33 @@ ACHCharacterBase::ACHCharacterBase()
 		CharacterControlManager.Add(ECharacterControlType::ThirdAim, ThirdPersonAimDataRef.Object);
 	}
 
-	MaxHealth = 100;
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/CyberHeist/Animation/AM_Dead.AM_Dead'"));
+	if (DeadMontageRef.Object) 
+	{
+		DeadMontage = DeadMontageRef.Object;
+	}
+
+	//Stat Component 
+	Stat = CreateDefaultSubobject<UCHCharacterStatComponent>(TEXT("Stat"));
+	//WidgetComponent 
+	HpBar = CreateDefaultSubobject<UCHWidgetComponent>(TEXT("Widget"));
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/CyberHeist/UI/WBP_HpBar.WBP_HpBar_C"));
+
+	if (HpBarWidgetRef.Class) {
+		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
+		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+		HpBar->SetDrawSize(FVector2D(150.0f, 15.0f));
+		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 // Called when the game starts or when spawned
 void ACHCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-
-	Health = MaxHealth;
 
 	Weapon = GetWorld()->SpawnActor<ACHGun>();
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
@@ -119,13 +141,48 @@ void ACHCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-float ACHCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ACHCharacterBase::PostInitializeComponents()
 {
-	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	DamageToApply = FMath::Min(Health, DamageToApply);
-	Health -= DamageToApply;
-	UE_LOG(LogTemp, Warning, TEXT("Health left %f"), Health);
+	Super::PostInitializeComponents();
 
-	return DamageToApply;
+	Stat->OnHpZero.AddUObject(this, &ACHCharacterBase::SetDead);
 }
 
+float ACHCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	/*float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	DamageToApply = FMath::Min(Health, DamageToApply);
+	Health -= DamageToApply;*/
+	// UE_LOG(LogTemp, Warning, TEXT("Health left %f"), Health);
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	Stat->ApplyDamage(DamageAmount);
+
+	return DamageAmount;
+}
+
+void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)
+{
+	UCHHpBarWidget* HpBarWidget = Cast<UCHHpBarWidget>(InUserWidget);
+	if (HpBarWidget) {
+		HpBarWidget->SetMaxHp(Stat->GetMaxHp());
+		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
+		Stat->OnHpChanged.AddUObject(HpBarWidget, &UCHHpBarWidget::UpdateHpBar);
+	}
+}
+
+void ACHCharacterBase::SetDead()
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	PlayDeadAnimation();
+	SetActorEnableCollision(false);
+	HpBar->SetHiddenInGame(true);
+}
+
+void ACHCharacterBase::PlayDeadAnimation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->StopAllMontages(0.0f);
+	AnimInstance->Montage_Play(DeadMontage, 1.0f);
+	// UE_LOG(LogTemp, Log, TEXT("DeadMontage"));
+}

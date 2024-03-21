@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Weapon/Gun/CHGun.h"
+#include "Interface/CHCharacterWidgetInterface.h"
 #include "CHCharacterBase.generated.h"
 
 UENUM()
@@ -17,7 +18,7 @@ enum class ECharacterControlType : uint8
 };
 
 UCLASS()
-class CYBERHEIST_API ACHCharacterBase : public ACharacter
+class CYBERHEIST_API ACHCharacterBase : public ACharacter, public ICHCharacterWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -25,6 +26,7 @@ public:
 	// Sets default values for this character's properties
 	ACHCharacterBase();
 
+	virtual void PostInitializeComponents() override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -41,6 +43,16 @@ protected:
 	TObjectPtr<class UAnimMontage> AimActionMontage;
 
 	void Aim();
+	// Dead
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+		TObjectPtr<class UAnimMontage> DeadMontage;
+
+	// 죽는 함수
+	virtual void SetDead();
+	// 몽타주 재생 함수
+	void PlayDeadAnimation();
+	float DeadEventDelayTime = 5.0f;
 
 public:	
 	// Called every frame
@@ -48,21 +60,14 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
-// protected :
 
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class ACHGun> Weapon;
-
-	UPROPERTY(EditAnywhere)
-	float MaxHealth;
-
-	UPROPERTY(EditAnywhere)
-	float Health;
+	TObjectPtr<class ACHGun> Weapon;
 
 	// Walk speed
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
@@ -74,4 +79,20 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	uint8 bSprint : 1;
+
+	// Stat Section
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UCHCharacterStatComponent> Stat;
+
+
+	//UI Widget Section
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UCHWidgetComponent> HpBar;
+
+	virtual void SetupCharacterWidget(UCHUserWidget* InUserWidget) override;
+	
+
+
 };

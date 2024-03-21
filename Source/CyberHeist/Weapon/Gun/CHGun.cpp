@@ -69,7 +69,7 @@ void ACHGun::PullTrigger()
 	FRotator Rotation;
 	OwnerController->GetPlayerViewPoint(Location, Rotation);
 
-	DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
+	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
 
 	FVector End = Location + Rotation.Vector() * MaxRange;
 
@@ -83,7 +83,7 @@ void ACHGun::PullTrigger()
 	if (bSuccess)
 	{
 		FVector ShotDirection = -Rotation.Vector();
-		DrawDebugPoint(GetWorld(), Hit.Location, 20, FColor::Red, true);
+		// DrawDebugPoint(GetWorld(), Hit.Location, 20, FColor::Red, true);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),ImpactEffect, Hit.Location, ShotDirection.Rotation());
 
 		AActor* HitActor = Hit.GetActor();
@@ -97,7 +97,7 @@ void ACHGun::PullTrigger()
 
 void ACHGun::StopParticleSystem()
 {
-	UE_LOG(LogTemp, Warning, TEXT("StopParticleSystem"));
+	// UE_LOG(LogTemp, Warning, TEXT("StopParticleSystem"));
 
 	// Deactivate the ParticleSystemComponent to stop playing the particle effect
 	Effect->Deactivate();

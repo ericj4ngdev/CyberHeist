@@ -32,6 +32,7 @@ protected:
 	void ChangeCharacterControl();
 	void SetCharacterControl(ECharacterControlType NewCharacterControlType);
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData) override;
+
 // Camera Section
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -79,6 +80,8 @@ protected:
 	TObjectPtr<class UInputAction> SprintAction;
 
 	void Shoot();
+	void CancelShoot();
+
 	void StartAim();
 	void StopAim();
 	void FirstMove(const FInputActionValue& Value);
@@ -86,10 +89,16 @@ protected:
 	void ThirdMove(const FInputActionValue& Value);
 	void ThirdLook(const FInputActionValue& Value);
 
+
+	FTimerHandle ShootTimerHandle;
+	float ShootingPreparationTime = 0.3f;
 public:
 	void StartSprint();
 	void StopSprint();
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UCHAnimInstance> CHAnimInstance;
 	
 
 	ECharacterControlType CurrentCharacterControlType;

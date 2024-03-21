@@ -93,6 +93,9 @@ void ACHCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CHAnimInstance = Cast<UCHAnimInstance>(GetMesh()->GetAnimInstance());
+	
+
 	SetCharacterControl(CurrentCharacterControlType);
 }
 
@@ -110,9 +113,11 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ThirdMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdMove);
 	EnhancedInputComponent->BindAction(ThirdLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdLook);
 	
-	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::Shoot);
+	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::Shoot);
+	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Canceled, this, &ACHCharacterPlayer::CancelShoot);
+
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartAim);
-	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopAim);
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHCharacterPlayer::StopAim);
 
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartSprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopSprint);
@@ -184,7 +189,34 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 
 void ACHCharacterPlayer::Shoot()
 {
-	Weapon->PullTrigger();
+	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
+		|| CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	{
+		Weapon->PullTrigger();
+	}
+	if (CurrentCharacterControlType == ECharacterControlType::Third || 
+		CurrentCharacterControlType == ECharacterControlType::First)
+	{
+		// hold a gun
+		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(true); }
+		// holding a gun delay
+		GetWorldTimerManager().SetTimer(ShootTimerHandle, [this]()
+			{
+				Weapon->PullTrigger();
+		
+			}, ShootingPreparationTime, false);
+	}
+}
+
+void ACHCharacterPlayer::CancelShoot()
+{
+	if (CurrentCharacterControlType == ECharacterControlType::Third ||
+		CurrentCharacterControlType == ECharacterControlType::First)
+	{ 
+		// Cancel holding a gun
+		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(false); }	
+		GetWorldTimerManager().ClearTimer(ShootTimerHandle);
+	}
 }
 
 void ACHCharacterPlayer::StartAim()
@@ -193,29 +225,13 @@ void ACHCharacterPlayer::StartAim()
 	{
 		SetCharacterControl(ECharacterControlType::ThirdAim);
 
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
-		{
-			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
-			if (CHAnimInstance)
-			{
-				CHAnimInstance->SetCombatMode(true);
-			}
-		}
+		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(true); }
 	}
 	if (CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		SetCharacterControl(ECharacterControlType::FirstAim);
 		
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
-		{
-			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
-			if (CHAnimInstance)
-			{
-				CHAnimInstance->SetCombatMode(true);
-			}
-		}
+		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(true); }
 	}
 }
 
@@ -224,29 +240,13 @@ void ACHCharacterPlayer::StopAim()
 	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
 		SetCharacterControl(ECharacterControlType::Third);
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
-		{
-			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
-			if (CHAnimInstance)
-			{
-				CHAnimInstance->SetCombatMode(false);
-			}
-		}
+		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(false); }
 	}
 	if (CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
 		SetCharacterControl(ECharacterControlType::First);
 
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
-		{
-			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
-			if (CHAnimInstance)
-			{
-				CHAnimInstance->SetCombatMode(false);
-			}
-		}
+		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(false); }
 	}
 }
 
