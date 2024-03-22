@@ -164,7 +164,8 @@ float ACHCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)
 {
 	UCHHpBarWidget* HpBarWidget = Cast<UCHHpBarWidget>(InUserWidget);
-	if (HpBarWidget) {
+	if (HpBarWidget) 
+	{
 		HpBarWidget->SetMaxHp(Stat->GetMaxHp());
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UCHHpBarWidget::UpdateHpBar);

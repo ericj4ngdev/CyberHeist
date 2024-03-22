@@ -10,7 +10,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Weapon/Gun/CHGun.h"
 #include "CHCharacterControlData.h"
+#include "UI/CHHUDWidget.h"
 #include "Animation/CHAnimInstance.h"
+#include "CharacterStat/CHCharacterStatComponent.h"
 
 ACHCharacterPlayer::ACHCharacterPlayer()
 {
@@ -317,4 +319,19 @@ void ACHCharacterPlayer::StopSprint()
 	bSprint = false; 
 	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d"), bSprint);
 	UE_LOG(LogTemp, Log, TEXT("bSprint is %s"), bSprint ? TEXT("true") : TEXT("false"));
+}
+
+void ACHCharacterPlayer::SetupHUDWidget(UCHHUDWidget* InHUDWidget)
+{
+	if (InHUDWidget)
+	{
+		// 들어온 인자를 사용해서 스탯에 있는 데이터를 넘겨주고 
+		// 스탯에 있는 델리게이트를 바인딩시켜두는 기능
+		// InHUDWidget->UpdateStat(Stat->GetBaseStat(), Stat->GetModifierStat());
+		InHUDWidget->SetMaxHp_Test(Stat->GetMaxHp());
+		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
+
+		// Stat->OnStatChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateStat);
+		Stat->OnHpChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateHpBar);
+	}
 }

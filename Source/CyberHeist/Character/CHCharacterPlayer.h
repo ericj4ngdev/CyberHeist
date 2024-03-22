@@ -6,6 +6,7 @@
 #include "Character/CHCharacterBase.h"
 #include "InputActionValue.h"
 #include "Weapon/Gun/CHGun.h"
+#include "Interface/CHCharacterHUDInterface.h"
 #include "CHCharacterPlayer.generated.h"
 
 class ACHGun;
@@ -14,7 +15,7 @@ class ACHGun;
  * 
  */
 UCLASS()
-class CYBERHEIST_API ACHCharacterPlayer : public ACHCharacterBase
+class CYBERHEIST_API ACHCharacterPlayer : public ACHCharacterBase, public ICHCharacterHUDInterface
 {
 	GENERATED_BODY()
 	
@@ -100,6 +101,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCHAnimInstance> CHAnimInstance;
 	
-
 	ECharacterControlType CurrentCharacterControlType;
+
+	// UI Section
+protected:
+	virtual void SetupHUDWidget(class UCHHUDWidget* InHUDWidget) override;
+
 };

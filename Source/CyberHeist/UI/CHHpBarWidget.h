@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -25,7 +25,7 @@ public:
 	void UpdateHpBar(float NewCurrentHp);
 
 protected:
-	// Progress Bar ÄÁÆ®·ÑÀ» À§ÇÑ ¿ÀºêÁ§Æ® Æ÷ÀÎÅÍ
+	// Progress Bar ì»¨íŠ¸ë¡¤ì„ ìœ„í•œ ì˜¤ë¸Œì íŠ¸ í¬ì¸í„°
 	UPROPERTY();
 	TObjectPtr<class UProgressBar> HpProgressBar;
 

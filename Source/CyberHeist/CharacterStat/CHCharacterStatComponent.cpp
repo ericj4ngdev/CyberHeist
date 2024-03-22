@@ -8,13 +8,13 @@ UCHCharacterStatComponent::UCHCharacterStatComponent()
 {
 	MaxHp = 100.0f;
 	CurrentHp = MaxHp;
+
+	bWantsInitializeComponent = true;
 }
 
-
-// Called when the game starts
-void UCHCharacterStatComponent::BeginPlay()
+void UCHCharacterStatComponent::InitializeComponent()
 {
-	Super::BeginPlay();
+	Super::InitializeComponent();
 
 	SetHp(MaxHp);
 }
