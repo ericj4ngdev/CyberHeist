@@ -34,7 +34,7 @@ void UCHHpBarWidget::NativeConstruct()
 	ICHCharacterWidgetInterface* CharacterWidget = Cast<ICHCharacterWidgetInterface>(OwningActor);
 	if (CharacterWidget) 
 	{
-		CharacterWidget->SetupCharacterWidget(this);
+		CharacterWidget->SetupCharacterWidget(this);		
 	}
 }
 

@@ -23,7 +23,8 @@ protected:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 public:
-	void SetCombatMode(bool combat);
+	void GetCombatMode();
+	void SetCombatMode(uint8 combat);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
@@ -67,5 +68,5 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Rotator)
 	float Yaw;
-	
+
 };

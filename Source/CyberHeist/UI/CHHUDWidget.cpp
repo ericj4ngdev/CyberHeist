@@ -5,6 +5,7 @@
 #include "Interface/CHCharacterHUDInterface.h"
 #include "CHHpBarWidget.h"
 #include "CHCharacterStatWidget.h"
+#include "UCHCrossHairWidget.h"
 
 UCHHUDWidget::UCHHUDWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -27,7 +28,14 @@ void UCHHUDWidget::SetMaxHp_Test(float NewMaxHp)
 void UCHHUDWidget::UpdateHpBar(float NewCurrentHp)
 {
 	HpBar->UpdateHpBar(NewCurrentHp);
+	// CrossHair
 }
+void UCHHUDWidget::SetCombatMode(uint8 bCombat)
+{
+	// HpBar->UpdateHpBar(NewCurrentHp);
+	CrossHair->SetCombatMode(bCombat);
+}
+
 
 void UCHHUDWidget::NativeConstruct()
 {
@@ -36,6 +44,9 @@ void UCHHUDWidget::NativeConstruct()
 	HpBar = Cast<UCHHpBarWidget>(GetWidgetFromName(TEXT("WidgetHpBar")));
 	ensure(HpBar);
 
+	CrossHair = Cast<UUCHCrossHairWidget>(GetWidgetFromName(TEXT("WidgetCrossHair")));
+	ensure(CrossHair);
+	
 	// CharacterStat = Cast<UCHCharacterStatWidget>(GetWidgetFromName(TEXT("WidgetCharacterStat")));
 	// ensure(CharacterStat);
 
@@ -43,6 +54,6 @@ void UCHHUDWidget::NativeConstruct()
 	ICHCharacterHUDInterface* HUDPawn = Cast<ICHCharacterHUDInterface>(GetOwningPlayerPawn());
 	if (HUDPawn)
 	{
-		HUDPawn->SetupHUDWidget(this);
+		HUDPawn->SetupHUDWidget(this);		
 	}
 }

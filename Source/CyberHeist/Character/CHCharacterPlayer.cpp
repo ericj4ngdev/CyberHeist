@@ -13,6 +13,7 @@
 #include "UI/CHHUDWidget.h"
 #include "Animation/CHAnimInstance.h"
 #include "CharacterStat/CHCharacterStatComponent.h"
+#include "UI/UCHCrossHairWidget.h"
 
 ACHCharacterPlayer::ACHCharacterPlayer()
 {
@@ -190,7 +191,7 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 }
 
 void ACHCharacterPlayer::Shoot()
-{
+{	
 	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
@@ -200,7 +201,11 @@ void ACHCharacterPlayer::Shoot()
 		CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		// hold a gun
-		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(true); }
+		if (CHAnimInstance) 
+		{ 
+			// CHAnimInstance->SetCombatMode(true); 
+			OnCombat.Broadcast(true);
+		}
 		// holding a gun delay
 		GetWorldTimerManager().SetTimer(ShootTimerHandle, [this]()
 			{
@@ -212,11 +217,16 @@ void ACHCharacterPlayer::Shoot()
 
 void ACHCharacterPlayer::CancelShoot()
 {
+	
 	if (CurrentCharacterControlType == ECharacterControlType::Third ||
 		CurrentCharacterControlType == ECharacterControlType::First)
 	{ 
 		// Cancel holding a gun
-		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(false); }	
+		if (CHAnimInstance) 
+		{ 
+			// CHAnimInstance->SetCombatMode(false); 
+			OnCombat.Broadcast(false);		// ÇÑ¹ø ½î°í ¶¼¸é ¾ø¾îÁü... ÀÌ°Ç Á».. 
+		}	
 		GetWorldTimerManager().ClearTimer(ShootTimerHandle);
 	}
 }
@@ -227,28 +237,44 @@ void ACHCharacterPlayer::StartAim()
 	{
 		SetCharacterControl(ECharacterControlType::ThirdAim);
 
-		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(true); }
+		if (CHAnimInstance) 
+		{ 
+			// CHAnimInstance->SetCombatMode(true); 
+			OnCombat.Broadcast(true);
+		}
 	}
 	if (CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		SetCharacterControl(ECharacterControlType::FirstAim);
 		
-		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(true); }
+		if (CHAnimInstance) 
+		{
+			// CHAnimInstance->SetCombatMode(true);
+			OnCombat.Broadcast(true);
+		}
 	}
 }
 
 void ACHCharacterPlayer::StopAim()
-{
+{	
 	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
 		SetCharacterControl(ECharacterControlType::Third);
-		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(false); }
+		if (CHAnimInstance) 
+		{
+			// CHAnimInstance->SetCombatMode(false);
+			OnCombat.Broadcast(false);
+		}
 	}
 	if (CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
 		SetCharacterControl(ECharacterControlType::First);
 
-		if (CHAnimInstance) { CHAnimInstance->SetCombatMode(false); }
+		if (CHAnimInstance) 
+		{
+			// CHAnimInstance->SetCombatMode(false);
+			OnCombat.Broadcast(false);
+		}
 	}
 }
 
@@ -333,5 +359,16 @@ void ACHCharacterPlayer::SetupHUDWidget(UCHHUDWidget* InHUDWidget)
 
 		// Stat->OnStatChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateStat);
 		Stat->OnHpChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateHpBar);
+		this->OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
+		// OnCombat.AddUObject(InHUDWidget, )
+	}
+}
+
+void ACHCharacterPlayer::SetupCrossWidget(UCHUserWidget* InUserWidget)
+{
+	UUCHCrossHairWidget* CrossWidget = Cast<UUCHCrossHairWidget>(InUserWidget);
+	if (CrossWidget)
+	{
+		OnCombat.AddUObject(CrossWidget, &UUCHCrossHairWidget::SetCombatMode);
 	}
 }

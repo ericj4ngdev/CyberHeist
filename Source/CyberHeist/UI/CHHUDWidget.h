@@ -23,13 +23,18 @@ public:
 	void SetMaxHp_Test(float NewMaxHp);
 	void UpdateHpBar(float NewCurrentHp);
 
+	void SetCombatMode(uint8 bCombat);
+
 protected:
 	virtual void NativeConstruct() override;
 
 protected:
 	UPROPERTY()
-		TObjectPtr<class UCHHpBarWidget> HpBar;
+	TObjectPtr<class UCHHpBarWidget> HpBar;
 
 	UPROPERTY()
-		TObjectPtr<class UCHCharacterStatWidget> CharacterStat;
+	TObjectPtr<class UUCHCrossHairWidget> CrossHair;
+
+	UPROPERTY()
+	TObjectPtr<class UCHCharacterStatWidget> CharacterStat;
 };

@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Character/CHCharacterPlayer.h"
 
 UCHAnimInstance::UCHAnimInstance()
 {
@@ -21,6 +22,13 @@ void UCHAnimInstance::NativeInitializeAnimation()
 	{
 		Movement = Owner->GetCharacterMovement();
 	}
+
+	ACHCharacterPlayer* OwnerActor = Cast<ACHCharacterPlayer>(Owner);
+	if (OwnerActor)
+	{
+		OwnerActor->OnCombat.AddUObject(this, &UCHAnimInstance::SetCombatMode);
+	}
+
 }
 
 void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -44,7 +52,16 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Yaw = Rotator.Yaw;*/
 }
 
-void UCHAnimInstance::SetCombatMode(bool combat)
+void UCHAnimInstance::SetCombatMode(uint8 combat)
 {
 	bCombat = combat;
+}
+
+void UCHAnimInstance::GetCombatMode()
+{
+	/*ACHCharacterPlayer* OwnerActor = Cast<ACHCharacterPlayer>(GetOwningActor());
+	if (OwnerActor)
+	{
+		OwnerActor->OnCombat.AddUObject(this, &UCHAnimInstance::SetCombatMode);
+	}*/
 }

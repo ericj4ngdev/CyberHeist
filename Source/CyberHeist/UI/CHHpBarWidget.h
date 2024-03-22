@@ -31,6 +31,4 @@ protected:
 
 	UPROPERTY();
 	float MaxHp;
-
-
 };

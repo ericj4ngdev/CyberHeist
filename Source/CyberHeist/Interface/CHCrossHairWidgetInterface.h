@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "CHCharacterHUDInterface.generated.h"
+#include "CHCrossHairWidgetInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UCHCharacterHUDInterface : public UInterface
+class UCHCrossHairWidgetInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,11 +16,12 @@ class UCHCharacterHUDInterface : public UInterface
 /**
  * 
  */
-class CYBERHEIST_API ICHCharacterHUDInterface
+class CYBERHEIST_API ICHCrossHairWidgetInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void SetupHUDWidget(class UCHHUDWidget* InHUDWidget) = 0;	
+	virtual void SetupCrossWidget(class UCHUserWidget* InUserWidget) = 0;
+
 };

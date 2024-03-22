@@ -7,7 +7,10 @@
 #include "InputActionValue.h"
 #include "Weapon/Gun/CHGun.h"
 #include "Interface/CHCharacterHUDInterface.h"
+#include "Interface/CHCrossHairWidgetInterface.h"
 #include "CHCharacterPlayer.generated.h"
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*bcombat*/);
 
 class ACHGun;
 
@@ -15,13 +18,15 @@ class ACHGun;
  * 
  */
 UCLASS()
-class CYBERHEIST_API ACHCharacterPlayer : public ACHCharacterBase, public ICHCharacterHUDInterface
+class CYBERHEIST_API ACHCharacterPlayer : public ACHCharacterBase, public ICHCharacterHUDInterface, public ICHCrossHairWidgetInterface
 {
 	GENERATED_BODY()
 	
 public:
 	ACHCharacterPlayer();
 
+	FOnCombatModeSignature OnCombat;
+	// void OnCombatMode(uint8 bCombat);
 
 protected:
 	virtual void BeginPlay() override;
@@ -106,5 +111,5 @@ public:
 	// UI Section
 protected:
 	virtual void SetupHUDWidget(class UCHHUDWidget* InHUDWidget) override;
-
+	virtual void SetupCrossWidget(class UCHUserWidget* InUserWidget) override;
 };
