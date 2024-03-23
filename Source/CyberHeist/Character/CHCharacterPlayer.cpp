@@ -116,11 +116,11 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ThirdMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdMove);
 	EnhancedInputComponent->BindAction(ThirdLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdLook);
 	
-	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::Shoot);
+	/*EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::Shoot);
 	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Canceled, this, &ACHCharacterPlayer::CancelShoot);
 
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartAim);
-	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHCharacterPlayer::StopAim);
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHCharacterPlayer::StopAim);*/
 
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartSprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopSprint);
@@ -148,6 +148,8 @@ void ACHCharacterPlayer::ChangeCharacterControl()
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
 {
 	UCHCharacterControlData* NewCharacterControl = CharacterControlManager[NewCharacterControlType];
+	UCHCharacterControlData* PrevCharacterControl = CharacterControlManager[CurrentCharacterControlType];
+	
 	check(NewCharacterControl);
 
 	SetCharacterControlData(NewCharacterControl);
@@ -158,7 +160,13 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		// 기존 IMC를 지우기 
-		Subsystem->ClearAllMappings();
+		// Subsystem->ClearAllMappings();
+		UInputMappingContext* PrevMappingContext = PrevCharacterControl->InputMappingContext;
+		if (PrevMappingContext)
+		{
+			Subsystem->RemoveMappingContext(PrevMappingContext);			
+		}
+
 		// 새로운 Data에 있는 IMC로 바꿔치기
 		UInputMappingContext* NewMappingContext = NewCharacterControl->InputMappingContext;
 		if (NewMappingContext)
@@ -188,94 +196,6 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	{
 		
 	}*/
-}
-
-void ACHCharacterPlayer::Shoot()
-{	
-	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
-		|| CurrentCharacterControlType == ECharacterControlType::FirstAim)
-	{
-		Weapon->PullTrigger();
-	}
-	if (CurrentCharacterControlType == ECharacterControlType::Third || 
-		CurrentCharacterControlType == ECharacterControlType::First)
-	{
-		// hold a gun
-		if (CHAnimInstance) 
-		{ 
-			// CHAnimInstance->SetCombatMode(true); 
-			OnCombat.Broadcast(true);
-		}
-		// holding a gun delay
-		GetWorldTimerManager().SetTimer(ShootTimerHandle, [this]()
-			{
-				Weapon->PullTrigger();
-		
-			}, ShootingPreparationTime, false);
-	}
-}
-
-void ACHCharacterPlayer::CancelShoot()
-{
-	
-	if (CurrentCharacterControlType == ECharacterControlType::Third ||
-		CurrentCharacterControlType == ECharacterControlType::First)
-	{ 
-		// Cancel holding a gun
-		if (CHAnimInstance) 
-		{ 
-			// CHAnimInstance->SetCombatMode(false); 
-			OnCombat.Broadcast(false);		// 한번 쏘고 떼면 없어짐... 이건 좀.. 
-		}	
-		GetWorldTimerManager().ClearTimer(ShootTimerHandle);
-	}
-}
-
-void ACHCharacterPlayer::StartAim()
-{
-	if (CurrentCharacterControlType == ECharacterControlType::Third)
-	{
-		SetCharacterControl(ECharacterControlType::ThirdAim);
-
-		if (CHAnimInstance) 
-		{ 
-			// CHAnimInstance->SetCombatMode(true); 
-			OnCombat.Broadcast(true);
-		}
-	}
-	if (CurrentCharacterControlType == ECharacterControlType::First)
-	{
-		SetCharacterControl(ECharacterControlType::FirstAim);
-		
-		if (CHAnimInstance) 
-		{
-			// CHAnimInstance->SetCombatMode(true);
-			OnCombat.Broadcast(true);
-		}
-	}
-}
-
-void ACHCharacterPlayer::StopAim()
-{	
-	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim)
-	{
-		SetCharacterControl(ECharacterControlType::Third);
-		if (CHAnimInstance) 
-		{
-			// CHAnimInstance->SetCombatMode(false);
-			OnCombat.Broadcast(false);
-		}
-	}
-	if (CurrentCharacterControlType == ECharacterControlType::FirstAim)
-	{
-		SetCharacterControl(ECharacterControlType::First);
-
-		if (CHAnimInstance) 
-		{
-			// CHAnimInstance->SetCombatMode(false);
-			OnCombat.Broadcast(false);
-		}
-	}
 }
 
 void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
@@ -340,6 +260,7 @@ void ACHCharacterPlayer::StartSprint()
 	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d"), bSprint);
 	// CH_LOG(LogCH, Log, TEXT("%s"), TEXT("Begin"));
 }
+
 void ACHCharacterPlayer::StopSprint()
 { 
 	bSprint = false; 
@@ -359,7 +280,9 @@ void ACHCharacterPlayer::SetupHUDWidget(UCHHUDWidget* InHUDWidget)
 
 		// Stat->OnStatChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateStat);
 		Stat->OnHpChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateHpBar);
-		this->OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
+		// this->OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
+		// UCHWeaponComponent
+
 		// OnCombat.AddUObject(InHUDWidget, )
 	}
 }
@@ -369,6 +292,6 @@ void ACHCharacterPlayer::SetupCrossWidget(UCHUserWidget* InUserWidget)
 	UUCHCrossHairWidget* CrossWidget = Cast<UUCHCrossHairWidget>(InUserWidget);
 	if (CrossWidget)
 	{
-		OnCombat.AddUObject(CrossWidget, &UUCHCrossHairWidget::SetCombatMode);
+		// OnCombat.AddUObject(CrossWidget, &UUCHCrossHairWidget::SetCombatMode);
 	}
 }

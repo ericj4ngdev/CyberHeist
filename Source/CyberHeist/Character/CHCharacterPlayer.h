@@ -10,7 +10,7 @@
 #include "Interface/CHCrossHairWidgetInterface.h"
 #include "CHCharacterPlayer.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*bcombat*/);
+// DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*bcombat*/);
 
 class ACHGun;
 
@@ -25,7 +25,7 @@ class CYBERHEIST_API ACHCharacterPlayer : public ACHCharacterBase, public ICHCha
 public:
 	ACHCharacterPlayer();
 
-	FOnCombatModeSignature OnCombat;
+	// FOnCombatModeSignature OnCombat;
 	// void OnCombatMode(uint8 bCombat);
 
 protected:
@@ -34,7 +34,7 @@ protected:
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-protected:
+public:
 	void ChangeCharacterControl();
 	void SetCharacterControl(ECharacterControlType NewCharacterControlType);
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData) override;
@@ -85,28 +85,35 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SprintAction;
 
-	void Shoot();
+	/*void Shoot();
 	void CancelShoot();
-
 	void StartAim();
-	void StopAim();
+	void StopAim();*/
+
 	void FirstMove(const FInputActionValue& Value);
 	void FirstLook(const FInputActionValue& Value);
 	void ThirdMove(const FInputActionValue& Value);
 	void ThirdLook(const FInputActionValue& Value);
 
-
-	FTimerHandle ShootTimerHandle;
-	float ShootingPreparationTime = 0.3f;
+public:
+	uint8 bCombatMode : 1;
+	void SetCombatMode(uint8 bNewCombatMode) { bCombatMode = bNewCombatMode; }
+	uint8 GetCombatMode() { return bCombatMode; }
+	// FTimerHandle ShootTimerHandle;
+	// float ShootingPreparationTime = 0.3f;
 public:
 	void StartSprint();
 	void StopSprint();
 
+private:
+	 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCHAnimInstance> CHAnimInstance;
 	
 	ECharacterControlType CurrentCharacterControlType;
+	FORCEINLINE ECharacterControlType GetCurrentCharacterControlType() { return CurrentCharacterControlType; }
+	FORCEINLINE void SetCurrentCharacterControlType(ECharacterControlType Type) {	CurrentCharacterControlType = Type;	}
 
 	// UI Section
 protected:

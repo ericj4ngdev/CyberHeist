@@ -26,7 +26,8 @@ void UCHAnimInstance::NativeInitializeAnimation()
 	ACHCharacterPlayer* OwnerActor = Cast<ACHCharacterPlayer>(Owner);
 	if (OwnerActor)
 	{
-		OwnerActor->OnCombat.AddUObject(this, &UCHAnimInstance::SetCombatMode);
+		// OwnerActor->OnCombat.AddUObject(this, &UCHAnimInstance::SetCombatMode);
+
 	}
 
 }
@@ -44,6 +45,13 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsFalling = Movement->IsFalling();
 		// bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshould);
 		bShouldMove = (GroundSpeed > 3) && (Movement->GetCurrentAcceleration().Length() > 0);
+	}
+
+	ACHCharacterPlayer* OwnerActor = Cast<ACHCharacterPlayer>(Owner);
+	if (OwnerActor)
+	{
+		// OwnerActor->OnCombat.AddUObject(this, &UCHAnimInstance::SetCombatMode);
+		SetCombatMode(OwnerActor->GetCombatMode());
 	}
 
 	/*FRotator Rotator = UKismetMathLibrary::NormalizedDeltaRotator(Owner->GetBaseAimRotation(), Owner->GetActorRotation());

@@ -46,13 +46,21 @@ protected:
 	// Dead
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
-		TObjectPtr<class UAnimMontage> DeadMontage;
+	TObjectPtr<class UAnimMontage> DeadMontage;
 
 	// 죽는 함수
 	virtual void SetDead();
 	// 몽타주 재생 함수
 	void PlayDeadAnimation();
+
 	float DeadEventDelayTime = 5.0f;
+public:
+	void SetHasRifle(bool bNewHasRifle);
+	bool GetHasRifle();
+
+	/** Bool for AnimBP to switch to another animation set */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	bool bHasRifle;
 
 public:	
 	// Called every frame
@@ -61,13 +69,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class ACHGun> Weapon;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class ACHGun> Weapon;*/
 
 	// Walk speed
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")

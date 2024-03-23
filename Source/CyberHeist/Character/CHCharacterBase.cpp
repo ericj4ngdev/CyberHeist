@@ -102,10 +102,10 @@ void ACHCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Weapon = GetWorld()->SpawnActor<ACHGun>();
+	// Weapon = GetWorld()->SpawnActor<ACHGun>();
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
-	Weapon->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon_rSocket"));
-	Weapon->SetOwner(this);	
+	// Weapon->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon_rSocket"));
+	// Weapon->SetOwner(this);	
 }
 
 void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
@@ -186,4 +186,14 @@ void ACHCharacterBase::PlayDeadAnimation()
 	AnimInstance->StopAllMontages(0.0f);
 	AnimInstance->Montage_Play(DeadMontage, 1.0f);
 	// UE_LOG(LogTemp, Log, TEXT("DeadMontage"));
+}
+
+void ACHCharacterBase::SetHasRifle(bool bNewHasRifle)
+{
+	bHasRifle = bNewHasRifle;
+}
+
+bool ACHCharacterBase::GetHasRifle()
+{
+	return bHasRifle;
 }
