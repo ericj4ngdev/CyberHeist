@@ -22,6 +22,9 @@ class CYBERHEIST_API ACHProjectile : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
 
+	UPROPERTY(EditAnywhere)
+	float Damage = 50;
+
 public:	
 	// Sets default values for this actor's properties
 	ACHProjectile();

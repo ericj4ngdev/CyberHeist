@@ -73,17 +73,7 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 		ThirdLookAction = InputActionThirdPersonLookRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShootRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Shoot.IA_Shoot'"));
-	if (nullptr != InputActionShootRef.Object)
-	{
-		ShootAction = InputActionShootRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionAimRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Aim.IA_Aim'"));
-	if (nullptr != InputActionAimRef.Object)
-	{
-		AimAction = InputActionAimRef.Object;
-	}
+	
 
 	// RunSpeed = 350;
 	// WalkSpeed = 150;

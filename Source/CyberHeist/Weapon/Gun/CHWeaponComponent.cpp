@@ -14,7 +14,49 @@
 
 UCHWeaponComponent::UCHWeaponComponent()
 {
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> WeaponMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/AssetPacks/ShooterGame/Weapons/Rifle.Rifle'"));
+	if (WeaponMeshRef.Object)
+	{
+		SetSkeletalMesh(WeaponMeshRef.Object);
+	}
 
+	static ConstructorHelpers::FObjectFinder<USoundBase> FireSoundRef(TEXT("/Script/Engine.SoundWave'/Game/AssetPacks/ShooterGame/Sounds/Weapon_AssaultRifle/Mono/AssaultRifle_Shot02.AssaultRifle_Shot02'"));
+	if (FireSoundRef.Object)
+	{
+		FireSound = FireSoundRef.Object;
+	}	
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> FireMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/AssetPacks/ParagonWraith/Characters/Heroes/Wraith/Animations/Fire_A_Fast_V1_Montage.Fire_A_Fast_V1_Montage'"));
+	if (FireMontageRef.Object)
+	{
+		FireAnimation = FireMontageRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ImpactRef(TEXT("/Script/Engine.ParticleSystem'/Game/AssetPacks/ParagonWraith/FX/Particles/Abilities/Primary/FX/P_Wraith_Primary_MuzzleFlash.P_Wraith_Primary_MuzzleFlash'"));
+	if (ImpactRef.Object)
+	{
+		MuzzleFlash = ImpactRef.Object;
+	}
+
+	/*static ConstructorHelpers::FObjectFinder<UInputMappingContext> FireIMCRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/CyberHeist/Input/IMC_Weapon.IMC_Weapon'"));
+	if (FireIMCRef.Succeeded())
+	{
+		FireMappingContext = FireIMCRef.Object;
+	}*/
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionShootRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Shoot.IA_Shoot'"));
+	if (nullptr != InputActionShootRef.Object)
+	{
+		FireAction = InputActionShootRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionAimRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Aim.IA_Aim'"));
+	if (nullptr != InputActionAimRef.Object)
+	{
+		AimAction = InputActionAimRef.Object;
+	}
+
+	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
 }
 
 
@@ -47,15 +89,7 @@ void UCHWeaponComponent::Fire()
 					}, Duration, false);
 			}
 		}
-	}
-
-	//MuzzleFlashComponent->Activate(true);
-
-	//float Duration = 0.1f; // Set the duration time in seconds
-	//FTimerManager& TimerManager = GetWorld()->GetTimerManager();
-	//TimerManager.SetTimer(DurationTimerHandle, this, &UCHWeaponComponent::StopParticleSystem, Duration, false);
-
-	
+	}	
 
 	// Try and fire a projectile
 	if (ProjectileClass != nullptr)
@@ -140,10 +174,13 @@ void UCHWeaponComponent::AttachWeapon(ACHCharacterPlayer* TargetCharacter)
 
 void UCHWeaponComponent::PullTrigger()
 {	
+	Character->bUseControllerRotationYaw = true;
 	if (Character->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| Character->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
-		Fire();
+		// Fire();
+		Character->SetCombatMode(true);
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UCHWeaponComponent::Fire, FireInterval, true);
 	}
 	if (Character->CurrentCharacterControlType == ECharacterControlType::Third ||
 		Character->CurrentCharacterControlType == ECharacterControlType::First)
@@ -152,25 +189,36 @@ void UCHWeaponComponent::PullTrigger()
 		Character->SetCombatMode(true);
 
 		// holding a gun delay
-		Character->GetWorldTimerManager().SetTimer(ShootTimerHandle, [this]()
-			{
-				Fire();
-
-			}, ShootingPreparationTime, false);
+		GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
+		{
+			// Fire();
+			// Activate the timer to continuously fire at intervals
+			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UCHWeaponComponent::Fire, FireInterval, true);
+		}, ShootingPreparationTime, false);		
 	}
 }
 
 void UCHWeaponComponent::CancelPullTrigger()
 {
-	Cast<ACHCharacterPlayer>(Character);
+	// 뗏다고 false되면 안된다. 조준 중에 사격하다가 사격만 안하면 false가 되어 카메라 이상..
+	// 조준 중이면 계속 bUseControllerRotationYaw는 유지
+	// 따라서 조건문을 주가해야 한다. 
+	// if(!현재 aim) 변경
+	if (Character->CurrentCharacterControlType != ECharacterControlType::ThirdAim &&
+		Character->CurrentCharacterControlType != ECharacterControlType::FirstAim)
+		Character->bUseControllerRotationYaw = false;
+
+	// Character->bUseControllerRotationYaw = false; 
+
 	if (Character->CurrentCharacterControlType == ECharacterControlType::Third ||
 		Character->CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		// Cancel holding a gun
 		Character->SetCombatMode(false);
 		
-		Character->GetWorldTimerManager().ClearTimer(ShootTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
 	}
+	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
 }
 
 void UCHWeaponComponent::StartAim()
@@ -183,13 +231,12 @@ void UCHWeaponComponent::StartAim()
 	if (Character->CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		Character->SetCharacterControl(ECharacterControlType::FirstAim);
-		Character->SetCombatMode(true);
-		
+		Character->SetCombatMode(true);		
 	}
 }
 
 void UCHWeaponComponent::StopAim()
-{
+{	
 	if (Character->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
 		Character->SetCharacterControl(ECharacterControlType::Third);
@@ -200,6 +247,10 @@ void UCHWeaponComponent::StopAim()
 		Character->SetCharacterControl(ECharacterControlType::First);
 		Character->SetCombatMode(false);
 	}
+	// 총 쏘는 중에 aim만 풀려도 계속 전방 주시 모드
+	// if(총 쏘는 중) Character->bUseControllerRotationYaw = true;
+	// 근데 총 쏘는 중은 어캐 알지??? -> Cancel에서 다 해결
+	// if (Character->bCombatMode) Character->bUseControllerRotationYaw = true;
 }
 
 void UCHWeaponComponent::StopParticleSystem()

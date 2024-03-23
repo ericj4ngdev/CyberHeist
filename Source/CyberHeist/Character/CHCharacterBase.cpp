@@ -10,6 +10,7 @@
 #include "CharacterStat/CHCharacterStatComponent.h"
 #include "UI/CHWidgetComponent.h"
 #include "UI/CHHpBarWidget.h"
+#include "Engine/DamageEvents.h"
 // #include "CharacterStat/CHCharaterStatComponent.h"
 
 // Sets default values
@@ -155,10 +156,42 @@ float ACHCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	Health -= DamageToApply;*/
 	// UE_LOG(LogTemp, Warning, TEXT("Health left %f"), Health);
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
+	UE_LOG(LogTemp, Log, TEXT("TakeDamage"));
 	Stat->ApplyDamage(DamageAmount);
 
 	return DamageAmount;
+}
+
+void ACHCharacterBase::AttackHitCheck()
+{
+	FHitResult OutHitResult;
+	// Attack이란 태그로 우리가 수행한 이 작업에 대해서 조사할 수 있게 태그 추가
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+
+	const float AttackRange = 40.0f;
+	const float AttackRadius = 50.0f;
+	const float AttackDamage = 30.0f;
+	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const FVector End = Start + GetActorForwardVector() * AttackRange;
+
+	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(AttackRadius), Params);
+
+	// 감지
+	if (HitDetected)
+	{
+		FDamageEvent DamageEvent;
+		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+	}
+#if ENABLE_DRAW_DEBUG
+
+	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+	float CapsuleHalfHeight = AttackRange * 0.5f;
+	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+
+	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+
+#endif
+
 }
 
 void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)

@@ -35,15 +35,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	FVector MuzzleOffset;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TObjectPtr<class UParticleSystemComponent> MuzzleFlashComponent;*/
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 	TObjectPtr<class UParticleSystem> MuzzleFlash;  // UParticleSystem
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputMappingContext* FireMappingContext;
+	TObjectPtr<class UInputMappingContext> FireMappingContext;
 
 	/** Fire Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -77,9 +74,18 @@ protected:
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+public:
+	// 발사 간격(초)
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	float FireInterval = 0.1f;
+
+	// 발사 타이머 핸들
+	FTimerHandle FireTimerHandle;
+
+
 private:
 	/** The Character holding this weapon*/
 	ACHCharacterPlayer* Character;
 	FTimerHandle ShootTimerHandle;
-	float ShootingPreparationTime = 0.3f;
+	float ShootingPreparationTime = 0.2f;
 };
