@@ -13,6 +13,7 @@ ACHProjectile::ACHProjectile()
 	CollisionComp->InitSphereRadius(10.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectile::OnHit);		// set up a notification for when this component hits something blocking
+	// CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHProjectile::OnSphereBeginOverlap);
 
 	// Players can't walk on it
 	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
@@ -34,23 +35,63 @@ ACHProjectile::ACHProjectile()
 
 }
 
+void ACHProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	//UE_LOG(LogTemp, Log, TEXT("OnSphereBeginOverlap"));
+	//// Checking if it is a First Person Character overlapping
+	//ACHCharacterBase* Character = Cast<ACHCharacterBase>(OtherActor);
+	//if (Character != nullptr)
+	//{
+	//	FDamageEvent DamageEvent;
+	//	Character->TakeDamage(Damage, DamageEvent, GetInstigatorController(), this);
+	//	// Unregister from the Overlap Event so it is no longer triggered
+	//	CollisionComp->OnComponentBeginOverlap.RemoveAll(this);
+	//}
+}
+
+
 void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	auto MyOwner = this->GetOwner();
+	if (MyOwner == nullptr) return;
+	auto OwnerInstigator = MyOwner->GetInstigatorController();
+
 	if (OtherActor && OtherActor != this && OtherComp)
 	{
-		// UE_LOG(LogTemp, Warning, TEXT("OnHit"));
 		FDamageEvent DamageEvent;
-		OtherActor->TakeDamage(Damage, DamageEvent, GetInstigatorController(), this);
+		OtherActor->TakeDamage(Damage, DamageEvent, OwnerInstigator, this);
+		UE_LOG(LogTemp, Warning, TEXT("FDamageEvent"));
+
+		UE_LOG(LogTemp, Warning, TEXT("OnHit"));
+		UE_LOG(LogTemp, Warning, TEXT("HitComp : %s"), *HitComp->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
+
+		Destroy();
 	}
 
 	// Only add impulse and destroy projectile if we hit a physics
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OnHit"));
+	{		
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-				
+
 		Destroy();
 	}
 
+	
 
+	// UE_LOG(LogTemp, Log, TEXT("OnHit"));
+	
+
+	//ACHCharacterBase* Character = Cast<ACHCharacterBase>(OtherActor);
+	//if (Character != nullptr)
+	//{
+	//	FDamageEvent DamageEvent;
+	//	Character->TakeDamage(Damage, DamageEvent, GetInstigatorController(), this);
+	//	// Unregister from the Overlap Event so it is no longer triggered
+	//	CollisionComp->OnComponentBeginOverlap.RemoveAll(this);
+	//	UE_LOG(LogTemp, Warning, TEXT("OnHit"));
+	//}
+
+	
 }

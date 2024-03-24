@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Character/CHCharacterBase.h"
+#include "Character/CHCharacterPlayer.h"
 #include "CHProjectile.generated.h"
 
 class USphereComponent;
@@ -28,6 +30,11 @@ class CYBERHEIST_API ACHProjectile : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ACHProjectile();
+
+	UFUNCTION()
+	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	// virtual void BeginPlay() override;
 
 	/** called when projectile hits something */
 	UFUNCTION()
