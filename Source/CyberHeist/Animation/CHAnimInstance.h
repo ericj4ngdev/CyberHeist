@@ -23,8 +23,8 @@ protected:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 public:
-	void GetCombatMode();
 	void SetCombatMode(uint8 combat);
+	void Recoil(float Multiplier);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
@@ -68,5 +68,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Rotator)
 	float Yaw;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	FTransform RecoilTransform;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	FTransform RecoilTemp;
 
 };

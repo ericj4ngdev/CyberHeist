@@ -11,6 +11,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Animation/CHAnimInstance.h"
 
 UCHWeaponComponent::UCHWeaponComponent()
 {
@@ -104,11 +105,14 @@ void UCHWeaponComponent::Fire()
 
 			//Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;			
 
-			// Spawn the projectile at the muzzle
+			ActorSpawnParams.Owner = GetOwner();
+			APawn* InstigatorPawn = Cast<APawn>(GetOwner());
+			ActorSpawnParams.Instigator = InstigatorPawn;
+
 			ACHProjectile* Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-			Projectile->SetOwner(Character);
+			if(Projectile) Projectile->SetOwner(Character);			// 
 		}
 	}
 
@@ -123,9 +127,18 @@ void UCHWeaponComponent::Fire()
 	{
 		// Get the animation object for the arms mesh
 		UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+		UE_LOG(LogTemp, Log, TEXT("AnimInstance"));
 		if (AnimInstance != nullptr)
 		{
-			AnimInstance->Montage_Play(FireAnimation, 2.f);
+			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
+			UE_LOG(LogTemp, Log, TEXT("UCHAnimInstance"));
+			if (CHAnimInstance)
+			{
+				UE_LOG(LogTemp, Log, TEXT("ReCoil"));
+				CHAnimInstance->Recoil(10);
+			}
+			// AnimInstance->Montage_Play(FireAnimation, 2.f);
+			// AnimInstance
 		}
 	}
 }

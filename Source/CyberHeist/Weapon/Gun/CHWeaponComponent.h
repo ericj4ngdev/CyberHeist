@@ -7,7 +7,7 @@
 #include "InputActionValue.h"
 #include "CHWeaponComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*bcombat*/);
+DECLARE_MULTICAST_DELEGATE(FOnCombatModeSignature);
 class ACHCharacterPlayer;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -29,7 +29,7 @@ public:
 
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* FireAnimation;
+	TObjectPtr < class UAnimMontage> FireAnimation;
 
 	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)

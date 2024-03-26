@@ -270,6 +270,7 @@ void ACHCharacterPlayer::SetupHUDWidget(UCHHUDWidget* InHUDWidget)
 
 		// Stat->OnStatChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateStat);
 		Stat->OnHpChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateHpBar);
+
 		// this->OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
 		// UCHWeaponComponent
 

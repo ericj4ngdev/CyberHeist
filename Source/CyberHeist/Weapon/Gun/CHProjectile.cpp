@@ -5,6 +5,10 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Engine/DamageEvents.h"
+#include "Kismet/GameplayStatics.h"
+#include "Player/CHPlayerController.h"
+#include "Character/CHCharacterPlayer.h"
+
 
 ACHProjectile::ACHProjectile()
 {
@@ -52,9 +56,11 @@ void ACHProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponen
 
 void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	auto MyOwner = this->GetOwner();
+	ACHCharacterPlayer* MyOwner = Cast<ACHCharacterPlayer>(GetOwner());
 	if (MyOwner == nullptr) return;
-	auto OwnerInstigator = MyOwner->GetInstigatorController();
+	ACHPlayerController* OwnerInstigator = Cast<ACHPlayerController>(MyOwner->GetInstigatorController());
+	// Cast<ACHPlayerController>(OwnerCharacter->Controller);
+	if (OwnerInstigator == nullptr) return;
 
 	if (OtherActor && OtherActor != this && OtherComp)
 	{
@@ -67,16 +73,17 @@ void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPri
 		UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
 		UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
 
-		Destroy();
+		if(OtherComp->IsSimulatingPhysics()) OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
+		Destroy();		
 	}
 
-	// Only add impulse and destroy projectile if we hit a physics
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
-	{		
-		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
+	//// Only add impulse and destroy projectile if we hit a physics
+	//if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
+	//{		
+	//	OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 
-		Destroy();
-	}
+	//	Destroy();
+	//}
 
 	
 
