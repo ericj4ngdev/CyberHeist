@@ -48,9 +48,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> DeadMontage;
 
-	// Á×´Â ÇÔ¼ö
+	// ì£½ëŠ” í•¨ìˆ˜
 	virtual void SetDead();
-	// ¸ùÅ¸ÁÖ Àç»ı ÇÔ¼ö
+	// ëª½íƒ€ì£¼ ì¬ìƒ í•¨ìˆ˜
 	void PlayDeadAnimation();
 
 	float DeadEventDelayTime = 5.0f;

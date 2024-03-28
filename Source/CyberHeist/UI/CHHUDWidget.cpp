@@ -30,10 +30,13 @@ void UCHHUDWidget::UpdateHpBar(float NewCurrentHp)
 	HpBar->UpdateHpBar(NewCurrentHp);
 	// CrossHair
 }
+
 void UCHHUDWidget::SetCombatMode(uint8 bCombat)
 {
 	// HpBar->UpdateHpBar(NewCurrentHp);
 	CrossHair->SetCombatMode(bCombat);
+	UE_LOG(LogTemp, Log, TEXT("UUCHCrossHairWidget"));
+	bCombat ? CrossHair->SetVisibility(ESlateVisibility::Visible) : CrossHair->SetVisibility(ESlateVisibility::Hidden);
 }
 
 
@@ -49,8 +52,7 @@ void UCHHUDWidget::NativeConstruct()
 	
 	// CharacterStat = Cast<UCHCharacterStatWidget>(GetWidgetFromName(TEXT("WidgetCharacterStat")));
 	// ensure(CharacterStat);
-
-	// GetOwningPlayerPawn으로 컨트롤러가 빙의하고 있는 폰을 가져온다. 
+	
 	ICHCharacterHUDInterface* HUDPawn = Cast<ICHCharacterHUDInterface>(GetOwningPlayerPawn());
 	if (HUDPawn)
 	{

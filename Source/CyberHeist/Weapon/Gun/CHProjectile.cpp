@@ -59,7 +59,6 @@ void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPri
 	ACHCharacterPlayer* MyOwner = Cast<ACHCharacterPlayer>(GetOwner());
 	if (MyOwner == nullptr) return;
 	ACHPlayerController* OwnerInstigator = Cast<ACHPlayerController>(MyOwner->GetInstigatorController());
-	// Cast<ACHPlayerController>(OwnerCharacter->Controller);
 	if (OwnerInstigator == nullptr) return;
 
 	if (OtherActor && OtherActor != this && OtherComp)

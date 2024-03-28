@@ -76,7 +76,7 @@ void UCHAnimInstance::Recoil(float Multiplier)
 	float LocalMultiplier;
 	FVector RecoilLocation;
 	FRotator RecoilRotation;
-	FQuat RecoilRotationQuat; // FRotator ´ë½Å FQuatÀ» »ç¿ëÇÕ´Ï´Ù.
+	FQuat RecoilRotationQuat; // FRotator ëŒ€ì‹  FQuatì„ ì‚¬ìš©í•©ë‹ˆë‹¤.
 
 	float RRoll = UKismetMathLibrary::RandomFloatInRange(-2.5f, -5.0f);
 	float RPitch = UKismetMathLibrary::RandomFloatInRange(-0.8f, -0.8f);
@@ -85,7 +85,7 @@ void UCHAnimInstance::Recoil(float Multiplier)
 	LocalMultiplier = Multiplier;
 	// RecoilRotation = RecoilTransform.Rotator();
 	// RecoilRotation = FRotator(RRoll, RPitch, RYaw) * LocalMultiplier;
-	RecoilRotationQuat = FQuat(FRotator(RRoll, RPitch, RYaw)) * LocalMultiplier; // FRotator¸¦ FQuatÀ¸·Î º¯È¯ÇÕ´Ï´Ù.
+	RecoilRotationQuat = FQuat(FRotator(RRoll, RPitch, RYaw)) * LocalMultiplier; // FRotatorë¥¼ FQuatìœ¼ë¡œ ë³€í™˜í•©ë‹ˆë‹¤.
 
 	float RX = UKismetMathLibrary::RandomFloatInRange(-0.16f, 0.16f);
 	float RY = UKismetMathLibrary::RandomFloatInRange(-1.1f, -2.1f);

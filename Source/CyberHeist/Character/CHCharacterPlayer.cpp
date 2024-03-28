@@ -144,12 +144,12 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 
 	SetCharacterControlData(NewCharacterControl);
 
-	// ÄÁÆ®·Ñ·¯ °¡Á®¿À±â
+	// ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-	// IMC¸¦ ¿î¿µÇÏ´Â subSystemÀ» °¡Á®¿Â´Ù. 
+	// IMCï¿½ï¿½ ï¿½î¿µï¿½Ï´ï¿½ subSystemï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½. 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
-		// ±âÁ¸ IMC¸¦ Áö¿ì±â 
+		// ï¿½ï¿½ï¿½ï¿½ IMCï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ 
 		// Subsystem->ClearAllMappings();
 		UInputMappingContext* PrevMappingContext = PrevCharacterControl->InputMappingContext;
 		if (PrevMappingContext)
@@ -157,14 +157,14 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 			Subsystem->RemoveMappingContext(PrevMappingContext);			
 		}
 
-		// »õ·Î¿î Data¿¡ ÀÖ´Â IMC·Î ¹Ù²ãÄ¡±â
+		// ï¿½ï¿½ï¿½Î¿ï¿½ Dataï¿½ï¿½ ï¿½Ö´ï¿½ IMCï¿½ï¿½ ï¿½Ù²ï¿½Ä¡ï¿½ï¿½
 		UInputMappingContext* NewMappingContext = NewCharacterControl->InputMappingContext;
 		if (NewMappingContext)
 		{
 			Subsystem->AddMappingContext(NewMappingContext, 0);
 		}
 	}
-	CurrentCharacterControlType = NewCharacterControlType;   // ÇöÀç enum°ª ±³Ã¼
+	CurrentCharacterControlType = NewCharacterControlType;   // ï¿½ï¿½ï¿½ï¿½ enumï¿½ï¿½ ï¿½ï¿½Ã¼
 }
 
 void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
@@ -244,6 +244,12 @@ void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
 	AddControllerPitchInput(LookAxisVector.Y);		// modify
 }
 
+void ACHCharacterPlayer::SetCombatMode(uint8 bNewCombatMode)
+{
+	bCombatMode = bNewCombatMode;
+	OnCombat.Broadcast(bCombatMode);
+}
+
 void ACHCharacterPlayer::StartSprint() 
 {
 	bSprint = true;
@@ -262,19 +268,16 @@ void ACHCharacterPlayer::SetupHUDWidget(UCHHUDWidget* InHUDWidget)
 {
 	if (InHUDWidget)
 	{
-		// µé¾î¿Â ÀÎÀÚ¸¦ »ç¿ëÇØ¼­ ½ºÅÈ¿¡ ÀÖ´Â µ¥ÀÌÅÍ¸¦ ³Ñ°ÜÁÖ°í 
-		// ½ºÅÈ¿¡ ÀÖ´Â µ¨¸®°ÔÀÌÆ®¸¦ ¹ÙÀÎµù½ÃÄÑµÎ´Â ±â´É
-		// InHUDWidget->UpdateStat(Stat->GetBaseStat(), Stat->GetModifierStat());
 		InHUDWidget->SetMaxHp_Test(Stat->GetMaxHp());
 		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
 
 		// Stat->OnStatChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateStat);
 		Stat->OnHpChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateHpBar);
-
-		// this->OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
+		// Stat->OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
+		OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
 		// UCHWeaponComponent
-
-		// OnCombat.AddUObject(InHUDWidget, )
+		// ìºë¦­í„°ì˜ combatë³€ìˆ˜ ë³€ê²½
+		// ê´€ë¦¬ ì£¼ì²´ = ë¸ë¦¬ê²Œì´íŠ¸ ì„ ì–¸
 	}
 }
 

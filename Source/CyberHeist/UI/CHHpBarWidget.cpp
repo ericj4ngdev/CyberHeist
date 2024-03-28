@@ -29,8 +29,8 @@ void UCHHpBarWidget::NativeConstruct()
 	ensure(HpProgressBar);
 
 	// OwningActor
-	// ÀÌ ¾×ÅÍ Á¤º¸¿¡ UpdateHpBarÇÔ¼ö Àü´ŞÇØ¼­
-	// ½ºÅÈÀÌ ¾÷µ¥ÀÌÆ®µÉ ¶§¸¶´Ù ÇÔ¼öÈ£ÃâµÇ¸é¼­ Hpbar º¯°æ
+	// ì´ ì•¡í„° ì •ë³´ì— UpdateHpBarí•¨ìˆ˜ ì „ë‹¬í•´ì„œ
+	// ìŠ¤íƒ¯ì´ ì—…ë°ì´íŠ¸ë  ë•Œë§ˆë‹¤ í•¨ìˆ˜í˜¸ì¶œë˜ë©´ì„œ Hpbar ë³€ê²½
 	ICHCharacterWidgetInterface* CharacterWidget = Cast<ICHCharacterWidgetInterface>(OwningActor);
 	if (CharacterWidget) 
 	{

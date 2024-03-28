@@ -118,7 +118,6 @@ void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* Ch
 	GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;
 	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
 	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
-
 }
 
 void ACHCharacterBase::Aim()
@@ -161,7 +160,7 @@ float ACHCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 void ACHCharacterBase::AttackHitCheck()
 {
 	FHitResult OutHitResult;
-	// AttackÀÌ¶õ ÅÂ±×·Î ¿ì¸®°¡ ¼öÇàÇÑ ÀÌ ÀÛ¾÷¿¡ ´ëÇØ¼­ Á¶»çÇÒ ¼ö ÀÖ°Ô ÅÂ±× Ãß°¡
+	// Attackì´ë€ íƒœê·¸ë¡œ ìš°ë¦¬ê°€ ìˆ˜í–‰í•œ ì´ ì‘ì—…ì— ëŒ€í•´ì„œ ì¡°ì‚¬í•  ìˆ˜ ìˆê²Œ íƒœê·¸ ì¶”ê°€
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
 	const float AttackRange = 40.0f;
@@ -172,7 +171,7 @@ void ACHCharacterBase::AttackHitCheck()
 
 	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(AttackRadius), Params);
 
-	// °¨Áö
+	// ê°ì§€
 	if (HitDetected)
 	{
 		FDamageEvent DamageEvent;

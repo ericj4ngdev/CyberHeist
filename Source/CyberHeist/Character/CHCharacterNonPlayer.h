@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Character/CHCharacterBase.h"
+#include "Interface/CHCharacterAIInterface.h"
 #include "CHCharacterNonPlayer.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERHEIST_API ACHCharacterNonPlayer : public ACHCharacterBase
+class CYBERHEIST_API ACHCharacterNonPlayer : public ACHCharacterBase, public ICHCharacterAIInterface
 {
 	GENERATED_BODY()
 	
@@ -19,4 +20,11 @@ public:
 
 public:
 	virtual void SetDead() override;
+
+	// AI Section
+protected:
+	virtual float GetAIPatrolRadius() override;
+	virtual float GetAIDetectRange() override;
+	virtual float GetAIAttackRange() override;
+	virtual float GetAITurnSpeed() override;
 };

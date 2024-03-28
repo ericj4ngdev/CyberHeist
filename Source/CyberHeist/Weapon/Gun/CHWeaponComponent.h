@@ -7,16 +7,13 @@
 #include "InputActionValue.h"
 #include "CHWeaponComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnCombatModeSignature);
+
 class ACHCharacterPlayer;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CYBERHEIST_API UCHWeaponComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
-	
-public:
-	FOnCombatModeSignature OnCombat;
 
 public:
 	/** Projectile class to spawn */
@@ -75,11 +72,11 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	// ¹ß»ç °£°Ý(ÃÊ)
+	// ï¿½ß»ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½)
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float FireInterval = 0.1f;
 
-	// ¹ß»ç Å¸ÀÌ¸Ó ÇÚµé
+	// ï¿½ß»ï¿½ Å¸ï¿½Ì¸ï¿½ ï¿½Úµï¿½
 	FTimerHandle FireTimerHandle;
 
 

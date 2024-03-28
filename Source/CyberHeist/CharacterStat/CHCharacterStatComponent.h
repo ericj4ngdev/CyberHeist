@@ -9,6 +9,7 @@
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float /*Current HP*/);
 
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CYBERHEIST_API UCHCharacterStatComponent : public UActorComponent
 {
@@ -37,5 +38,8 @@ public:
 	FORCEINLINE float GetMaxHp() { return MaxHp; }
 	FORCEINLINE float GetCurrentHp() { return CurrentHp; }
 	float ApplyDamage(float InDamage);
-		
+
+	// Combat
+public:
+	// FOnCombatModeSignature OnCombat;
 };

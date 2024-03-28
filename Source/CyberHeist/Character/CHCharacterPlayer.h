@@ -10,7 +10,7 @@
 #include "Interface/CHCrossHairWidgetInterface.h"
 #include "CHCharacterPlayer.generated.h"
 
-// DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*bcombat*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*combat */);
 
 class ACHGun;
 
@@ -25,7 +25,7 @@ class CYBERHEIST_API ACHCharacterPlayer : public ACHCharacterBase, public ICHCha
 public:
 	ACHCharacterPlayer();
 
-	// FOnCombatModeSignature OnCombat;
+	FOnCombatModeSignature OnCombat;
 	// void OnCombatMode(uint8 bCombat);
 
 protected:
@@ -97,15 +97,14 @@ protected:
 
 public:
 	uint8 bCombatMode : 1;
-	void SetCombatMode(uint8 bNewCombatMode) { bCombatMode = bNewCombatMode; }
+	void SetCombatMode(uint8 bNewCombatMode);
 	uint8 GetCombatMode() { return bCombatMode; }
 	// FTimerHandle ShootTimerHandle;
 	// float ShootingPreparationTime = 0.3f;
+	void func();
 public:
 	void StartSprint();
 	void StopSprint();
-
-private:
 	 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
