@@ -15,10 +15,12 @@ UBTTask_FindPatrolPos::UBTTask_FindPatrolPos()
 EBTNodeResult::Type UBTTask_FindPatrolPos::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
+	// UE_LOG(LogTemp, Log, TEXT("ExecuteTask"));
 	
 	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
 	if (nullptr == ControllingPawn)
 	{
+		UE_LOG(LogTemp, Log, TEXT("ControllingPawn is null"));
 		return EBTNodeResult::Failed;
 	}
 
@@ -26,6 +28,7 @@ EBTNodeResult::Type UBTTask_FindPatrolPos::ExecuteTask(UBehaviorTreeComponent& O
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(ControllingPawn->GetWorld());
 	if (nullptr == NavSystem)
 	{
+		UE_LOG(LogTemp, Log, TEXT("NavSystem is null"));
 		return EBTNodeResult::Failed;
 	}
 	
@@ -33,16 +36,19 @@ EBTNodeResult::Type UBTTask_FindPatrolPos::ExecuteTask(UBehaviorTreeComponent& O
 	ICHCharacterAIInterface* AIPawn = Cast<ICHCharacterAIInterface>(ControllingPawn);
 	if (nullptr == AIPawn)
 	{
+		UE_LOG(LogTemp, Log, TEXT("AIPawn is null"));
 		return EBTNodeResult::Failed;
 	}
 	
 	FVector Origin = OwnerComp.GetBlackboardComponent()->GetValueAsVector(BBKEY_HOMEPOS);
+	// UE_LOG(LogTemp, Log, TEXT("ExecuteTask"));
 	float PatrolRadius = AIPawn->GetAIPatrolRadius();
 	FNavLocation NextPatrolPos;
-
+	
 	// 반경 내에 랜덤한 위치 지정
 	if (NavSystem->GetRandomPointInNavigableRadius(Origin, PatrolRadius, NextPatrolPos))
 	{
+		UE_LOG(LogTemp, Log, TEXT("Succeeded"));
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(BBKEY_PATROLPOS, NextPatrolPos.Location);
 		return EBTNodeResult::Succeeded;
 	}

@@ -8,7 +8,6 @@
 #include "Character/CHCharacterPlayer.h"
 #include "Kismet/GameplayStatics.h"
 
-
 UCHAnimInstance::UCHAnimInstance()
 {
 	// MovingThreshould = 3.0f;
@@ -24,14 +23,6 @@ void UCHAnimInstance::NativeInitializeAnimation()
 	{
 		Movement = Owner->GetCharacterMovement();
 	}
-
-	//ACHCharacterPlayer* OwnerActor = Cast<ACHCharacterPlayer>(Owner);
-	//if (OwnerActor)
-	//{
-	//	// OwnerActor->OnCombat.AddUObject(this, &UCHAnimInstance::SetCombatMode);
-
-	//}
-
 }
 
 void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -40,15 +31,15 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (Movement)
 	{
-		// Velocity = Owner->
 		Velocity = Movement->Velocity;
 		GroundSpeed = Velocity.Size2D();
-		// bIsIdle = GroundSpeed < MovingThreshould;
 		bIsFalling = Movement->IsFalling();
-		// bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshould);
-		bShouldMove = (GroundSpeed > 3) && (Movement->GetCurrentAcceleration().Length() > 0);
+		FVector temp = Movement->GetCurrentAcceleration();
+		// TODO: Compare Acceleration with Zero Vector 
+		bShouldMove = (GroundSpeed > 3);		
+		//&& !temp.Equals(FVector::Zero(), 0.1f);
 	}
-
+	
 	ACHCharacterPlayer* OwnerActor = Cast<ACHCharacterPlayer>(Owner);
 	if (OwnerActor)
 	{

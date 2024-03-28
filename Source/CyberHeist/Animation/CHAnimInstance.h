@@ -33,10 +33,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class UCharacterMovementComponent> Movement;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Variable)
 	FVector Velocity;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Variable)
 	float GroundSpeed;
 
 	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)

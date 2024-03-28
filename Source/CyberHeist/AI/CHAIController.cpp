@@ -25,11 +25,12 @@ ACHAIController::ACHAIController()
 void ACHAIController::RunAI()
 {
 	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
-	if (UseBlackboard(BBAsset, BlackboardPtr))   // BB 초기화
+	if (UseBlackboard(BBAsset, BlackboardPtr))
 	{
 		Blackboard->SetValueAsVector(BBKEY_HOMEPOS, GetPawn()->GetActorLocation());
 		
-		bool RunResult = RunBehaviorTree(BTAsset);  // BT구동
+		bool RunResult = RunBehaviorTree(BTAsset);
+		
 		ensure(RunResult);
 	}
 }
@@ -46,7 +47,7 @@ void ACHAIController::StopAI()
 void ACHAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-
+	
 	RunAI();
 }
 
