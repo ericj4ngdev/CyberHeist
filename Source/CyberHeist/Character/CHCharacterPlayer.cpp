@@ -253,14 +253,11 @@ void ACHCharacterPlayer::SetCombatMode(uint8 bNewCombatMode)
 void ACHCharacterPlayer::StartSprint() 
 {
 	bSprint = true;
-	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d"), bSprint);
-	// CH_LOG(LogCH, Log, TEXT("%s"), TEXT("Begin"));
 }
 
 void ACHCharacterPlayer::StopSprint()
 { 
 	bSprint = false; 
-	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d"), bSprint);
 	UE_LOG(LogTemp, Log, TEXT("bSprint is %s"), bSprint ? TEXT("true") : TEXT("false"));
 }
 
@@ -273,11 +270,7 @@ void ACHCharacterPlayer::SetupHUDWidget(UCHHUDWidget* InHUDWidget)
 
 		// Stat->OnStatChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateStat);
 		Stat->OnHpChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateHpBar);
-		// Stat->OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
 		OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
-		// UCHWeaponComponent
-		// 캐릭터의 combat변수 변경
-		// 관리 주체 = 델리게이트 선언
 	}
 }
 

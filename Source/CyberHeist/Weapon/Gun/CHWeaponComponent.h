@@ -66,7 +66,7 @@ protected:
 
 	void StopParticleSystem();
 	FTimerHandle DurationTimerHandle;
-
+	uint8 bTrigger : 1;
 	/** Ends gameplay for this component. */
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

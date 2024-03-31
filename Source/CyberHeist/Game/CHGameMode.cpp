@@ -15,7 +15,7 @@ ACHGameMode::ACHGameMode()
 	}
 
 	// PlayerControllerClass
-	static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerClassRef(TEXT("/Script/CyberHeist.CHPlayerController"));
+	static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerClassRef(TEXT("/Script/Engine.Blueprint'/Game/CyberHeist/Blueprint/BP_CHPlayerController.BP_CHPlayerController_C'"));
 	if (PlayerControllerClassRef.Class)
 	{
 		PlayerControllerClass = PlayerControllerClassRef.Class;

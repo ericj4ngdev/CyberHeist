@@ -76,9 +76,9 @@ void UCHWeaponComponent::Fire()
 			UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Owner->GetRootComponent(), TEXT("MuzzleFlashSocket"));
 			if (ParticleComponent != nullptr)
 			{
-				// È°¼ºÈ­ ÈÄ ÀÏÁ¤ ½Ã°£ ÈÄ¿¡ ºñÈ°¼ºÈ­
+				// È°ï¿½ï¿½È­ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½Ä¿ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­
 				ParticleComponent->Activate(true);
-				float Duration = 0.1f; // ºñÈ°¼ºÈ­ÇÒ ½Ã°£(ÃÊ)
+				float Duration = 0.1f; // ï¿½ï¿½È°ï¿½ï¿½È­ï¿½ï¿½ ï¿½Ã°ï¿½(ï¿½ï¿½)
 				FTimerHandle TimerHandle;
 				FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 				TimerManager.SetTimer(TimerHandle, [ParticleComponent]()
@@ -177,11 +177,6 @@ void UCHWeaponComponent::AttachWeapon(ACHCharacterPlayer* TargetCharacter)
 
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &UCHWeaponComponent::StartAim);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &UCHWeaponComponent::StopAim);
-
-			// UIµµ ´Þ¾ÆÁÖ±â
-			// UCHHUDWidget¸¦ °¡Á®¿Íµµ ¹®Á¦ÀÎ°Ô SetupHUDWidgetÀº HUDÀÇ Native¿¡¼­ ÃÊ±âÈ­ÇÑ´Ù. 
-			// ±×·¡¼­ ÀÌº¥Æ® µî·ÏÀ» SetupHUDWidget ¹Û¿¡ ÇÒ ¼ö ¾ø´Ù´Â Á¦¾àÀÌ »ý±ä´Ù. °ú¿¬ ÀÌ°Ô ¸Â´Â °É±î? 
-			// OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);
 		}
 	}
 }
@@ -201,7 +196,7 @@ void UCHWeaponComponent::PullTrigger()
 	{
 		// hold a gun
 		Character->SetCombatMode(true);
-
+		UE_LOG(LogTemp, Log, TEXT("SetCombatMode true"));
 		// holding a gun delay
 		GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
 		{
@@ -210,19 +205,14 @@ void UCHWeaponComponent::PullTrigger()
 			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UCHWeaponComponent::Fire, FireInterval, true);
 		}, ShootingPreparationTime, false);		
 	}
+
+	bTrigger = true;	
 }
 
 void UCHWeaponComponent::CancelPullTrigger()
 {
-	// ¶Â´Ù°í falseµÇ¸é ¾ÈµÈ´Ù. Á¶ÁØ Áß¿¡ »ç°ÝÇÏ´Ù°¡ »ç°Ý¸¸ ¾ÈÇÏ¸é false°¡ µÇ¾î Ä«¸Þ¶ó ÀÌ»ó..
-	// Á¶ÁØ ÁßÀÌ¸é °è¼Ó bUseControllerRotationYaw´Â À¯Áö
-	// µû¶ó¼­ Á¶°Ç¹®À» ÁÖ°¡ÇØ¾ß ÇÑ´Ù. 
-	// if(!ÇöÀç aim) º¯°æ
-	if (Character->CurrentCharacterControlType != ECharacterControlType::ThirdAim &&
-		Character->CurrentCharacterControlType != ECharacterControlType::FirstAim)
-		Character->bUseControllerRotationYaw = false;
-
-	// Character->bUseControllerRotationYaw = false; 
+	if (Character->CurrentCharacterControlType == ECharacterControlType::Third)
+		Character->bUseControllerRotationYaw = false; 
 
 	if (Character->CurrentCharacterControlType == ECharacterControlType::Third ||
 		Character->CurrentCharacterControlType == ECharacterControlType::First)
@@ -233,6 +223,7 @@ void UCHWeaponComponent::CancelPullTrigger()
 		GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
 	}
 	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+	bTrigger = false;
 }
 
 void UCHWeaponComponent::StartAim()
@@ -240,13 +231,13 @@ void UCHWeaponComponent::StartAim()
 	if (Character->CurrentCharacterControlType == ECharacterControlType::Third)
 	{
 		Character->SetCharacterControl(ECharacterControlType::ThirdAim);
-		Character->SetCombatMode(true);
 	}
 	if (Character->CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		Character->SetCharacterControl(ECharacterControlType::FirstAim);
-		Character->SetCombatMode(true);		
 	}
+	// if PullTriggering, pass
+	if(!bTrigger) Character->SetCombatMode(true);
 }
 
 void UCHWeaponComponent::StopAim()
@@ -254,17 +245,21 @@ void UCHWeaponComponent::StopAim()
 	if (Character->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
 		Character->SetCharacterControl(ECharacterControlType::Third);
-		Character->SetCombatMode(false);
+		
 	}
 	if (Character->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
 		Character->SetCharacterControl(ECharacterControlType::First);
-		Character->SetCombatMode(false);
+		
 	}
-	// ÃÑ ½î´Â Áß¿¡ aim¸¸ Ç®·Áµµ °è¼Ó Àü¹æ ÁÖ½Ã ¸ðµå
-	// if(ÃÑ ½î´Â Áß) Character->bUseControllerRotationYaw = true;
-	// ±Ùµ¥ ÃÑ ½î´Â ÁßÀº ¾îÄ³ ¾ËÁö??? -> Cancel¿¡¼­ ´Ù ÇØ°á
-	// if (Character->bCombatMode) Character->bUseControllerRotationYaw = true;
+	if(!bTrigger)
+	{
+		Character->SetCombatMode(false); // if PullTriggering, pass
+	}
+	else
+	{
+		Character->bUseControllerRotationYaw = true;		
+	}
 }
 
 void UCHWeaponComponent::StopParticleSystem()
