@@ -99,9 +99,7 @@ public:
 	uint8 bCombatMode : 1;
 	void SetCombatMode(uint8 bNewCombatMode);
 	uint8 GetCombatMode() { return bCombatMode; }
-	// FTimerHandle ShootTimerHandle;
-	// float ShootingPreparationTime = 0.3f;
-	void func();
+	
 public:
 	void StartSprint();
 	void StopSprint();

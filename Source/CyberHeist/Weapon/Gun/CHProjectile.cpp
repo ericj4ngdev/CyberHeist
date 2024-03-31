@@ -65,12 +65,11 @@ void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPri
 	{
 		FDamageEvent DamageEvent;
 		OtherActor->TakeDamage(Damage, DamageEvent, OwnerInstigator, this);
-		UE_LOG(LogTemp, Warning, TEXT("FDamageEvent"));
-
-		UE_LOG(LogTemp, Warning, TEXT("OnHit"));
-		UE_LOG(LogTemp, Warning, TEXT("HitComp : %s"), *HitComp->GetName());
-		UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
-		UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
+		// UE_LOG(LogTemp, Warning, TEXT("FDamageEvent"));
+		// UE_LOG(LogTemp, Warning, TEXT("OnHit"));
+		// UE_LOG(LogTemp, Warning, TEXT("HitComp : %s"), *HitComp->GetName());
+		// UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
+		// UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
 
 		if(OtherComp->IsSimulatingPhysics()) OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 		Destroy();		

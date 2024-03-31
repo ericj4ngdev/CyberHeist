@@ -26,13 +26,11 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 
 	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
 	ThirdPersonCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	// ThirdPersonCamera->SetRelativeLocation()
-	// (X = 75.000000, Y = 60.000000, Z = 50.000000)
 	ThirdPersonCamera->bUsePawnControlRotation = false;
 
 	// FirstPersonCamera
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCamera->SetupAttachment(GetMesh(),FName("Head"));		// ???
+	FirstPersonCamera->SetupAttachment(GetMesh(),FName("Head"));	
 	FirstPersonCamera->bUsePawnControlRotation = true;
 	// FirstPersonCamera->bAutoActivate = false;
 
@@ -101,16 +99,12 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(ChangeControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ChangeCharacterControl);
+	
 	EnhancedInputComponent->BindAction(FirstMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::FirstMove);
 	EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::FirstLook);
+	
 	EnhancedInputComponent->BindAction(ThirdMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdMove);
 	EnhancedInputComponent->BindAction(ThirdLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdLook);
-	
-	/*EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::Shoot);
-	EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Canceled, this, &ACHCharacterPlayer::CancelShoot);
-
-	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartAim);
-	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHCharacterPlayer::StopAim);*/
 
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartSprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopSprint);
@@ -156,7 +150,7 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 		{
 			Subsystem->RemoveMappingContext(PrevMappingContext);			
 		}
-
+		
 		// ���ο� Data�� �ִ� IMC�� �ٲ�ġ��
 		UInputMappingContext* NewMappingContext = NewCharacterControl->InputMappingContext;
 		if (NewMappingContext)
@@ -252,6 +246,7 @@ void ACHCharacterPlayer::SetCombatMode(uint8 bNewCombatMode)
 
 void ACHCharacterPlayer::StartSprint() 
 {
+	if(GetCharacterMovement()->IsFalling()) return;
 	bSprint = true;
 }
 

@@ -35,7 +35,7 @@ void UCHHUDWidget::SetCombatMode(uint8 bCombat)
 {
 	// HpBar->UpdateHpBar(NewCurrentHp);
 	CrossHair->SetCombatMode(bCombat);
-	UE_LOG(LogTemp, Log, TEXT("UUCHCrossHairWidget"));
+	// UE_LOG(LogTemp, Log, TEXT("UUCHCrossHairWidget"));
 	bCombat ? CrossHair->SetVisibility(ESlateVisibility::Visible) : CrossHair->SetVisibility(ESlateVisibility::Hidden);
 }
 

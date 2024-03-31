@@ -20,7 +20,7 @@ EBTNodeResult::Type UBTTask_FindPatrolPos::ExecuteTask(UBehaviorTreeComponent& O
 	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
 	if (nullptr == ControllingPawn)
 	{
-		UE_LOG(LogTemp, Log, TEXT("ControllingPawn is null"));
+		// UE_LOG(LogTemp, Log, TEXT("ControllingPawn is null"));
 		return EBTNodeResult::Failed;
 	}
 
@@ -28,7 +28,7 @@ EBTNodeResult::Type UBTTask_FindPatrolPos::ExecuteTask(UBehaviorTreeComponent& O
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(ControllingPawn->GetWorld());
 	if (nullptr == NavSystem)
 	{
-		UE_LOG(LogTemp, Log, TEXT("NavSystem is null"));
+		// UE_LOG(LogTemp, Log, TEXT("NavSystem is null"));
 		return EBTNodeResult::Failed;
 	}
 	

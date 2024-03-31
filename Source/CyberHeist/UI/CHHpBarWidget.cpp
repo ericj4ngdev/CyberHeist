@@ -14,7 +14,7 @@ void UCHHpBarWidget::UpdateHpBar(float NewCurrentHp)
 {
 	ensure(MaxHp > 0.0f);
 
-	UE_LOG(LogTemp,Log, TEXT("%f"), NewCurrentHp);
+	// UE_LOG(LogTemp,Log, TEXT("%f"), NewCurrentHp);
 	if (HpProgressBar)
 	{
 		HpProgressBar->SetPercent(NewCurrentHp / MaxHp);

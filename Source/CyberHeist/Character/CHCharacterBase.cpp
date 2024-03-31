@@ -137,7 +137,7 @@ void ACHCharacterBase::PostInitializeComponents()
 float ACHCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	UE_LOG(LogTemp, Log, TEXT("TakeDamage"));
+	// UE_LOG(LogTemp, Log, TEXT("TakeDamage"));
 	Stat->ApplyDamage(DamageAmount);
 
 	return DamageAmount;

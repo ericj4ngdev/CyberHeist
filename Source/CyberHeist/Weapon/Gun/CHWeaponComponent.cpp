@@ -127,18 +127,14 @@ void UCHWeaponComponent::Fire()
 	{
 		// Get the animation object for the arms mesh
 		UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
-		UE_LOG(LogTemp, Log, TEXT("AnimInstance"));
 		if (AnimInstance != nullptr)
 		{
 			UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
-			UE_LOG(LogTemp, Log, TEXT("UCHAnimInstance"));
 			if (CHAnimInstance)
 			{
 				UE_LOG(LogTemp, Log, TEXT("ReCoil"));
 				CHAnimInstance->Recoil(10);
 			}
-			// AnimInstance->Montage_Play(FireAnimation, 2.f);
-			// AnimInstance
 		}
 	}
 }
