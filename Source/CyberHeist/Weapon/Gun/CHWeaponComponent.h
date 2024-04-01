@@ -72,11 +72,8 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	// �߻� ����(��)
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float FireInterval = 0.1f;
-
-	// �߻� Ÿ�̸� �ڵ�
 	FTimerHandle FireTimerHandle;
 
 

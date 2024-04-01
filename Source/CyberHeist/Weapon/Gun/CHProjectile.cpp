@@ -39,21 +39,6 @@ ACHProjectile::ACHProjectile()
 
 }
 
-void ACHProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	//UE_LOG(LogTemp, Log, TEXT("OnSphereBeginOverlap"));
-	//// Checking if it is a First Person Character overlapping
-	//ACHCharacterBase* Character = Cast<ACHCharacterBase>(OtherActor);
-	//if (Character != nullptr)
-	//{
-	//	FDamageEvent DamageEvent;
-	//	Character->TakeDamage(Damage, DamageEvent, GetInstigatorController(), this);
-	//	// Unregister from the Overlap Event so it is no longer triggered
-	//	CollisionComp->OnComponentBeginOverlap.RemoveAll(this);
-	//}
-}
-
-
 void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	ACHCharacterPlayer* MyOwner = Cast<ACHCharacterPlayer>(GetOwner());
@@ -74,29 +59,5 @@ void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPri
 		if(OtherComp->IsSimulatingPhysics()) OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 		Destroy();		
 	}
-
-	//// Only add impulse and destroy projectile if we hit a physics
-	//if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
-	//{		
-	//	OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-
-	//	Destroy();
-	//}
-
-	
-
-	// UE_LOG(LogTemp, Log, TEXT("OnHit"));
-	
-
-	//ACHCharacterBase* Character = Cast<ACHCharacterBase>(OtherActor);
-	//if (Character != nullptr)
-	//{
-	//	FDamageEvent DamageEvent;
-	//	Character->TakeDamage(Damage, DamageEvent, GetInstigatorController(), this);
-	//	// Unregister from the Overlap Event so it is no longer triggered
-	//	CollisionComp->OnComponentBeginOverlap.RemoveAll(this);
-	//	UE_LOG(LogTemp, Warning, TEXT("OnHit"));
-	//}
-
-	
+	// UE_LOG(LogTemp, Log, TEXT("OnHit"));	
 }
