@@ -95,7 +95,7 @@ protected:
 	TObjectPtr<class UCHWidgetComponent> HpBar;
 
 	virtual void SetupCharacterWidget(UCHUserWidget* InUserWidget) override;
-	
+
 
 
 };

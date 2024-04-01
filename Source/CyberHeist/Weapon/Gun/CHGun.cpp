@@ -3,8 +3,10 @@
 
 #include "Weapon/Gun/CHGun.h"
 
+#include "CHProjectile.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Animation/CHAnimInstance.h"
 #include "Character/CHCharacterPlayer.h"
 #include "KisMet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -20,8 +22,6 @@ class UEnhancedInputLocalPlayerSubsystem;
 ACHGun::ACHGun()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	bSpawnWithCollision = true;
 	
 	CollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Root"));
 	CollisionComp->InitCapsuleSize(40.0f, 50.0f);
@@ -34,7 +34,6 @@ ACHGun::ACHGun()
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMesh->SetupAttachment(CollisionComp);
-	WeaponMesh->SetRelativeLocation(WeaponMeshPickupRelativeLocation);
 	WeaponMesh->CastShadow = true;
 	WeaponMesh->SetVisibility(true, true);
 	WeaponMesh->SetupAttachment(CollisionComp);	
@@ -42,18 +41,27 @@ ACHGun::ACHGun()
 	Effect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Effect"));
 	Effect->SetupAttachment(CollisionComp);
 	
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> MuzzleFlashRef(TEXT("/Script/Engine.ParticleSystem'/Game/AssetPacks/ParagonWraith/FX/Particles/Abilities/Primary/FX/P_Wraith_Primary_MuzzleFlash.P_Wraith_Primary_MuzzleFlash'"));
+	/*static ConstructorHelpers::FObjectFinder<UParticleSystem> MuzzleFlashRef(TEXT("/Script/Engine.ParticleSystem'/Game/AssetPacks/ParagonWraith/FX/Particles/Abilities/Primary/FX/P_Wraith_Primary_MuzzleFlash.P_Wraith_Primary_MuzzleFlash'"));
 	if (MuzzleFlashRef.Object) 
 	{
 		Effect->SetTemplate(MuzzleFlashRef.Object);
-		Effect->bAutoActivate = false;
-	}
+	}*/
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> ImpactRef(TEXT("/Script/Engine.ParticleSystem'/Game/AssetPacks/ShooterGame/Effects/ParticleSystems/Weapons/AssaultRifle/Impacts/P_AssaultRifle_IH.P_AssaultRifle_IH'"));
+	Effect->bAutoActivate = false;
+	/*static ConstructorHelpers::FObjectFinder<UParticleSystem> ImpactRef(TEXT("/Script/Engine.ParticleSystem'/Game/AssetPacks/ShooterGame/Effects/ParticleSystems/Weapons/AssaultRifle/Impacts/P_AssaultRifle_IH.P_AssaultRifle_IH'"));
 	if (ImpactRef.Object)
 	{
 		ImpactEffect = ImpactRef.Object;
-	}
+	}*/
+
+	MaxRange = 5000;
+	Damage = 10;
+
+	DefaultShootingType = EWeaponShootType::LineTrace;
+	ShootingType = DefaultShootingType;
+
+	DefaultFireMode = EFireMode::SemiAutomatic;
+	FireMode = DefaultFireMode;
 }
 
 // Called when the game starts or when spawned
@@ -101,7 +109,14 @@ void ACHGun::AttachWeapon(ACHCharacterPlayer* TargetCharacter)
 
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGun::PullTrigger);
+			if(ShootingType == EWeaponShootType::LineTrace)
+			{
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGun::PullTriggerLine);				
+			}
+			else if(ShootingType == EWeaponShootType::Projectile)
+			{
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGun::PullTriggerProjectile);				
+			}
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGun::CancelPullTrigger);
 
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGun::StartAim);
@@ -110,6 +125,85 @@ void ACHGun::AttachWeapon(ACHCharacterPlayer* TargetCharacter)
 	}
 }
 
+void ACHGun::FireProjectile()
+{
+	if (OwningCharacter == nullptr || OwningCharacter->GetController() == nullptr)
+	{
+		return;
+	}
+	
+	/*if (MuzzleFlash != nullptr)
+	{
+		AActor* ActorOwner = GetOwner();
+		if (ActorOwner != nullptr)
+		{
+			UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, ActorOwner->GetRootComponent(), TEXT("MuzzleFlashSocket"));
+			if (ParticleComponent != nullptr)
+			{
+				ParticleComponent->Activate(true);
+				float Duration = 0.1f; 
+				FTimerHandle TimerHandle;
+				FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+				TimerManager.SetTimer(TimerHandle, [ParticleComponent]()
+					{
+						if (ParticleComponent->IsValidLowLevel())
+						{
+							ParticleComponent->DeactivateSystem();
+						}
+					}, Duration, false);
+			}
+		}
+	}	*/
+
+	// Try and play effect
+	Effect->Activate(true);
+	float Duration = 0.1f; // Set the duration time in seconds
+	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGun::StopParticleSystem, Duration, false);
+
+	
+	// Try and fire a projectile
+	if (ProjectileClass != nullptr)
+	{
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController());
+			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
+			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+
+			//Set Spawn Collision Handling Override
+			FActorSpawnParameters ActorSpawnParams;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;			
+
+			ActorSpawnParams.Owner = GetOwner();
+			APawn* InstigatorPawn = Cast<APawn>(GetOwner());
+			ActorSpawnParams.Instigator = InstigatorPawn;
+
+			ACHProjectile* Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			if(Projectile) Projectile->SetOwner(OwningCharacter);			// 
+		}
+	}
+
+	// Try and play the sound if specified
+	if (FireSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwningCharacter->GetActorLocation());
+	}
+
+	// Get the animation object for the arms mesh
+	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr)
+	{
+		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
+		if (CHAnimInstance)
+		{
+			UE_LOG(LogTemp, Log, TEXT("ReCoil"));
+			CHAnimInstance->Recoil(10);
+		}
+	}
+	
+}
 
 void ACHGun::FireLine()
 {
@@ -161,10 +255,27 @@ void ACHGun::FireLine()
 			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
 		}
 	}
+
+	// Try and play the sound if specified
+	if (FireSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwningCharacter->GetActorLocation());
+	}
+
+	// Get the animation object for the arms mesh
+	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr)
+	{
+		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
+		if (CHAnimInstance)
+		{
+			UE_LOG(LogTemp, Log, TEXT("ReCoil"));
+			CHAnimInstance->Recoil(10);
+		}
+	}	
 }
 
-
-void ACHGun::PullTrigger()
+void ACHGun::PullTriggerLine()
 {
 	OwningCharacter->bUseControllerRotationYaw = true;
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
@@ -179,15 +290,59 @@ void ACHGun::PullTrigger()
 		// hold a gun
 		OwningCharacter->SetCombatMode(true);
 		// UE_LOG(LogTemp, Log, TEXT("SetCombatMode true"));
-		// holding a gun delay
-		GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-		{
-			// Fire();
-			// Activate the timer to continuously fire at intervals
-			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
-		}, ShootingPreparationTime, false);		
-	}
 
+		if(FireMode == EFireMode::Automatic)
+		{
+			// holding a gun delay
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
+			{
+				// Fire();
+				// Activate the timer to continuously fire at intervals
+				GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
+			}, ShootingPreparationTime, false);	
+		}
+		else if(FireMode == EFireMode::SemiAutomatic)
+		{			
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
+			{
+				FireLine();
+			}, ShootingPreparationTime, false);	
+		}
+	}
+	bTrigger = true;
+}
+
+void ACHGun::PullTriggerProjectile()
+{
+	OwningCharacter->bUseControllerRotationYaw = true;
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	{
+		OwningCharacter->SetCombatMode(true);
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireProjectile, FireInterval, true);
+	}
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
+		OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+	{
+		// hold a gun
+		OwningCharacter->SetCombatMode(true);
+
+		if(FireMode == EFireMode::Automatic)
+		{
+			// holding a gun delay
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
+			{
+				GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireProjectile, FireInterval, true);
+			}, ShootingPreparationTime, false);	
+		}
+		else if(FireMode == EFireMode::SemiAutomatic)
+		{			
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
+			{
+				FireProjectile();
+			}, ShootingPreparationTime, false);	
+		}
+	}
 	bTrigger = true;
 }
 

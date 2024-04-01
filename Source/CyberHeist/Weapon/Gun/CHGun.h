@@ -8,6 +8,22 @@
 #include "GameFramework/Actor.h"
 #include "CHGun.generated.h"
 
+UENUM(BlueprintType)
+enum class EWeaponShootType : uint8
+{
+	LineTrace UMETA(DisplayName = "Line Trace"),
+	Projectile UMETA(DisplayName = "Projectile")
+};
+
+UENUM(BlueprintType)
+enum class EFireMode : uint8
+{
+	Automatic UMETA(DisplayName = "Automatic"),
+	SemiAutomatic UMETA(DisplayName = "Semi Automatic"),
+	BurstFire UMETA(DisplayName = "BurstFire")
+};
+
+
 class ACHCharacterPlayer;
 
 UCLASS()
@@ -33,30 +49,53 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<class UParticleSystemComponent> Effect;
 
-	UPROPERTY(VisibleAnywhere, Category = "Effect")
+	UPROPERTY(EditAnywhere, Category = "Weapon|Effect")
 	TObjectPtr<class UParticleSystem> MuzzleFlash;  // UParticleSystem
 
-	UPROPERTY(VisibleAnywhere, Category = "Effect")
+	UPROPERTY(EditAnywhere, Category = "Weapon|Effect")
 	TObjectPtr<class UParticleSystem> ImpactEffect;  // UParticleSystem
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	FVector WeaponMeshPickupRelativeLocation;
 
-	TObjectPtr<class ACHCharacterPlayer> OwningCharacter;
+	/** Sound to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Audio")
+	TObjectPtr<class USoundBase> FireSound;
 
+	/** Gun muzzle's offset from the characters location */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Muzzle")
+	FVector MuzzleOffset;
+
+	// properties
 public:
-	// Pickup on touch
-	virtual void NotifyActorBeginOverlap(class AActor* Other) override;
+	/** Projectile class to spawn */
+	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	TSubclassOf<class ACHProjectile> ProjectileClass;
 	
-	/** Attaches the actor to a FirstPersonCharacter */
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void AttachWeapon(ACHCharacterPlayer* TargetCharacter);
+	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	float FireInterval = 0.1f;
+	
+	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	float ShootingPreparationTime = 0.2f;
+	
+	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	float MaxRange;
+	
+	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	float Damage;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Properties")
+	EWeaponShootType ShootingType;
 
-	// Whether or not to spawn this weapon with collision enabled (pickup mode).
-	// Set to false when spawning directly into a player's inventory or true when spawning into the world in pickup mode.
-	UPROPERTY(BlueprintReadWrite)
-	bool bSpawnWithCollision;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Properties")
+	EFireMode FireMode;
+
+	EFireMode DefaultFireMode;
+	EWeaponShootType DefaultShootingType;
 	
+	FTimerHandle DurationTimerHandle;
+	FTimerHandle FireTimerHandle;
+	FTimerHandle ShootTimerHandle;
+
+	uint8 bTrigger : 1;
+
 	// Input
 public:
 	/** MappingContext */
@@ -71,46 +110,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AimAction;
 
-public:	
-	void PullTrigger();
+	void PullTriggerProjectile();
+	void PullTriggerLine();
 	void CancelPullTrigger();
 	void StartAim();
 	void StopAim();
 	void StopParticleSystem();
+
+	/** Make the weapon Fire a Line */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void FireLine();
-	// properties
-public:
-	uint8 bTrigger : 1;
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	float FireInterval = 0.1f;
-	FTimerHandle DurationTimerHandle;
-	FTimerHandle FireTimerHandle;
-	FTimerHandle ShootTimerHandle;
-	float ShootingPreparationTime = 0.2f;
+
+	/** Make the weapon Fire a Projectile */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void FireProjectile();
 private:
-	UPROPERTY(EditAnywhere)
-	float MaxRange = 5000;
-	
-	UPROPERTY(EditAnywhere)
-		float Damage = 10;
+	TObjectPtr<class ACHCharacterPlayer> OwningCharacter;
 
 	
 public:
-	/** Projectile class to spawn */
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	TSubclassOf<class ACHProjectile> ProjectileClass;
-
-	/** Sound to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	USoundBase* FireSound;
-
-	/** AnimMontage to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	TObjectPtr <class UAnimMontage> FireAnimation;
-
-	/** Gun muzzle's offset from the characters location */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	FVector MuzzleOffset;
-
-
+	// Pickup on touch
+	virtual void NotifyActorBeginOverlap(class AActor* Other) override;
+	
+	/** Attaches the actor to a FirstPersonCharacter */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void AttachWeapon(ACHCharacterPlayer* TargetCharacter);
 };
