@@ -175,6 +175,20 @@ void ACHCharacterBase::AttackHitCheck()
 
 }
 
+void ACHCharacterBase::SetCombatMode(uint8 bNewCombatMode)
+{
+	bCombatMode = bNewCombatMode;
+	OnCombat.Broadcast(bCombatMode);
+}
+
+void ACHCharacterBase::ChangeCharacterControl()
+{
+}
+
+void ACHCharacterBase::SetCharacterControl(ECharacterControlType NewCharacterControlType)
+{
+}
+
 void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)
 {
 	UCHHpBarWidget* HpBarWidget = Cast<UCHHpBarWidget>(InUserWidget);
@@ -185,6 +199,110 @@ void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UCHHpBarWidget::UpdateHpBar);
 	}
 }
+
+void ACHCharacterBase::AddWeaponToInventory(ACHGun* NewGun, bool bEquipWeapon)
+{
+	Inventory.Weapons.Add(NewGun);
+	NewGun->SetOwningCharacter(this);
+	EquipWeapon(NewGun);	
+}
+
+
+void ACHCharacterBase::SetCurrentWeapon(ACHGun* NewWeapon, ACHGun* LastWeapon)
+{
+	if (NewWeapon == LastWeapon)
+	{
+		return;
+	}
+
+	UnEquipWeapon(LastWeapon);
+
+	if (NewWeapon)
+	{
+		// Weapons coming from OnRep_CurrentWeapon won't have the owner set
+		CurrentWeapon = NewWeapon;
+		CurrentWeapon->SetOwningCharacter(this);
+		CurrentWeapon->Equip();
+
+		// change gun animation
+		/*UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
+		if (Equip1PMontage && GetFirstPersonMesh())
+		{
+			GetFirstPersonMesh()->GetAnimInstance()->Montage_Play(Equip1PMontage);
+		}
+
+		UAnimMontage* Equip3PMontage = CurrentWeapon->GetEquip3PMontage();
+		if (Equip3PMontage && GetThirdPersonMesh())
+		{
+			GetThirdPersonMesh()->GetAnimInstance()->Montage_Play(Equip3PMontage);
+		}*/
+	}
+	else
+	{
+		// This will clear HUD, tags etc
+		UnEquipWeapon(CurrentWeapon);
+		CurrentWeapon = nullptr;
+	}
+	
+}
+
+void ACHCharacterBase::EquipWeapon(ACHGun* NewWeapon)
+{
+	SetCurrentWeapon(NewWeapon, CurrentWeapon);
+}
+
+void ACHCharacterBase::UnEquipWeapon(ACHGun* WeaponToUnEquip)
+{
+	if (WeaponToUnEquip)
+	{		
+		WeaponToUnEquip->UnEquip();
+	}
+}
+
+void ACHCharacterBase::NextWeapon()
+{
+	if (Inventory.Weapons.Num() < 2)
+	{
+		return;
+	}
+
+	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
+	UnEquipWeapon(CurrentWeapon);
+	CurrentWeapon = nullptr;
+
+	if (CurrentWeaponIndex == INDEX_NONE)
+	{
+		EquipWeapon(Inventory.Weapons[0]);
+	}
+	else
+	{
+		EquipWeapon(Inventory.Weapons[(CurrentWeaponIndex + 1) % Inventory.Weapons.Num()]);
+	}
+}
+
+void ACHCharacterBase::PreviousWeapon()
+{
+	if (Inventory.Weapons.Num() < 2)
+	{
+		return;
+	}
+
+	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
+
+	UnEquipWeapon(CurrentWeapon);
+	CurrentWeapon = nullptr;
+
+	if (CurrentWeaponIndex == INDEX_NONE)
+	{
+		EquipWeapon(Inventory.Weapons[0]);
+	}
+	else
+	{
+		int32 IndexOfPrevWeapon = FMath::Abs(CurrentWeaponIndex - 1 + Inventory.Weapons.Num()) % Inventory.Weapons.Num();
+		EquipWeapon(Inventory.Weapons[IndexOfPrevWeapon]);
+	}
+}
+
 
 void ACHCharacterBase::SetDead()
 {

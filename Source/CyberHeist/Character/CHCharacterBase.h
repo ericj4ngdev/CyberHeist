@@ -8,6 +8,8 @@
 #include "Interface/CHCharacterWidgetInterface.h"
 #include "CHCharacterBase.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*combat */);
+
 UENUM()
 enum class ECharacterControlType : uint8
 {
@@ -16,6 +18,24 @@ enum class ECharacterControlType : uint8
 	FirstAim,
 	ThirdAim
 };
+
+USTRUCT()
+struct CYBERHEIST_API FCHCharacterInventory
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	TArray<ACHGun*> Weapons;
+
+	// Consumable items
+
+	// Passive items like armor
+
+	// Door keys
+
+	// Etc
+};
+
 
 UCLASS()
 class CYBERHEIST_API ACHCharacterBase : public ACharacter, public ICHCharacterWidgetInterface
@@ -31,12 +51,25 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	FOnCombatModeSignature OnCombat;
 protected:
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData);
 
 	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
 	TMap<ECharacterControlType, class UCHCharacterControlData*> CharacterControlManager;
 
+public:
+	ECharacterControlType CurrentCharacterControlType;
+	FORCEINLINE ECharacterControlType GetCurrentCharacterControlType() { return CurrentCharacterControlType; }
+	FORCEINLINE void SetCurrentCharacterControlType(ECharacterControlType Type) {	CurrentCharacterControlType = Type;	}
+
+public:
+	uint8 bCombatMode : 1;
+	void SetCombatMode(uint8 bNewCombatMode);
+	uint8 GetCombatMode() { return bCombatMode; }
+public:
+	virtual void ChangeCharacterControl();
+	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType);
 	// Aim
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
@@ -95,7 +128,37 @@ protected:
 	TObjectPtr<class UCHWidgetComponent> HpBar;
 
 	virtual void SetupCharacterWidget(UCHUserWidget* InUserWidget) override;
+	
+	// Inventory
+public:
+	UPROPERTY()
+	FCHCharacterInventory Inventory;
+	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "GASShooter|Inventory")
+	TArray<TSubclassOf<ACHGun>> DefaultInventoryWeaponClasses;
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory", Meta = (AllowPrivateAccess = "true"))
+	TMap<FString, class ACHGun*> InventoryManager;
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void AddWeaponToInventory(ACHGun* NewGun, bool bEquipWeapon);
 
+	void SetCurrentWeapon(ACHGun* NewWeapon, ACHGun* LastWeapon);
+	
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void EquipWeapon(ACHGun* NewWeapon);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void UnEquipWeapon(ACHGun* WeaponToUnEquip);
+
+	UFUNCTION(BlueprintCallable, Category = "GASShooter|Inventory")
+	virtual void NextWeapon();
+
+	UFUNCTION(BlueprintCallable, Category = "GASShooter|Inventory")
+	virtual void PreviousWeapon();
+	
+	UPROPERTY()
+	ACHGun* CurrentWeapon;
+	
 };
+

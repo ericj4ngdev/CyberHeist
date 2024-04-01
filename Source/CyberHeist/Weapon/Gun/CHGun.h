@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "InputActionValue.h"
 #include "GameFramework/Actor.h"
 #include "CHGun.generated.h"
 
@@ -125,7 +124,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void FireProjectile();
 private:
-	TObjectPtr<class ACHCharacterPlayer> OwningCharacter;
+	TObjectPtr<class ACHCharacterBase> OwningCharacter;
 
 	
 public:
@@ -134,5 +133,12 @@ public:
 	
 	/** Attaches the actor to a FirstPersonCharacter */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void AttachWeapon(ACHCharacterPlayer* TargetCharacter);
+	void Equip();
+	void UnEquip();
+	void SetOwningCharacter(ACHCharacterBase* InOwningCharacter);
+
+	bool bIsEquipped;
+	// Called when the player picks up this weapon
+	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter);
+	
 };

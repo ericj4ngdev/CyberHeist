@@ -71,12 +71,18 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 		ThirdLookAction = InputActionThirdPersonLookRef.Object;
 	}
 
-	
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionChangeNextWeaponActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ChangeNextWeapon.IA_ChangeNextWeapon'"));
+	if (nullptr != InputActionChangeNextWeaponActionRef.Object)
+	{
+		ChangeNextWeaponAction = InputActionChangeNextWeaponActionRef.Object;
+	}
 
-	// RunSpeed = 350;
-	// WalkSpeed = 150;
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionChangePrevWeaponActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ChangePrevWeapon.IA_ChangePrevWeapon'"));
+	if (nullptr != InputActionChangePrevWeaponActionRef.Object)
+	{
+		ChangePrevWeaponAction = InputActionChangePrevWeaponActionRef.Object;
+	}
 	
-	// AimDistance = 100;
 	CurrentCharacterControlType = ECharacterControlType::Third;
 }
 
@@ -86,7 +92,6 @@ void ACHCharacterPlayer::BeginPlay()
 
 	CHAnimInstance = Cast<UCHAnimInstance>(GetMesh()->GetAnimInstance());
 	
-
 	SetCharacterControl(CurrentCharacterControlType);
 }
 
@@ -108,6 +113,9 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartSprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopSprint);
+
+	EnhancedInputComponent->BindAction(ChangeNextWeaponAction, ETriggerEvent::Triggered, this, &ACHCharacterBase::NextWeapon);
+	EnhancedInputComponent->BindAction(ChangePrevWeaponAction, ETriggerEvent::Triggered, this, &ACHCharacterBase::PreviousWeapon);
 }
 
 void ACHCharacterPlayer::ChangeCharacterControl()
@@ -236,12 +244,6 @@ void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);		// modify
-}
-
-void ACHCharacterPlayer::SetCombatMode(uint8 bNewCombatMode)
-{
-	bCombatMode = bNewCombatMode;
-	OnCombat.Broadcast(bCombatMode);
 }
 
 void ACHCharacterPlayer::StartSprint() 

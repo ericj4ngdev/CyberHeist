@@ -10,7 +10,7 @@
 #include "Interface/CHCrossHairWidgetInterface.h"
 #include "CHCharacterPlayer.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*combat */);
+
 
 class ACHGun;
 
@@ -25,9 +25,6 @@ class CYBERHEIST_API ACHCharacterPlayer : public ACHCharacterBase, public ICHCha
 public:
 	ACHCharacterPlayer();
 
-	FOnCombatModeSignature OnCombat;
-	// void OnCombatMode(uint8 bCombat);
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -35,8 +32,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	void ChangeCharacterControl();
-	void SetCharacterControl(ECharacterControlType NewCharacterControlType);
+	virtual void ChangeCharacterControl() override;
+	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType) override;
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData) override;
 
 // Camera Section
@@ -85,6 +82,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SprintAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ChangeNextWeaponAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ChangePrevWeaponAction;
+	
 	/*void Shoot();
 	void CancelShoot();
 	void StartAim();
@@ -94,11 +97,6 @@ protected:
 	void FirstLook(const FInputActionValue& Value);
 	void ThirdMove(const FInputActionValue& Value);
 	void ThirdLook(const FInputActionValue& Value);
-
-public:
-	uint8 bCombatMode : 1;
-	void SetCombatMode(uint8 bNewCombatMode);
-	uint8 GetCombatMode() { return bCombatMode; }
 	
 public:
 	void StartSprint();
@@ -108,12 +106,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCHAnimInstance> CHAnimInstance;
 	
-	ECharacterControlType CurrentCharacterControlType;
-	FORCEINLINE ECharacterControlType GetCurrentCharacterControlType() { return CurrentCharacterControlType; }
-	FORCEINLINE void SetCurrentCharacterControlType(ECharacterControlType Type) {	CurrentCharacterControlType = Type;	}
+	
 
 	// UI Section
 protected:
 	virtual void SetupHUDWidget(class UCHHUDWidget* InHUDWidget) override;
 	virtual void SetupCrossWidget(class UCHUserWidget* InUserWidget) override;
+
 };
