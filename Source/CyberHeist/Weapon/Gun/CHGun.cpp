@@ -79,6 +79,7 @@ void ACHGun::BeginPlay()
 void ACHGun::NotifyActorBeginOverlap(AActor* Other)
 {
 	Super::NotifyActorBeginOverlap(Other);
+	 
 	PickUpOnTouch(Cast<ACHCharacterBase>(Other));	
 }
 
@@ -376,6 +377,7 @@ void ACHGun::PullTriggerProjectile()
 			}
 			if(FireMode == EFireMode::SemiAutomatic)
 			{
+				UE_LOG(LogTemp, Log, TEXT("ThirdAim|SemiAutomatic"));
 				FireProjectile();
 			}
 		}
@@ -398,6 +400,7 @@ void ACHGun::PullTriggerProjectile()
 				GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
 				{
 					FireProjectile();
+					UE_LOG(LogTemp, Log, TEXT("Third|SemiAutomatic"));
 				}, ShootingPreparationTime, false);	
 			}
 		}

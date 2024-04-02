@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionTypes.h"
 #include "CHAIController.generated.h"
 
 /**
@@ -30,4 +31,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UBehaviorTree> BTAsset;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UAIPerceptionComponent> AIPerception;
+
+	UFUNCTION()
+	void HandleSightSense(AActor* Actor, FAIStimulus Stimulus);
+	
 };
