@@ -55,7 +55,7 @@ ACHGun::ACHGun()
 	}*/
 
 	MaxRange = 5000;
-	Damage = 10;
+	Damage = 1;
 
 	DefaultShootingType = EWeaponShootType::LineTrace;
 	// ShootingType = DefaultShootingType;
@@ -162,6 +162,21 @@ void ACHGun::PickUpOnTouch(ACHCharacterBase* InCharacter)
 	InCharacter->AddWeaponToInventory(this,true);
 }
 
+uint8 ACHGun::FireByAI()
+{
+	if(ShootingType == EWeaponShootType::LineTrace)
+	{
+		PullTriggerLine();
+		return true;
+	}
+	if(ShootingType == EWeaponShootType::Projectile)
+	{
+		PullTriggerProjectile();
+		return true;
+	}
+	return false;
+}
+
 void ACHGun::FireProjectile()
 {
 	if (OwningCharacter == nullptr || OwningCharacter->GetController() == nullptr)
@@ -235,7 +250,7 @@ void ACHGun::FireProjectile()
 		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
 		if (CHAnimInstance)
 		{
-			UE_LOG(LogTemp, Log, TEXT("ReCoil"));
+			// UE_LOG(LogTemp, Log, TEXT("ReCoil"));
 			CHAnimInstance->Recoil(10);
 		}
 	}
@@ -306,7 +321,7 @@ void ACHGun::FireLine()
 		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
 		if (CHAnimInstance)
 		{
-			UE_LOG(LogTemp, Log, TEXT("ReCoil"));
+			// UE_LOG(LogTemp, Log, TEXT("ReCoil"));
 			CHAnimInstance->Recoil(10);
 		}
 	}	
@@ -314,163 +329,158 @@ void ACHGun::FireLine()
 
 void ACHGun::PullTriggerLine()
 {	
-	if(bIsEquipped)
+	if(!bIsEquipped) return;
+
+	OwningCharacter->bUseControllerRotationYaw = true;
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
-		OwningCharacter->bUseControllerRotationYaw = true;
-		if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
-			|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
-		{
-			OwningCharacter->SetCombatMode(true);
-			// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
+		OwningCharacter->SetCombatMode(true);
+		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
 
-			if(FireMode == EFireMode::Automatic)
+		if(FireMode == EFireMode::Automatic)
+		{
+			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
+		}
+		if(FireMode == EFireMode::SemiAutomatic)
+		{
+			FireLine();					
+		}
+	}
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
+		OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+	{
+		// hold a gun
+		OwningCharacter->SetCombatMode(true);
+		// UE_LOG(LogTemp, Log, TEXT("SetCombatMode true"));
+
+		if(FireMode == EFireMode::Automatic)
+		{
+			// holding a gun delay
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
 			{
+				// Fire();
+				// Activate the timer to continuously fire at intervals
 				GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
-			}
-			if(FireMode == EFireMode::SemiAutomatic)
-			{
-				FireLine();					
-			}
+			}, ShootingPreparationTime, false);	
 		}
-		if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
-			OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		if(FireMode == EFireMode::SemiAutomatic)
 		{
-			// hold a gun
-			OwningCharacter->SetCombatMode(true);
-			// UE_LOG(LogTemp, Log, TEXT("SetCombatMode true"));
-
-			if(FireMode == EFireMode::Automatic)
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
 			{
-				// holding a gun delay
-				GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-				{
-					// Fire();
-					// Activate the timer to continuously fire at intervals
-					GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
-				}, ShootingPreparationTime, false);	
-			}
-			if(FireMode == EFireMode::SemiAutomatic)
-			{
-				GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-				{
-					FireLine();
-				}, ShootingPreparationTime, false);	
-			}
+				FireLine();
+			}, ShootingPreparationTime, false);	
 		}
-		bTrigger = true;
-	}	
+	}
+	bTrigger = true;
+	
 }
 
 void ACHGun::PullTriggerProjectile()
 {
-	if(bIsEquipped)
+	if(!bIsEquipped) return;
+	
+	OwningCharacter->bUseControllerRotationYaw = true;
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
-		OwningCharacter->bUseControllerRotationYaw = true;
-		if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
-			|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+		OwningCharacter->SetCombatMode(true);
+		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireProjectile, FireInterval, true);
+		if(FireMode == EFireMode::Automatic)
 		{
-			OwningCharacter->SetCombatMode(true);
-			// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireProjectile, FireInterval, true);
-			if(FireMode == EFireMode::Automatic)
+			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireProjectile, FireInterval, true);
+		}
+		if(FireMode == EFireMode::SemiAutomatic)
+		{
+			UE_LOG(LogTemp, Log, TEXT("ThirdAim|SemiAutomatic"));
+			FireProjectile();
+		}
+	}
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
+		OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+	{
+		// hold a gun
+		OwningCharacter->SetCombatMode(true);
+
+		if(FireMode == EFireMode::Automatic)
+		{
+			// holding a gun delay
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
 			{
 				GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireProjectile, FireInterval, true);
-			}
-			if(FireMode == EFireMode::SemiAutomatic)
+			}, ShootingPreparationTime, false);	
+		}
+		if(FireMode == EFireMode::SemiAutomatic)
+		{			
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
 			{
-				UE_LOG(LogTemp, Log, TEXT("ThirdAim|SemiAutomatic"));
 				FireProjectile();
-			}
+				UE_LOG(LogTemp, Log, TEXT("Third|SemiAutomatic"));
+			}, ShootingPreparationTime, false);	
 		}
-		if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
-			OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
-		{
-			// hold a gun
-			OwningCharacter->SetCombatMode(true);
-
-			if(FireMode == EFireMode::Automatic)
-			{
-				// holding a gun delay
-				GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-				{
-					GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireProjectile, FireInterval, true);
-				}, ShootingPreparationTime, false);	
-			}
-			if(FireMode == EFireMode::SemiAutomatic)
-			{			
-				GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-				{
-					FireProjectile();
-					UE_LOG(LogTemp, Log, TEXT("Third|SemiAutomatic"));
-				}, ShootingPreparationTime, false);	
-			}
-		}
-		bTrigger = true;
 	}
+	bTrigger = true;	
 }
 
 void ACHGun::CancelPullTrigger()
 {
-	if(bIsEquipped)
-	{
-		ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
-			PlayerCharacter->bUseControllerRotationYaw = false; 
+	if(!bIsEquipped) return;
+	
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
+		OwningCharacter->bUseControllerRotationYaw = false; 
 
-		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
-			PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
-		{
-			// Cancel holding a gun
-			OwningCharacter->SetCombatMode(false);
-		
-			GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
-		}
-		GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
-		bTrigger = false;
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
+		OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+	{
+		// Cancel holding a gun
+		OwningCharacter->SetCombatMode(false);
+	
+		GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
 	}
+	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+	bTrigger = false;	
 }
 
 void ACHGun::StartAim()
 {
-	if(bIsEquipped)
+	if(!bIsEquipped) return;
+	
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 	{
-		ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
-		}
-		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
-		}
-		// if Pull Triggering, pass
-		if(!bTrigger) OwningCharacter->SetCombatMode(true);
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
 	}
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+	}
+	// if Pull Triggering, pass
+	if(!bTrigger) OwningCharacter->SetCombatMode(true);	
 }
 
 void ACHGun::StopAim()
 {
-	if(bIsEquipped)
+	if(!bIsEquipped) return;
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
-		ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);
-		
-		}
-		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-		
-		}
-		if(!bTrigger)
-		{
-			OwningCharacter->SetCombatMode(false); // if PullTriggering, pass
-		}
-		else
-		{
-			OwningCharacter->bUseControllerRotationYaw = true;		
-		}
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);
+	
 	}
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+	
+	}
+	if(!bTrigger)
+	{
+		OwningCharacter->SetCombatMode(false); // if PullTriggering, pass
+	}
+	else
+	{
+		OwningCharacter->bUseControllerRotationYaw = true;		
+	}
+	
 }
 
 void ACHGun::StopParticleSystem()

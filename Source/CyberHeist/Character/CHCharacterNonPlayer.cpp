@@ -36,10 +36,35 @@ float ACHCharacterNonPlayer::GetAIDetectRange()
 
 float ACHCharacterNonPlayer::GetAIAttackRange()
 {
-	return 0.0f;
+	return 900.0f;
 }
 
 float ACHCharacterNonPlayer::GetAITurnSpeed()
 {
-	return 0.0f;
+	return 2.0f;
+}
+
+void ACHCharacterNonPlayer::SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished)
+{
+	OnAttackFinished = InOnAttackFinished;
+}
+
+void ACHCharacterNonPlayer::AttackByAI()
+{
+	if(Inventory.Weapons.IsEmpty()) return;
+	if(CurrentWeapon == nullptr) return;
+	// if(!CurrentWeapon->FireByAI())
+	
+	CurrentWeapon->FireByAI();
+	
+	UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::AttackByAI"));
+}
+
+void ACHCharacterNonPlayer::CancelAttackByAI()
+{
+	if(CurrentWeapon->FireByAI())
+	{
+		UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::CancelAttackByAI"));
+		CurrentWeapon->CancelPullTrigger();
+	}
 }

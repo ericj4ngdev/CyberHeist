@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "CHCharacterAIInterface.generated.h"
 
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UCHCharacterAIInterface : public UInterface
@@ -13,6 +14,7 @@ class UCHCharacterAIInterface : public UInterface
 	GENERATED_BODY()
 };
 
+DECLARE_DELEGATE(FAICharacterAttackFinished);
 /**
  * 
  */
@@ -26,4 +28,8 @@ public:
 	virtual float GetAIDetectRange() = 0;
 	virtual float GetAIAttackRange() = 0;
 	virtual float GetAITurnSpeed() = 0;
+
+	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished) = 0;
+	virtual void AttackByAI() = 0;
+	virtual void CancelAttackByAI() = 0;
 };

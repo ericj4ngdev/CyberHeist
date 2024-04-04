@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"	
 #include "Character/CHCharacterPlayer.h"
+#include "Character/CHCharacterBase.h"
 #include "Kismet/GameplayStatics.h"
 
 UCHAnimInstance::UCHAnimInstance()
@@ -40,7 +41,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		//&& !temp.Equals(FVector::Zero(), 0.1f);
 	}
 	
-	ACHCharacterPlayer* OwnerActor = Cast<ACHCharacterPlayer>(Owner);
+	ACHCharacterBase* OwnerActor = Cast<ACHCharacterBase>(Owner);
 	if (OwnerActor)
 	{
 		// OwnerActor->OnCombat.AddUObject(this, &UCHAnimInstance::SetCombatMode);

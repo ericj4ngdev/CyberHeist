@@ -59,7 +59,7 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 			if (Pawn && Pawn->GetController()->IsPlayerController())
 			{
 				// Target 키값에 Player 할당. 
-				OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBKEY_TARGET, Pawn);
+				OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBKEY_TARGETACTOR, Pawn);
 				// 감지된 곳에 녹색 구, 점, 선 생성
 				DrawDebugSphere(World, Center, DetectRadius, 16, FColor::Green, false, 0.2f);
 
@@ -70,6 +70,6 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 		}
 	}
 	// 플레이어를 못찾거나 없으면 Target은 null값. NPC위치에 빨간 구 
-	OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBKEY_TARGET, nullptr);
+	OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBKEY_TARGETACTOR, nullptr);
 	DrawDebugSphere(World, Center, DetectRadius, 16, FColor::Red, false, 0.2f);
 }

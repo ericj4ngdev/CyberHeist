@@ -159,6 +159,7 @@ public:
 	
 	UPROPERTY()
 	ACHGun* CurrentWeapon;
-	
+
+	// AI
 };
 

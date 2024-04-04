@@ -123,9 +123,13 @@ public:
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void FireProjectile();
+
+	/** Make the weapon Fire */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	uint8 FireByAI();
+	
 private:
 	TObjectPtr<class ACHCharacterBase> OwningCharacter;
-
 	
 public:
 	// Pickup on touch
