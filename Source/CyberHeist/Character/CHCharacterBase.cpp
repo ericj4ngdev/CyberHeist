@@ -303,6 +303,10 @@ void ACHCharacterBase::PreviousWeapon()
 	}
 }
 
+void ACHCharacterBase::NotifyComboActionEnd()
+{
+}
+
 
 void ACHCharacterBase::SetDead()
 {

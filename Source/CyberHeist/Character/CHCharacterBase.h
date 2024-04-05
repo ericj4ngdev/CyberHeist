@@ -64,6 +64,7 @@ public:
 	FORCEINLINE void SetCurrentCharacterControlType(ECharacterControlType Type) {	CurrentCharacterControlType = Type;	}
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	uint8 bCombatMode : 1;
 	void SetCombatMode(uint8 bNewCombatMode);
 	uint8 GetCombatMode() { return bCombatMode; }
@@ -161,5 +162,7 @@ public:
 	ACHGun* CurrentWeapon;
 
 	// AI
+public:
+	virtual void NotifyComboActionEnd();
 };
 

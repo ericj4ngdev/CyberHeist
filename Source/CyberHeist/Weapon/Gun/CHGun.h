@@ -127,7 +127,8 @@ public:
 	/** Make the weapon Fire */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	uint8 FireByAI();
-	
+	void EndShoot();
+
 private:
 	TObjectPtr<class ACHCharacterBase> OwningCharacter;
 	

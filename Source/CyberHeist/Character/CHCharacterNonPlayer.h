@@ -30,6 +30,7 @@ protected:
 	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished) override;
 	virtual void AttackByAI() override;
 	virtual void CancelAttackByAI() override;
-
+	virtual void NotifyComboActionEnd() override;
+	
 	FAICharacterAttackFinished OnAttackFinished;
 };

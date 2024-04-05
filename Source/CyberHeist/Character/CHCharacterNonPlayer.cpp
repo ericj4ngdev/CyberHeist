@@ -41,7 +41,7 @@ float ACHCharacterNonPlayer::GetAIAttackRange()
 
 float ACHCharacterNonPlayer::GetAITurnSpeed()
 {
-	return 2.0f;
+	return 100.0f;
 }
 
 void ACHCharacterNonPlayer::SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished)
@@ -56,7 +56,7 @@ void ACHCharacterNonPlayer::AttackByAI()
 	// if(!CurrentWeapon->FireByAI())
 	
 	CurrentWeapon->FireByAI();
-	
+	// CurrentWeapon->CancelPullTrigger();
 	UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::AttackByAI"));
 }
 
@@ -67,4 +67,10 @@ void ACHCharacterNonPlayer::CancelAttackByAI()
 		UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::CancelAttackByAI"));
 		CurrentWeapon->CancelPullTrigger();
 	}
+}
+
+void ACHCharacterNonPlayer::NotifyComboActionEnd()
+{
+	Super::NotifyComboActionEnd();
+	OnAttackFinished.ExecuteIfBound();
 }

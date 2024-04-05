@@ -21,26 +21,34 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	}
 
+	APawn* TargetPawn = Cast<APawn>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGETACTOR));
+	if(nullptr == TargetPawn)
+	{
+		return EBTNodeResult::Failed;
+	}
+	
 	ICHCharacterAIInterface* AIPawn = Cast<ICHCharacterAIInterface>(ControllingPawn);
 	if (nullptr == AIPawn)
 	{
 		return EBTNodeResult::Failed;
 	}
-
-	APawn* TargetPawn = Cast<APawn>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGETACTOR));
-	if(TargetPawn == nullptr) return EBTNodeResult::Failed;
-	
 	// TargetActor is Set
-	// UObject* Target = OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGETACTOR);
-	// APawn* TargetPawn = Cast<APawn>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGETACTOR));
-	if(TargetPawn != nullptr)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Target : %s"), *TargetPawn->GetName());
-		AIPawn->AttackByAI();
-		return EBTNodeResult::InProgress;
-	}
-	// else return EBTNodeResult::Failed;
-	
-	AIPawn->CancelAttackByAI();
-	return EBTNodeResult::Succeeded;
+	// UE_LOG(LogTemp, Log, TEXT("Target : %s"), *TargetPawn->GetName());
+
+	FAICharacterAttackFinished OnAttackFinished;
+	OnAttackFinished.BindLambda(
+		[&]()
+		{
+			UE_LOG(LogTemp, Log, TEXT("BindLambda"));
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
+	);
+
+	AIPawn->SetAIAttackDelegate(OnAttackFinished);	// npc에게 델리 전달.
+	// NotifyComboActionEnd?
+	AIPawn->AttackByAI();			// 공격 후 막줄에 NotifyComboActionEnd로
+	// OnAttackFinished.ExecuteIfBound(); 가 npc에서 호출 -> 람다가 호출
+	// 그런데 교수님과 다른건 공격 end부분이 없다. 
+	// return EBTNodeResult::Succeeded;
+	return EBTNodeResult::InProgress;
 }

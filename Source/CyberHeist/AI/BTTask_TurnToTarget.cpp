@@ -36,7 +36,6 @@ EBTNodeResult::Type UBTTask_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 
 	float TurnSpeed = AIPawn->GetAITurnSpeed();
 	FVector LookVector = TargetPawn->GetActorLocation() - ControllingPawn->GetActorLocation();
-	LookVector.Z = 0.0f;
 	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
 	ControllingPawn->SetActorRotation(FMath::RInterpTo(ControllingPawn->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), TurnSpeed)); // 서서히 해당 로테이션으로 돌리는 로직 구현
 
