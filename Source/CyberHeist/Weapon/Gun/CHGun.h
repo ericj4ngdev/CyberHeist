@@ -89,7 +89,7 @@ public:
 	EFireMode DefaultFireMode;
 	EWeaponShootType DefaultShootingType;
 	
-	FTimerHandle DurationTimerHandle;
+	FTimerHandle DurationTimerHandle;	
 	FTimerHandle FireTimerHandle;
 	FTimerHandle ShootTimerHandle;
 

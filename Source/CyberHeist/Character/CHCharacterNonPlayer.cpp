@@ -56,6 +56,8 @@ void ACHCharacterNonPlayer::AttackByAI()
 	// if(!CurrentWeapon->FireByAI())
 	
 	CurrentWeapon->FireByAI();
+	// 바로 초기화 말고 공격은 하고 
+	// GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->FireTimerHandle);
 	// CurrentWeapon->CancelPullTrigger();
 	UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::AttackByAI"));
 }
@@ -72,5 +74,5 @@ void ACHCharacterNonPlayer::CancelAttackByAI()
 void ACHCharacterNonPlayer::NotifyComboActionEnd()
 {
 	Super::NotifyComboActionEnd();
-	OnAttackFinished.ExecuteIfBound();
+	OnAttackFinished.ExecuteIfBound();		 // Broadcast UBTTask_Attack return Succeeded
 }

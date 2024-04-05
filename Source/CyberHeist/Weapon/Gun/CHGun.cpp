@@ -166,41 +166,21 @@ uint8 ACHGun::FireByAI()
 {
 	if(ShootingType == EWeaponShootType::LineTrace)
 	{
-		// PullTriggerLine();
 		if(OwningCharacter)	OwningCharacter->SetCombatMode(true);
-		GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-			{
-				FireLine();
-			}, ShootingPreparationTime, false);
+		
 		FireLine();
-		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::EndShoot, FireInterval, false);
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::EndShoot, FireInterval, false);	// End Attack.
+		
 		return true;
 	}
 	if(ShootingType == EWeaponShootType::Projectile)
 	{
-		// PullTriggerProjectile();
 		if(OwningCharacter)	OwningCharacter->SetCombatMode(true);
-		GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-		{
-			FireProjectile();
-			// 매번 발사할 때, FireInterval 후에 End함수가 호출되게 하자. 
-			// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::EndShoot, FireInterval, false);
-		}, ShootingPreparationTime, false);
+		
 		FireProjectile();
-		// 매번 발사할 때, FireInterval 후에 End함수가 호출되게 하자.교수님은 애니메이션 몽타주가 끝나면 EndDelegate에 의해 CancelPullTrigger(공격 끝 함수)를 호출했지만
-		// 나는 타이머로 이를 호출하게 하였다. 
-		// 여기서 연사 제어가 된다. BT노드에서 Loop 돌려줄 필요가 없다. 물론 이거 임시방편이다. 
 		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::EndShoot, FireInterval, false);
-		// 루프말고 매번 시간 초기화로 반복하게 한다. 그럼 End에서 FireTimerHandle을 초기화로 인해 반복이 된다.
-		// AI입장에서 ShootTimerHandle은 초기화되면 총을 쏘지 않으므로 FireTimerHandle만 초기화하는 EndShoot함수를 만들었다. 
 		return true;
 	}
-	// TODO 작동 안함
-	if(OwningCharacter)	OwningCharacter->SetCombatMode(false);
-	GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
-	UE_LOG(LogTemp,Log,TEXT("SetCombatMode(false)"));
-	// GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
-	// NotifyComboActionEnd();
 	return false;
 }
 
@@ -209,10 +189,12 @@ void ACHGun::EndShoot()
 	if(!bIsEquipped) return;
 	
 	// if(OwningCharacter)	OwningCharacter->SetCombatMode(false);
-	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);		// 이래야 EndShoot 반복 가능
+	// 다끝나고 초기화
 	bTrigger = false;
 	
-	OwningCharacter->NotifyComboActionEnd();
+	OwningCharacter->NotifyComboActionEnd();	 // AttackTask return Succeeded
 }
 
 void ACHGun::FireProjectile()
