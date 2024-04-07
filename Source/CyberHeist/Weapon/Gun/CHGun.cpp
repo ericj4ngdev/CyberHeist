@@ -3,6 +3,7 @@
 
 #include "Weapon/Gun/CHGun.h"
 
+#include "AIController.h"
 #include "CHProjectile.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -303,6 +304,14 @@ void ACHGun::FireLine()
 	FRotator Rotation;
 	OwnerController->GetPlayerViewPoint(Location, Rotation);
 
+	AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
+	if(AIController)
+	{		
+		// Location, Rotation을 총구로 설정하기
+		Rotation = GetOwner()->GetActorRotation();
+		Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
+	}
+	
 	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
 	
 	FVector End = Location + Rotation.Vector() * MaxRange;
