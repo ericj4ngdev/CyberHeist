@@ -3,6 +3,7 @@
 
 #include "Character/CHCharacterNonPlayer.h"
 #include "AI/CHAIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ACHCharacterNonPlayer::ACHCharacterNonPlayer()
 {
@@ -10,6 +11,8 @@ ACHCharacterNonPlayer::ACHCharacterNonPlayer()
 
 	AIControllerClass = ACHAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	// GetCharacterMovement()->bCanCrouch = true;
 }
 
 void ACHCharacterNonPlayer::SetDead()
@@ -75,4 +78,9 @@ void ACHCharacterNonPlayer::NotifyComboActionEnd()
 {
 	Super::NotifyComboActionEnd();
 	OnAttackFinished.ExecuteIfBound();		 // Broadcast UBTTask_Attack return Succeeded
+}
+
+void ACHCharacterNonPlayer::Cover()
+{	
+	GetCharacterMovement()->Crouch();
 }

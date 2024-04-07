@@ -31,6 +31,10 @@ protected:
 	virtual void AttackByAI() override;
 	virtual void CancelAttackByAI() override;
 	virtual void NotifyComboActionEnd() override;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	virtual void Cover() override;
 	
 	FAICharacterAttackFinished OnAttackFinished;
 };
