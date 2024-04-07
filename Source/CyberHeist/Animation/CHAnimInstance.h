@@ -45,6 +45,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
 	uint8 bIsFalling : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Variable)
+	uint8 bIsCrouching : 1;
+	
 	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsJumping : 1;
 

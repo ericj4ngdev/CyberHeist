@@ -23,6 +23,7 @@ void UCHAnimInstance::NativeInitializeAnimation()
 	if (Owner)
 	{
 		Movement = Owner->GetCharacterMovement();
+		NavMovementComponent
 	}
 }
 
@@ -39,6 +40,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		// TODO: Compare Acceleration with Zero Vector 
 		bShouldMove = (GroundSpeed > 3);		
 		//&& !temp.Equals(FVector::Zero(), 0.1f);
+		bIsCrouching = Movement->IsCrouching();
 	}
 	
 	ACHCharacterBase* OwnerActor = Cast<ACHCharacterBase>(Owner);
