@@ -22,8 +22,9 @@ void UCHAnimInstance::NativeInitializeAnimation()
 	Owner = Cast<ACharacter>(GetOwningActor());
 	if (Owner)
 	{
-		Movement = Owner->GetCharacterMovement();
-		NavMovementComponent
+		CharacterMovement = Owner->GetCharacterMovement();
+		// NavMovementComponent
+		// NavMovementComponent = Cast<UNavMovementComponent>(Owner->GetMovementComponent());
 	}
 }
 
@@ -31,16 +32,16 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	if (Movement)
+	if (CharacterMovement)
 	{
-		Velocity = Movement->Velocity;
+		Velocity = CharacterMovement->Velocity;
 		GroundSpeed = Velocity.Size2D();
-		bIsFalling = Movement->IsFalling();
-		FVector temp = Movement->GetCurrentAcceleration();
+		bIsFalling = CharacterMovement->IsFalling();
+		bIsCrouching = CharacterMovement->IsCrouching();
+		// FVector temp = CharacterMovement->GetCurrentAcceleration();
 		// TODO: Compare Acceleration with Zero Vector 
-		bShouldMove = (GroundSpeed > 3);		
+		bShouldMove = (GroundSpeed > 3); // && temp == 0;	
 		//&& !temp.Equals(FVector::Zero(), 0.1f);
-		bIsCrouching = Movement->IsCrouching();
 	}
 	
 	ACHCharacterBase* OwnerActor = Cast<ACHCharacterBase>(Owner);

@@ -81,6 +81,7 @@ void ACHCharacterNonPlayer::NotifyComboActionEnd()
 }
 
 void ACHCharacterNonPlayer::Cover()
-{	
-	GetCharacterMovement()->Crouch();
+{
+	Crouch();
+	UE_LOG(LogTemp, Log, TEXT("Cover"));
 }

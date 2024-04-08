@@ -31,8 +31,12 @@ protected:
 	TObjectPtr<class ACharacter> Owner;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
-	TObjectPtr<class UCharacterMovementComponent> Movement;
+	TObjectPtr<class UCharacterMovementComponent> CharacterMovement;
 
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
+	TObjectPtr<class UNavMovementComponent> NavMovementComponent;*/
+	
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Variable)
 	FVector Velocity;
 
