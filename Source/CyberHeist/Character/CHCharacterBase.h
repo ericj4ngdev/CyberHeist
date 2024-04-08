@@ -9,6 +9,8 @@
 #include "CHCharacterBase.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*combat */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHighCoverSignature, uint8 /*combat */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnLowCoverSignature, uint8 /*combat */);
 
 UENUM()
 enum class ECharacterControlType : uint8
@@ -52,6 +54,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	FOnCombatModeSignature OnCombat;
+public:
+	FOnHighCoverSignature OnHighCover;
+	FOnLowCoverSignature OnLowCover;
 protected:
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData);
 
@@ -68,6 +73,11 @@ public:
 	uint8 bCombatMode : 1;
 	void SetCombatMode(uint8 bNewCombatMode);
 	uint8 GetCombatMode() { return bCombatMode; }
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	uint8 bCovered : 1;	
+	
 public:
 	virtual void ChangeCharacterControl();
 	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType);
@@ -88,6 +98,11 @@ protected:
 	void PlayDeadAnimation();
 
 	float DeadEventDelayTime = 5.0f;
+
+	// Cover
+public:
+	
+	
 public:
 	void SetHasRifle(bool bNewHasRifle);
 	bool GetHasRifle();

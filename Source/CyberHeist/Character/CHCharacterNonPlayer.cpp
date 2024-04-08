@@ -83,5 +83,5 @@ void ACHCharacterNonPlayer::NotifyComboActionEnd()
 void ACHCharacterNonPlayer::Cover()
 {
 	Crouch();
-	UE_LOG(LogTemp, Log, TEXT("Cover"));
+	// UE_LOG(LogTemp, Log, TEXT("Cover"));
 }

@@ -105,6 +105,7 @@ void ACHCharacterBase::BeginPlay()
 
 	// Weapon = GetWorld()->SpawnActor<ACHGun>();
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
+	bCovered = false;
 	// Weapon->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon_rSocket"));
 	// Weapon->SetOwner(this);	
 }

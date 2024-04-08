@@ -4,6 +4,7 @@
 #include "Character/CHCharacterPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
@@ -13,6 +14,8 @@
 #include "UI/CHHUDWidget.h"
 #include "Animation/CHAnimInstance.h"
 #include "CharacterStat/CHCharacterStatComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "UI/UCHCrossHairWidget.h"
 
 ACHCharacterPlayer::ACHCharacterPlayer()
@@ -82,6 +85,12 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	{
 		ChangePrevWeaponAction = InputActionChangePrevWeaponActionRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionTakeCoverRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Cover.IA_Cover'"));
+	if (nullptr != InputActionTakeCoverRef.Object)
+	{
+		TakeCoverAction = InputActionTakeCoverRef.Object;
+	}
 	
 	CurrentCharacterControlType = ECharacterControlType::Third;
 }
@@ -116,6 +125,8 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputComponent->BindAction(ChangeNextWeaponAction, ETriggerEvent::Triggered, this, &ACHCharacterBase::NextWeapon);
 	EnhancedInputComponent->BindAction(ChangePrevWeaponAction, ETriggerEvent::Triggered, this, &ACHCharacterBase::PreviousWeapon);
+
+	EnhancedInputComponent->BindAction(TakeCoverAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TakeCover);
 }
 
 void ACHCharacterPlayer::ChangeCharacterControl()
@@ -146,12 +157,10 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 
 	SetCharacterControlData(NewCharacterControl);
 
-	// ��Ʈ�ѷ� ��������
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-	// IMC�� ��ϴ� subSystem�� �����´�. 
+	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
-		// ���� IMC�� ����� 
 		// Subsystem->ClearAllMappings();
 		UInputMappingContext* PrevMappingContext = PrevCharacterControl->InputMappingContext;
 		if (PrevMappingContext)
@@ -159,7 +168,6 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 			Subsystem->RemoveMappingContext(PrevMappingContext);			
 		}
 		
-		// ���ο� Data�� �ִ� IMC�� �ٲ�ġ��
 		UInputMappingContext* NewMappingContext = NewCharacterControl->InputMappingContext;
 		if (NewMappingContext)
 		{
@@ -182,12 +190,6 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
 	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
 	CameraBoom->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
-
-	/*if (CurrentCharacterControlType == ECharacterControlType::Third || 
-		CurrentCharacterControlType == ECharacterControlType::ThirdAim)
-	{
-		
-	}*/
 }
 
 void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
@@ -244,6 +246,85 @@ void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);		// modify
+}
+
+void ACHCharacterPlayer::TakeCover()
+{
+	// Not Covered 
+	if(!bCovered)
+	{
+		float CharacterHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+		FVector HighStart = GetActorLocation() + GetActorUpVector() * CharacterHalfHeight;				// 캐릭터 위치를 시작점으로 설정
+		FVector LowerStart = GetActorLocation() - GetActorUpVector() * CharacterHalfHeight * 0.5f;		// 캐릭터 위치를 시작점으로 설정
+		
+		float Radius = CharacterHalfHeight * 0.5f;									// 구체의 반경 설정
+		float CheckRange = 150.0f;													// 엄폐물 조사 반경
+		FVector HighEnd = HighStart + GetActorForwardVector() * CheckRange;			// 높이를 설정하여 바닥으로 Sphere Trace
+		FVector LowerEnd = LowerStart + GetActorForwardVector() * CheckRange;		// 높이를 설정하여 바닥으로 Sphere Trace
+
+		FHitResult HitHighCoverResult;
+		FCollisionQueryParams HighTraceParams(FName(TEXT("HighCoverTrace")), true, this);
+
+		FHitResult HitLowCoverResult;
+		FCollisionQueryParams LowTraceParams(FName(TEXT("LowCoverTrace")), true, this);
+		
+		bool HitHighCoverDetected = GetWorld()->SweepSingleByChannel(HitHighCoverResult, HighStart, HighEnd,
+			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), HighTraceParams);
+		bool HitLowCoverDetected = GetWorld()->SweepSingleByChannel(HitLowCoverResult, LowerStart, LowerEnd,
+			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), LowTraceParams);
+		
+		// 감지
+		if (HitLowCoverDetected)
+		{
+			if(HitHighCoverDetected)
+			{
+				// Play Cover Anim Montage				
+				FVector TargetLocation = HitHighCoverResult.Location + UKismetMathLibrary::GetForwardVector(UKismetMathLibrary::MakeRotFromX(HitHighCoverResult.Normal)) * 15.0f;				
+				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(UKismetMathLibrary::MakeRotFromX(HitHighCoverResult.Normal), FRotator(0.0f,0.0f,90.0f));
+				// GetCapsuleComponent()->SetWorldLocationAndRotation(TargetLocation, TargetRotation);
+				FLatentActionInfo Info;
+				Info.CallbackTarget = this;
+				UKismetSystemLibrary::MoveComponentTo(GetCapsuleComponent(),TargetLocation, TargetRotation, false, false, 0.2f, false, EMoveComponentAction::Move, Info);
+				OnLowCover.Broadcast(false);
+				OnHighCover.Broadcast(true);
+				// 움직임 속도 제한
+				
+				UE_LOG(LogTemp, Log, TEXT("High Covered"));
+			}
+			else
+			{
+				// Play Cover Anim Montage
+				OnHighCover.Broadcast(false);
+				OnLowCover.Broadcast(true);
+				UE_LOG(LogTemp, Log, TEXT("Low Covered"));
+			}			
+			bCovered = true;			
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("Nothing to Cover"));			
+		}
+#if ENABLE_DRAW_DEBUG
+
+		FVector HigherCapsuleOrigin = HighStart + (HighEnd - HighStart) * 0.5f;
+		FVector LowerCapsuleOrigin = LowerStart + (LowerEnd - LowerStart) * 0.5f;
+		
+		FColor DrawHighColor = HitHighCoverDetected ? FColor::Green : FColor::Red;		
+		FColor DrawLowerColor = HitLowCoverDetected ? FColor::Green : FColor::Red;
+
+		DrawDebugCapsule(GetWorld(), HigherCapsuleOrigin, CheckRange, Radius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawHighColor, false, 5.0f);
+		DrawDebugCapsule(GetWorld(), LowerCapsuleOrigin, CheckRange, Radius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawLowerColor, false, 5.0f);
+		
+#endif
+	}
+	else
+	{
+		// Cancel Cover Anim Montage
+		OnHighCover.Broadcast(false);
+		OnLowCover.Broadcast(false);
+		bCovered = false;
+		UE_LOG(LogTemp, Log, TEXT("UnCovered"));
+	}	
 }
 
 void ACHCharacterPlayer::StartSprint() 
