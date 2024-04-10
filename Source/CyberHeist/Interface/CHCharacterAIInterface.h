@@ -33,4 +33,5 @@ public:
 	virtual void AttackByAI() = 0;
 	virtual void CancelAttackByAI() = 0;
 	virtual void Cover() = 0;
+	virtual void UnCover() = 0;
 };

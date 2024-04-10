@@ -18,4 +18,14 @@ public:
 	UBTTask_Attack();
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	
+private:
+	FTimerHandle StopTimerHandle;
+	FTimerHandle TimerHandle;
+public:
+	UPROPERTY(EditAnywhere, Category = "Timer")
+	float AttackInterval;
+
+	UPROPERTY(EditAnywhere, Category = "Timer")
+	float Duration;
 };

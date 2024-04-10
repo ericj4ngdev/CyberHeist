@@ -21,11 +21,12 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	}
 
-	APawn* TargetPawn = Cast<APawn>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGETACTOR));
+	/*APawn* TargetPawn = Cast<APawn>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGETACTOR));
 	if(nullptr == TargetPawn)
 	{
 		return EBTNodeResult::Failed;
-	}
+	}*/
+	
 	
 	ICHCharacterAIInterface* AIPawn = Cast<ICHCharacterAIInterface>(ControllingPawn);
 	if (nullptr == AIPawn)
@@ -39,16 +40,31 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	OnAttackFinished.BindLambda(
 		[&]()
 		{
-			UE_LOG(LogTemp, Log, TEXT("BindLambda"));
+			// UE_LOG(LogTemp, Log, TEXT("BindLambda"));
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+			
+			/*GetWorld()->GetTimerManager().SetTimer(StopTimerHandle, [this, &OwnerComp]()
+			{
+				OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISATTACKING, false);
+				GetWorld()->GetTimerManager().ClearTimer(StopTimerHandle);
+				UE_LOG(LogTemp,Log,TEXT("Stop"));
+				return EBTNodeResult::Succeeded;
+			}, AttackInterval, false);	*/
 		}
 	);
 
 	AIPawn->SetAIAttackDelegate(OnAttackFinished);	// npc에게 델리 전달.
 	// NotifyComboActionEnd?
 	AIPawn->AttackByAI();			// 공격 후 막줄에 NotifyComboActionEnd로
-	// OnAttackFinished.ExecuteIfBound(); 가 npc에서 호출 -> 람다가 호출
-	// 그런데 교수님과 다른건 공격 end부분이 없다. 
-	// return EBTNodeResult::Succeeded;
+
+	// 3초 후에 ISATTACKING = false로 만들고 공격 멈추기
+	OwnerComp.GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, &OwnerComp]()
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISATTACKING, false);
+		UE_LOG(LogTemp,Log,TEXT("Stop"));
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	}, Duration, false);
+	
 	return EBTNodeResult::InProgress;
 }

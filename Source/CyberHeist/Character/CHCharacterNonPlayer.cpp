@@ -62,7 +62,7 @@ void ACHCharacterNonPlayer::AttackByAI()
 	// 바로 초기화 말고 공격은 하고 
 	// GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->FireTimerHandle);
 	// CurrentWeapon->CancelPullTrigger();
-	UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::AttackByAI"));
+	// UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::AttackByAI"));
 }
 
 void ACHCharacterNonPlayer::CancelAttackByAI()
@@ -84,4 +84,9 @@ void ACHCharacterNonPlayer::Cover()
 {
 	Crouch();
 	// UE_LOG(LogTemp, Log, TEXT("Cover"));
+}
+
+void ACHCharacterNonPlayer::UnCover()
+{
+	UnCrouch();
 }

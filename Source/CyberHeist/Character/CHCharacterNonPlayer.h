@@ -35,6 +35,9 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void Cover() override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void UnCover() override;
 	
 	FAICharacterAttackFinished OnAttackFinished;
 };

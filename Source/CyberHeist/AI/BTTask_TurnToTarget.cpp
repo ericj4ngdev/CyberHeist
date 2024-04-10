@@ -21,7 +21,7 @@ EBTNodeResult::Type UBTTask_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 	{
 		return EBTNodeResult::Failed;
 	}
-
+	FVector TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(BBKEY_LASTKNOWNLOCATION);
 	APawn* TargetPawn = Cast<APawn>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGETACTOR));
 	if (nullptr == TargetPawn)
 	{

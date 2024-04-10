@@ -181,8 +181,9 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 {
 	Super::SetCharacterControlData(CharacterControlData);
 
-	ThirdPersonCamera->SetRelativeLocation(CharacterControlData->CameraPosition);
-
+	// ThirdPersonCamera->SetRelativeLocation(CharacterControlData->CameraPosition);
+	
+	CameraBoom->SocketOffset = CharacterControlData->CameraPosition;
 	CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
 	CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
 	CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
@@ -223,19 +224,79 @@ void ACHCharacterPlayer::FirstLook(const FInputActionValue& Value)
 void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>().GetSafeNormal();
+	// UE_LOG(LogTemp, Log, TEXT("MovementVector X: %f, Y: %f"), MovementVector.X, MovementVector.Y);
 
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	float speed = bSprint ? RunSpeed : WalkSpeed;
-
-	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
-	AddMovementInput(RightDirection, MovementVector.X * speed);
+	if(bCovered)
+	{
+		/*const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
 	
-	GetCharacterMovement()->MaxWalkSpeed = speed;
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		UE_LOG(LogTemp, Log, TEXT("RightDirection X: %f, Y: %f | ForwardDirection X: %f, Y: %f"), RightDirection.X, RightDirection.Y, ForwardDirection.X, ForwardDirection.Y);*/
+		
+		const FRotator Rotation = GetActorRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		UE_LOG(LogTemp, Log, TEXT("RightDirection X: %f, Y: %f | ForwardDirection X: %f, Y: %f"), RightDirection.X, RightDirection.Y, ForwardDirection.X, ForwardDirection.Y);
+		
+
+		
+		// FName HorizontalAxisName("Horizontal");
+		// const FVector HorizontalVector = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y); //InputComponent->GetAxisValue();
+
+		/*const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		
+		float speed = bSprint ? RunSpeed : WalkSpeed;
+
+		AddMovementInput(ForwardDirection, MovementVector.Y * speed);
+		AddMovementInput(RightDirection, MovementVector.X * speed);*/
+
+		
+		float Range = 100.0f;
+		// GetMove Right/Left를 MovementVector로 하면 안될거 같다.
+		// 진짜 회전값? yaw ?
+		// 그런데 얘는 카메라 영향안받는데..?
+		// 바로보는 방향의 좌우 (xy말고)
+		FVector Start = RightDirection * 45.0f + GetActorLocation();
+		FVector End = ForwardDirection * Range + Start;
+
+		FHitResult HitResult;
+		FCollisionQueryParams TraceParams(FName(TEXT("CoverTrace")), true, this);
+		float Radius = 5.0f;
+		bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,
+			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), TraceParams);
+
+#if ENABLE_DRAW_DEBUG
+		FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+		DrawDebugCapsule(GetWorld(), CapsuleOrigin, Range * 0.5f, Radius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);		
+#endif
+		const FVector Temp = FRotationMatrix(FRotationMatrix::MakeFromX(HitResult.Normal).Rotator()).GetScaledAxis(EAxis::X);		// 벽과 평행한 좌우 방향
+		AddMovementInput(Temp, - MovementVector.X * WalkSpeed);				
+		// AddMovementInput(Temp, MovementVector.X * WalkSpeed);
+	}
+	else
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);		
+		
+		float speed = bSprint ? RunSpeed : WalkSpeed;
+
+		AddMovementInput(ForwardDirection, MovementVector.Y * speed);
+		AddMovementInput(RightDirection, MovementVector.X * speed);
+	
+		GetCharacterMovement()->MaxWalkSpeed = speed;
+	}
+	
+	
 
 	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d	WalkSpeed : %f	RunSpeed : %f	speed : %f"), bSprint, WalkSpeed, RunSpeed, speed);
 }
@@ -280,11 +341,11 @@ void ACHCharacterPlayer::TakeCover()
 			{
 				// Play Cover Anim Montage				
 				FVector TargetLocation = HitHighCoverResult.Location + UKismetMathLibrary::GetForwardVector(UKismetMathLibrary::MakeRotFromX(HitHighCoverResult.Normal)) * 15.0f;				
-				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(UKismetMathLibrary::MakeRotFromX(HitHighCoverResult.Normal), FRotator(0.0f,0.0f,90.0f));
+				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(UKismetMathLibrary::MakeRotFromX(HitHighCoverResult.Normal), FRotator(0.0f,0.0f, 180.0f));
 				// GetCapsuleComponent()->SetWorldLocationAndRotation(TargetLocation, TargetRotation);
 				FLatentActionInfo Info;
 				Info.CallbackTarget = this;
-				UKismetSystemLibrary::MoveComponentTo(GetCapsuleComponent(),TargetLocation, TargetRotation, false, false, 0.2f, false, EMoveComponentAction::Move, Info);
+				UKismetSystemLibrary::MoveComponentTo(GetCapsuleComponent(),TargetLocation, TargetRotation, false, false, 1.0f, false, EMoveComponentAction::Move, Info);
 				OnLowCover.Broadcast(false);
 				OnHighCover.Broadcast(true);
 				// 움직임 속도 제한

@@ -5,3 +5,4 @@
 // #define BBKEY_TARGET TEXT("Target")
 #define BBKEY_TARGETACTOR TEXT("TargetActor")
 #define BBKEY_LASTKNOWNLOCATION TEXT("LastKnownLocation")
+#define BBKEY_ISATTACKING TEXT("IsAttacking")

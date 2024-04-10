@@ -104,7 +104,10 @@ void ACHAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
 	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
 	UObject* TargetActor = UKismetMathLibrary::SelectObject(CharacterActor, nullptr, Stimulus.WasSuccessfullySensed());
 	BlackboardPtr->SetValueAsObject(BBKEY_TARGETACTOR, TargetActor);
-	if(Stimulus.WasSuccessfullySensed()) BlackboardPtr->SetValueAsVector(BBKEY_LASTKNOWNLOCATION, Stimulus.StimulusLocation);
+	if(Stimulus.WasSuccessfullySensed())
+	{
+		BlackboardPtr->SetValueAsVector(BBKEY_LASTKNOWNLOCATION, Stimulus.StimulusLocation);
+	}
 	
 }
 
