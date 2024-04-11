@@ -75,6 +75,13 @@ ACHCharacterBase::ACHCharacterBase()
 		CharacterControlManager.Add(ECharacterControlType::ThirdAim, ThirdPersonAimDataRef.Object);
 	}
 
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonCoverDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson_Cover.CHC_ThirdPerson_Cover'"));
+	if (ThirdPersonCoverDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::ThirdCover, ThirdPersonCoverDataRef.Object);
+	}
+
+	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/CyberHeist/Animation/AM_Dead.AM_Dead'"));
 	if (DeadMontageRef.Object) 
 	{
@@ -182,7 +189,7 @@ void ACHCharacterBase::SetCombatMode(uint8 bNewCombatMode)
 	OnCombat.Broadcast(bCombatMode);
 }
 
-void ACHCharacterBase::ChangeCharacterControl()
+void ACHCharacterBase::ChangePerspectiveControlData()
 {
 }
 

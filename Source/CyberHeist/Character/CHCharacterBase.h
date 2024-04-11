@@ -18,7 +18,9 @@ enum class ECharacterControlType : uint8
 	First,
 	Third,
 	FirstAim,
-	ThirdAim
+	ThirdAim,
+	ThirdCover,
+	
 };
 
 USTRUCT()
@@ -74,12 +76,15 @@ public:
 	void SetCombatMode(uint8 bNewCombatMode);
 	uint8 GetCombatMode() { return bCombatMode; }
 
+	// Cover
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	uint8 bCovered : 1;	
+
+	float CurrentDistanceFromWall;
 	
 public:
-	virtual void ChangeCharacterControl();
+	virtual void ChangePerspectiveControlData();
 	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType);
 	// Aim
 protected:
@@ -128,6 +133,11 @@ public:
 	// Run speed
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float RunSpeed;
+
+	// Sneak Speed
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float SneakSpeed;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	uint8 bSprint : 1;

@@ -26,6 +26,7 @@ public:
 	void SetCombatMode(uint8 combat);
 	void SetHighCover(uint8 TakeHighCover);
 	void SetLowCover(uint8 TakeLowCover);
+	void SetCoveredDirection(uint8 bRight);
 	void Recoil(float Multiplier);
 
 protected:
@@ -54,6 +55,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Variable)
 	uint8 bIsCrouching : 1;
 
+	// Cover
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
 	uint8 bTakeHighCover : 1;
 
@@ -62,10 +64,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
 	uint8 bCoverMoveRight : 1;
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	uint8 bIsJumping : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Threshould)
+	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Threshould)
 	float MovingThreshould;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Threshould)

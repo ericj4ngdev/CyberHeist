@@ -79,6 +79,11 @@ void UCHAnimInstance::SetLowCover(uint8 TakeLowCover)
 	bTakeLowCover = TakeLowCover;
 }
 
+void UCHAnimInstance::SetCoveredDirection(uint8 bRight)
+{
+	bCoverMoveRight = bRight;
+}
+
 void UCHAnimInstance::Recoil(float Multiplier)
 {
 	float LocalMultiplier;

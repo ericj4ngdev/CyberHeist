@@ -27,12 +27,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void Tick(float DeltaTime) override;
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	virtual void ChangeCharacterControl() override;
+	virtual void ChangePerspectiveControlData() override;
 	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType) override;
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData) override;
 
@@ -56,8 +56,8 @@ protected:
 	// Input Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> ChangeControlAction;
-
+	TObjectPtr<class UInputAction> ChangePerspectiveControlAction;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> JumpAction;
 
@@ -70,6 +70,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ThirdMoveAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ThirdCoveredMoveAction;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ThirdLookAction;
 
@@ -100,6 +103,7 @@ protected:
 	void FirstLook(const FInputActionValue& Value);
 	void ThirdMove(const FInputActionValue& Value);
 	void ThirdLook(const FInputActionValue& Value);
+	void ThirdCoveredMove(const FInputActionValue& Value);
 	void TakeCover();
 	
 public:
@@ -109,7 +113,7 @@ public:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCHAnimInstance> CHAnimInstance;
-	
+
 	
 
 	// UI Section

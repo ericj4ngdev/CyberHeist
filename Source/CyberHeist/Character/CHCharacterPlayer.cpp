@@ -41,7 +41,7 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputChangeActionControlRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ChangeControl.IA_ChangeControl'"));
 	if (nullptr != InputChangeActionControlRef.Object)
 	{
-		ChangeControlAction = InputChangeActionControlRef.Object;
+		ChangePerspectiveControlAction = InputChangeActionControlRef.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Jump.IA_Jump'"));
@@ -66,6 +66,12 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	if (nullptr != InputActionThirdPersonMoveRef.Object)
 	{
 		ThirdMoveAction = InputActionThirdPersonMoveRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionThirdCoveredMoveActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ThirdCoverdMoveAction.IA_ThirdCoverdMoveAction'"));
+	if (nullptr != InputActionThirdCoveredMoveActionRef.Object)
+	{
+		ThirdCoveredMoveAction = InputActionThirdCoveredMoveActionRef.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionThirdPersonLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ThirdLook.IA_ThirdLook'"));
@@ -104,6 +110,25 @@ void ACHCharacterPlayer::BeginPlay()
 	SetCharacterControl(CurrentCharacterControlType);
 }
 
+void ACHCharacterPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);				// (1,0,0) 카메라 전방
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);					// (0,1,0) 
+	
+	DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
+	DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + RightDirection * 100.0f, 10.0f, FColor::Blue, false, -1, 0 ,5.0f);
+	
+	FVector Start = GetActorUpVector() * 10.0f + GetActorLocation();
+	FVector End = GetActorForwardVector() * 50.0f + Start;
+	DrawDebugDirectionalArrow(GetWorld(),Start, End, 10.0f, FColor::Red, false, -1, 0 ,10.0f);
+
+	// GetActorRotation().Vector() = Forward()
+}
+
 void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -112,12 +137,13 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-	EnhancedInputComponent->BindAction(ChangeControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ChangeCharacterControl);
+	EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ChangePerspectiveControlData);
 	
 	EnhancedInputComponent->BindAction(FirstMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::FirstMove);
 	EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::FirstLook);
 	
 	EnhancedInputComponent->BindAction(ThirdMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdMove);
+	EnhancedInputComponent->BindAction(ThirdCoveredMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdCoveredMove);
 	EnhancedInputComponent->BindAction(ThirdLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdLook);
 
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartSprint);
@@ -129,7 +155,7 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(TakeCoverAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TakeCover);
 }
 
-void ACHCharacterPlayer::ChangeCharacterControl()
+void ACHCharacterPlayer::ChangePerspectiveControlData()
 {
 	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim) return;
 	if (CurrentCharacterControlType == ECharacterControlType::First)
@@ -152,13 +178,19 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 {
 	UCHCharacterControlData* NewCharacterControl = CharacterControlManager[NewCharacterControlType];
 	UCHCharacterControlData* PrevCharacterControl = CharacterControlManager[CurrentCharacterControlType];
-	
+
+	// when player take covered in Fist personview and uncovered, new = Third exception
+	if(PrevCharacterControl == CharacterControlManager[ECharacterControlType::First] && bCovered)
+	{
+		NewCharacterControl = CharacterControlManager[ECharacterControlType::First];
+	}
 	check(NewCharacterControl);
 
-	SetCharacterControlData(NewCharacterControl);
+	SetCharacterControlData(NewCharacterControl);		// ControlData(Camera and Pawn Rotation)
 
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-	
+
+	// Change IMC 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		// Subsystem->ClearAllMappings();
@@ -174,7 +206,7 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 			Subsystem->AddMappingContext(NewMappingContext, 0);
 		}
 	}
-	CurrentCharacterControlType = NewCharacterControlType;   // ���� enum�� ��ü
+	CurrentCharacterControlType = NewCharacterControlType; 
 }
 
 void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
@@ -225,79 +257,20 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>().GetSafeNormal();
 	// UE_LOG(LogTemp, Log, TEXT("MovementVector X: %f, Y: %f"), MovementVector.X, MovementVector.Y);
-
-	if(bCovered)
-	{
-		/*const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
 	
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		UE_LOG(LogTemp, Log, TEXT("RightDirection X: %f, Y: %f | ForwardDirection X: %f, Y: %f"), RightDirection.X, RightDirection.Y, ForwardDirection.X, ForwardDirection.Y);*/
-		
-		const FRotator Rotation = GetActorRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-		
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		UE_LOG(LogTemp, Log, TEXT("RightDirection X: %f, Y: %f | ForwardDirection X: %f, Y: %f"), RightDirection.X, RightDirection.Y, ForwardDirection.X, ForwardDirection.Y);
-		
-
-		
-		// FName HorizontalAxisName("Horizontal");
-		// const FVector HorizontalVector = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y); //InputComponent->GetAxisValue();
-
-		/*const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		
-		float speed = bSprint ? RunSpeed : WalkSpeed;
-
-		AddMovementInput(ForwardDirection, MovementVector.Y * speed);
-		AddMovementInput(RightDirection, MovementVector.X * speed);*/
-
-		
-		float Range = 100.0f;
-		// GetMove Right/Left를 MovementVector로 하면 안될거 같다.
-		// 진짜 회전값? yaw ?
-		// 그런데 얘는 카메라 영향안받는데..?
-		// 바로보는 방향의 좌우 (xy말고)
-		FVector Start = RightDirection * 45.0f + GetActorLocation();
-		FVector End = ForwardDirection * Range + Start;
-
-		FHitResult HitResult;
-		FCollisionQueryParams TraceParams(FName(TEXT("CoverTrace")), true, this);
-		float Radius = 5.0f;
-		bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,
-			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), TraceParams);
-
-#if ENABLE_DRAW_DEBUG
-		FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
-		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-		DrawDebugCapsule(GetWorld(), CapsuleOrigin, Range * 0.5f, Radius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);		
-#endif
-		const FVector Temp = FRotationMatrix(FRotationMatrix::MakeFromX(HitResult.Normal).Rotator()).GetScaledAxis(EAxis::X);		// 벽과 평행한 좌우 방향
-		AddMovementInput(Temp, - MovementVector.X * WalkSpeed);				
-		// AddMovementInput(Temp, MovementVector.X * WalkSpeed);
-	}
-	else
-	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);				// (1,0,0)
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);					// (0,1,0)
 	
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);		
-		
-		float speed = bSprint ? RunSpeed : WalkSpeed;
-
-		AddMovementInput(ForwardDirection, MovementVector.Y * speed);
-		AddMovementInput(RightDirection, MovementVector.X * speed);
+	float speed = bSprint ? RunSpeed : WalkSpeed;
 	
-		GetCharacterMovement()->MaxWalkSpeed = speed;
-	}
+	// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
+	// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + RightDirection * 100.0f, 10.0f, FColor::Blue, false, -1, 0 ,5.0f);
 	
-	
-
+	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
+	AddMovementInput(RightDirection, MovementVector.X * speed);
+	GetCharacterMovement()->MaxWalkSpeed = speed;
 	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d	WalkSpeed : %f	RunSpeed : %f	speed : %f"), bSprint, WalkSpeed, RunSpeed, speed);
 }
 
@@ -307,6 +280,81 @@ void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);		// modify
+}
+
+void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
+{
+	FVector2D MovementVector = Value.Get<FVector2D>().GetSafeNormal();
+	
+	if(bCovered)
+	{
+		float PrevDistanceFromWall = CurrentDistanceFromWall;
+		const FVector BackwardVector = GetActorForwardVector();
+		const FVector RightHand = GetActorRightVector();
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);				// (1,0,0) 카메라 벡터
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);					// (0,1,0)
+		// UE_LOG(LogTemp, Log, TEXT("RightDirection X: %f, Y: %f | ForwardDirection X: %f, Y: %f"), RightDirection.X, RightDirection.Y, ForwardDirection.X, ForwardDirection.Y);
+				
+		float Range = 150.0f;
+		float Radius = 5.0f;
+		FVector Start = RightHand * MovementVector.X * 45.0f  + GetActorLocation();			// 왼손, 오른손
+		FVector End = Start + (BackwardVector * Range);											// 벽쪽으로 레이저. 근데 - 안붙혀도 뒤로 나간다. 
+		
+		FHitResult HitResult;
+		FCollisionQueryParams TraceParams(FName(TEXT("CoverTrace")), true, this);
+		bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,
+			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), TraceParams);
+		CurrentDistanceFromWall = HitResult.Distance;
+
+#if ENABLE_DRAW_DEBUG
+		FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+		DrawDebugCapsule(GetWorld(), CapsuleOrigin, Range * 0.5f, Radius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);		
+#endif
+
+		// 입력 벡터 
+		const FVector InputVector = RightDirection * MovementVector.X + ForwardDirection * MovementVector.Y;
+		float AngleForCoveredMove = FVector::DotProduct(HitResult.ImpactNormal,InputVector);
+		DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + InputVector * 100.f, 50.0f, FColor::Emerald, false, -1, 0 ,5.0f);
+		DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() - HitResult.ImpactNormal * 100.f, 50.0f, FColor::Black, false, -1, 0 ,5.0f);
+		
+		FVector WallParallel = FVector(HitResult.ImpactNormal.Y, -HitResult.ImpactNormal.X, HitResult.ImpactNormal.Z);
+		float AngleForDirection = FVector::DotProduct(WallParallel,InputVector);		// y축 입력키도 반영하기 위한 내적
+		
+		// UE_LOG(LogTemp, Log, TEXT("Dir : %f "),Dir);
+		UE_LOG(LogTemp, Log, TEXT("AngleForDirection : %f "),AngleForDirection);
+
+		// 40 degree ~ 180 degree = can cover
+		// Degree Uproperty 
+		if(AngleForCoveredMove >= -1.0f && AngleForCoveredMove <= 0.8f)
+		{
+			CHAnimInstance->SetCoveredDirection(AngleForDirection > 0);
+			// bool IsRight = (AngleForDirection > 0) ? true : false; 
+			const FVector MoveDirection = WallParallel * AngleForDirection;
+			SetActorRotation((-HitResult.ImpactNormal).Rotation());
+
+			// Want to = 법선 벡터 
+			// current = 현재 내 액터의 rotation
+			// lerp 
+			AddMovementInput(MoveDirection, SneakSpeed);			
+		}
+		else
+		{
+			// Cancel Cover Anim Montage
+			OnHighCover.Broadcast(false);
+			OnLowCover.Broadcast(false);
+			// 입력 속성 변경
+			SetCharacterControl(ECharacterControlType::Third);
+			bCovered = false;
+			UE_LOG(LogTemp, Log, TEXT("UnCovered"));
+		}
+
+		// 엄페 모서리에 도달 시 자동 해제... 는 아니고   
+		// if(HitDetected == false)  
+
+	}
 }
 
 void ACHCharacterPlayer::TakeCover()
@@ -339,24 +387,40 @@ void ACHCharacterPlayer::TakeCover()
 		{
 			if(HitHighCoverDetected)
 			{
-				// Play Cover Anim Montage				
-				FVector TargetLocation = HitHighCoverResult.Location + UKismetMathLibrary::GetForwardVector(UKismetMathLibrary::MakeRotFromX(HitHighCoverResult.Normal)) * 15.0f;				
-				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(UKismetMathLibrary::MakeRotFromX(HitHighCoverResult.Normal), FRotator(0.0f,0.0f, 180.0f));
-				// GetCapsuleComponent()->SetWorldLocationAndRotation(TargetLocation, TargetRotation);
+				// Play Cover Anim Montage
+
+				// Move to Cover
+				FVector TargetLocation = HitHighCoverResult.Location + HitHighCoverResult.ImpactNormal * 15.0f;				
+				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitHighCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
+				SetActorLocationAndRotation(TargetLocation, TargetRotation);
+				// SetWorldLocationAndRotation(TargetLocation, TargetRotation);
 				FLatentActionInfo Info;
 				Info.CallbackTarget = this;
-				UKismetSystemLibrary::MoveComponentTo(GetCapsuleComponent(),TargetLocation, TargetRotation, false, false, 1.0f, false, EMoveComponentAction::Move, Info);
+				// UKismetSystemLibrary::MoveComponentTo(GetCapsuleComponent(),TargetLocation, TargetRotation, false, false, 0.2f, false, EMoveComponentAction::Move, Info);
+				// 액터 이동 
 				OnLowCover.Broadcast(false);
 				OnHighCover.Broadcast(true);
-				// 움직임 속도 제한
 				
+				// 움직임 속도 제한
+				GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
+				
+				// 입력 속성 변경
+				SetCharacterControl(ECharacterControlType::ThirdCover);
 				UE_LOG(LogTemp, Log, TEXT("High Covered"));
 			}
 			else
 			{
 				// Play Cover Anim Montage
+
+				// Move to Cover
+				FVector TargetLocation = HitLowCoverResult.Location + HitLowCoverResult.ImpactNormal * 15.0f;				
+				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
+				SetActorLocationAndRotation(TargetLocation, TargetRotation);
+				
 				OnHighCover.Broadcast(false);
 				OnLowCover.Broadcast(true);
+				// 입력 속성 변경
+				SetCharacterControl(ECharacterControlType::ThirdCover);
 				UE_LOG(LogTemp, Log, TEXT("Low Covered"));
 			}			
 			bCovered = true;			
@@ -383,6 +447,8 @@ void ACHCharacterPlayer::TakeCover()
 		// Cancel Cover Anim Montage
 		OnHighCover.Broadcast(false);
 		OnLowCover.Broadcast(false);
+		// 입력 속성 변경
+		SetCharacterControl(ECharacterControlType::Third);
 		bCovered = false;
 		UE_LOG(LogTemp, Log, TEXT("UnCovered"));
 	}	

@@ -476,7 +476,8 @@ void ACHGun::StartAim()
 	if(!bIsEquipped) return;
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third
+|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
 	}
@@ -495,12 +496,11 @@ void ACHGun::StopAim()
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);
-	
+		// 엄폐 조준 상태에서 조준 해제하면 ThirdCover가 아닌 Third로 돌아감. 
 	}
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-	
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);	
 	}
 	if(!bTrigger)
 	{
