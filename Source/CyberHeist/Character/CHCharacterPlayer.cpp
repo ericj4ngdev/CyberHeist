@@ -206,7 +206,12 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 			Subsystem->AddMappingContext(NewMappingContext, 0);
 		}
 	}
-	CurrentCharacterControlType = NewCharacterControlType; 
+	CurrentCharacterControlType = NewCharacterControlType;
+
+	FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
+	UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), *EnumAsString);
+
+	// UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), CurrentCharacterControlType)
 }
 
 void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
@@ -321,7 +326,7 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 		DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() - HitResult.ImpactNormal * 100.f, 50.0f, FColor::Black, false, -1, 0 ,5.0f);
 		
 		FVector WallParallel = FVector(HitResult.ImpactNormal.Y, -HitResult.ImpactNormal.X, HitResult.ImpactNormal.Z);
-		float AngleForDirection = FVector::DotProduct(WallParallel,InputVector);		// y축 입력키도 반영하기 위한 내적
+		AngleForDirection = FVector::DotProduct(WallParallel,InputVector);		// y축 입력키도 반영하기 위한 내적
 		
 		// UE_LOG(LogTemp, Log, TEXT("Dir : %f "),Dir);
 		UE_LOG(LogTemp, Log, TEXT("AngleForDirection : %f "),AngleForDirection);

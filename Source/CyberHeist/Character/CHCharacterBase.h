@@ -20,7 +20,7 @@ enum class ECharacterControlType : uint8
 	FirstAim,
 	ThirdAim,
 	ThirdCover,
-	
+	ThirdCoverAim,
 };
 
 USTRUCT()

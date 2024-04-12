@@ -93,6 +93,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> TakeCoverAction;
+
 	
 	/*void Shoot();
 	void CancelShoot();
@@ -105,6 +106,8 @@ protected:
 	void ThirdLook(const FInputActionValue& Value);
 	void ThirdCoveredMove(const FInputActionValue& Value);
 	void TakeCover();
+public:
+	float AngleForDirection;
 	
 public:
 	void StartSprint();

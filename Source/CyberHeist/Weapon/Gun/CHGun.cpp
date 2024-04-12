@@ -353,7 +353,8 @@ void ACHGun::FireLine()
 			// UE_LOG(LogTemp, Log, TEXT("ReCoil"));
 			CHAnimInstance->Recoil(10);
 		}
-	}	
+	}
+	
 }
 
 void ACHGun::PullTriggerLine()
@@ -361,8 +362,39 @@ void ACHGun::PullTriggerLine()
 	if(!bIsEquipped) return;
 
 	OwningCharacter->bUseControllerRotationYaw = true;
+
+	/*if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim)
+	{
+		ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+		// 오른쪽 엄폐의 경우
+		if(PlayerCharacter->AngleForDirection > 0)
+		{
+			// PlayerCharacter->SetActorLocationAndRotation(, );
+		}
+		else
+		{
+			// 왼쪽 엄폐
+			// PlayerCharacter->SetActorLocationAndRotation(, );
+		}
+
+			
+		OwningCharacter->SetCombatMode(true);
+		// OwningCharacter->SetCharacterControl(ECharacterControlType::ThirdCoverAim);
+		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
+
+		if(FireMode == EFireMode::Automatic)
+		{
+			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
+		}
+		if(FireMode == EFireMode::SemiAutomatic)
+		{
+			FireLine();					
+		}
+	}*/
+	
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
-		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim)
 	{
 		OwningCharacter->SetCombatMode(true);
 		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
@@ -376,8 +408,9 @@ void ACHGun::PullTriggerLine()
 			FireLine();					
 		}
 	}
-	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
-		OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
 		// hold a gun
 		OwningCharacter->SetCombatMode(true);
@@ -411,7 +444,8 @@ void ACHGun::PullTriggerProjectile()
 	
 	OwningCharacter->bUseControllerRotationYaw = true;
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
-		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim)
 	{
 		OwningCharacter->SetCombatMode(true);
 		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireProjectile, FireInterval, true);
@@ -425,8 +459,9 @@ void ACHGun::PullTriggerProjectile()
 			FireProjectile();
 		}
 	}
-	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
-		OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
 		// hold a gun
 		OwningCharacter->SetCombatMode(true);
@@ -458,8 +493,9 @@ void ACHGun::CancelPullTrigger()
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 		OwningCharacter->bUseControllerRotationYaw = false; 
 
-	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third ||
-		OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
 		// Cancel holding a gun
 		OwningCharacter->SetCombatMode(false);
@@ -476,11 +512,15 @@ void ACHGun::StartAim()
 	if(!bIsEquipped) return;
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third
-|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
 	}
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCoverAim);
+	}
+	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
@@ -496,12 +536,18 @@ void ACHGun::StopAim()
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);
-		// 엄폐 조준 상태에서 조준 해제하면 ThirdCover가 아닌 Third로 돌아감. 
 	}
+	
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
+	}
+	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);	
 	}
+	
 	if(!bTrigger)
 	{
 		OwningCharacter->SetCombatMode(false); // if PullTriggering, pass

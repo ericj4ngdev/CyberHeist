@@ -81,6 +81,11 @@ ACHCharacterBase::ACHCharacterBase()
 		CharacterControlManager.Add(ECharacterControlType::ThirdCover, ThirdPersonCoverDataRef.Object);
 	}
 
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonCoverAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson_CoveredAim.CHC_ThirdPerson_CoveredAim'"));
+	if (ThirdPersonCoverAimDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::ThirdCoverAim, ThirdPersonCoverAimDataRef.Object);
+	}
 	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/CyberHeist/Animation/AM_Dead.AM_Dead'"));
 	if (DeadMontageRef.Object) 

@@ -41,15 +41,7 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		[&]()
 		{
 			// UE_LOG(LogTemp, Log, TEXT("BindLambda"));
-			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-			
-			/*GetWorld()->GetTimerManager().SetTimer(StopTimerHandle, [this, &OwnerComp]()
-			{
-				OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISATTACKING, false);
-				GetWorld()->GetTimerManager().ClearTimer(StopTimerHandle);
-				UE_LOG(LogTemp,Log,TEXT("Stop"));
-				return EBTNodeResult::Succeeded;
-			}, AttackInterval, false);	*/
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);			
 		}
 	);
 
