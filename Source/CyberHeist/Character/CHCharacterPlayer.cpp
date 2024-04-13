@@ -97,7 +97,7 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	{
 		TakeCoverAction = InputActionTakeCoverRef.Object;
 	}
-	
+	// AngleForEscapeCover = 135.f;
 	CurrentCharacterControlType = ECharacterControlType::Third;
 }
 
@@ -105,6 +105,9 @@ void ACHCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	RadianForEscapeCover = FMath::DegreesToRadians(AngleForEscapeCover);
+	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), AngleForEscapeCover,FMath::Cos(AngleForEscapeCover));
+	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), RadianForEscapeCover,FMath::Cos(RadianForEscapeCover));
 	CHAnimInstance = Cast<UCHAnimInstance>(GetMesh()->GetAnimInstance());
 	
 	SetCharacterControl(CurrentCharacterControlType);
@@ -293,7 +296,6 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 	
 	if(bCovered)
 	{
-		float PrevDistanceFromWall = CurrentDistanceFromWall;
 		const FVector BackwardVector = GetActorForwardVector();
 		const FVector RightHand = GetActorRightVector();
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -301,28 +303,47 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);				// (1,0,0) 카메라 벡터
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);					// (0,1,0)
 		// UE_LOG(LogTemp, Log, TEXT("RightDirection X: %f, Y: %f | ForwardDirection X: %f, Y: %f"), RightDirection.X, RightDirection.Y, ForwardDirection.X, ForwardDirection.Y);
-				
+
+		// 오른쪽 벡터
+		DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + RightHand * 100.f, 50.0f, FColor::Green, false, -1, 0 ,5.0f);
+		const FVector InputVector = RightDirection * MovementVector.X + ForwardDirection * MovementVector.Y;
+		// float AngleForCoveredMove_ = FVector::DotProduct(RightHand,InputVector);
+
+		// 카메라 방향에 따른 입력값 부호(좌우. y값이 반영된 입력값 부호)
+		float InputVectorDirectionByCamera = 0.f;
+		
+		// case 1
+		InputVectorDirectionByCamera = FVector::DotProduct(RightHand.GetSafeNormal(), InputVector.GetSafeNormal()) > 0 ? 1 : -1;
+
+		// case 2
+		/*InputVectorDirectionByCamera = FVector::DotProduct(RightHand.GetSafeNormal(), InputVector.GetSafeNormal());
+		if(InputVectorDirectionByCamera > 0) InputVectorDirectionByCamera = 1;
+		else if(InputVectorDirectionByCamera < 0) InputVectorDirectionByCamera = -1;*/
+		
+		UE_LOG(LogTemp, Log, TEXT("InputVectorDirectionByCamera : %f"), InputVectorDirectionByCamera);
+		// 각도에 따라 위치가 달라진다... 그냥 크기 1,0,-1로 고정해야 할 듯.
 		float Range = 150.0f;
 		float Radius = 5.0f;
-		FVector Start = RightHand * MovementVector.X * 45.0f  + GetActorLocation();			// 왼손, 오른손
+		FVector Start = RightHand * InputVectorDirectionByCamera * 45.0f  + GetActorLocation();			// 왼손, 오른손
+		// FVector Start = RightHand * AngleForDirection * 45.0f  + GetActorLocation();			// 왼손, 오른손
 		FVector End = Start + (BackwardVector * Range);											// 벽쪽으로 레이저. 근데 - 안붙혀도 뒤로 나간다. 
 		
 		FHitResult HitResult;
 		FCollisionQueryParams TraceParams(FName(TEXT("CoverTrace")), true, this);
-		bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,
-			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), TraceParams);
-		CurrentDistanceFromWall = HitResult.Distance;
-
+		bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), TraceParams);
+		// WallNormal = HitResult.ImpactNormal;
+		
 #if ENABLE_DRAW_DEBUG
 		FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
 		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
 		DrawDebugCapsule(GetWorld(), CapsuleOrigin, Range * 0.5f, Radius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);		
 #endif
 
+		if(HitDetected == false) return;
 		// 입력 벡터 
-		const FVector InputVector = RightDirection * MovementVector.X + ForwardDirection * MovementVector.Y;
 		float AngleForCoveredMove = FVector::DotProduct(HitResult.ImpactNormal,InputVector);
 		DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + InputVector * 100.f, 50.0f, FColor::Emerald, false, -1, 0 ,5.0f);
+		// 벽의 법선 벡터
 		DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() - HitResult.ImpactNormal * 100.f, 50.0f, FColor::Black, false, -1, 0 ,5.0f);
 		
 		FVector WallParallel = FVector(HitResult.ImpactNormal.Y, -HitResult.ImpactNormal.X, HitResult.ImpactNormal.Z);
@@ -333,17 +354,16 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 
 		// 40 degree ~ 180 degree = can cover
 		// Degree Uproperty 
-		if(AngleForCoveredMove >= -1.0f && AngleForCoveredMove <= 0.8f)
+		if(AngleForCoveredMove >= -1.0f && AngleForCoveredMove <= FMath::Cos(RadianForEscapeCover))
 		{
 			CHAnimInstance->SetCoveredDirection(AngleForDirection > 0);
 			// bool IsRight = (AngleForDirection > 0) ? true : false; 
 			const FVector MoveDirection = WallParallel * AngleForDirection;
+			
 			SetActorRotation((-HitResult.ImpactNormal).Rotation());
-
+			AddMovementInput(MoveDirection, SneakSpeed);
 			// Want to = 법선 벡터 
 			// current = 현재 내 액터의 rotation
-			// lerp 
-			AddMovementInput(MoveDirection, SneakSpeed);			
 		}
 		else
 		{
@@ -358,7 +378,7 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 
 		// 엄페 모서리에 도달 시 자동 해제... 는 아니고   
 		// if(HitDetected == false)  
-
+		
 	}
 }
 
@@ -390,6 +410,13 @@ void ACHCharacterPlayer::TakeCover()
 		// 감지
 		if (HitLowCoverDetected)
 		{
+			// 엄폐 방향 결정
+			FVector WallParallel = FVector(HitLowCoverResult.ImpactNormal.Y, -HitLowCoverResult.ImpactNormal.X, HitLowCoverResult.ImpactNormal.Z);
+			FVector ActorForward = GetActorForwardVector();
+
+			float Result = FVector::DotProduct(WallParallel, ActorForward);
+			CHAnimInstance->SetCoveredDirection(Result > 0);			
+			
 			if(HitHighCoverDetected)
 			{
 				// Play Cover Anim Montage

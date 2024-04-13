@@ -8,6 +8,7 @@
 #include "Weapon/Gun/CHGun.h"
 #include "Interface/CHCharacterHUDInterface.h"
 #include "Interface/CHCrossHairWidgetInterface.h"
+#include "Math/UnrealMathUtility.h"
 #include "CHCharacterPlayer.generated.h"
 
 
@@ -108,6 +109,18 @@ protected:
 	void TakeCover();
 public:
 	float AngleForDirection;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System", meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "AngleForEscapeCover", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
+	float AngleForEscapeCover;
+	
+	float RadianForEscapeCover;
+	// FVector WallNormal;
+	// FVector WallParallel;
+
+	
+
+	// 라디안을 degree로 변환하여 초기화
+	
+
 	
 public:
 	void StartSprint();
