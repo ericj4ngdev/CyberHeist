@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Weapon/Gun/CHGun.h"
 #include "Interface/CHCharacterWidgetInterface.h"
+#include "MotionWarpingComponent.h"
 #include "CHCharacterBase.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*combat */);
@@ -81,6 +82,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	uint8 bCovered : 1;	
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> TakeCoverMontage;
+	
 	float CurrentDistanceFromWall;
 	
 public:
@@ -102,11 +106,7 @@ protected:
 	// 몽타주 재생 함수
 	void PlayDeadAnimation();
 
-	float DeadEventDelayTime = 5.0f;
-
-	// Cover
-public:
-	
+	float DeadEventDelayTime = 5.0f;	
 	
 public:
 	void SetHasRifle(bool bNewHasRifle);
@@ -142,6 +142,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	uint8 bSprint : 1;
 
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Motion, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UMotionWarpingComponent> MotionWarpComponent;
+
+	
 	// Stat Section
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))

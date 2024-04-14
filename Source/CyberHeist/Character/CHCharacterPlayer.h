@@ -113,13 +113,12 @@ public:
 	float AngleForEscapeCover;
 	
 	float RadianForEscapeCover;
-	// FVector WallNormal;
-	// FVector WallParallel;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System")
+	float CheckCoverSphereRadius;
 	
-
-	// 라디안을 degree로 변환하여 초기화
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System")
+	float CheckRange;
 
 	
 public:

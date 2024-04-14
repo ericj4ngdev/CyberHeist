@@ -11,7 +11,8 @@
 #include "UI/CHWidgetComponent.h"
 #include "UI/CHHpBarWidget.h"
 #include "Engine/DamageEvents.h"
-// #include "CharacterStat/CHCharaterStatComponent.h"
+#include "MotionWarpingComponent.h"
+
 
 // Sets default values
 ACHCharacterBase::ACHCharacterBase()
@@ -86,6 +87,12 @@ ACHCharacterBase::ACHCharacterBase()
 	{
 		CharacterControlManager.Add(ECharacterControlType::ThirdCoverAim, ThirdPersonCoverAimDataRef.Object);
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> TakeCoverMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/CyberHeist/Animation/AM_StartTakeCover.AM_StartTakeCover'"));
+	if (TakeCoverMontageRef.Object) 
+	{
+		TakeCoverMontage = TakeCoverMontageRef.Object;
+	}
 	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/CyberHeist/Animation/AM_Dead.AM_Dead'"));
 	if (DeadMontageRef.Object) 
@@ -108,6 +115,9 @@ ACHCharacterBase::ACHCharacterBase()
 		HpBar->SetDrawSize(FVector2D(150.0f, 15.0f));
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	// Motion
+	MotionWarpComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarping"));
 }
 
 // Called when the game starts or when spawned

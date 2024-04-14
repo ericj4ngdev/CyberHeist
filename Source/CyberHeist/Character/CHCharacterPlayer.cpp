@@ -391,8 +391,8 @@ void ACHCharacterPlayer::TakeCover()
 		FVector HighStart = GetActorLocation() + GetActorUpVector() * CharacterHalfHeight;				// 캐릭터 위치를 시작점으로 설정
 		FVector LowerStart = GetActorLocation() - GetActorUpVector() * CharacterHalfHeight * 0.5f;		// 캐릭터 위치를 시작점으로 설정
 		
-		float Radius = CharacterHalfHeight * 0.5f;									// 구체의 반경 설정
-		float CheckRange = 150.0f;													// 엄폐물 조사 반경
+		// float Radius = CharacterHalfHeight * 0.5f;									// 구체의 반경 설정
+		// CheckRange = 150.0f;													// 엄폐물 조사 반경
 		FVector HighEnd = HighStart + GetActorForwardVector() * CheckRange;			// 높이를 설정하여 바닥으로 Sphere Trace
 		FVector LowerEnd = LowerStart + GetActorForwardVector() * CheckRange;		// 높이를 설정하여 바닥으로 Sphere Trace
 
@@ -403,9 +403,9 @@ void ACHCharacterPlayer::TakeCover()
 		FCollisionQueryParams LowTraceParams(FName(TEXT("LowCoverTrace")), true, this);
 		
 		bool HitHighCoverDetected = GetWorld()->SweepSingleByChannel(HitHighCoverResult, HighStart, HighEnd,
-			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), HighTraceParams);
+			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CheckCoverSphereRadius), HighTraceParams);
 		bool HitLowCoverDetected = GetWorld()->SweepSingleByChannel(HitLowCoverResult, LowerStart, LowerEnd,
-			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), LowTraceParams);
+			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CheckCoverSphereRadius), LowTraceParams);
 		
 		// 감지
 		if (HitLowCoverDetected)
@@ -419,17 +419,29 @@ void ACHCharacterPlayer::TakeCover()
 			
 			if(HitHighCoverDetected)
 			{
-				// Play Cover Anim Montage
-
 				// Move to Cover
-				FVector TargetLocation = HitHighCoverResult.Location + HitHighCoverResult.ImpactNormal * 15.0f;				
-				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitHighCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
-				SetActorLocationAndRotation(TargetLocation, TargetRotation);
-				// SetWorldLocationAndRotation(TargetLocation, TargetRotation);
-				FLatentActionInfo Info;
-				Info.CallbackTarget = this;
-				// UKismetSystemLibrary::MoveComponentTo(GetCapsuleComponent(),TargetLocation, TargetRotation, false, false, 0.2f, false, EMoveComponentAction::Move, Info);
-				// 액터 이동 
+				FVector TargetLocation = HitLowCoverResult.Location; //  + HitLowCoverResult.ImpactNormal * 1.0f;				
+				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
+				// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
+
+				float Distance = FVector::Distance(TargetLocation,GetActorLocation());
+				UE_LOG(LogTemp, Log, TEXT("Distance : %f"), Distance);
+				
+				if(Distance > 70.0f)
+				{
+					FMotionWarpingTarget Target;
+					Target.Name = FName("StartTakeCover");				
+					Target.Location = TargetLocation;
+					Target.Rotation = TargetRotation;
+					
+					MotionWarpComponent->AddOrUpdateWarpTarget(Target);
+					
+					CHAnimInstance->StopAllMontages(0.0f);
+					CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
+				}
+				// 도착하면 모션 멈추기...				
+
+				// 엄폐 애니메이션
 				OnLowCover.Broadcast(false);
 				OnHighCover.Broadcast(true);
 				
@@ -463,14 +475,14 @@ void ACHCharacterPlayer::TakeCover()
 		}
 #if ENABLE_DRAW_DEBUG
 
-		FVector HigherCapsuleOrigin = HighStart + (HighEnd - HighStart) * 0.5f;
+		FVector HigherCapsuleOrigin = HighStart + (HighEnd - HighStart) * 0.5f;		// = GetActorForwardVector() * CheckRange
 		FVector LowerCapsuleOrigin = LowerStart + (LowerEnd - LowerStart) * 0.5f;
 		
 		FColor DrawHighColor = HitHighCoverDetected ? FColor::Green : FColor::Red;		
 		FColor DrawLowerColor = HitLowCoverDetected ? FColor::Green : FColor::Red;
 
-		DrawDebugCapsule(GetWorld(), HigherCapsuleOrigin, CheckRange, Radius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawHighColor, false, 5.0f);
-		DrawDebugCapsule(GetWorld(), LowerCapsuleOrigin, CheckRange, Radius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawLowerColor, false, 5.0f);
+		DrawDebugCapsule(GetWorld(), HigherCapsuleOrigin, CheckRange, CheckCoverSphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawHighColor, false, 5.0f);
+		DrawDebugCapsule(GetWorld(), LowerCapsuleOrigin, CheckRange, CheckCoverSphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawLowerColor, false, 5.0f);
 		
 #endif
 	}
