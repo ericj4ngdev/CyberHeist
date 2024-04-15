@@ -12,6 +12,7 @@
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCombatModeSignature, uint8 /*combat */);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHighCoverSignature, uint8 /*combat */);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnLowCoverSignature, uint8 /*combat */);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCoverStateSignature, uint8 /*bHigh */, uint8 /*bLow */);
 
 UENUM()
 enum class ECharacterControlType : uint8
@@ -60,6 +61,8 @@ protected:
 public:
 	FOnHighCoverSignature OnHighCover;
 	FOnLowCoverSignature OnLowCover;
+	FOnCoverStateSignature OnCoverState;
+	
 protected:
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData);
 

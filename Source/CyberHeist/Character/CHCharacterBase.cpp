@@ -88,7 +88,7 @@ ACHCharacterBase::ACHCharacterBase()
 		CharacterControlManager.Add(ECharacterControlType::ThirdCoverAim, ThirdPersonCoverAimDataRef.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> TakeCoverMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/CyberHeist/Animation/AM_StartTakeCover.AM_StartTakeCover'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> TakeCoverMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/CyberHeist/Animation/YBot_Retarget/AM_StartTakeCover.AM_StartTakeCover'"));
 	if (TakeCoverMontageRef.Object) 
 	{
 		TakeCoverMontage = TakeCoverMontageRef.Object;

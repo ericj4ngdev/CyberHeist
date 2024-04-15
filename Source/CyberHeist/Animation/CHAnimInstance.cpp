@@ -26,8 +26,9 @@ void UCHAnimInstance::NativeInitializeAnimation()
 	ACHCharacterBase* OwnerActor = Cast<ACHCharacterBase>(Owner);
 	if(OwnerActor)
 	{
-		OwnerActor->OnHighCover.AddUObject(this, &UCHAnimInstance::SetHighCover);
-		OwnerActor->OnLowCover.AddUObject(this, &UCHAnimInstance::SetLowCover);
+		// OwnerActor->OnHighCover.AddUObject(this, &UCHAnimInstance::SetHighCover);
+		// OwnerActor->OnLowCover.AddUObject(this, &UCHAnimInstance::SetLowCover);
+		OwnerActor->OnCoverState.AddUObject(this, &UCHAnimInstance::SetCoverState);
 	}
 }
 
@@ -77,6 +78,25 @@ void UCHAnimInstance::SetHighCover(uint8 TakeHighCover)
 void UCHAnimInstance::SetLowCover(uint8 TakeLowCover)
 {
 	bTakeLowCover = TakeLowCover;
+}
+
+void UCHAnimInstance::SetCoverState(uint8 TakeHighCover, uint8 TakeLowCover)
+{
+	bTakeHighCover = TakeHighCover;
+	bTakeLowCover = TakeLowCover;
+
+	if(TakeHighCover && TakeLowCover)
+	{
+		CurrentCoverState = ECoverState::High;
+	}
+	else if(TakeHighCover == false && TakeLowCover)
+	{
+		CurrentCoverState = ECoverState::Low;
+	}
+	else
+	{
+		CurrentCoverState = ECoverState::None;
+	}
 }
 
 void UCHAnimInstance::SetCoveredDirection(uint8 bRight)

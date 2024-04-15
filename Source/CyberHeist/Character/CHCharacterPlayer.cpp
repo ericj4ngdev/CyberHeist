@@ -324,7 +324,8 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 		// 각도에 따라 위치가 달라진다... 그냥 크기 1,0,-1로 고정해야 할 듯.
 		float Range = 150.0f;
 		float Radius = 5.0f;
-		FVector Start = RightHand * InputVectorDirectionByCamera * 45.0f  + GetActorLocation();			// 왼손, 오른손
+		FVector Start = RightHand * InputVectorDirectionByCamera * 45.0f  + GetActorLocation() + GetActorUpVector() * GetCapsuleComponent()->GetScaledCapsuleHalfHeight();			// 왼손, 오른손
+		UE_LOG(LogTemp, Log, TEXT("GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : %f"), GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
 		// FVector Start = RightHand * AngleForDirection * 45.0f  + GetActorLocation();			// 왼손, 오른손
 		FVector End = Start + (BackwardVector * Range);											// 벽쪽으로 레이저. 근데 - 안붙혀도 뒤로 나간다. 
 		
@@ -368,8 +369,8 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 		else
 		{
 			// Cancel Cover Anim Montage
-			OnHighCover.Broadcast(false);
-			OnLowCover.Broadcast(false);
+			OnCoverState.Broadcast(false, false);
+			UnCrouch();
 			// 입력 속성 변경
 			SetCharacterControl(ECharacterControlType::Third);
 			bCovered = false;
@@ -420,7 +421,7 @@ void ACHCharacterPlayer::TakeCover()
 			if(HitHighCoverDetected)
 			{
 				// Move to Cover
-				FVector TargetLocation = HitLowCoverResult.Location; //  + HitLowCoverResult.ImpactNormal * 1.0f;				
+				FVector TargetLocation = HitLowCoverResult.Location;			
 				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
 				// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
 
@@ -440,10 +441,9 @@ void ACHCharacterPlayer::TakeCover()
 					CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
 				}
 				// 도착하면 모션 멈추기...				
-
+				// Crouch();
 				// 엄폐 애니메이션
-				OnLowCover.Broadcast(false);
-				OnHighCover.Broadcast(true);
+				OnCoverState.Broadcast(true,true);
 				
 				// 움직임 속도 제한
 				GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
@@ -454,15 +454,34 @@ void ACHCharacterPlayer::TakeCover()
 			}
 			else
 			{
-				// Play Cover Anim Montage
-
 				// Move to Cover
-				FVector TargetLocation = HitLowCoverResult.Location + HitLowCoverResult.ImpactNormal * 15.0f;				
+				FVector TargetLocation = HitLowCoverResult.Location; //  + HitLowCoverResult.ImpactNormal * 1.0f;				
 				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
-				SetActorLocationAndRotation(TargetLocation, TargetRotation);
+				// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
+
+				float Distance = FVector::Distance(TargetLocation,GetActorLocation());
+				UE_LOG(LogTemp, Log, TEXT("Distance : %f"), Distance);
 				
-				OnHighCover.Broadcast(false);
-				OnLowCover.Broadcast(true);
+				// Play Cover Anim Montage
+				if(Distance > 70.0f)
+				{
+					FMotionWarpingTarget Target;
+					Target.Name = FName("StartTakeCover");				
+					Target.Location = TargetLocation;
+					Target.Rotation = TargetRotation;
+
+					MotionWarpComponent->AddOrUpdateWarpTarget(Target);
+					
+					CHAnimInstance->StopAllMontages(0.0f);
+					CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
+				}
+				
+				// 엄폐 애니메이션
+				OnCoverState.Broadcast(false, true);
+				Crouch();
+				// 움직임 속도 제한
+				GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
+				
 				// 입력 속성 변경
 				SetCharacterControl(ECharacterControlType::ThirdCover);
 				UE_LOG(LogTemp, Log, TEXT("Low Covered"));
@@ -471,6 +490,7 @@ void ACHCharacterPlayer::TakeCover()
 		}
 		else
 		{
+			UnCrouch();
 			UE_LOG(LogTemp, Log, TEXT("Nothing to Cover"));			
 		}
 #if ENABLE_DRAW_DEBUG
@@ -488,9 +508,9 @@ void ACHCharacterPlayer::TakeCover()
 	}
 	else
 	{
+		UnCrouch();
 		// Cancel Cover Anim Montage
-		OnHighCover.Broadcast(false);
-		OnLowCover.Broadcast(false);
+		OnCoverState.Broadcast(false,false);
 		// 입력 속성 변경
 		SetCharacterControl(ECharacterControlType::Third);
 		bCovered = false;

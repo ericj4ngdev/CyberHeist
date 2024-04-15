@@ -6,6 +6,15 @@
 #include "Animation/AnimInstance.h"
 #include "CHAnimInstance.generated.h"
 
+
+UENUM(BlueprintType)
+enum class ECoverState : uint8
+{
+	Low		UMETA(DisplayName = "Low"),
+	High	UMETA(DisplayName = "High"),
+	None	UMETA(DisplayName = "None")
+};
+
 /**
  * 
  */
@@ -26,6 +35,7 @@ public:
 	void SetCombatMode(uint8 combat);
 	void SetHighCover(uint8 TakeHighCover);
 	void SetLowCover(uint8 TakeLowCover);
+	void SetCoverState(uint8 TakeHighCover, uint8 TakeLowCover);
 	void SetCoveredDirection(uint8 bRight);
 	void Recoil(float Multiplier);
 
@@ -92,4 +102,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
 	FTransform RecoilTemp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ECoverState CurrentCoverState;
 };
