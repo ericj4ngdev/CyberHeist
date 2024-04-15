@@ -107,8 +107,19 @@ protected:
 	void ThirdLook(const FInputActionValue& Value);
 	void ThirdCoveredMove(const FInputActionValue& Value);
 	void TakeCover();
-public:
+
+	// Cover System
+public:	
+	void SetCoveredAttackMotion(uint8 bAim);
+
+	uint8 bEdge;
+	float InputVectorDirectionByCamera;
+
+	// 벽 기준 입력값에 따른 좌우 이동방향
+	FVector MoveDirection;
+	
 	float AngleForDirection;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System", meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "AngleForEscapeCover", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
 	float AngleForEscapeCover;
 	

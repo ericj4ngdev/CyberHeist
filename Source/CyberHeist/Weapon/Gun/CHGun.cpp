@@ -519,6 +519,7 @@ void ACHGun::StartAim()
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCoverAim);
+		PlayerCharacter->SetCoveredAttackMotion(true);
 	}
 	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
@@ -541,6 +542,7 @@ void ACHGun::StopAim()
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
+		PlayerCharacter->SetCoveredAttackMotion(false);
 	}
 	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)

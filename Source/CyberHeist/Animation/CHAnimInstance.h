@@ -104,4 +104,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ECoverState CurrentCoverState;
+public:
+	FORCEINLINE ECoverState GetCurrentCoverState() const {return CurrentCoverState;}
 };

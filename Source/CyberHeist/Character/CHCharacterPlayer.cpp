@@ -109,7 +109,7 @@ void ACHCharacterPlayer::BeginPlay()
 	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), AngleForEscapeCover,FMath::Cos(AngleForEscapeCover));
 	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), RadianForEscapeCover,FMath::Cos(RadianForEscapeCover));
 	CHAnimInstance = Cast<UCHAnimInstance>(GetMesh()->GetAnimInstance());
-	
+	// InputVectorDirectionByCamera = 0.f;
 	SetCharacterControl(CurrentCharacterControlType);
 }
 
@@ -310,7 +310,7 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 		// float AngleForCoveredMove_ = FVector::DotProduct(RightHand,InputVector);
 
 		// 카메라 방향에 따른 입력값 부호(좌우. y값이 반영된 입력값 부호)
-		float InputVectorDirectionByCamera = 0.f;
+		InputVectorDirectionByCamera = 0.f;
 		
 		// case 1
 		InputVectorDirectionByCamera = FVector::DotProduct(RightHand.GetSafeNormal(), InputVector.GetSafeNormal()) > 0 ? 1 : -1;
@@ -320,18 +320,19 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 		if(InputVectorDirectionByCamera > 0) InputVectorDirectionByCamera = 1;
 		else if(InputVectorDirectionByCamera < 0) InputVectorDirectionByCamera = -1;*/
 		
-		UE_LOG(LogTemp, Log, TEXT("InputVectorDirectionByCamera : %f"), InputVectorDirectionByCamera);
+		// UE_LOG(LogTemp, Log, TEXT("InputVectorDirectionByCamera : %f"), InputVectorDirectionByCamera);
 		// 각도에 따라 위치가 달라진다... 그냥 크기 1,0,-1로 고정해야 할 듯.
 		float Range = 150.0f;
 		float Radius = 5.0f;
 		FVector Start = RightHand * InputVectorDirectionByCamera * 45.0f  + GetActorLocation() + GetActorUpVector() * GetCapsuleComponent()->GetScaledCapsuleHalfHeight();			// 왼손, 오른손
-		UE_LOG(LogTemp, Log, TEXT("GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : %f"), GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+		// UE_LOG(LogTemp, Log, TEXT("GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : %f"), GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
 		// FVector Start = RightHand * AngleForDirection * 45.0f  + GetActorLocation();			// 왼손, 오른손
 		FVector End = Start + (BackwardVector * Range);											// 벽쪽으로 레이저. 근데 - 안붙혀도 뒤로 나간다. 
 		
 		FHitResult HitResult;
 		FCollisionQueryParams TraceParams(FName(TEXT("CoverTrace")), true, this);
 		bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), TraceParams);
+		bEdge = HitDetected;
 		// WallNormal = HitResult.ImpactNormal;
 		
 #if ENABLE_DRAW_DEBUG
@@ -340,7 +341,17 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 		DrawDebugCapsule(GetWorld(), CapsuleOrigin, Range * 0.5f, Radius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);		
 #endif
 
-		if(HitDetected == false) return;
+		if(HitDetected == false)
+		{
+			// 카메라 이동
+			// AngleForDirection > 0     // 방향
+			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
+			CameraBoom->SocketOffset = FVector(NewCharacterControl->CameraPosition.X,NewCharacterControl->CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->CameraPosition.Z);
+			// UE_LOG(LogTemp, Log, TEXT("NewCharacterControl->CameraPosition.Y : %f"), NewCharacterControl->CameraPosition.Y);
+
+				
+			return;
+		}
 		// 입력 벡터 
 		float AngleForCoveredMove = FVector::DotProduct(HitResult.ImpactNormal,InputVector);
 		DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + InputVector * 100.f, 50.0f, FColor::Emerald, false, -1, 0 ,5.0f);
@@ -359,7 +370,7 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 		{
 			CHAnimInstance->SetCoveredDirection(AngleForDirection > 0);
 			// bool IsRight = (AngleForDirection > 0) ? true : false; 
-			const FVector MoveDirection = WallParallel * AngleForDirection;
+			MoveDirection = WallParallel * AngleForDirection;
 			
 			SetActorRotation((-HitResult.ImpactNormal).Rotation());
 			AddMovementInput(MoveDirection, SneakSpeed);
@@ -518,6 +529,42 @@ void ACHCharacterPlayer::TakeCover()
 	}	
 }
 
+void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
+{
+	switch (CHAnimInstance->GetCurrentCoverState())
+	{
+	case ECoverState::Low:
+		if(bAim)
+		{
+			UnCrouch();			
+		}
+		else
+		{
+			Crouch();
+		}
+		break;
+	case ECoverState::High:
+		// 벽 중간에서 aim하면 이동???
+		if(bAim)
+		{
+			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
+			CameraBoom->SocketOffset = FVector(NewCharacterControl->CameraPosition.X,NewCharacterControl->CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->CameraPosition.Z);
+			SetActorLocation(GetActorLocation() + MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius());
+			UE_LOG(LogTemp, Log, TEXT("+ MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius()"));				
+		}
+		else
+		{
+			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
+			CameraBoom->SocketOffset = FVector(NewCharacterControl->CameraPosition.X,NewCharacterControl->CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->CameraPosition.Z);
+			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius());
+		}
+		break;
+	case ECoverState::None:
+		break;
+	}
+		
+}
+
 void ACHCharacterPlayer::StartSprint() 
 {
 	if(GetCharacterMovement()->IsFalling()) return;
@@ -551,3 +598,4 @@ void ACHCharacterPlayer::SetupCrossWidget(UCHUserWidget* InUserWidget)
 		// OnCombat.AddUObject(CrossWidget, &UUCHCrossHairWidget::SetCombatMode);
 	}
 }
+
