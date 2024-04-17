@@ -66,21 +66,18 @@ protected:
 	uint8 bIsCrouching : 1;
 
 	// Cover
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CoverSystem)
 	uint8 bTakeHighCover : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CoverSystem)
 	uint8 bTakeLowCover : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CoverSystem)
 	uint8 bCoverMoveRight : 1;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Threshould)
-	float MovingThreshould;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Threshould)
-	float JumpingThreshould;*/
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CoverSystem)
+	float CoverHeight;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
 	uint8 bCombat : 1;
 
@@ -102,7 +99,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
 	FTransform RecoilTemp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoverSystem)
 	ECoverState CurrentCoverState;
 public:
 	FORCEINLINE ECoverState GetCurrentCoverState() const {return CurrentCoverState;}
