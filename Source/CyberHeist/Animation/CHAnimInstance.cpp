@@ -59,10 +59,10 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	RecoilTransform = UKismetMathLibrary::TInterpTo(RecoilTransform, FTransform(), UGameplayStatics::GetWorldDeltaSeconds(this), 15.0f);
 
-	FRotator Rotator = UKismetMathLibrary::NormalizedDeltaRotator(Owner->GetBaseAimRotation(), Owner->GetActorRotation());
-	Roll = Rotator.Roll;
-	Pitch = Rotator.Pitch;
-	Yaw = Rotator.Yaw;
+	// FRotator Rotator = UKismetMathLibrary::NormalizedDeltaRotator(Owner->GetBaseAimRotation(), Owner->GetActorRotation());
+	// Roll = Rotator.Roll;
+	// Pitch = Rotator.Pitch;
+	// Yaw = Rotator.Yaw;
 }
 
 void UCHAnimInstance::SetCombatMode(uint8 combat)
