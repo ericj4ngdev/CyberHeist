@@ -39,14 +39,17 @@ public:
 
 // Camera Section
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class USpringArmComponent> CameraBoom;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USpringArmComponent> CameraBoom;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UCameraComponent> FirstPersonCamera;
+	TObjectPtr<class UCameraComponent> FirstPersonCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<class UCameraComponent> ThirdPersonCamera;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UCameraComponent> ThirdPersonCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USkeletalMeshComponent> FirstPersonMesh;
 
 	UPROPERTY(EditAnywhere)
 	float AimDistance;
@@ -54,6 +57,15 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float DefaultCameraDistance;
 
+	UPROPERTY(BlueprintReadOnly, Category = Camera)
+	bool bIsFirstPersonPerspective;
+
+	UPROPERTY(BlueprintReadOnly, Category = Camera)
+	FVector StartingThirdPersonMeshLocation;
+
+	UPROPERTY(BlueprintReadOnly, Category = Camera)
+	FVector StartingFirstPersonMeshLocation;
+	
 	// Input Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
@@ -81,9 +93,6 @@ protected:
 	TObjectPtr<class UInputAction> ShootAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> AimAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SprintAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
@@ -108,6 +117,12 @@ protected:
 	void ThirdCoveredMove(const FInputActionValue& Value);
 	void TakeCover();
 
+	// Toggles between perspectives
+	void TogglePerspective();
+
+	// Sets the perspective
+	void SetPerspective(bool InIsFirstPersonPerspective);
+	
 	// Cover System
 public:	
 	void SetCoveredAttackMotion(uint8 bAim);

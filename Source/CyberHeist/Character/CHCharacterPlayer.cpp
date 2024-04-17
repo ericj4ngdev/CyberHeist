@@ -24,7 +24,6 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = DefaultCameraDistance;
-	// CameraBoom->SocketOffset = FVector(0.0f, 0.0f, 0.0f);
 	CameraBoom->bUsePawnControlRotation = true;
 
 	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
@@ -33,10 +32,21 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 
 	// FirstPersonCamera
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCamera->SetupAttachment(GetMesh(),FName("Head"));	
+	FirstPersonCamera->SetupAttachment(RootComponent);	
 	FirstPersonCamera->bUsePawnControlRotation = true;
 	// FirstPersonCamera->bAutoActivate = false;
 
+	FirstPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(FName("FirstPersonMesh"));
+	FirstPersonMesh->SetupAttachment(FirstPersonCamera);
+	FirstPersonMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FirstPersonMesh->SetCollisionProfileName(FName("NoCollision"));
+	FirstPersonMesh->bReceivesDecals = false;
+	FirstPersonMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	FirstPersonMesh->CastShadow = false;
+	FirstPersonMesh->SetVisibility(false, true);
+
+	GetMesh()->bCastHiddenShadow = true;
+	
 	// Input
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputChangeActionControlRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ChangeControl.IA_ChangeControl'"));
 	if (nullptr != InputChangeActionControlRef.Object)
@@ -99,6 +109,8 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	}
 	// AngleForEscapeCover = 135.f;
 	CurrentCharacterControlType = ECharacterControlType::Third;
+
+	bIsFirstPersonPerspective = false;
 }
 
 void ACHCharacterPlayer::BeginPlay()
@@ -110,6 +122,9 @@ void ACHCharacterPlayer::BeginPlay()
 	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), RadianForEscapeCover,FMath::Cos(RadianForEscapeCover));
 	CHAnimInstance = Cast<UCHAnimInstance>(GetMesh()->GetAnimInstance());
 	// InputVectorDirectionByCamera = 0.f;
+	StartingThirdPersonMeshLocation = GetMesh()->GetRelativeLocation();
+	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
+	SetPerspective(bIsFirstPersonPerspective);
 	SetCharacterControl(CurrentCharacterControlType);
 }
 
@@ -140,7 +155,9 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-	EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ChangePerspectiveControlData);
+	EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TogglePerspective);
+	// EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ChangePerspectiveControlData);
+
 	
 	EnhancedInputComponent->BindAction(FirstMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::FirstMove);
 	EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::FirstLook);
@@ -527,6 +544,45 @@ void ACHCharacterPlayer::TakeCover()
 		bCovered = false;
 		UE_LOG(LogTemp, Log, TEXT("UnCovered"));
 	}	
+}
+
+void ACHCharacterPlayer::TogglePerspective()
+{
+
+	bIsFirstPersonPerspective = !bIsFirstPersonPerspective;
+	SetPerspective(bIsFirstPersonPerspective);
+}
+
+void ACHCharacterPlayer::SetPerspective(bool InIsFirstPersonPerspective)
+{
+	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim) return;
+	if (CurrentCharacterControlType == ECharacterControlType::Third)
+	{
+		// 1인칭
+		SetCharacterControl(ECharacterControlType::First);
+		
+		ThirdPersonCamera->Deactivate();
+		FirstPersonCamera->Activate();
+
+		GetMesh()->SetVisibility(false, true);
+		FirstPersonMesh->SetVisibility(true, true);
+
+		// Move third person mesh back so that the shadow doesn't look disconnected
+		GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation + FVector(-120.0f, 0.0f, 0.0f));
+	}
+	else if(CurrentCharacterControlType == ECharacterControlType::First)
+	{
+		SetCharacterControl(ECharacterControlType::Third);
+		
+		FirstPersonCamera->Deactivate();
+		ThirdPersonCamera->Activate();
+
+		FirstPersonMesh->SetVisibility(false, true);
+		GetMesh()->SetVisibility(true, true);
+
+		// Reset the third person mesh
+		GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation);
+	}
 }
 
 void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
