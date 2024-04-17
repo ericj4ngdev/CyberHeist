@@ -132,6 +132,16 @@ void ACHCharacterBase::BeginPlay()
 	// Weapon->SetOwner(this);	
 }
 
+USkeletalMeshComponent* ACHCharacterBase::GetFirstPersonMesh() const
+{
+	return FirstPersonMesh;
+}
+
+USkeletalMeshComponent* ACHCharacterBase::GetThirdPersonMesh() const
+{
+	return GetMesh();
+}
+
 void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
 {
 	// Pawn
@@ -196,6 +206,16 @@ void ACHCharacterBase::AttackHitCheck()
 
 #endif
 
+}
+
+FName ACHCharacterBase::GetWeaponAttachPoint()
+{
+	return WeaponAttachPoint;
+}
+
+bool ACHCharacterBase::IsInFirstPersonPerspective() const
+{
+	return bIsFirstPersonPerspective;
 }
 
 void ACHCharacterBase::SetCombatMode(uint8 bNewCombatMode)
@@ -280,6 +300,11 @@ void ACHCharacterBase::UnEquipWeapon(ACHGun* WeaponToUnEquip)
 	{		
 		WeaponToUnEquip->UnEquip();
 	}
+}
+
+ACHGun* ACHCharacterBase::GetCurrentWeapon() const
+{
+	return CurrentWeapon;
 }
 
 void ACHCharacterBase::NextWeapon()

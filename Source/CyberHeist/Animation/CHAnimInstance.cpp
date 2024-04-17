@@ -26,8 +26,6 @@ void UCHAnimInstance::NativeInitializeAnimation()
 	ACHCharacterBase* OwnerActor = Cast<ACHCharacterBase>(Owner);
 	if(OwnerActor)
 	{
-		// OwnerActor->OnHighCover.AddUObject(this, &UCHAnimInstance::SetHighCover);
-		// OwnerActor->OnLowCover.AddUObject(this, &UCHAnimInstance::SetLowCover);
 		OwnerActor->OnCoverState.AddUObject(this, &UCHAnimInstance::SetCoverState);
 	}
 }

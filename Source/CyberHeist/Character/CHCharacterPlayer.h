@@ -47,25 +47,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> ThirdPersonCamera;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class USkeletalMeshComponent> FirstPersonMesh;
-
+	
 	UPROPERTY(EditAnywhere)
 	float AimDistance;
 
 	UPROPERTY(EditAnywhere)
 	float DefaultCameraDistance;
-
-	UPROPERTY(BlueprintReadOnly, Category = Camera)
-	bool bIsFirstPersonPerspective;
-
-	UPROPERTY(BlueprintReadOnly, Category = Camera)
-	FVector StartingThirdPersonMeshLocation;
-
-	UPROPERTY(BlueprintReadOnly, Category = Camera)
-	FVector StartingFirstPersonMeshLocation;
-	
+		
 	// Input Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))

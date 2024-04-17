@@ -62,6 +62,15 @@ public:
 	FOnHighCoverSignature OnHighCover;
 	FOnLowCoverSignature OnLowCover;
 	FOnCoverStateSignature OnCoverState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USkeletalMeshComponent> FirstPersonMesh;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Character")
+	USkeletalMeshComponent* GetFirstPersonMesh() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Character")
+	USkeletalMeshComponent* GetThirdPersonMesh() const;
 	
 protected:
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData);
@@ -123,7 +132,23 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	void AttackHitCheck();
+	
+	FName GetWeaponAttachPoint();
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = Weapon)
+	FName WeaponAttachPoint;
+	
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	bool IsInFirstPersonPerspective() const;
+	
+	UPROPERTY(BlueprintReadOnly, Category = Camera)
+	bool bIsFirstPersonPerspective;
+
+	UPROPERTY(BlueprintReadOnly, Category = Camera)
+	FVector StartingThirdPersonMeshLocation;
+
+	UPROPERTY(BlueprintReadOnly, Category = Camera)
+	FVector StartingFirstPersonMeshLocation;
 
 public:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
@@ -185,12 +210,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void UnEquipWeapon(ACHGun* WeaponToUnEquip);
 
-	UFUNCTION(BlueprintCallable, Category = "GASShooter|Inventory")
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	ACHGun* GetCurrentWeapon() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	virtual void NextWeapon();
 
-	UFUNCTION(BlueprintCallable, Category = "GASShooter|Inventory")
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	virtual void PreviousWeapon();
-	
+
+protected:
 	UPROPERTY()
 	ACHGun* CurrentWeapon;
 

@@ -27,17 +27,26 @@ ACHGun::ACHGun()
 	CollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Root"));
 	CollisionComp->InitCapsuleSize(40.0f, 50.0f);
 	CollisionComp->SetCollisionObjectType(ECC_GameTraceChannel1);
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision); // Manually enable when in pickup mode
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // Manually enable when in pickup mode
 	CollisionComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	RootComponent = CollisionComp;
+
+	WeaponMesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(FName("WeaponMesh1P"));
+	WeaponMesh1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	WeaponMesh1P->CastShadow = false;
+	WeaponMesh1P->SetVisibility(false, true);
+	WeaponMesh1P->SetupAttachment(CollisionComp);
+	WeaponMesh1P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 	
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponMesh->SetupAttachment(CollisionComp);
-	WeaponMesh->CastShadow = true;
-	WeaponMesh->SetVisibility(true, true);
-	WeaponMesh->SetupAttachment(CollisionComp);	
+	WeaponMesh3P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh3P"));
+	WeaponMesh3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	WeaponMesh3P->SetupAttachment(CollisionComp);
+	// WeaponMesh3P->SetRelativeLocation(WeaponMesh3PickupRelativeLocation);
+	WeaponMesh3P->CastShadow = true;
+	WeaponMesh3P->SetVisibility(true, true);
+	WeaponMesh3P->SetupAttachment(CollisionComp);
+	WeaponMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 
 	Effect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Effect"));
 	Effect->SetupAttachment(CollisionComp);
@@ -69,9 +78,8 @@ ACHGun::ACHGun()
 void ACHGun::BeginPlay()
 {
 	// Attach the ParticleSystemComponent to the MuzzleFlashSocket
-	Effect->AttachToComponent(WeaponMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("MuzzleFlashSocket"));
+	Effect->AttachToComponent(WeaponMesh3P, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("MuzzleFlashSocket"));
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-
 	
 	Super::BeginPlay();
 }
@@ -86,14 +94,60 @@ void ACHGun::NotifyActorBeginOverlap(AActor* Other)
 
 // Call by CharacterPlayer
 void ACHGun::Equip()
-{	
+{
+	if (!OwningCharacter)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s %s OwningCharacter is nullptr"), *FString(__FUNCTION__), *GetName());
+		return;
+	}
+	
 	bIsEquipped = true;
+
+	// FName AttachPoint = OwningCharacter->GetWeaponAttachPoint();
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+
+	if (WeaponMesh1P)
+	{
+		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("WeaponPoint")));
+		// WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachPoint);
+		WeaponMesh1P->SetRelativeLocation(WeaponMesh1PEquippedRelativeLocation);
+		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
+
+		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		{
+			WeaponMesh1P->SetVisibility(true, true);			
+		}
+		else
+		{
+			WeaponMesh1P->SetVisibility(false, true);			
+		}
+	}
+	
+	if (WeaponMesh3P)
+	{		
+		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("Weapon_rSocket")));
+		// WeaponMesh3P->SetRelativeLocation(WeaponMesh3PEquippedRelativeLocation);
+		// WeaponMesh3P->SetRelativeRotation(FRotator(0, 0, -90.0f));
+		WeaponMesh3P->CastShadow = true;
+		// WeaponMesh3P->bCastHiddenShadow = true;
+
+		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		{
+			WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
+			WeaponMesh3P->SetVisibility(false, true);
+		}
+		else
+		{
+			WeaponMesh3P->SetVisibility(true, true);
+		}
+	}
+	
 	
 	// Attach the weapon to the First Person Character
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, FName(TEXT("Weapon_rSocket")));
-	WeaponMesh->SetVisibility(true, true);
-	WeaponMesh->CastShadow = true;
+	
+	// AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, FName(TEXT("Weapon_rSocket")));
+	// WeaponMesh3P->SetVisibility(true, true);
+	// WeaponMesh3P->CastShadow = true;
 	
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -102,7 +156,7 @@ void ACHGun::Equip()
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-	{
+	{		
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
@@ -135,10 +189,14 @@ void ACHGun::UnEquip()
 	}
 
 	bIsEquipped = false;
+
+	// WeaponMesh1P->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+	WeaponMesh1P->SetVisibility(false, true);
+	WeaponMesh1P->CastShadow = false;
 	
 	// WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
-	WeaponMesh->SetVisibility(false, false);
-	WeaponMesh->CastShadow = false;
+	WeaponMesh3P->SetVisibility(false, false);
+	WeaponMesh3P->CastShadow = false;
 	
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{
@@ -155,6 +213,15 @@ void ACHGun::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 	OwningCharacter = InOwningCharacter;
 	if (OwningCharacter == nullptr)	return;
 	SetOwner(OwningCharacter);
+	AttachToComponent(OwningCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	if (OwningCharacter->GetCurrentWeapon() != this)
+	{
+		WeaponMesh3P->CastShadow = false;
+		WeaponMesh3P->SetVisibility(true, true);
+		WeaponMesh3P->SetVisibility(false, true);
+	}
 }
 
 void ACHGun::PickUpOnTouch(ACHCharacterBase* InCharacter)
@@ -345,9 +412,11 @@ void ACHGun::FireLine()
 
 	// Get the animation object for the arms mesh
 	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();
 	if (AnimInstance != nullptr)
 	{
-		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
+		FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);		
 		if (CHAnimInstance)
 		{
 			// UE_LOG(LogTemp, Log, TEXT("ReCoil"));

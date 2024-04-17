@@ -43,8 +43,40 @@ public:
 	TObjectPtr<class UCapsuleComponent> CollisionComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	TObjectPtr<class USkeletalMeshComponent> WeaponMesh;
+	TObjectPtr<class USkeletalMeshComponent> WeaponMesh1P;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<class USkeletalMeshComponent> WeaponMesh3P;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> Equip1PMontage;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> Equip3PMontage;
+	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> Fire1PMontage;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> AimFire1PMontage;
+	
+	
+	// Relative Location of weapon 1P Mesh when equipped
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	FVector WeaponMesh1PEquippedRelativeLocation;
+
+	// Relative Location of weapon 3P Mesh when equipped
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	FVector WeaponMesh3PEquippedRelativeLocation;
+	
+	// Relative Location of weapon 1P Mesh when equipped
+	UPROPERTY(EditAnywhere, Category = "Weapon|Location")
+	FVector WeaponMeshFPEquippedRelativeLocation;
+
+	// Relative Location of weapon 3P Mesh when equipped
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Location")
+	FVector WeaponMeshTPEquippedRelativeLocation;
+	
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<class UParticleSystemComponent> Effect;
 
