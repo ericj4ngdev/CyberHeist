@@ -88,6 +88,18 @@ ACHCharacterBase::ACHCharacterBase()
 		CharacterControlManager.Add(ECharacterControlType::ThirdCoverAim, ThirdPersonCoverAimDataRef.Object);
 	}
 
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonPrecisionAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FP_PrecisionAim.CHC_FP_PrecisionAim'"));
+	if (FirstPersonPrecisionAimDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::FirstPrecisionAim, FirstPersonPrecisionAimDataRef.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonPrecisionAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson_PrecisionAim.CHC_ThirdPerson_PrecisionAim'"));
+	if (ThirdPersonPrecisionAimDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::ThirdPrecisionAim, ThirdPersonPrecisionAimDataRef.Object);
+	}
+	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> TakeCoverMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/CyberHeist/Animation/YBot_Retarget/AM_StartTakeCover.AM_StartTakeCover'"));
 	if (TakeCoverMontageRef.Object) 
 	{

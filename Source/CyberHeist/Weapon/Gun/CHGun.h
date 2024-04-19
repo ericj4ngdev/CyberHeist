@@ -141,11 +141,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AimAction;
 
+	/** Precision Aim Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> PrecisionAimAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> CancelPrecisionAimAction;
+	
 	void PullTriggerProjectile();
 	void PullTriggerLine();
 	void CancelPullTrigger();
 	void StartAim();
 	void StopAim();
+	void StartPrecisionAim();
+	void StopPrecisionAim();
 	void StopParticleSystem();
 
 	/** Make the weapon Fire a Line */

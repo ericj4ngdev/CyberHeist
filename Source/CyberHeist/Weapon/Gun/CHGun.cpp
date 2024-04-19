@@ -84,7 +84,6 @@ void ACHGun::BeginPlay()
 	Super::BeginPlay();
 }
 
-
 void ACHGun::NotifyActorBeginOverlap(AActor* Other)
 {
 	Super::NotifyActorBeginOverlap(Other);
@@ -177,6 +176,9 @@ void ACHGun::Equip()
 
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGun::StartAim);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGun::StopAim);
+
+			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGun::StartPrecisionAim);
+			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGun::StopPrecisionAim);
 		}
 	}
 }
@@ -432,38 +434,11 @@ void ACHGun::PullTriggerLine()
 
 	OwningCharacter->bUseControllerRotationYaw = true;
 
-	/*if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim)
-	{
-		ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-		// 오른쪽 엄폐의 경우
-		if(PlayerCharacter->AngleForDirection > 0)
-		{
-			// PlayerCharacter->SetActorLocationAndRotation(, );
-		}
-		else
-		{
-			// 왼쪽 엄폐
-			// PlayerCharacter->SetActorLocationAndRotation(, );
-		}
 
-			
-		OwningCharacter->SetCombatMode(true);
-		// OwningCharacter->SetCharacterControl(ECharacterControlType::ThirdCoverAim);
-		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
-
-		if(FireMode == EFireMode::Automatic)
-		{
-			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
-		}
-		if(FireMode == EFireMode::SemiAutomatic)
-		{
-			FireLine();					
-		}
-	}*/
-	
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
-		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim)
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 	{
 		OwningCharacter->SetCombatMode(true);
 		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
@@ -603,7 +578,8 @@ void ACHGun::StopAim()
 {
 	if(!bIsEquipped) return;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
+		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);
 	}
@@ -628,6 +604,40 @@ void ACHGun::StopAim()
 		OwningCharacter->bUseControllerRotationYaw = true;		
 	}
 	
+}
+
+void ACHGun::StartPrecisionAim()
+{
+	// 휠 올리면 호출되는 함수
+	if(!bIsEquipped) return;
+	
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
+	}
+	
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstPrecisionAim);
+	}
+}
+
+void ACHGun::StopPrecisionAim()
+{
+	// 휠 내리면 호출되는 함수
+	if(!bIsEquipped) return;
+	
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);		
+	}
+	
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstPrecisionAim)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+	}	
 }
 
 void ACHGun::StopParticleSystem()
