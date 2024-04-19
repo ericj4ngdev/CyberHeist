@@ -52,52 +52,46 @@ ACHCharacterBase::ACHCharacterBase()
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FirstPerson.CHC_FirstPerson'"));
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FP.CHC_FP'"));
 	if (FirstPersonDataRef.Object)
 	{
 		CharacterControlManager.Add(ECharacterControlType::First, FirstPersonDataRef.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson.CHC_ThirdPerson'"));
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_TP.CHC_TP'"));
 	if (ThirdPersonDataRef.Object)
 	{
 		CharacterControlManager.Add(ECharacterControlType::Third, ThirdPersonDataRef.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FirstPerson_Aim.CHC_FirstPerson_Aim'"));
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FP_Aim.CHC_FP_Aim'"));
 	if (FirstPersonAimDataRef.Object)
 	{
 		CharacterControlManager.Add(ECharacterControlType::FirstAim, FirstPersonAimDataRef.Object);
 	}
-
-	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson_Aim.CHC_ThirdPerson_Aim'"));
+	
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_TP_Aim.CHC_TP_Aim'"));
 	if (ThirdPersonAimDataRef.Object)
 	{
 		CharacterControlManager.Add(ECharacterControlType::ThirdAim, ThirdPersonAimDataRef.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonCoverDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson_Cover.CHC_ThirdPerson_Cover'"));
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonCoverDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_TP_Cover.CHC_TP_Cover'"));
 	if (ThirdPersonCoverDataRef.Object)
 	{
 		CharacterControlManager.Add(ECharacterControlType::ThirdCover, ThirdPersonCoverDataRef.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonCoverAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson_CoveredAim.CHC_ThirdPerson_CoveredAim'"));
-	if (ThirdPersonCoverAimDataRef.Object)
+	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonPrecisionAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_TP_PrecisionAim.CHC_TP_PrecisionAim'"));
+	if (ThirdPersonPrecisionAimDataRef.Object)
 	{
-		CharacterControlManager.Add(ECharacterControlType::ThirdCoverAim, ThirdPersonCoverAimDataRef.Object);
+		CharacterControlManager.Add(ECharacterControlType::ThirdPrecisionAim, ThirdPersonPrecisionAimDataRef.Object);
 	}
 
 	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonPrecisionAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FP_PrecisionAim.CHC_FP_PrecisionAim'"));
 	if (FirstPersonPrecisionAimDataRef.Object)
 	{
-		CharacterControlManager.Add(ECharacterControlType::FirstPrecisionAim, FirstPersonPrecisionAimDataRef.Object);
-	}
-
-	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> ThirdPersonPrecisionAimDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_ThirdPerson_PrecisionAim.CHC_ThirdPerson_PrecisionAim'"));
-	if (ThirdPersonPrecisionAimDataRef.Object)
-	{
-		CharacterControlManager.Add(ECharacterControlType::ThirdPrecisionAim, ThirdPersonPrecisionAimDataRef.Object);
+		CharacterControlManager.Add(ECharacterControlType::FirstScopeAim, FirstPersonPrecisionAimDataRef.Object);
 	}
 	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> TakeCoverMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/CyberHeist/Animation/YBot_Retarget/AM_StartTakeCover.AM_StartTakeCover'"));
@@ -230,14 +224,10 @@ bool ACHCharacterBase::IsInFirstPersonPerspective() const
 	return bIsFirstPersonPerspective;
 }
 
-void ACHCharacterBase::SetCombatMode(uint8 bNewCombatMode)
+void ACHCharacterBase::SetAiming(uint8 bNewAiming)
 {
-	bCombatMode = bNewCombatMode;
-	OnCombat.Broadcast(bCombatMode);
-}
-
-void ACHCharacterBase::ChangePerspectiveControlData()
-{
+	bAiming = bNewAiming;
+	OnCombat.Broadcast(bAiming);
 }
 
 void ACHCharacterBase::SetCharacterControl(ECharacterControlType NewCharacterControlType)

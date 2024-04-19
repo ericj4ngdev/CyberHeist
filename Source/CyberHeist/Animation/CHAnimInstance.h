@@ -17,14 +17,16 @@ enum class ECoverState : uint8
 
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
-{
-	None				UMETA(DisplayName = "None"),
+{	
 	Rifle				UMETA(DisplayName = "Rifle"),
 	RifleAiming			UMETA(DisplayName = "Rifle Aiming"),
+	RifleScopeAiming	UMETA(DisplayName = "Rifle Scope Aiming"),
 	MiniGun				UMETA(DisplayName = "MiniGun"),
-	MiniGunAiming		UMETA(DisplayName = "MiniGunAiming"),
+	MiniGunAiming		UMETA(DisplayName = "MiniGun Aiming"),
+	MiniGunScopeAiming	UMETA(DisplayName = "MiniGun Scope Aiming"),
 	RPG					UMETA(DisplayName = "RPG"),
-	RPGAiming			UMETA(DisplayName = "RPGAiming"),
+	RPGAiming			UMETA(DisplayName = "RPG Aiming"),
+	RPGScopeAiming		UMETA(DisplayName = "RPG Scope Aiming"),
 };
 
 
@@ -45,7 +47,6 @@ protected:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 public:
-	void SetCombatMode(uint8 combat);
 	void SetHighCover(uint8 TakeHighCover);
 	void SetLowCover(uint8 TakeLowCover);
 	void SetCoverState(uint8 TakeHighCover, uint8 TakeLowCover);
@@ -58,19 +59,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class UCharacterMovementComponent> CharacterMovement;
-
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
-	TObjectPtr<class UNavMovementComponent> NavMovementComponent;*/
-	
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Variable)
 	FVector Velocity;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Variable)
 	float GroundSpeed;
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	uint8 bIsIdle : 1;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
 	uint8 bIsFalling : 1;
@@ -90,10 +84,18 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CoverSystem)
 	float CoverHeight;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
-	uint8 bCombat : 1;
 
+	// Aim
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	uint8 bAiming : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	uint8 bPrecisionAiming : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	uint8 bScopeAiming : 1;
+	
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
 	uint8 bShouldMove : 1;
 

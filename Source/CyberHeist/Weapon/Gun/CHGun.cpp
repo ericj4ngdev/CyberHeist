@@ -107,11 +107,11 @@ void ACHGun::Equip()
 
 	if (WeaponMesh1P)
 	{
-		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("WeaponPoint")));
+		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, FName(TEXT("WeaponPoint")));
 		// WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachPoint);
 		WeaponMesh1P->SetRelativeLocation(WeaponMesh1PEquippedRelativeLocation);
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
-
+		
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 		{
 			WeaponMesh1P->SetVisibility(true, true);			
@@ -124,7 +124,7 @@ void ACHGun::Equip()
 	
 	if (WeaponMesh3P)
 	{		
-		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("Weapon_rSocket")));
+		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, FName(TEXT("Weapon_rSocket")));
 		// WeaponMesh3P->SetRelativeLocation(WeaponMesh3PEquippedRelativeLocation);
 		// WeaponMesh3P->SetRelativeRotation(FRotator(0, 0, -90.0f));
 		WeaponMesh3P->CastShadow = true;
@@ -236,7 +236,7 @@ uint8 ACHGun::FireByAI()
 {
 	if(ShootingType == EWeaponShootType::LineTrace)
 	{
-		if(OwningCharacter)	OwningCharacter->SetCombatMode(true);
+		if(OwningCharacter)	OwningCharacter->SetAiming(true);
 		
 		FireLine();
 		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::EndShoot, FireInterval, false);	// End Attack.
@@ -245,7 +245,7 @@ uint8 ACHGun::FireByAI()
 	}
 	if(ShootingType == EWeaponShootType::Projectile)
 	{
-		if(OwningCharacter)	OwningCharacter->SetCombatMode(true);
+		if(OwningCharacter)	OwningCharacter->SetAiming(true);
 		
 		FireProjectile();
 		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::EndShoot, FireInterval, false);
@@ -434,13 +434,52 @@ void ACHGun::PullTriggerLine()
 
 	OwningCharacter->bUseControllerRotationYaw = true;
 
+	// not combat mode
+	/*if(OwningCharacter->GetAiming() == false)
+	{
+		OwningCharacter->SetAiming(true);
+
+		// no delay for hold gun
+		if(FireMode == EFireMode::Automatic)
+		{
+			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
+		}
+		if(FireMode == EFireMode::SemiAutomatic)
+		{
+			FireLine();					
+		}
+	}
+	else
+	{
+		// hold a gun
+		OwningCharacter->SetAiming(true);
+		// UE_LOG(LogTemp, Log, TEXT("SetCombatMode true"));
+
+		if(FireMode == EFireMode::Automatic)
+		{
+			// holding a gun delay
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
+			{
+				// Fire();
+				// Activate the timer to continuously fire at intervals
+				GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
+			}, ShootingPreparationTime, false);	
+		}
+		if(FireMode == EFireMode::SemiAutomatic)
+		{
+			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
+			{
+				FireLine();
+			}, ShootingPreparationTime, false);	
+		}
+	}*/
 
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
-		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim
-		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
-		OwningCharacter->SetCombatMode(true);
+		OwningCharacter->SetAiming(true);
 		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
 
 		if(FireMode == EFireMode::Automatic)
@@ -452,12 +491,14 @@ void ACHGun::PullTriggerLine()
 			FireLine();					
 		}
 	}
+
+	// 아직 조준하지 않은 상태. 
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
 		// hold a gun
-		OwningCharacter->SetCombatMode(true);
+		OwningCharacter->SetAiming(true);
 		// UE_LOG(LogTemp, Log, TEXT("SetCombatMode true"));
 
 		if(FireMode == EFireMode::Automatic)
@@ -487,11 +528,13 @@ void ACHGun::PullTriggerProjectile()
 	if(!bIsEquipped) return;
 	
 	OwningCharacter->bUseControllerRotationYaw = true;
+
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
-		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim)
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
-		OwningCharacter->SetCombatMode(true);
+		OwningCharacter->SetAiming(true);
 		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireProjectile, FireInterval, true);
 		if(FireMode == EFireMode::Automatic)
 		{
@@ -508,7 +551,7 @@ void ACHGun::PullTriggerProjectile()
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
 		// hold a gun
-		OwningCharacter->SetCombatMode(true);
+		OwningCharacter->SetAiming(true);
 
 		if(FireMode == EFireMode::Automatic)
 		{
@@ -542,7 +585,7 @@ void ACHGun::CancelPullTrigger()
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
 		// Cancel holding a gun
-		OwningCharacter->SetCombatMode(false);
+		OwningCharacter->SetAiming(false);
 	
 		GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
 	}
@@ -560,18 +603,32 @@ void ACHGun::StartAim()
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
 	}
+
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCoverAim);
+		if(!PlayerCharacter->GetCovered())
+		{
+			UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
+		}		
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
 		PlayerCharacter->SetCoveredAttackMotion(true);
 	}
-	
+
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+		// 조준 여부 변수 추가
+		// PlayerCharacter->SetAiming(true);  // 근데 이건 밑에 코드에서 해줌
+		if(PlayerCharacter->GetScopeAiming())
+		{
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+		}
+		else
+		{
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);			
+		}
 	}
 	// if Pull Triggering, pass
-	if(!bTrigger) OwningCharacter->SetCombatMode(true);	
+	if(!bTrigger) OwningCharacter->SetAiming(true);	
 }
 
 void ACHGun::StopAim()
@@ -581,23 +638,27 @@ void ACHGun::StopAim()
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);
+		if(PlayerCharacter->GetCovered())
+		{
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
+			PlayerCharacter->SetCoveredAttackMotion(false);			
+		}
+		else
+		{
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);			
+		}
 	}
-	
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCoverAim)
-	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
-		PlayerCharacter->SetCoveredAttackMotion(false);
-	}
-	
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
-	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);	
+		
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
+		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+	{		
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+		// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
 	}
 	
 	if(!bTrigger)
 	{
-		OwningCharacter->SetCombatMode(false); // if PullTriggering, pass
+		OwningCharacter->SetAiming(false); // if PullTriggering, pass
 	}
 	else
 	{
@@ -612,15 +673,23 @@ void ACHGun::StartPrecisionAim()
 	if(!bIsEquipped) return;
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+
+	
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
+		// 조준경 bool 변수 -> 애니메이션에 전달
+		PlayerCharacter->SetTPAimingCloser(true);
+		// 카메라 위치 수정
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
 	}
-	
+
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstPrecisionAim);
+		PlayerCharacter->SetScopeAiming(true);
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
 	}
+	
+	
 }
 
 void ACHGun::StopPrecisionAim()
@@ -631,13 +700,16 @@ void ACHGun::StopPrecisionAim()
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 	{
+		PlayerCharacter->SetTPAimingCloser(false);
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);		
 	}
 	
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstPrecisionAim)
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+		PlayerCharacter->SetScopeAiming(false);
 	}	
+
 }
 
 void ACHGun::StopParticleSystem()

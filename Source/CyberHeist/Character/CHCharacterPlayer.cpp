@@ -60,6 +60,12 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 		JumpAction = InputActionJumpRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionSprintRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Sprint.IA_Sprint'"));
+	if (nullptr != InputActionSprintRef.Object)
+	{
+		SprintAction = InputActionSprintRef.Object;
+	}
+	
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionFirstPersonMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_FirstMove.IA_FirstMove'"));
 	if (nullptr != InputActionFirstPersonMoveRef.Object)
 	{
@@ -76,12 +82,6 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	if (nullptr != InputActionThirdPersonMoveRef.Object)
 	{
 		ThirdMoveAction = InputActionThirdPersonMoveRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionThirdCoveredMoveActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ThirdCoverdMoveAction.IA_ThirdCoverdMoveAction'"));
-	if (nullptr != InputActionThirdCoveredMoveActionRef.Object)
-	{
-		ThirdCoveredMoveAction = InputActionThirdCoveredMoveActionRef.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionThirdPersonLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ThirdLook.IA_ThirdLook'"));
@@ -107,7 +107,7 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	{
 		TakeCoverAction = InputActionTakeCoverRef.Object;
 	}
-	// AngleForEscapeCover = 135.f;
+	
 	CurrentCharacterControlType = ECharacterControlType::Third;
 
 	bIsFirstPersonPerspective = false;
@@ -124,7 +124,7 @@ void ACHCharacterPlayer::BeginPlay()
 	// InputVectorDirectionByCamera = 0.f;
 	StartingThirdPersonMeshLocation = GetMesh()->GetRelativeLocation();
 	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
-	SetPerspective(bIsFirstPersonPerspective);
+	SetPerspective();
 	SetCharacterControl(CurrentCharacterControlType);
 }
 
@@ -153,9 +153,9 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-	EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TogglePerspective);
+	EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::SetPerspective);
 	// EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ChangePerspectiveControlData);
 
 	
@@ -163,7 +163,7 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::FirstLook);
 	
 	EnhancedInputComponent->BindAction(ThirdMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdMove);
-	EnhancedInputComponent->BindAction(ThirdCoveredMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdCoveredMove);
+	// EnhancedInputComponent->BindAction(ThirdCoveredMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdCoveredMove);
 	EnhancedInputComponent->BindAction(ThirdLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdLook);
 
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartSprint);
@@ -173,25 +173,6 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ChangePrevWeaponAction, ETriggerEvent::Triggered, this, &ACHCharacterBase::PreviousWeapon);
 
 	EnhancedInputComponent->BindAction(TakeCoverAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TakeCover);
-}
-
-void ACHCharacterPlayer::ChangePerspectiveControlData()
-{
-	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim) return;
-	if (CurrentCharacterControlType == ECharacterControlType::First)
-	{
-		SetCharacterControl(ECharacterControlType::Third);
-		ThirdPersonCamera->SetActive(true);
-		CameraBoom->SetActive(true);
-		FirstPersonCamera->SetActive(false);
-	}
-	else if (CurrentCharacterControlType == ECharacterControlType::Third)
-	{
-		SetCharacterControl(ECharacterControlType::First);
-		FirstPersonCamera->SetActive(true);
-		ThirdPersonCamera->SetActive(false);
-		CameraBoom->SetActive(false);
-	}
 }
 
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
@@ -212,7 +193,7 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 
 	// Change IMC 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-	{
+	{		
 		// Subsystem->ClearAllMappings();
 		UInputMappingContext* PrevMappingContext = PrevCharacterControl->InputMappingContext;
 		if (PrevMappingContext)
@@ -239,8 +220,11 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	Super::SetCharacterControlData(CharacterControlData);
 
 	// ThirdPersonCamera->SetRelativeLocation(CharacterControlData->CameraPosition);
+	FirstPersonCamera->SetRelativeLocation(CharacterControlData->FP_CameraPosition);
+	FirstPersonCamera->FieldOfView = CharacterControlData->FP_FieldOfView;
+	ThirdPersonCamera->FieldOfView = CharacterControlData->TP_FieldOfView;
 	
-	CameraBoom->SocketOffset = CharacterControlData->CameraPosition;
+	CameraBoom->SocketOffset = CharacterControlData->TP_CameraPosition;	
 	CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
 	CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
 	CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
@@ -248,6 +232,21 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
 	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
 	CameraBoom->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
+}
+
+void ACHCharacterPlayer::Jump()
+{
+	Super::Jump();
+
+	if(bCovered)
+	{
+		
+	}
+	else
+	{
+		
+	}
+	
 }
 
 void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
@@ -282,38 +281,10 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>().GetSafeNormal();
 	// UE_LOG(LogTemp, Log, TEXT("MovementVector X: %f, Y: %f"), MovementVector.X, MovementVector.Y);
-	
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);				// (1,0,0)
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);					// (0,1,0)
-	
-	float speed = bSprint ? RunSpeed : WalkSpeed;
-	
-	// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
-	// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + RightDirection * 100.0f, 10.0f, FColor::Blue, false, -1, 0 ,5.0f);
-	
-	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
-	AddMovementInput(RightDirection, MovementVector.X * speed);
-	GetCharacterMovement()->MaxWalkSpeed = speed;
-	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d	WalkSpeed : %f	RunSpeed : %f	speed : %f"), bSprint, WalkSpeed, RunSpeed, speed);
-}
 
-void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
-{
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	AddControllerYawInput(LookAxisVector.X);
-	AddControllerPitchInput(LookAxisVector.Y);		// modify
-}
-
-void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
-{
-	FVector2D MovementVector = Value.Get<FVector2D>().GetSafeNormal();
-	
 	if(bCovered)
 	{
-		const FVector BackwardVector = GetActorForwardVector();
+		const FVector ForwardVector = GetActorForwardVector();
 		const FVector RightHand = GetActorRightVector();
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -344,7 +315,7 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 		FVector Start = RightHand * InputVectorDirectionByCamera * 45.0f  + GetActorLocation() + GetActorUpVector() * GetCapsuleComponent()->GetScaledCapsuleHalfHeight();			// 왼손, 오른손
 		// UE_LOG(LogTemp, Log, TEXT("GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : %f"), GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
 		// FVector Start = RightHand * AngleForDirection * 45.0f  + GetActorLocation();			// 왼손, 오른손
-		FVector End = Start + (BackwardVector * Range);											// 벽쪽으로 레이저. 근데 - 안붙혀도 뒤로 나간다. 
+		FVector End = Start + (ForwardVector * Range);											// 벽쪽으로 레이저. 근데 - 안붙혀도 뒤로 나간다. 
 		
 		FHitResult HitResult;
 		FCollisionQueryParams TraceParams(FName(TEXT("CoverTrace")), true, this);
@@ -363,7 +334,7 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 			// 카메라 이동
 			// AngleForDirection > 0     // 방향
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
-			CameraBoom->SocketOffset = FVector(NewCharacterControl->CameraPosition.X,NewCharacterControl->CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->CameraPosition.Z);
+			CameraBoom->SocketOffset = FVector(NewCharacterControl->TP_CameraPosition.X,NewCharacterControl->TP_CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->TP_CameraPosition.Z);
 			// UE_LOG(LogTemp, Log, TEXT("NewCharacterControl->CameraPosition.Y : %f"), NewCharacterControl->CameraPosition.Y);
 
 				
@@ -403,16 +374,46 @@ void ACHCharacterPlayer::ThirdCoveredMove(const FInputActionValue& Value)
 			SetCharacterControl(ECharacterControlType::Third);
 			bCovered = false;
 			UE_LOG(LogTemp, Log, TEXT("UnCovered"));
-		}
-
-		// 엄페 모서리에 도달 시 자동 해제... 는 아니고   
-		// if(HitDetected == false)  
-		
+		}		
 	}
+	else
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);	
+	
+		float speed = bSprint ? RunSpeed : WalkSpeed;
+	
+		// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
+		// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + RightDirection * 100.0f, 10.0f, FColor::Blue, false, -1, 0 ,5.0f);
+	
+		AddMovementInput(ForwardDirection, MovementVector.Y * speed);
+		AddMovementInput(RightDirection, MovementVector.X * speed);
+		GetCharacterMovement()->MaxWalkSpeed = speed;
+		// UE_LOG(LogTemp, Log, TEXT("bSprint : %d	WalkSpeed : %f	RunSpeed : %f	speed : %f"), bSprint, WalkSpeed, RunSpeed, speed);		
+	}	
+}
+
+void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
+{
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	AddControllerYawInput(LookAxisVector.X);
+	AddControllerPitchInput(LookAxisVector.Y);		// modify
 }
 
 void ACHCharacterPlayer::TakeCover()
 {
+	// 1인칭일 때는 비활성화
+	if(CurrentCharacterControlType == ECharacterControlType::First
+		|| CurrentCharacterControlType == ECharacterControlType::FirstAim
+		|| CurrentCharacterControlType == ECharacterControlType::FirstScopeAim )
+	{
+		// 기울이기 기능 넣자 ㅋㅋㅋ
+		return;
+	}
+	
 	// Not Covered 
 	if(!bCovered)
 	{
@@ -478,6 +479,7 @@ void ACHCharacterPlayer::TakeCover()
 				
 				// 입력 속성 변경
 				SetCharacterControl(ECharacterControlType::ThirdCover);
+				
 				UE_LOG(LogTemp, Log, TEXT("High Covered"));
 			}
 			else
@@ -511,7 +513,9 @@ void ACHCharacterPlayer::TakeCover()
 				GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
 				
 				// 입력 속성 변경
+				// 1인칭일 때는 무시
 				SetCharacterControl(ECharacterControlType::ThirdCover);
+				
 				UE_LOG(LogTemp, Log, TEXT("Low Covered"));
 			}			
 			bCovered = true;			
@@ -541,6 +545,7 @@ void ACHCharacterPlayer::TakeCover()
 		OnCoverState.Broadcast(false,false);
 		// 입력 속성 변경
 		SetCharacterControl(ECharacterControlType::Third);
+			
 		bCovered = false;
 		UE_LOG(LogTemp, Log, TEXT("UnCovered"));
 	}	
@@ -548,12 +553,11 @@ void ACHCharacterPlayer::TakeCover()
 
 void ACHCharacterPlayer::TogglePerspective()
 {
-
 	bIsFirstPersonPerspective = !bIsFirstPersonPerspective;
-	SetPerspective(bIsFirstPersonPerspective);
+	// SetPerspective(bIsFirstPersonPerspective);
 }
 
-void ACHCharacterPlayer::SetPerspective(bool InIsFirstPersonPerspective)
+void ACHCharacterPlayer::SetPerspective()
 {
 	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim) return;
 	if (CurrentCharacterControlType == ECharacterControlType::Third)
@@ -604,14 +608,14 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 		if(bAim)
 		{
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
-			CameraBoom->SocketOffset = FVector(NewCharacterControl->CameraPosition.X,NewCharacterControl->CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->CameraPosition.Z);
+			CameraBoom->SocketOffset = FVector(NewCharacterControl->TP_CameraPosition.X,NewCharacterControl->TP_CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->TP_CameraPosition.Z);
 			SetActorLocation(GetActorLocation() + MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius());
 			UE_LOG(LogTemp, Log, TEXT("+ MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius()"));				
 		}
 		else
 		{
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
-			CameraBoom->SocketOffset = FVector(NewCharacterControl->CameraPosition.X,NewCharacterControl->CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->CameraPosition.Z);
+			CameraBoom->SocketOffset = FVector(NewCharacterControl->TP_CameraPosition.X,NewCharacterControl->TP_CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->TP_CameraPosition.Z);
 			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius());
 		}
 		break;

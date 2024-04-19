@@ -180,18 +180,17 @@ void UCHWeaponComponent::AttachWeapon(ACHCharacterPlayer* TargetCharacter)
 void UCHWeaponComponent::PullTrigger()
 {	
 	Character->bUseControllerRotationYaw = true;
-	if (Character->CurrentCharacterControlType == ECharacterControlType::ThirdAim
-		|| Character->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	if (Character->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
 		// Fire();
-		Character->SetCombatMode(true);
+		Character->SetAiming(true);
 		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UCHWeaponComponent::Fire, FireInterval, true);
 	}
 	if (Character->CurrentCharacterControlType == ECharacterControlType::Third ||
 		Character->CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		// hold a gun
-		Character->SetCombatMode(true);
+		Character->SetAiming(true);
 		UE_LOG(LogTemp, Log, TEXT("SetCombatMode true"));
 		// holding a gun delay
 		GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
@@ -214,7 +213,7 @@ void UCHWeaponComponent::CancelPullTrigger()
 		Character->CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		// Cancel holding a gun
-		Character->SetCombatMode(false);
+		Character->SetAiming(false);
 		
 		GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
 	}
@@ -230,10 +229,10 @@ void UCHWeaponComponent::StartAim()
 	}
 	if (Character->CurrentCharacterControlType == ECharacterControlType::First)
 	{
-		Character->SetCharacterControl(ECharacterControlType::FirstAim);
+		// Character->SetCharacterControl(ECharacterControlType::FirstAim);
 	}
 	// if PullTriggering, pass
-	if(!bTrigger) Character->SetCombatMode(true);
+	if(!bTrigger) Character->SetAiming(true);
 }
 
 void UCHWeaponComponent::StopAim()
@@ -243,14 +242,14 @@ void UCHWeaponComponent::StopAim()
 		Character->SetCharacterControl(ECharacterControlType::Third);
 		
 	}
-	if (Character->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	/*if (Character->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
 		Character->SetCharacterControl(ECharacterControlType::First);
 		
-	}
+	}*/
 	if(!bTrigger)
 	{
-		Character->SetCombatMode(false); // if PullTriggering, pass
+		Character->SetAiming(false); // if PullTriggering, pass
 	}
 	else
 	{

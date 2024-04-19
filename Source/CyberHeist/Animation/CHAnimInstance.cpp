@@ -49,9 +49,18 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	ACHCharacterBase* OwnerActor = Cast<ACHCharacterBase>(Owner);
 	if (OwnerActor)
 	{
-		// OwnerActor->OnCombat.AddUObject(this, &UCHAnimInstance::SetCombatMode);
-		SetCombatMode(OwnerActor->GetCombatMode());
+		bAiming = OwnerActor->GetAiming();
+		bPrecisionAiming = OwnerActor->GetTPAimingCloser();
+		bScopeAiming = OwnerActor->GetScopeAiming();
 	}
+
+	// 1인칭 전용.. 이건 총마다 달라서 바꿔야 함.. 
+	if(bAiming)
+	{
+		if(bScopeAiming) CurrentWeaponState = EWeaponState::RifleScopeAiming;
+		else CurrentWeaponState = EWeaponState::RifleAiming;
+	}
+	else CurrentWeaponState = EWeaponState::Rifle;
 	
 	RecoilTemp = UKismetMathLibrary::TInterpTo(RecoilTemp, RecoilTransform, UGameplayStatics::GetWorldDeltaSeconds(this), 25.0f);
 
@@ -61,11 +70,6 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	// Roll = Rotator.Roll;
 	// Pitch = Rotator.Pitch;
 	// Yaw = Rotator.Yaw;
-}
-
-void UCHAnimInstance::SetCombatMode(uint8 combat)
-{
-	bCombat = combat;
 }
 
 void UCHAnimInstance::SetHighCover(uint8 TakeHighCover)

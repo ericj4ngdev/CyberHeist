@@ -18,13 +18,12 @@ UENUM()
 enum class ECharacterControlType : uint8
 {
 	First,
-	Third,
 	FirstAim,
+	FirstScopeAim,
+	Third,
 	ThirdAim,
 	ThirdCover,
-	ThirdCoverAim,
 	ThirdPrecisionAim,
-	FirstPrecisionAim
 };
 
 USTRUCT()
@@ -85,31 +84,45 @@ public:
 	FORCEINLINE ECharacterControlType GetCurrentCharacterControlType() { return CurrentCharacterControlType; }
 	FORCEINLINE void SetCurrentCharacterControlType(ECharacterControlType Type) {	CurrentCharacterControlType = Type;	}
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
-	uint8 bCombatMode : 1;
-	void SetCombatMode(uint8 bNewCombatMode);
-	uint8 GetCombatMode() { return bCombatMode; }
+	// Aim
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Aim)
+	uint8 bAiming : 1;
 
-	// Cover
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Aim)
+	uint8 bTPAimingCloser : 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	uint8 bFPScopeAiming : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> AimActionMontage;
+
+	void Aim();
+	
 public:
+	void SetAiming(uint8 bNewAiming);
+	FORCEINLINE uint8 GetAiming() const { return bAiming; }
+	FORCEINLINE void SetTPAimingCloser(uint8 bNewTPAimingCloser){ bTPAimingCloser = bNewTPAimingCloser; }
+	FORCEINLINE uint8 GetTPAimingCloser() const { return bTPAimingCloser; }
+	FORCEINLINE void SetScopeAiming(uint8 bNewFPScopeAiming){ bFPScopeAiming = bNewFPScopeAiming; }
+	FORCEINLINE uint8 GetScopeAiming() const { return bFPScopeAiming; }
+	
+	// Cover
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	uint8 bCovered : 1;	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> TakeCoverMontage;
-	
-	float CurrentDistanceFromWall;
+
+public:
+	FORCEINLINE uint8 GetCovered() const { return bCovered;}
+	// float CurrentDistanceFromWall;
 	
 public:
-	virtual void ChangePerspectiveControlData();
 	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType);
-	// Aim
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
-	TObjectPtr<class UAnimMontage> AimActionMontage;
 
-	void Aim();
 	// Dead
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
@@ -168,7 +181,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SneakSpeed;
 	
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	uint8 bSprint : 1;
 

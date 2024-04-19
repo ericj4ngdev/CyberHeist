@@ -186,5 +186,6 @@ public:
 	bool bIsEquipped;
 	// Called when the player picks up this weapon
 	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter);
+
 	
 };

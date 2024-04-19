@@ -33,7 +33,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	virtual void ChangePerspectiveControlData() override;
 	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType) override;
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData) override;
 
@@ -98,18 +97,19 @@ protected:
 	void StartAim();
 	void StopAim();*/
 
+	virtual void Jump() override;
+	
 	void FirstMove(const FInputActionValue& Value);
 	void FirstLook(const FInputActionValue& Value);
 	void ThirdMove(const FInputActionValue& Value);
 	void ThirdLook(const FInputActionValue& Value);
-	void ThirdCoveredMove(const FInputActionValue& Value);
 	void TakeCover();
 
 	// Toggles between perspectives
 	void TogglePerspective();
 
 	// Sets the perspective
-	void SetPerspective(bool InIsFirstPersonPerspective);
+	void SetPerspective();
 	
 	// Cover System
 public:	
