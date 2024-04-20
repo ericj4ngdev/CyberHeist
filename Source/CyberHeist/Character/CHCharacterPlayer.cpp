@@ -260,7 +260,8 @@ void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 	float speed = bSprint ? RunSpeed : WalkSpeed;
-
+	if(bAiming) speed = WalkSpeed;
+	
 	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
 	AddMovementInput(RightDirection, MovementVector.X * speed);
 
@@ -382,8 +383,9 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);	
-	
+
 		float speed = bSprint ? RunSpeed : WalkSpeed;
+		if(bAiming) speed = WalkSpeed;
 	
 		// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
 		// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + RightDirection * 100.0f, 10.0f, FColor::Blue, false, -1, 0 ,5.0f);
@@ -628,6 +630,11 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 void ACHCharacterPlayer::StartSprint() 
 {
 	if(GetCharacterMovement()->IsFalling()) return;
+	if(bAiming)
+	{
+		bSprint = false;		
+		return;
+	}
 	bSprint = true;
 }
 

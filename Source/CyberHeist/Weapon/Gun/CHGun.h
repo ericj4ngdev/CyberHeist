@@ -58,6 +58,9 @@ public:
 	TObjectPtr<class UAnimMontage> Fire1PMontage;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> Fire3PMontage;
+	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 	TObjectPtr<class UAnimMontage> AimFire1PMontage;
 	
 	

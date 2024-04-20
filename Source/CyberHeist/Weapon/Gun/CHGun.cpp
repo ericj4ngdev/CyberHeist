@@ -413,17 +413,18 @@ void ACHGun::FireLine()
 	}
 
 	// Get the animation object for the arms mesh
-	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr)
+	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
+	if (TPAnimInstance != nullptr)
 	{
+		TPAnimInstance->Montage_Play(Fire3PMontage, 1);
 		FPAnimInstance->Montage_Play(Fire1PMontage, 1);
-		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);		
+		/*UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(TPAnimInstance);		
 		if (CHAnimInstance)
 		{
 			// UE_LOG(LogTemp, Log, TEXT("ReCoil"));
 			CHAnimInstance->Recoil(10);
-		}
+		}*/
 	}
 	
 }
