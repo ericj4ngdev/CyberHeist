@@ -62,14 +62,6 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 	else CurrentWeaponState = EWeaponState::Rifle;
 	
-	/*RecoilTemp = UKismetMathLibrary::TInterpTo(RecoilTemp, RecoilTransform, UGameplayStatics::GetWorldDeltaSeconds(this), 25.0f);
-
-	RecoilTransform = UKismetMathLibrary::TInterpTo(RecoilTransform, FTransform(), UGameplayStatics::GetWorldDeltaSeconds(this), 15.0f);*/
-
-	// FRotator Rotator = UKismetMathLibrary::NormalizedDeltaRotator(Owner->GetBaseAimRotation(), Owner->GetActorRotation());
-	// Roll = Rotator.Roll;
-	// Pitch = Rotator.Pitch;
-	// Yaw = Rotator.Yaw;
 }
 
 void UCHAnimInstance::SetHighCover(uint8 TakeHighCover)

@@ -418,7 +418,8 @@ void ACHGun::FireLine()
 	if (TPAnimInstance != nullptr)
 	{
 		TPAnimInstance->Montage_Play(Fire3PMontage, 1);
-		FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+		if(OwningCharacter->GetScopeAiming()) FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
+		else FPAnimInstance->Montage_Play(Fire1PMontage, 1);
 		/*UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(TPAnimInstance);		
 		if (CHAnimInstance)
 		{

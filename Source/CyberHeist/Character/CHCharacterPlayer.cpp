@@ -628,13 +628,13 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 }
 
 void ACHCharacterPlayer::StartSprint() 
-{
-	if(GetCharacterMovement()->IsFalling()) return;
-	if(bAiming)
+{	
+	if(bAiming || GetCharacterMovement()->IsFalling())
 	{
 		bSprint = false;		
 		return;
 	}
+	// if() return;
 	bSprint = true;
 }
 
