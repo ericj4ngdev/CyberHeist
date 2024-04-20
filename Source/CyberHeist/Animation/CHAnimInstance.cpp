@@ -62,9 +62,9 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 	else CurrentWeaponState = EWeaponState::Rifle;
 	
-	RecoilTemp = UKismetMathLibrary::TInterpTo(RecoilTemp, RecoilTransform, UGameplayStatics::GetWorldDeltaSeconds(this), 25.0f);
+	/*RecoilTemp = UKismetMathLibrary::TInterpTo(RecoilTemp, RecoilTransform, UGameplayStatics::GetWorldDeltaSeconds(this), 25.0f);
 
-	RecoilTransform = UKismetMathLibrary::TInterpTo(RecoilTransform, FTransform(), UGameplayStatics::GetWorldDeltaSeconds(this), 15.0f);
+	RecoilTransform = UKismetMathLibrary::TInterpTo(RecoilTransform, FTransform(), UGameplayStatics::GetWorldDeltaSeconds(this), 15.0f);*/
 
 	// FRotator Rotator = UKismetMathLibrary::NormalizedDeltaRotator(Owner->GetBaseAimRotation(), Owner->GetActorRotation());
 	// Roll = Rotator.Roll;
@@ -127,6 +127,6 @@ void UCHAnimInstance::Recoil(float Multiplier)
 
 	RecoilLocation = FVector(RX, RY, RZ) * LocalMultiplier;
 
-	RecoilTransform.SetLocation(RecoilLocation);
-	RecoilTransform.SetRotation(RecoilRotationQuat);
+	// RecoilTransform.SetLocation(RecoilLocation);
+	// RecoilTransform.SetRotation(RecoilRotationQuat);
 }

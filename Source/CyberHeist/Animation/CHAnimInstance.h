@@ -29,6 +29,14 @@ enum class EWeaponState : uint8
 	RPGScopeAiming		UMETA(DisplayName = "RPG Scope Aiming"),
 };
 
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	Fist				UMETA(DisplayName = "Fist"),
+	Rifle				UMETA(DisplayName = "Rifle"),
+	MiniGun				UMETA(DisplayName = "MiniGun"),
+	RPG					UMETA(DisplayName = "RPG"),
+};
 
 /**
  * 
@@ -108,17 +116,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Rotator)
 	float Yaw;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
 	FTransform RecoilTransform;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
-	FTransform RecoilTemp;
+	FTransform RecoilTemp;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoverSystem)
 	ECoverState CurrentCoverState;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoverSystem)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	EWeaponState CurrentWeaponState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	EWeaponType CurrentWeapon;
 	
 public:
 	FORCEINLINE ECoverState GetCurrentCoverState() const {return CurrentCoverState;}
