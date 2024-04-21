@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Weapon/Gun/CHGun.h"
 #include "CHAnimInstance.generated.h"
-
 
 UENUM(BlueprintType)
 enum class ECoverState : uint8
@@ -27,15 +27,6 @@ enum class EWeaponState : uint8
 	RPG					UMETA(DisplayName = "RPG"),
 	RPGAiming			UMETA(DisplayName = "RPG Aiming"),
 	RPGScopeAiming		UMETA(DisplayName = "RPG Scope Aiming"),
-};
-
-UENUM(BlueprintType)
-enum class EWeaponType : uint8
-{
-	Fist				UMETA(DisplayName = "Fist"),
-	Rifle				UMETA(DisplayName = "Rifle"),
-	MiniGun				UMETA(DisplayName = "MiniGun"),
-	RPG					UMETA(DisplayName = "RPG"),
 };
 
 /**

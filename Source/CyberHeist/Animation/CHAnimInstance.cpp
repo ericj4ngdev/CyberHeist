@@ -52,16 +52,35 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bAiming = OwnerActor->GetAiming();
 		bPrecisionAiming = OwnerActor->GetTPAimingCloser();
 		bScopeAiming = OwnerActor->GetScopeAiming();
-		
+		// CurrentWeapon = OwnerActor->GetCurrentWeapon()->CurrentWeaponType;		
 	}
 
 	// 1인칭 전용.. 이건 총마다 달라서 바꿔야 함.. 
-	if(bAiming)
+	/*if(bAiming)
 	{
 		if(bScopeAiming) CurrentWeaponState = EWeaponState::RifleScopeAiming;
 		else CurrentWeaponState = EWeaponState::RifleAiming;
 	}
-	else CurrentWeaponState = EWeaponState::Rifle;
+	else CurrentWeaponState = EWeaponState::Rifle;*/
+
+	/*if (static_cast<uint8>(CurrentWeapon) == static_cast<uint8>(EWeaponType::Rifle))
+	{
+		if(bAiming)
+		{
+			if(bScopeAiming) CurrentWeaponState = EWeaponState::RifleScopeAiming;
+			else CurrentWeaponState = EWeaponState::RifleAiming;
+		}
+		else CurrentWeaponState = EWeaponState::Rifle;
+	}
+	else if(static_cast<uint8>(CurrentWeapon) == static_cast<uint8>(EWeaponType::RPG))
+	{
+		if(bAiming)
+		{
+			if(bScopeAiming) CurrentWeaponState = EWeaponState::RPGScopeAiming;
+			else CurrentWeaponState = EWeaponState::RPGAiming;
+		}
+		else CurrentWeaponState = EWeaponState::RPG;
+	}*/
 }
 
 void UCHAnimInstance::SetHighCover(uint8 TakeHighCover)

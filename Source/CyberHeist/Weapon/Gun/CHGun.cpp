@@ -120,7 +120,9 @@ void ACHGun::Equip()
 
 	if (WeaponMesh1P)
 	{
-		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, FName(TEXT("WeaponPoint")));
+		// FName(TEXT("WeaponPoint"))
+		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);
+		
 		// WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachPoint);
 		WeaponMesh1P->SetRelativeLocation(WeaponMesh1PEquippedRelativeLocation);
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
@@ -137,7 +139,9 @@ void ACHGun::Equip()
 	
 	if (WeaponMesh3P)
 	{		
-		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, FName(TEXT("Weapon_rSocket")));
+		// FName(TEXT("Weapon_rSocket"))
+		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
+		
 		// WeaponMesh3P->SetRelativeLocation(WeaponMesh3PEquippedRelativeLocation);
 		// WeaponMesh3P->SetRelativeRotation(FRotator(0, 0, -90.0f));
 		WeaponMesh3P->CastShadow = true;

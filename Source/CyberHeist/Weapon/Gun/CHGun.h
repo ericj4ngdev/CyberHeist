@@ -22,6 +22,14 @@ enum class EFireMode : uint8
 	BurstFire UMETA(DisplayName = "BurstFire")
 };
 
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	Rifle				UMETA(DisplayName = "Rifle"),
+	MiniGun				UMETA(DisplayName = "MiniGun"),
+	RPG					UMETA(DisplayName = "RPG"),
+};
+
 
 class ACHCharacterPlayer;
 
@@ -42,8 +50,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = Property)
 	FString GunName;	
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UAnimInstance> WeaponAnimInstance;*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	EWeaponType CurrentWeaponType;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -182,6 +190,11 @@ public:
 
 	uint8 bTrigger : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Properties")
+	FName AttachPoint1P;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Properties")
+	FName AttachPoint3P;
+	
 	// Input
 public:
 	/** MappingContext */
