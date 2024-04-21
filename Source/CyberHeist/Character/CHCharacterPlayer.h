@@ -109,7 +109,7 @@ protected:
 	void TogglePerspective();
 
 	// Sets the perspective
-	void SetPerspective();
+	void SetPerspective(uint8 Is1PPerspective);
 	
 	// Cover System
 public:	

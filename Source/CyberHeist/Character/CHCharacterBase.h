@@ -148,23 +148,22 @@ public:
 
 	void AttackHitCheck();
 	
-	FName GetWeaponAttachPoint();
+	FName GetWeaponAttachPoint() const;
+	uint8 IsInFirstPersonPerspective() const;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = Weapon)
 	FName WeaponAttachPoint;
-	
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	bool IsInFirstPersonPerspective() const;
-	
+		
 	UPROPERTY(BlueprintReadOnly, Category = Camera)
-	bool bIsFirstPersonPerspective;
+	uint8 bIsFirstPersonPerspective : 1;
 
 	UPROPERTY(BlueprintReadOnly, Category = Camera)
 	FVector StartingThirdPersonMeshLocation;
 
 	UPROPERTY(BlueprintReadOnly, Category = Camera)
 	FVector StartingFirstPersonMeshLocation;
-
+	
+	
 public:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class ACHGun> Weapon;*/

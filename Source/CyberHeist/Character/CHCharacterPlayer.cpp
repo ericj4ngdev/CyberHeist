@@ -124,8 +124,8 @@ void ACHCharacterPlayer::BeginPlay()
 	// InputVectorDirectionByCamera = 0.f;
 	StartingThirdPersonMeshLocation = GetMesh()->GetRelativeLocation();
 	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
-	SetPerspective();
 	SetCharacterControl(CurrentCharacterControlType);
+	SetPerspective(bIsFirstPersonPerspective);
 }
 
 void ACHCharacterPlayer::Tick(float DeltaTime)
@@ -155,7 +155,7 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-	EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::SetPerspective);
+	EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TogglePerspective);
 	// EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ChangePerspectiveControlData);
 
 	
@@ -372,7 +372,13 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 			OnCoverState.Broadcast(false, false);
 			UnCrouch();
 			// 입력 속성 변경
-			SetCharacterControl(ECharacterControlType::Third);
+
+			// Aim이면 조준상태 유지하면서 나오게 하기 위함
+			if(CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+			{
+				SetCharacterControl(ECharacterControlType::Third);
+			}			
+			
 			bCovered = false;
 			UE_LOG(LogTemp, Log, TEXT("UnCovered"));
 		}		
@@ -408,9 +414,7 @@ void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
 void ACHCharacterPlayer::TakeCover()
 {
 	// 1인칭일 때는 비활성화
-	if(CurrentCharacterControlType == ECharacterControlType::First
-		|| CurrentCharacterControlType == ECharacterControlType::FirstAim
-		|| CurrentCharacterControlType == ECharacterControlType::FirstScopeAim )
+	if(IsInFirstPersonPerspective())
 	{
 		// 기울이기 기능 넣자 ㅋㅋㅋ
 		return;
@@ -556,13 +560,13 @@ void ACHCharacterPlayer::TakeCover()
 void ACHCharacterPlayer::TogglePerspective()
 {
 	bIsFirstPersonPerspective = !bIsFirstPersonPerspective;
-	// SetPerspective(bIsFirstPersonPerspective);
+	SetPerspective(bIsFirstPersonPerspective);
 }
 
-void ACHCharacterPlayer::SetPerspective()
+void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 {
 	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim) return;
-	if (CurrentCharacterControlType == ECharacterControlType::Third)
+	if (Is1PPerspective)
 	{
 		// 1인칭
 		SetCharacterControl(ECharacterControlType::First);
@@ -576,7 +580,7 @@ void ACHCharacterPlayer::SetPerspective()
 		// Move third person mesh back so that the shadow doesn't look disconnected
 		GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation + FVector(-120.0f, 0.0f, 0.0f));
 	}
-	else if(CurrentCharacterControlType == ECharacterControlType::First)
+	else
 	{
 		SetCharacterControl(ECharacterControlType::Third);
 		

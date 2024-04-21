@@ -214,12 +214,12 @@ void ACHCharacterBase::AttackHitCheck()
 
 }
 
-FName ACHCharacterBase::GetWeaponAttachPoint()
+FName ACHCharacterBase::GetWeaponAttachPoint() const
 {
 	return WeaponAttachPoint;
 }
 
-bool ACHCharacterBase::IsInFirstPersonPerspective() const
+uint8 ACHCharacterBase::IsInFirstPersonPerspective() const
 {
 	return bIsFirstPersonPerspective;
 }

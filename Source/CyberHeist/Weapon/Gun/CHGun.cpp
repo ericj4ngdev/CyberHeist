@@ -72,6 +72,9 @@ ACHGun::ACHGun()
 
 	DefaultFireMode = EFireMode::SemiAutomatic;
 	// FireMode = DefaultFireMode;
+	
+	bReloading = false;
+	bInfiniteAmmo = false;
 }
 
 // Called when the game starts or when spawned
@@ -189,6 +192,8 @@ void ACHGun::Equip()
 
 			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGun::StartPrecisionAim);
 			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGun::StopPrecisionAim);
+
+			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGun::Reload);
 		}
 	}
 }
@@ -277,88 +282,12 @@ void ACHGun::EndShoot()
 	OwningCharacter->NotifyComboActionEnd();	 // AttackTask return Succeeded
 }
 
-void ACHGun::FireProjectile()
-{
-	if (OwningCharacter == nullptr || OwningCharacter->GetController() == nullptr)
-	{
-		return;
-	}
-	
-	/*if (MuzzleFlash != nullptr)
-	{
-		AActor* ActorOwner = GetOwner();
-		if (ActorOwner != nullptr)
-		{
-			UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, ActorOwner->GetRootComponent(), TEXT("MuzzleFlashSocket"));
-			if (ParticleComponent != nullptr)
-			{
-				ParticleComponent->Activate(true);
-				float Duration = 0.1f; 
-				FTimerHandle TimerHandle;
-				FTimerManager& TimerManager = GetWorld()->GetTimerManager();
-				TimerManager.SetTimer(TimerHandle, [ParticleComponent]()
-					{
-						if (ParticleComponent->IsValidLowLevel())
-						{
-							ParticleComponent->DeactivateSystem();
-						}
-					}, Duration, false);
-			}
-		}
-	}	*/
-
-	// Try and play effect
-	Effect->Activate(true);
-	float Duration = 0.1f; // Set the duration time in seconds
-	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGun::StopParticleSystem, Duration, false);
-
-	
-	// Try and fire a projectile
-	if (ProjectileClass != nullptr)
-	{
-		UWorld* const World = GetWorld();
-		if (World != nullptr)
-		{
-			APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController());
-			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
-			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-
-			//Set Spawn Collision Handling Override
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;			
-
-			ActorSpawnParams.Owner = GetOwner();
-			APawn* InstigatorPawn = Cast<APawn>(GetOwner());
-			ActorSpawnParams.Instigator = InstigatorPawn;
-
-			ACHProjectile* Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-			if(Projectile) Projectile->SetOwner(OwningCharacter);			// 
-		}
-	}
-
-	// Try and play the sound if specified
-	if (FireSound != nullptr)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwningCharacter->GetActorLocation());
-	}
-
-	// Get the animation object for the arms mesh
-	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr)
-	{
-		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
-		if (CHAnimInstance)
-		{
-			// UE_LOG(LogTemp, Log, TEXT("ReCoil"));
-			CHAnimInstance->Recoil(10);
-		}
-	}
-	
-}
-
 void ACHGun::FireLine()
 {
+	// 쏘는 몽타주가 여기 있다. 총알이 다 차거나 재장전 중일 때 예외처리는 여기서 해야할 듯. 
+	if(!bIsEquipped) return;
+	if(bReloading || CurrentAmmoInClip <= 0) return;
+		
 	// UE_LOG(LogTemp, Warning, TEXT("PullTrigger"));
 	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
 	Effect->Activate(true);
@@ -437,54 +366,104 @@ void ACHGun::FireLine()
 			CHAnimInstance->Recoil(10);
 		}*/
 	}
+	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
+}
+
+void ACHGun::FireProjectile()
+{
+	if(!bIsEquipped) return;
+	if(bReloading || CurrentAmmoInClip <= 0) return;
 	
+	if (OwningCharacter == nullptr || OwningCharacter->GetController() == nullptr)
+	{
+		return;
+	}
+	
+	/*if (MuzzleFlash != nullptr)
+	{
+		AActor* ActorOwner = GetOwner();
+		if (ActorOwner != nullptr)
+		{
+			UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, ActorOwner->GetRootComponent(), TEXT("MuzzleFlashSocket"));
+			if (ParticleComponent != nullptr)
+			{
+				ParticleComponent->Activate(true);
+				float Duration = 0.1f; 
+				FTimerHandle TimerHandle;
+				FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+				TimerManager.SetTimer(TimerHandle, [ParticleComponent]()
+					{
+						if (ParticleComponent->IsValidLowLevel())
+						{
+							ParticleComponent->DeactivateSystem();
+						}
+					}, Duration, false);
+			}
+		}
+	}	*/
+
+	// Try and play effect
+	Effect->Activate(true);
+	float Duration = 0.1f; // Set the duration time in seconds
+	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGun::StopParticleSystem, Duration, false);
+
+	
+	// Try and fire a projectile
+	if (ProjectileClass != nullptr)
+	{
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController());
+			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
+			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+
+			//Set Spawn Collision Handling Override
+			FActorSpawnParameters ActorSpawnParams;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;			
+
+			ActorSpawnParams.Owner = GetOwner();
+			APawn* InstigatorPawn = Cast<APawn>(GetOwner());
+			ActorSpawnParams.Instigator = InstigatorPawn;
+
+			ACHProjectile* Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			if(Projectile) Projectile->SetOwner(OwningCharacter);			// 
+		}
+	}
+
+	// Try and play the sound if specified
+	if (FireSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwningCharacter->GetActorLocation());
+	}
+
+	// Get the animation object for the arms mesh
+	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr)
+	{
+		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
+		if (CHAnimInstance)
+		{
+			// UE_LOG(LogTemp, Log, TEXT("ReCoil"));
+			CHAnimInstance->Recoil(10);
+		}
+	}
+	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;
 }
 
 void ACHGun::PullTriggerLine()
 {	
 	if(!bIsEquipped) return;
+	if(bReloading)
+	{
+		CancelPullTrigger();
+		return;
+	}
 
 	OwningCharacter->bUseControllerRotationYaw = true;
 
 	// not combat mode
-	/*if(OwningCharacter->GetAiming() == false)
-	{
-		OwningCharacter->SetAiming(true);
-
-		// no delay for hold gun
-		if(FireMode == EFireMode::Automatic)
-		{
-			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
-		}
-		if(FireMode == EFireMode::SemiAutomatic)
-		{
-			FireLine();					
-		}
-	}
-	else
-	{
-		// hold a gun
-		OwningCharacter->SetAiming(true);
-		// UE_LOG(LogTemp, Log, TEXT("SetCombatMode true"));
-
-		if(FireMode == EFireMode::Automatic)
-		{
-			// holding a gun delay
-			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-			{
-				// Fire();
-				// Activate the timer to continuously fire at intervals
-				GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
-			}, ShootingPreparationTime, false);	
-		}
-		if(FireMode == EFireMode::SemiAutomatic)
-		{
-			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-			{
-				FireLine();
-			}, ShootingPreparationTime, false);	
-		}
-	}*/
 
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
@@ -492,7 +471,6 @@ void ACHGun::PullTriggerLine()
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
 		OwningCharacter->SetAiming(true);
-		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGun::FireLine, FireInterval, true);
 
 		if(FireMode == EFireMode::Automatic)
 		{
@@ -532,12 +510,16 @@ void ACHGun::PullTriggerLine()
 		}
 	}
 	bTrigger = true;
-	
 }
 
 void ACHGun::PullTriggerProjectile()
 {
 	if(!bIsEquipped) return;
+	if(bReloading)
+	{
+		CancelPullTrigger();
+		return;
+	}
 	
 	OwningCharacter->bUseControllerRotationYaw = true;
 
@@ -588,6 +570,7 @@ void ACHGun::PullTriggerProjectile()
 void ACHGun::CancelPullTrigger()
 {
 	if(!bIsEquipped) return;
+	// if(bReloading) return;
 	
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 		OwningCharacter->bUseControllerRotationYaw = false; 
@@ -609,6 +592,12 @@ void ACHGun::CancelPullTrigger()
 void ACHGun::StartAim()
 {
 	if(!bIsEquipped) return;
+	if(bReloading)
+	{
+		// cancel aim
+		StopAim();
+		return;
+	}
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
@@ -646,6 +635,8 @@ void ACHGun::StartAim()
 void ACHGun::StopAim()
 {
 	if(!bIsEquipped) return;
+	// if(bReloading) return;
+	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
@@ -730,4 +721,86 @@ void ACHGun::StopParticleSystem()
 
 	// Deactivate the ParticleSystemComponent to stop playing the particle effect
 	Effect->Deactivate();
+}
+
+void ACHGun::Reload()
+{
+	if(bReloading) return;
+	if(bInfiniteAmmo) return;
+	// 소유한 총알 = 0
+	if(CurrentAmmo == 0)
+	{
+		UE_LOG(LogTemp,Log,TEXT("Find Ammo"));
+		return;
+	}
+
+	// 탄창에 총알 가득
+	if(CurrentAmmoInClip == ClipSize)
+	{
+		UE_LOG(LogTemp,Log,TEXT("Full Ammo"));
+		return;
+	}
+
+	// Reload
+	bReloading = true;
+
+	// 조준 중이라면 해제
+	if(OwningCharacter->IsInFirstPersonPerspective())
+	{
+		OwningCharacter->SetCharacterControl(ECharacterControlType::First);
+	}
+	else
+	{
+		// 엄폐는 유지
+		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+		{
+			OwningCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);			
+		}
+		else
+		{
+			OwningCharacter->SetCharacterControl(ECharacterControlType::Third);			
+		}
+	}
+	
+	// if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
+	
+	// 총 재장전 Animation Montage
+	if(ReloadWeaponMontage)
+	{
+		WeaponMesh1P->GetAnimInstance()->Montage_Play(ReloadWeaponMontage);
+		WeaponMesh3P->GetAnimInstance()->Montage_Play(ReloadWeaponMontage);		
+	}
+	
+	// 플레이어 재장전 Animation Montage
+	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
+	if (TPAnimInstance && FPAnimInstance)
+	{
+		TPAnimInstance->Montage_Play(Reload3PMontage, 1);
+		FPAnimInstance->Montage_Play(Reload1PMontage,1);
+	}
+
+	// 탄창 증가
+
+	// 총알이 있다면
+	if(CurrentAmmo > 0)
+	{
+		int32 NeededAmmo;
+		NeededAmmo = ClipSize - CurrentAmmoInClip;
+		if(CurrentAmmo > NeededAmmo)
+		{
+			CurrentAmmoInClip = ClipSize;
+			CurrentAmmo -= NeededAmmo;
+		}
+		else
+		{
+			CurrentAmmoInClip += CurrentAmmo;
+			CurrentAmmo = 0;
+		}		
+	}
+	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, [this]()
+	{
+		bReloading = false;		
+	}, ReloadInterval, false);
+	
 }

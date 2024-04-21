@@ -41,8 +41,11 @@ protected:
 public:
 	UPROPERTY(EditAnywhere, Category = Property)
 	FString GunName;	
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimInstance> WeaponAnimInstance;*/
 	
-public:
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class UCapsuleComponent> CollisionComp;
 
@@ -69,7 +72,17 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 	TObjectPtr<class UAnimMontage> AimFire1PMontage;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> Reload1PMontage;
 	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> Reload3PMontage;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> ReloadWeaponMontage;
+	
+public:
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	UAnimMontage* GetEquip1PMontage() const;
 
@@ -119,23 +132,30 @@ public:
 
 	// How much ammo in the clip the gun starts with
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
-	int32 PrimaryClipAmmo;
+	int32 CurrentAmmoInClip;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
-	int32 MaxPrimaryClipAmmo;
+	int32 ClipSize;
 
-	// How much ammo in the clip the gun starts with. Used for things like rifle grenades.
+	// Ammo except in clip
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
-	int32 SecondaryClipAmmo;
-
+	int32 CurrentAmmo;
+	
+	// maximum bullet capacity
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
-	int32 MaxSecondaryClipAmmo;
-
+	int32 MaxAmmoCapacity;
+	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
-	bool bInfiniteAmmo;
+	uint8 bReloading : 1;	
+	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
+	uint8 bInfiniteAmmo : 1;
 	
 	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
 	float FireInterval = 0.1f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	float ReloadInterval = 2.f;
 	
 	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
 	float ShootingPreparationTime = 0.2f;
@@ -158,6 +178,7 @@ public:
 	FTimerHandle DurationTimerHandle;	
 	FTimerHandle FireTimerHandle;
 	FTimerHandle ShootTimerHandle;
+	FTimerHandle ReloadTimerHandle;
 
 	uint8 bTrigger : 1;
 
@@ -181,6 +202,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> CancelPrecisionAimAction;
+
+	/** Reload Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ReloadAction;
 	
 	void PullTriggerProjectile();
 	void PullTriggerLine();
@@ -190,6 +215,7 @@ public:
 	void StartPrecisionAim();
 	void StopPrecisionAim();
 	void StopParticleSystem();
+	void Reload();
 
 	/** Make the weapon Fire a Line */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
