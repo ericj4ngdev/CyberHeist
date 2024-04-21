@@ -270,7 +270,7 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGun* NewWeapon, ACHGun* LastWeapon)
 		CurrentWeapon->Equip();
 
 		// change gun animation
-		/*UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
+		UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
 		if (Equip1PMontage && GetFirstPersonMesh())
 		{
 			GetFirstPersonMesh()->GetAnimInstance()->Montage_Play(Equip1PMontage);
@@ -279,8 +279,9 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGun* NewWeapon, ACHGun* LastWeapon)
 		UAnimMontage* Equip3PMontage = CurrentWeapon->GetEquip3PMontage();
 		if (Equip3PMontage && GetThirdPersonMesh())
 		{
+			UE_LOG(LogTemp, Log, TEXT("Equip3PMontage"));
 			GetThirdPersonMesh()->GetAnimInstance()->Montage_Play(Equip3PMontage);
-		}*/
+		}
 	}
 	else
 	{

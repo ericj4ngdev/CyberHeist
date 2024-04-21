@@ -39,6 +39,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	UPROPERTY(EditAnywhere, Category = Property)
+	FString GunName;	
+	
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class UCapsuleComponent> CollisionComp;
 
@@ -66,6 +70,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 	TObjectPtr<class UAnimMontage> AimFire1PMontage;
 	
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	UAnimMontage* GetEquip1PMontage() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	UAnimMontage* GetEquip3PMontage() const;
+
+
 	
 	// Relative Location of weapon 1P Mesh when equipped
 	UPROPERTY(EditAnywhere, Category = "Weapon")
@@ -105,6 +116,23 @@ public:
 	/** Projectile class to spawn */
 	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
 	TSubclassOf<class ACHProjectile> ProjectileClass;
+
+	// How much ammo in the clip the gun starts with
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
+	int32 PrimaryClipAmmo;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
+	int32 MaxPrimaryClipAmmo;
+
+	// How much ammo in the clip the gun starts with. Used for things like rifle grenades.
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
+	int32 SecondaryClipAmmo;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
+	int32 MaxSecondaryClipAmmo;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ammo")
+	bool bInfiniteAmmo;
 	
 	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
 	float FireInterval = 0.1f;

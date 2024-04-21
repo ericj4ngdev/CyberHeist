@@ -52,6 +52,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bAiming = OwnerActor->GetAiming();
 		bPrecisionAiming = OwnerActor->GetTPAimingCloser();
 		bScopeAiming = OwnerActor->GetScopeAiming();
+		
 	}
 
 	// 1인칭 전용.. 이건 총마다 달라서 바꿔야 함.. 
@@ -61,7 +62,6 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		else CurrentWeaponState = EWeaponState::RifleAiming;
 	}
 	else CurrentWeaponState = EWeaponState::Rifle;
-	
 }
 
 void UCHAnimInstance::SetHighCover(uint8 TakeHighCover)

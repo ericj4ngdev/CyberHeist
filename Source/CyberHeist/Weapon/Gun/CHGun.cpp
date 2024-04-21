@@ -84,6 +84,16 @@ void ACHGun::BeginPlay()
 	Super::BeginPlay();
 }
 
+UAnimMontage* ACHGun::GetEquip1PMontage() const
+{
+	return Equip1PMontage;
+}
+
+UAnimMontage* ACHGun::GetEquip3PMontage() const
+{
+	return Equip3PMontage;
+}
+
 void ACHGun::NotifyActorBeginOverlap(AActor* Other)
 {
 	Super::NotifyActorBeginOverlap(Other);
