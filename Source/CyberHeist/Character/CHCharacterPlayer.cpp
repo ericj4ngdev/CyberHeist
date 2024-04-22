@@ -236,16 +236,17 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 
 void ACHCharacterPlayer::Jump()
 {
-	Super::Jump();
+	if(CurrentWeapon->CurrentWeaponType == EWeapon::MiniGun)
+	{
+		return;
+	}
 
 	if(bCovered)
 	{
-		
+		return;
 	}
-	else
-	{
-		
-	}
+	
+	Super::Jump();
 	
 }
 
@@ -261,7 +262,10 @@ void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
 
 	float speed = bSprint ? RunSpeed : WalkSpeed;
 	if(bAiming) speed = WalkSpeed;
-	
+	if(CurrentWeapon)
+	{
+		if(CurrentWeapon->CurrentWeaponType == EWeapon::MiniGun) speed = WalkSpeed;
+	}
 	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
 	AddMovementInput(RightDirection, MovementVector.X * speed);
 
@@ -392,6 +396,10 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 
 		float speed = bSprint ? RunSpeed : WalkSpeed;
 		if(bAiming) speed = WalkSpeed;
+		if(CurrentWeapon)
+		{
+			if(CurrentWeapon->CurrentWeaponType == EWeapon::MiniGun) speed = WalkSpeed;
+		}
 	
 		// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
 		// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + RightDirection * 100.0f, 10.0f, FColor::Blue, false, -1, 0 ,5.0f);
@@ -418,6 +426,11 @@ void ACHCharacterPlayer::TakeCover()
 	{
 		// 기울이기 기능 넣자 ㅋㅋㅋ
 		return;
+	}
+	
+	if(CurrentWeapon)
+	{
+		if(CurrentWeapon->CurrentWeaponType == EWeapon::MiniGun) return;
 	}
 	
 	// Not Covered 

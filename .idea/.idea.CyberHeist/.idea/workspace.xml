@@ -11,86 +11,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6dc1dad0-e4e0-4a76-a3d7-d3fa40b954c0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist.dir/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist.dir/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist.dir/.idea/indexLayout.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist.dir/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist.dir/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/AssetPacks/ParagonWraith/Characters/Heroes/Wraith/Meshes/Wraith_Skeleton.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/AssetPacks/ParagonWraith/Characters/Heroes/Wraith/Meshes/Wraith_Skeleton.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCHCharacter_FP.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCHCharacter_FP.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCharacter_TP.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCharacter_TP.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/AM_FPP_RPG_Equip.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/AM_FPP_RPG_Equip.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/A_RPG_Aim.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/A_RPG_Aim.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/A_RPG_Idle.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/A_RPG_Idle.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/A_RPG_Reload.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/A_RPG_Reload.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/A_RPG_Shooting.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/A_RPG_Shooting.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Attack_01.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Attack_02.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Get_Weapon.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Hide.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Idle_01.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Idle_02.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Idle_03.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Idle_04.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Idle_Aim.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Idle_Aim1.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Idle_Sight.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Idle_Sight1.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Inspection_Weapon.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Jump.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Jump_End.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Jump_Loop.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Jump_Start.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Reload.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Run_01.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Run_02.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Shot.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Shot_Aim.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Shot_Sight.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Walk_01.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Walk_02.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Walk_Aim.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/Anim_Rocket_Launcher_Walk_Sight.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/ThirdPerson_Jump.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/RPG_RTK/ThirdPerson_Jump.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacte_Jump-End.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacte_Jump_Loop.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacte_Jump_Start.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacter-Standing_Run_Back.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacter-Unarmed_Walk_Back.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_Minigun_Shooting.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_Minigun_Shooting.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunslingerAnimation.uasset" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Weapon/BP_RPG.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Missile.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Missile.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Projectile.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Projectile.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Weapon/BP_MiniGun.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Weapon/BP_MiniGun.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/CharacterControl/CHC_TP_Aim.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/CharacterControl/CHC_TP_Aim.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/CharacterControl/CHC_TP_PrecisionAim.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/CharacterControl/CHC_TP_PrecisionAim.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Attack_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Attack_01.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Attack_02.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Attack_02.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Get_Weapon.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Get_Weapon.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Hide.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Hide.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Idle_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Idle_01.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Idle_02.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Idle_02.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Idle_Aim.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Idle_Aim.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Idle_Sight.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Idle_Sight.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Inspection_Weapon.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Inspection_Weapon.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Jump.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Jump.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Jump_End.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Jump_End.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Jump_Loop.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Jump_Loop.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Jump_Start.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Jump_Start.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Reload.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Reload.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Run_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Run_01.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Run_02.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Run_02.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Shot.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Shot.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Shot_Aim.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Shot_Aim.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Shot_Sight.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Shot_Sight.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Walk_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Walk_01.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Walk_02.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Walk_02.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Walk_Aim.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Walk_Aim.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Walk_Sight.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Animations/Arms/Anim_Rocket_Launcher_Walk_Sight.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Blueprints/AB_Rocket_Launcher.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Blueprints/AB_Rocket_Launcher.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/ShooterGame/Animations/FPP_Animations/HerroFPP_RifleAimFire_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ShooterGame/Animations/FPP_Animations/HerroFPP_RifleAimFire_Montage.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/ShooterGame/Characters/HeroFPP/HeroFPP_Skeleton.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ShooterGame/Characters/HeroFPP/HeroFPP_Skeleton.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Animation/CHAnimInstance.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Animation/CHAnimInstance.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Animation/CHAnimInstance.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Animation/CHAnimInstance.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGun.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGun.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGun.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGun.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,36 +39,36 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2fRHtEBLwP3cFxzaFyekbDfrYnT" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "C++ Project.CyberHeist.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;C++ Project.CyberHeist.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "rider.external.source.directories": [
-      "C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\DecompilerCache",
-      "C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\SourcesCache",
-      "C:\\Users\\Jang\\AppData\\Local\\Symbols\\src"
+  &quot;keyToStringList&quot;: {
+    &quot;rider.external.source.directories&quot;: [
+      &quot;C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\DecompilerCache&quot;,
+      &quot;C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\SourcesCache&quot;,
+      &quot;C:\\Users\\Jang\\AppData\\Local\\Symbols\\src&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="C++ Project.CyberHeist">
     <configuration name="CyberHeist" type="CppProject" factoryName="C++ Project">
       <configuration_1>
