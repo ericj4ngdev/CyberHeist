@@ -17,14 +17,15 @@ enum class ECoverState : uint8
 
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
-{	
-	Rifle				UMETA(DisplayName = "Rifle"),
+{
+	Fist				UMETA(DisplayName = "Fist Idle"),
+	FistAiming			UMETA(DisplayName = "Fist Aiming"),
+	Rifle				UMETA(DisplayName = "Rifle Idle"),
 	RifleAiming			UMETA(DisplayName = "Rifle Aiming"),
 	RifleScopeAiming	UMETA(DisplayName = "Rifle Scope Aiming"),
-	MiniGun				UMETA(DisplayName = "MiniGun"),
+	MiniGun				UMETA(DisplayName = "MiniGun Idle"),
 	MiniGunAiming		UMETA(DisplayName = "MiniGun Aiming"),
-	MiniGunScopeAiming	UMETA(DisplayName = "MiniGun Scope Aiming"),
-	RPG					UMETA(DisplayName = "RPG"),
+	RPG					UMETA(DisplayName = "RPG Idle"),
 	RPGAiming			UMETA(DisplayName = "RPG Aiming"),
 	RPGScopeAiming		UMETA(DisplayName = "RPG Scope Aiming"),
 };
@@ -120,7 +121,7 @@ protected:
 	EWeaponState CurrentWeaponState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	EWeaponType CurrentWeapon;
+	EWeapon CurrentWeapon;
 	
 public:
 	FORCEINLINE ECoverState GetCurrentCoverState() const {return CurrentCoverState;}

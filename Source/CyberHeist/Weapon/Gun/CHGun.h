@@ -17,17 +17,18 @@ enum class EWeaponShootType : uint8
 UENUM(BlueprintType)
 enum class EFireMode : uint8
 {
-	Automatic UMETA(DisplayName = "Automatic"),
-	SemiAutomatic UMETA(DisplayName = "Semi Automatic"),
-	BurstFire UMETA(DisplayName = "BurstFire")
+	Automatic		UMETA(DisplayName = "Automatic"),
+	SemiAutomatic	UMETA(DisplayName = "Semi Automatic"),
+	BurstFire		UMETA(DisplayName = "BurstFire")
 };
 
 UENUM(BlueprintType)
-enum class EWeaponType : uint8
+enum class EWeapon : uint8
 {
-	Rifle				UMETA(DisplayName = "Rifle"),
-	MiniGun				UMETA(DisplayName = "MiniGun"),
-	RPG					UMETA(DisplayName = "RPG"),
+	UnArmed,
+	Rifle,
+	MiniGun,
+	RPG,
 };
 
 
@@ -51,7 +52,7 @@ public:
 	FString GunName;	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	EWeaponType CurrentWeaponType;
+	EWeapon CurrentWeaponType;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -87,6 +88,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 	TObjectPtr<class UAnimMontage> Reload3PMontage;
 
+	/* 총 자체 재장전 애니메이션*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 	TObjectPtr<class UAnimMontage> ReloadWeaponMontage;
 	

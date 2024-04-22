@@ -233,8 +233,8 @@ public:
 	virtual void PreviousWeapon();
 
 protected:
-	UPROPERTY()
-	ACHGun* CurrentWeapon;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class ACHGun> CurrentWeapon;
 
 	// AI
 public:

@@ -358,17 +358,14 @@ void ACHGun::FireLine()
 	// Get the animation object for the arms mesh
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
 	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
-	if (TPAnimInstance != nullptr)
+	if (TPAnimInstance)
 	{
-		TPAnimInstance->Montage_Play(Fire3PMontage, 1);
+		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
+	}
+	if (FPAnimInstance)
+	{
 		if(OwningCharacter->GetScopeAiming()) FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
 		else FPAnimInstance->Montage_Play(Fire1PMontage, 1);
-		/*UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(TPAnimInstance);		
-		if (CHAnimInstance)
-		{
-			// UE_LOG(LogTemp, Log, TEXT("ReCoil"));
-			CHAnimInstance->Recoil(10);
-		}*/
 	}
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 }
@@ -383,29 +380,6 @@ void ACHGun::FireProjectile()
 		return;
 	}
 	
-	/*if (MuzzleFlash != nullptr)
-	{
-		AActor* ActorOwner = GetOwner();
-		if (ActorOwner != nullptr)
-		{
-			UParticleSystemComponent* ParticleComponent = UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, ActorOwner->GetRootComponent(), TEXT("MuzzleFlashSocket"));
-			if (ParticleComponent != nullptr)
-			{
-				ParticleComponent->Activate(true);
-				float Duration = 0.1f; 
-				FTimerHandle TimerHandle;
-				FTimerManager& TimerManager = GetWorld()->GetTimerManager();
-				TimerManager.SetTimer(TimerHandle, [ParticleComponent]()
-					{
-						if (ParticleComponent->IsValidLowLevel())
-						{
-							ParticleComponent->DeactivateSystem();
-						}
-					}, Duration, false);
-			}
-		}
-	}	*/
-
 	// Try and play effect
 	Effect->Activate(true);
 	float Duration = 0.1f; // Set the duration time in seconds
@@ -443,16 +417,18 @@ void ACHGun::FireProjectile()
 	}
 
 	// Get the animation object for the arms mesh
-	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr)
+	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
+	if (TPAnimInstance)
 	{
-		UCHAnimInstance* CHAnimInstance = Cast<UCHAnimInstance>(AnimInstance);
-		if (CHAnimInstance)
-		{
-			// UE_LOG(LogTemp, Log, TEXT("ReCoil"));
-			CHAnimInstance->Recoil(10);
-		}
+		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
 	}
+	if (FPAnimInstance)
+	{
+		if(OwningCharacter->GetScopeAiming()) FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
+		else FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+	}
+	
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;
 }
 
@@ -772,17 +748,14 @@ void ACHGun::Reload()
 	if(ReloadWeaponMontage)
 	{
 		WeaponMesh1P->GetAnimInstance()->Montage_Play(ReloadWeaponMontage);
-		WeaponMesh3P->GetAnimInstance()->Montage_Play(ReloadWeaponMontage);		
+		WeaponMesh3P->GetAnimInstance()->Montage_Play(ReloadWeaponMontage);				
 	}
 	
 	// 플레이어 재장전 Animation Montage
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
-	if (TPAnimInstance && FPAnimInstance)
-	{
-		TPAnimInstance->Montage_Play(Reload3PMontage, 1);
-		FPAnimInstance->Montage_Play(Reload1PMontage,1);
-	}
+	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();
+	if(FPAnimInstance) FPAnimInstance->Montage_Play(Reload1PMontage,1);
+	if(TPAnimInstance) TPAnimInstance->Montage_Play(Reload3PMontage, 1);
 
 	// 탄창 증가
 

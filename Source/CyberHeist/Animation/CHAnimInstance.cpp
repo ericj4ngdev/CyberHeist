@@ -52,9 +52,13 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bAiming = OwnerActor->GetAiming();
 		bPrecisionAiming = OwnerActor->GetTPAimingCloser();
 		bScopeAiming = OwnerActor->GetScopeAiming();
-		// CurrentWeapon = OwnerActor->GetCurrentWeapon()->CurrentWeaponType;		
+		if(OwnerActor->GetCurrentWeapon())
+		{
+			CurrentWeapon = OwnerActor->GetCurrentWeapon()->CurrentWeaponType;		
+			
+		}
 	}
-
+	
 	// 1인칭 전용.. 이건 총마다 달라서 바꿔야 함.. 
 	/*if(bAiming)
 	{
@@ -63,7 +67,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 	else CurrentWeaponState = EWeaponState::Rifle;*/
 
-	/*if (static_cast<uint8>(CurrentWeapon) == static_cast<uint8>(EWeaponType::Rifle))
+	if (CurrentWeapon == EWeapon::Rifle)
 	{
 		if(bAiming)
 		{
@@ -72,7 +76,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		}
 		else CurrentWeaponState = EWeaponState::Rifle;
 	}
-	else if(static_cast<uint8>(CurrentWeapon) == static_cast<uint8>(EWeaponType::RPG))
+	else if(CurrentWeapon == EWeapon::RPG)
 	{
 		if(bAiming)
 		{
@@ -80,7 +84,19 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			else CurrentWeaponState = EWeaponState::RPGAiming;
 		}
 		else CurrentWeaponState = EWeaponState::RPG;
-	}*/
+	}
+	else if(CurrentWeapon == EWeapon::MiniGun)
+	{
+		if(bAiming)
+		{
+			CurrentWeaponState = EWeaponState::MiniGunAiming;
+		}
+		else CurrentWeaponState = EWeaponState::MiniGun;
+	}
+	else if(CurrentWeapon == EWeapon::UnArmed)
+	{
+		CurrentWeaponState = EWeaponState::Fist;
+	}
 }
 
 void UCHAnimInstance::SetHighCover(uint8 TakeHighCover)
