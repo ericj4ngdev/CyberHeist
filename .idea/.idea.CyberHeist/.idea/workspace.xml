@@ -11,25 +11,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6dc1dad0-e4e0-4a76-a3d7-d3fa40b954c0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/AssetPacks/ParagonWraith/Characters/Heroes/Wraith/Meshes/Wraith_Skeleton.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/AssetPacks/ParagonWraith/Characters/Heroes/Wraith/Meshes/Wraith_Skeleton.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCharacter_TP.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCharacter_TP.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacte_Jump-End.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacte_Jump_Loop.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacte_Jump_Start.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacter-Standing_Run_Back.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunCharacter-Unarmed_Walk_Back.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_Minigun_Shooting.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_Minigun_Shooting.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/Minigun_RTK/A_MinigunslingerAnimation.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Missile.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Missile.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Projectile.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Projectile.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Weapon/BP_MiniGun.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Weapon/BP_MiniGun.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/CharacterControl/CHC_TP_Aim.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/CharacterControl/CHC_TP_Aim.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/CharacterControl/CHC_TP_PrecisionAim.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/CharacterControl/CHC_TP_PrecisionAim.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/ShooterGame/Characters/HeroFPP/HeroFPP_Skeleton.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ShooterGame/Characters/HeroFPP/HeroFPP_Skeleton.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCHCharacter_FP.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCHCharacter_FP.uasset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
