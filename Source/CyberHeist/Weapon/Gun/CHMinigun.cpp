@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Weapon/Gun/CHGunRifle.h"
+#include "Weapon/Gun/CHMinigun.h"
 #include "AIController.h"
 #include "CHProjectile.h"
 #include "EnhancedInputComponent.h"
@@ -17,15 +17,29 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 
-ACHGunRifle::ACHGunRifle() 
+ACHMinigun::ACHMinigun()
 {
+	DefaultFireMode = ECHFireMode::FullAuto;
+	
+	CannonMesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(FName("CannonMesh1P"));
+	CannonMesh1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CannonMesh1P->CastShadow = false;
+	CannonMesh1P->SetVisibility(false, true);
+	CannonMesh1P->SetupAttachment(WeaponMesh1P);
+	CannonMesh1P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+
+	CannonMesh3P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CannonMesh3P"));
+	CannonMesh3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CannonMesh3P->SetupAttachment(WeaponMesh3P);
+	CannonMesh3P->CastShadow = true;
+	CannonMesh3P->SetVisibility(true, true);
+	CannonMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 }
 
-void ACHGunRifle::Equip()
+void ACHMinigun::Equip()
 {
 	Super::Equip();
 
-	OwningCharacter->SetHasRifle(true);
 	
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
@@ -38,23 +52,23 @@ void ACHGunRifle::Equip()
 
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRifle::PullTrigger);	
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRifle::CancelPullTrigger);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRifle::StartAim);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRifle::StopAim);
-			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartPrecisionAim);
-			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StopPrecisionAim);
-			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRifle::Reload);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHMinigun::PullTrigger);	
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHMinigun::CancelPullTrigger);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHMinigun::StartAim);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHMinigun::StopAim);
+			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartPrecisionAim);
+			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StopPrecisionAim);
+			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHMinigun::Reload);
 		}
 	}
 }
 
-void ACHGunRifle::UnEquip()
+void ACHMinigun::UnEquip()
 {
 	Super::UnEquip();
 }
 
-void ACHGunRifle::Fire()
+void ACHMinigun::Fire()
 {
 	Super::Fire();
 	// 쏘는 몽타주가 여기 있다. 총알이 다 차거나 재장전 중일 때 예외처리는 여기서 해야할 듯. 
@@ -139,7 +153,7 @@ void ACHGunRifle::Fire()
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 }
 
-void ACHGunRifle::PullTrigger()
+void ACHMinigun::PullTrigger()
 {
 	Super::PullTrigger();
 	if(!bIsEquipped) return;
@@ -159,14 +173,9 @@ void ACHGunRifle::PullTrigger()
 	{
 		OwningCharacter->SetAiming(true);
 
-		if(FireMode == ECHFireMode::FullAuto)
-		{
-			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::Fire, FireInterval, true);
-		}
-		if(FireMode == ECHFireMode::SemiAuto)
-		{
-			Fire();					
-		}
+		// play rotating cannon animation 
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHMinigun::Fire, FireInterval, true);
+		
 	}
 
 	// 아직 조준하지 않은 상태. 
@@ -177,26 +186,17 @@ void ACHGunRifle::PullTrigger()
 		// hold a gun
 		OwningCharacter->SetAiming(true);
 
-		if(FireMode == ECHFireMode::FullAuto)
+		// holding a gun delay
+		GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
 		{
-			// holding a gun delay
-			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-			{
-				GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::Fire, FireInterval, true);
-			}, ShootingPreparationTime, false);	
-		}
-		if(FireMode == ECHFireMode::SemiAuto)
-		{
-			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-			{
-				Fire();
-			}, ShootingPreparationTime, false);	
-		}
+			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHMinigun::Fire, FireInterval, true);
+		}, ShootingPreparationTime, false);	
+		
 	}
 	bTrigger = true;
 }
 
-void ACHGunRifle::CancelPullTrigger()
+void ACHMinigun::CancelPullTrigger()
 {
 	Super::CancelPullTrigger();
 	if(!bIsEquipped) return;
@@ -218,7 +218,7 @@ void ACHGunRifle::CancelPullTrigger()
 	OwningCharacter->NotifyComboActionEnd();
 }
 
-void ACHGunRifle::StartAim()
+void ACHMinigun::StartAim()
 {
 	Super::StartAim();
 	if(!bIsEquipped) return;
@@ -262,7 +262,7 @@ void ACHGunRifle::StartAim()
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
 }
 
-void ACHGunRifle::StopAim()
+void ACHMinigun::StopAim()
 {
 	Super::StopAim();
 
@@ -301,7 +301,7 @@ void ACHGunRifle::StopAim()
 	}
 }
 
-void ACHGunRifle::StartPrecisionAim()
+void ACHMinigun::StartPrecisionAim()
 {
 	Super::StartPrecisionAim();
 	// 휠 올리면 호출되는 함수
@@ -325,7 +325,7 @@ void ACHGunRifle::StartPrecisionAim()
 	}
 }
 
-void ACHGunRifle::StopPrecisionAim()
+void ACHMinigun::StopPrecisionAim()
 {
 	Super::StopPrecisionAim();
 	// 휠 내리면 호출되는 함수
@@ -345,7 +345,7 @@ void ACHGunRifle::StopPrecisionAim()
 	}	
 }
 
-void ACHGunRifle::Reload()
+void ACHMinigun::Reload()
 {
 	Super::Reload();
 	if(bReloading) return;
@@ -424,17 +424,17 @@ void ACHGunRifle::Reload()
 	}, ReloadInterval, false);
 }
 
-void ACHGunRifle::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
+void ACHMinigun::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 {
 	Super::SetOwningCharacter(InOwningCharacter);
 }
 
-void ACHGunRifle::PickUpOnTouch(ACHCharacterBase* InCharacter)
+void ACHMinigun::PickUpOnTouch(ACHCharacterBase* InCharacter)
 {
 	Super::PickUpOnTouch(InCharacter);
 }
 
-void ACHGunRifle::StopParticleSystem()
+void ACHMinigun::StopParticleSystem()
 {
 	Super::StopParticleSystem();
 }

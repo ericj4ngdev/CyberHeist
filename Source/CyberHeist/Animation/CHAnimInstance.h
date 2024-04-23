@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Weapon/Gun/CHGun.h"
+#include "Weapon/Gun/CHGunBase.h"
 #include "CHAnimInstance.generated.h"
 
 UENUM(BlueprintType)
@@ -121,7 +121,7 @@ protected:
 	EWeaponState CurrentWeaponState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	EWeapon CurrentWeapon;
+	ECHWeaponType CurrentWeapon;
 	
 public:
 	FORCEINLINE ECoverState GetCurrentCoverState() const {return CurrentCoverState;}

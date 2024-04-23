@@ -12,6 +12,7 @@
 #include "UI/CHHpBarWidget.h"
 #include "Engine/DamageEvents.h"
 #include "MotionWarpingComponent.h"
+#include "Weapon/Gun/CHGunBase.h"
 
 
 // Sets default values
@@ -124,6 +125,8 @@ ACHCharacterBase::ACHCharacterBase()
 
 	// Motion
 	MotionWarpComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarping"));
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -131,7 +134,7 @@ void ACHCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Weapon = GetWorld()->SpawnActor<ACHGun>();
+	// Weapon = GetWorld()->SpawnActor<ACHGunBase>();
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
 	bCovered = false;
 	// Weapon->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon_rSocket"));
@@ -245,7 +248,7 @@ void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)
 	}
 }
 
-void ACHCharacterBase::AddWeaponToInventory(ACHGun* NewGun, bool bEquipWeapon)
+void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewGun, bool bEquipWeapon)
 {
 	Inventory.Weapons.Add(NewGun);
 	NewGun->SetOwningCharacter(this);
@@ -253,7 +256,7 @@ void ACHCharacterBase::AddWeaponToInventory(ACHGun* NewGun, bool bEquipWeapon)
 }
 
 
-void ACHCharacterBase::SetCurrentWeapon(ACHGun* NewWeapon, ACHGun* LastWeapon)
+void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon)
 {
 	if (NewWeapon == LastWeapon)
 	{
@@ -292,12 +295,12 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGun* NewWeapon, ACHGun* LastWeapon)
 	
 }
 
-void ACHCharacterBase::EquipWeapon(ACHGun* NewWeapon)
+void ACHCharacterBase::EquipWeapon(ACHGunBase* NewWeapon)
 {
 	SetCurrentWeapon(NewWeapon, CurrentWeapon);
 }
 
-void ACHCharacterBase::UnEquipWeapon(ACHGun* WeaponToUnEquip)
+void ACHCharacterBase::UnEquipWeapon(ACHGunBase* WeaponToUnEquip)
 {
 	if (WeaponToUnEquip)
 	{		
@@ -305,7 +308,7 @@ void ACHCharacterBase::UnEquipWeapon(ACHGun* WeaponToUnEquip)
 	}
 }
 
-ACHGun* ACHCharacterBase::GetCurrentWeapon() const
+ACHGunBase* ACHCharacterBase::GetCurrentWeapon() const
 {
 	return CurrentWeapon;
 }

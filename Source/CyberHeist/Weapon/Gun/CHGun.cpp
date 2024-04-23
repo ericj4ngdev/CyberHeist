@@ -237,18 +237,18 @@ void ACHGun::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 	AttachToComponent(OwningCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	if (OwningCharacter->GetCurrentWeapon() != this)
+	/*if (OwningCharacter->GetCurrentWeapon() != this)
 	{
 		WeaponMesh3P->CastShadow = false;
 		WeaponMesh3P->SetVisibility(true, true);
 		WeaponMesh3P->SetVisibility(false, true);
-	}
+	}*/
 }
 
 void ACHGun::PickUpOnTouch(ACHCharacterBase* InCharacter)
 {
 	// bIsEquipped = true;
-	InCharacter->AddWeaponToInventory(this,true);
+	// InCharacter->AddWeaponToInventory(this,true);
 }
 
 uint8 ACHGun::FireByAI()

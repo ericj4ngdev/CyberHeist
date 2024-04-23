@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Weapon/Gun/CHGun.h"
+#include "Weapon/Gun/CHGunBase.h"
 #include "Interface/CHCharacterWidgetInterface.h"
 #include "MotionWarpingComponent.h"
 #include "CHCharacterBase.generated.h"
@@ -32,7 +32,7 @@ struct CYBERHEIST_API FCHCharacterInventory
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	TArray<ACHGun*> Weapons;
+	TArray<ACHGunBase*> Weapons;
 
 	// Consumable items
 
@@ -166,7 +166,7 @@ public:
 	
 public:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class ACHGun> Weapon;*/
+	TObjectPtr<class ACHGunBase> Weapon;*/
 
 	// Walk speed
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
@@ -207,24 +207,24 @@ public:
 	FCHCharacterInventory Inventory;
 	
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "GASShooter|Inventory")
-	TArray<TSubclassOf<ACHGun>> DefaultInventoryWeaponClasses;
+	TArray<TSubclassOf<ACHGunBase>> DefaultInventoryWeaponClasses;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory", Meta = (AllowPrivateAccess = "true"))
-	TMap<FString, class ACHGun*> InventoryManager;
+	TMap<FString, class ACHGunBase*> InventoryManager;
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void AddWeaponToInventory(ACHGun* NewGun, bool bEquipWeapon);
+	void AddWeaponToInventory(ACHGunBase* NewGun, bool bEquipWeapon);
 
-	void SetCurrentWeapon(ACHGun* NewWeapon, ACHGun* LastWeapon);
+	void SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon);
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void EquipWeapon(ACHGun* NewWeapon);
+	void EquipWeapon(ACHGunBase* NewWeapon);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void UnEquipWeapon(ACHGun* WeaponToUnEquip);
+	void UnEquipWeapon(ACHGunBase* WeaponToUnEquip);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	ACHGun* GetCurrentWeapon() const;
+	ACHGunBase* GetCurrentWeapon() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	virtual void NextWeapon();
@@ -234,7 +234,7 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class ACHGun> CurrentWeapon;
+	TObjectPtr<class ACHGunBase> CurrentWeapon;
 
 	// AI
 public:

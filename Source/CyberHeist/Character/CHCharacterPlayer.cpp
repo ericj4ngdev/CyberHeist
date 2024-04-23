@@ -236,7 +236,8 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 
 void ACHCharacterPlayer::Jump()
 {
-	if(CurrentWeapon->CurrentWeaponType == EWeapon::MiniGun)
+	
+	if(CurrentWeapon && CurrentWeapon->WeaponType == ECHWeaponType::MiniGun)
 	{
 		return;
 	}
@@ -264,7 +265,7 @@ void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
 	if(bAiming) speed = WalkSpeed;
 	if(CurrentWeapon)
 	{
-		if(CurrentWeapon->CurrentWeaponType == EWeapon::MiniGun) speed = WalkSpeed;
+		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = WalkSpeed;
 	}
 	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
 	AddMovementInput(RightDirection, MovementVector.X * speed);
@@ -398,7 +399,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		if(bAiming) speed = WalkSpeed;
 		if(CurrentWeapon)
 		{
-			if(CurrentWeapon->CurrentWeaponType == EWeapon::MiniGun) speed = WalkSpeed;
+			if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = WalkSpeed;
 		}
 	
 		// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
@@ -430,7 +431,7 @@ void ACHCharacterPlayer::TakeCover()
 	
 	if(CurrentWeapon)
 	{
-		if(CurrentWeapon->CurrentWeaponType == EWeapon::MiniGun) return;
+		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) return;
 	}
 	
 	// Not Covered 

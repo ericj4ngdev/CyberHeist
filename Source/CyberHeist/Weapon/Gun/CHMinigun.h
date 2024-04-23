@@ -4,18 +4,25 @@
 
 #include "CoreMinimal.h"
 #include "Weapon/Gun/CHGunBase.h"
-#include "CHGunRifle.generated.h"
+#include "CHMinigun.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERHEIST_API ACHGunRifle : public ACHGunBase
+class CYBERHEIST_API ACHMinigun : public ACHGunBase
 {
 	GENERATED_BODY()
-	
+
 public:
-	ACHGunRifle();
+	ACHMinigun();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<class USkeletalMeshComponent> CannonMesh1P;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<class USkeletalMeshComponent> CannonMesh3P;
 
 public:
 	virtual void Equip() override;
@@ -33,5 +40,5 @@ public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
 	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 
 	virtual void StopParticleSystem() override;
-
+	
 };

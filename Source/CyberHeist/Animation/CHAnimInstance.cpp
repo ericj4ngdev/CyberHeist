@@ -54,7 +54,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bScopeAiming = OwnerActor->GetScopeAiming();
 		if(OwnerActor->GetCurrentWeapon())
 		{
-			CurrentWeapon = OwnerActor->GetCurrentWeapon()->CurrentWeaponType;		
+			CurrentWeapon = OwnerActor->GetCurrentWeapon()->WeaponType;		
 			
 		}
 	}
@@ -67,7 +67,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 	else CurrentWeaponState = EWeaponState::Rifle;*/
 
-	if (CurrentWeapon == EWeapon::Rifle)
+	if (CurrentWeapon == ECHWeaponType::Rifle)
 	{
 		if(bAiming)
 		{
@@ -76,7 +76,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		}
 		else CurrentWeaponState = EWeaponState::Rifle;
 	}
-	else if(CurrentWeapon == EWeapon::RPG)
+	else if(CurrentWeapon == ECHWeaponType::RPG)
 	{
 		if(bAiming)
 		{
@@ -85,7 +85,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		}
 		else CurrentWeaponState = EWeaponState::RPG;
 	}
-	else if(CurrentWeapon == EWeapon::MiniGun)
+	else if(CurrentWeapon == ECHWeaponType::MiniGun)
 	{
 		if(bAiming)
 		{
@@ -93,7 +93,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		}
 		else CurrentWeaponState = EWeaponState::MiniGun;
 	}
-	else if(CurrentWeapon == EWeapon::UnArmed)
+	else if(CurrentWeapon == ECHWeaponType::UnArmed)
 	{
 		CurrentWeaponState = EWeaponState::Fist;
 	}

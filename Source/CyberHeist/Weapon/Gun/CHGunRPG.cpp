@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Weapon/Gun/CHGunRifle.h"
+#include "Weapon/Gun/CHGunRPG.h"
 #include "AIController.h"
 #include "CHProjectile.h"
 #include "EnhancedInputComponent.h"
@@ -17,16 +17,43 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 
-ACHGunRifle::ACHGunRifle() 
+ACHGunRPG::ACHGunRPG()
 {
+	DefaultFireMode = ECHFireMode::SemiAuto;
+
+	ScopeMesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(FName("ScopeMesh1P"));
+	ScopeMesh1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	ScopeMesh1P->CastShadow = false;
+	ScopeMesh1P->SetVisibility(false, true);
+	ScopeMesh1P->SetupAttachment(WeaponMesh1P);
+	ScopeMesh1P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+
+	ScopeMesh3P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ScopeMesh3P"));
+	ScopeMesh3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	ScopeMesh3P->SetupAttachment(WeaponMesh3P);
+	ScopeMesh3P->CastShadow = true;
+	ScopeMesh3P->SetVisibility(true, true);
+	ScopeMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+
+	MissileMesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(FName("MissileMesh1P"));
+	MissileMesh1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	MissileMesh1P->CastShadow = false;
+	MissileMesh1P->SetVisibility(false, true);
+	MissileMesh1P->SetupAttachment(WeaponMesh1P);
+	MissileMesh1P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+
+	MissileMesh3P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MissileMesh3P"));
+	MissileMesh3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	MissileMesh3P->SetupAttachment(WeaponMesh3P);
+	MissileMesh3P->CastShadow = true;
+	MissileMesh3P->SetVisibility(true, true);
+	MissileMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 }
 
-void ACHGunRifle::Equip()
+void ACHGunRPG::Equip()
 {
 	Super::Equip();
 
-	OwningCharacter->SetHasRifle(true);
-	
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{		
@@ -38,83 +65,61 @@ void ACHGunRifle::Equip()
 
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRifle::PullTrigger);	
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRifle::CancelPullTrigger);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRifle::StartAim);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRifle::StopAim);
-			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartPrecisionAim);
-			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StopPrecisionAim);
-			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRifle::Reload);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRPG::PullTrigger);	
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRPG::CancelPullTrigger);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRPG::StartAim);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
+			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
+			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);
+			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRPG::Reload);
 		}
 	}
+	
 }
 
-void ACHGunRifle::UnEquip()
+void ACHGunRPG::UnEquip()
 {
 	Super::UnEquip();
 }
 
-void ACHGunRifle::Fire()
+void ACHGunRPG::Fire()
 {
 	Super::Fire();
-	// 쏘는 몽타주가 여기 있다. 총알이 다 차거나 재장전 중일 때 예외처리는 여기서 해야할 듯. 
 	if(!bIsEquipped) return;
 	if(bReloading || CurrentAmmoInClip <= 0) return;
-		
-	// UE_LOG(LogTemp, Warning, TEXT("PullTrigger"));
-	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
+	
+	if (OwningCharacter == nullptr || OwningCharacter->GetController() == nullptr)
+	{
+		return;
+	}
+	
+	// Try and play effect
 	Effect->Activate(true);
 	float Duration = 0.1f; // Set the duration time in seconds
-	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunBase::StopParticleSystem, Duration, false);
+	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunRPG::StopParticleSystem, Duration, false);
 
-	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (OwnerPawn == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerPawn"));
-		return;
-	}
-	AController* OwnerController = OwnerPawn->GetController();
-	ensure(OwnerController);
-	if (OwnerController == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
-		return;
-	}
-
-	FVector Location;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(Location, Rotation);
-
-	AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
-	if(AIController)
-	{		
-		// Location, Rotation을 총구로 설정하기
-		Rotation = GetOwner()->GetActorRotation();
-		Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
-	}
 	
-	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
-	
-	FVector End = Location + Rotation.Vector() * MaxRange;
-
-	// LineTrace
-	FHitResult Hit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
-
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
-	if (bSuccess)
+	// Try and fire a projectile
+	if (ProjectileClass != nullptr)
 	{
-		FVector ShotDirection = -Rotation.Vector();
-		DrawDebugPoint(GetWorld(), Hit.Location, 20, FColor::Red, true);
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),ImpactEffect, Hit.Location, ShotDirection.Rotation());
-
-		AActor* HitActor = Hit.GetActor();
-		if (HitActor != nullptr)
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
 		{
-			FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
-			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
+			APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController());
+			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
+			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+
+			//Set Spawn Collision Handling Override
+			FActorSpawnParameters ActorSpawnParams;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;			
+
+			ActorSpawnParams.Owner = GetOwner();
+			APawn* InstigatorPawn = Cast<APawn>(GetOwner());
+			ActorSpawnParams.Instigator = InstigatorPawn;
+
+			ACHProjectile* Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			if(Projectile) Projectile->SetOwner(OwningCharacter);			// 
 		}
 	}
 
@@ -136,10 +141,11 @@ void ACHGunRifle::Fire()
 		if(OwningCharacter->GetScopeAiming()) FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
 		else FPAnimInstance->Montage_Play(Fire1PMontage, 1);
 	}
-	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
+	
+	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;
 }
 
-void ACHGunRifle::PullTrigger()
+void ACHGunRPG::PullTrigger()
 {
 	Super::PullTrigger();
 	if(!bIsEquipped) return;
@@ -158,15 +164,8 @@ void ACHGunRifle::PullTrigger()
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
 		OwningCharacter->SetAiming(true);
-
-		if(FireMode == ECHFireMode::FullAuto)
-		{
-			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::Fire, FireInterval, true);
-		}
-		if(FireMode == ECHFireMode::SemiAuto)
-		{
-			Fire();					
-		}
+		Fire();					
+		
 	}
 
 	// 아직 조준하지 않은 상태. 
@@ -177,26 +176,16 @@ void ACHGunRifle::PullTrigger()
 		// hold a gun
 		OwningCharacter->SetAiming(true);
 
-		if(FireMode == ECHFireMode::FullAuto)
+		GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
 		{
-			// holding a gun delay
-			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-			{
-				GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::Fire, FireInterval, true);
-			}, ShootingPreparationTime, false);	
-		}
-		if(FireMode == ECHFireMode::SemiAuto)
-		{
-			GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
-			{
-				Fire();
-			}, ShootingPreparationTime, false);	
-		}
+			Fire();
+		}, ShootingPreparationTime, false);	
+		
 	}
 	bTrigger = true;
 }
 
-void ACHGunRifle::CancelPullTrigger()
+void ACHGunRPG::CancelPullTrigger()
 {
 	Super::CancelPullTrigger();
 	if(!bIsEquipped) return;
@@ -218,7 +207,7 @@ void ACHGunRifle::CancelPullTrigger()
 	OwningCharacter->NotifyComboActionEnd();
 }
 
-void ACHGunRifle::StartAim()
+void ACHGunRPG::StartAim()
 {
 	Super::StartAim();
 	if(!bIsEquipped) return;
@@ -262,7 +251,7 @@ void ACHGunRifle::StartAim()
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
 }
 
-void ACHGunRifle::StopAim()
+void ACHGunRPG::StopAim()
 {
 	Super::StopAim();
 
@@ -301,7 +290,7 @@ void ACHGunRifle::StopAim()
 	}
 }
 
-void ACHGunRifle::StartPrecisionAim()
+void ACHGunRPG::StartPrecisionAim()
 {
 	Super::StartPrecisionAim();
 	// 휠 올리면 호출되는 함수
@@ -325,7 +314,7 @@ void ACHGunRifle::StartPrecisionAim()
 	}
 }
 
-void ACHGunRifle::StopPrecisionAim()
+void ACHGunRPG::StopPrecisionAim()
 {
 	Super::StopPrecisionAim();
 	// 휠 내리면 호출되는 함수
@@ -345,7 +334,7 @@ void ACHGunRifle::StopPrecisionAim()
 	}	
 }
 
-void ACHGunRifle::Reload()
+void ACHGunRPG::Reload()
 {
 	Super::Reload();
 	if(bReloading) return;
@@ -424,17 +413,17 @@ void ACHGunRifle::Reload()
 	}, ReloadInterval, false);
 }
 
-void ACHGunRifle::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
+void ACHGunRPG::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 {
 	Super::SetOwningCharacter(InOwningCharacter);
 }
 
-void ACHGunRifle::PickUpOnTouch(ACHCharacterBase* InCharacter)
+void ACHGunRPG::PickUpOnTouch(ACHCharacterBase* InCharacter)
 {
 	Super::PickUpOnTouch(InCharacter);
 }
 
-void ACHGunRifle::StopParticleSystem()
+void ACHGunRPG::StopParticleSystem()
 {
 	Super::StopParticleSystem();
 }
