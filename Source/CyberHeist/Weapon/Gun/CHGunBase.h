@@ -82,7 +82,10 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 	TObjectPtr<class UAnimMontage> Reload3PMontage;
-
+	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> WeaponMeshFireMontage;
+	
 	/* 총 자체 재장전 애니메이션*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 	TObjectPtr<class UAnimMontage> ReloadWeaponMontage;

@@ -34,6 +34,19 @@ ACHMinigun::ACHMinigun()
 	CannonMesh3P->CastShadow = true;
 	CannonMesh3P->SetVisibility(true, true);
 	CannonMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> RotateMontageAsset(TEXT("/Script/Engine.AnimMontage'/Game/Minigun/Animations/A_Minigun/AM_Minigun-Cano_Rotation.AM_Minigun-Cano_Rotation'"));
+	if (RotateMontageAsset.Succeeded())
+	{
+		CannonRotateMontage = RotateMontageAsset.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to find CannonRotateMontage asset!"));
+	}
+	
+	bAiming = false;
+	bShooting = false;
 }
 
 void ACHMinigun::Equip()
@@ -138,6 +151,14 @@ void ACHMinigun::Fire()
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwningCharacter->GetActorLocation());
 	}
 
+	UAnimInstance* Weapon1pAnimInstance = WeaponMesh1P->GetAnimInstance();
+	UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+	if(WeaponMeshFireMontage)
+	{
+		Weapon1pAnimInstance->Montage_Play(WeaponMeshFireMontage);
+		Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
+	}
+	
 	// Get the animation object for the arms mesh
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
 	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
@@ -147,9 +168,9 @@ void ACHMinigun::Fire()
 	}
 	if (FPAnimInstance)
 	{
-		if(OwningCharacter->GetScopeAiming()) FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
-		else FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+		FPAnimInstance->Montage_Play(Fire1PMontage, 1);
 	}
+	
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 }
 
@@ -163,8 +184,42 @@ void ACHMinigun::PullTrigger()
 		return;
 	}
 
+	bShooting = true;
+	
 	OwningCharacter->bUseControllerRotationYaw = true;
 
+	// 총 발사 Animation Montage
+	if(CannonRotateMontage == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CannonRotateMontage is null"));
+		return;
+	}
+		
+	if(CannonMesh1P == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CannonMesh1P is null"));
+		return;
+	}
+	
+	if(CannonMesh3P == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CannonMesh3P is null"));
+		return;
+	}
+		
+	UAnimInstance* Cannon1pAnimInstance = CannonMesh1P->GetAnimInstance();
+	if(!Cannon1pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+	{
+		Cannon1pAnimInstance->Montage_Play(CannonRotateMontage, 1.f);				
+	}
+
+	UAnimInstance* Cannon3pAnimInstance = CannonMesh3P->GetAnimInstance();
+	if(!Cannon3pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+	{
+		Cannon3pAnimInstance->Montage_Play(CannonRotateMontage, 1.f);				
+	}
+	
+	
 	// not aiming mode
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
@@ -200,6 +255,50 @@ void ACHMinigun::CancelPullTrigger()
 {
 	Super::CancelPullTrigger();
 	if(!bIsEquipped) return;
+
+	bShooting = false;
+
+	UAnimInstance* Weapon1pAnimInstance = WeaponMesh1P->GetAnimInstance();
+	UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+	if(WeaponMeshFireMontage)
+	{
+		Weapon1pAnimInstance->Montage_Stop(2.0f,WeaponMeshFireMontage);
+		Weapon3pAnimInstance->Montage_Stop(2.0f,WeaponMeshFireMontage);
+	}
+	
+	if(bAiming == false)
+	{
+		// 총 발사 Animation Montage
+		if(CannonRotateMontage == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CannonRotateMontage is null"));
+			return;
+		}
+		
+		if(CannonMesh1P == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CannonMesh1P is null"));
+			return;
+		}
+	
+		if(CannonMesh3P == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CannonMesh3P is null"));
+			return;
+		}
+		
+		UAnimInstance* Cannon1pAnimInstance = CannonMesh1P->GetAnimInstance();
+		if(Cannon1pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+		{
+			Cannon1pAnimInstance->Montage_Stop(1.f, CannonRotateMontage);				
+		}
+
+		UAnimInstance* Cannon3pAnimInstance = CannonMesh3P->GetAnimInstance();
+		if(Cannon3pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+		{
+			Cannon3pAnimInstance->Montage_Stop(1.f, CannonRotateMontage);				
+		}
+	}
 	
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 		OwningCharacter->bUseControllerRotationYaw = false; 
@@ -227,6 +326,38 @@ void ACHMinigun::StartAim()
 		// cancel aim
 		StopAim();
 		return;
+	}
+	bAiming = true;
+	
+	// 총 발사 Animation Montage
+	if(CannonRotateMontage == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CannonRotateMontage is null"));
+		return;
+	}
+		
+	if(CannonMesh1P == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CannonMesh1P is null"));
+		return;
+	}
+	
+	if(CannonMesh3P == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CannonMesh3P is null"));
+		return;
+	}
+		
+	UAnimInstance* Cannon1pAnimInstance = CannonMesh1P->GetAnimInstance();
+	if(!Cannon1pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+	{
+		Cannon1pAnimInstance->Montage_Play(CannonRotateMontage);
+	}
+
+	UAnimInstance* Cannon3pAnimInstance = CannonMesh3P->GetAnimInstance();
+	if(!Cannon3pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+	{
+		Cannon3pAnimInstance->Montage_Play(CannonRotateMontage);				
 	}
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
@@ -268,6 +399,41 @@ void ACHMinigun::StopAim()
 
 	if(!bIsEquipped) return;
 	// if(bReloading) return;
+
+	bAiming = false;
+	if(bShooting == false)
+	{
+		// 총 발사 Animation Montage
+		if(CannonRotateMontage == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CannonRotateMontage is null"));
+			return;
+		}
+		
+		if(CannonMesh1P == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CannonMesh1P is null"));
+			return;
+		}
+	
+		if(CannonMesh3P == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CannonMesh3P is null"));
+			return;
+		}
+		
+		UAnimInstance* Cannon1pAnimInstance = CannonMesh1P->GetAnimInstance();
+		if(Cannon1pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+		{
+			Cannon1pAnimInstance->Montage_Stop(1.f, CannonRotateMontage);				
+		}
+
+		UAnimInstance* Cannon3pAnimInstance = CannonMesh3P->GetAnimInstance();
+		if(Cannon3pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+		{
+			Cannon3pAnimInstance->Montage_Stop(1.f, CannonRotateMontage);				
+		}
+	}	
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
@@ -318,11 +484,11 @@ void ACHMinigun::StartPrecisionAim()
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
 	}
 
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	/*if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
 		PlayerCharacter->SetScopeAiming(true);
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-	}
+	}*/
 }
 
 void ACHMinigun::StopPrecisionAim()
@@ -338,11 +504,11 @@ void ACHMinigun::StopPrecisionAim()
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);		
 	}
 	
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+	/*if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
 		PlayerCharacter->SetScopeAiming(false);
-	}	
+	}*/
 }
 
 void ACHMinigun::Reload()

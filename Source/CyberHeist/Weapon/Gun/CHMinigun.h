@@ -24,6 +24,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class USkeletalMeshComponent> CannonMesh3P;
 
+protected:
+	/* cannon rotate */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> CannonRotateMontage;
+	
 public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;
@@ -40,5 +45,8 @@ public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
 	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 
 	virtual void StopParticleSystem() override;
-	
+
+private:
+	uint8 bAiming;
+	uint8 bShooting;
 };
