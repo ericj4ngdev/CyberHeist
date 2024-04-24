@@ -16,6 +16,7 @@
 
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 ACHGunRPG::ACHGunRPG()
 {
@@ -48,6 +49,13 @@ ACHGunRPG::ACHGunRPG()
 	MissileMesh3P->CastShadow = true;
 	MissileMesh3P->SetVisibility(true, true);
 	MissileMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	
+	
+}
+
+void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
+{
+	Reload();
 }
 
 void ACHGunRPG::Equip()
@@ -71,7 +79,7 @@ void ACHGunRPG::Equip()
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
 			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
 			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);
-			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRPG::Reload);
+			// EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRPG::Reload);
 		}
 	}
 	
@@ -92,36 +100,110 @@ void ACHGunRPG::Fire()
 	{
 		return;
 	}
+
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (OwnerPawn == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerPawn"));
+		return;
+	}
+	AController* OwnerController = OwnerPawn->GetController();
+	ensure(OwnerController);
+	if (OwnerController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+		return;
+	}
+
+	FVector Start;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(Start, Rotation);
+	
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+	
+	AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
+	if(AIController)
+	{		
+		// Location, Rotation을 총구로 설정하기
+		Rotation = GetOwner()->GetActorRotation();
+		Start = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
+	}
+	
+	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
+	
+	FVector End = Start + Rotation.Vector() * MaxRange;
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult,Start,End, ECollisionChannel::ECC_GameTraceChannel1, Params);
+	FVector HitTarget = FVector{};
+
+	// ====================================
 	
 	// Try and play effect
-	Effect->Activate(true);
-	float Duration = 0.1f; // Set the duration time in seconds
+	float Duration = 0.1f;				// Set the duration time in seconds
 	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunRPG::StopParticleSystem, Duration, false);
+
+	//Set Spawn Collision Handling Override
+	FActorSpawnParameters ActorSpawnParams;
+	ActorSpawnParams.Owner = GetOwner();
+	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
+	ActorSpawnParams.Instigator = InstigatorPawn;
+	ACHProjectile* Projectile = nullptr;
 
 	
 	// Try and fire a projectile
-	if (ProjectileClass != nullptr)
+	if (ProjectileClass  == nullptr)
 	{
-		UWorld* const World = GetWorld();
-		if (World != nullptr)
-		{
-			APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController());
-			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
-			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-
-			//Set Spawn Collision Handling Override
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;			
-
-			ActorSpawnParams.Owner = GetOwner();
-			APawn* InstigatorPawn = Cast<APawn>(GetOwner());
-			ActorSpawnParams.Instigator = InstigatorPawn;
-
-			ACHProjectile* Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-			if(Projectile) Projectile->SetOwner(OwningCharacter);			// 
-		}
+		UE_LOG(LogTemp, Log, TEXT("ProjectileClass is null"));
+		return;
 	}
+	
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		if(OwningCharacter->IsInFirstPersonPerspective())
+		{
+			const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh1P->GetSocketByName(FName("MuzzleOffset"));
+			const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh1P);
+			
+			HitTarget = HitResult.ImpactPoint;
+			FVector ToTarget = HitTarget - SocketTransform.GetLocation();
+			FRotator TargetRotation = ToTarget.Rotation();
+			
+			SpawnLocation = SocketTransform.GetLocation(); 
+			SpawnRotation = (bHit ? TargetRotation : SocketTransform.GetRotation().Rotator());
+			// SpawnRotation = SocketTransform.GetRotation().Rotator();
+			
+			Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			if(Projectile) Projectile->SetOwner(OwningCharacter);
+		}
+		else
+		{
+			const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh3P->GetSocketByName(FName("MuzzleOffset"));
+			const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh3P);
+
+			HitTarget = HitResult.ImpactPoint;
+			FVector ToTarget = HitTarget - SocketTransform.GetLocation();
+			FRotator TargetRotation = ToTarget.Rotation();
+			/*FVector ToTarget = HitTarget - SocketTransform.GetLocation();
+			FRotator TargetRotation = ToTarget.Rotation();*/
+			
+			SpawnLocation = SocketTransform.GetLocation(); 
+			SpawnRotation = (bHit ? TargetRotation : SocketTransform.GetRotation().Rotator());
+
+			Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+			if(Projectile) Projectile->SetOwner(OwningCharacter);
+		}
+		
+		
+		
+		// ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+		
+	}
+	
+	
 
 	// Try and play the sound if specified
 	if (FireSound != nullptr)
@@ -132,15 +214,32 @@ void ACHGunRPG::Fire()
 	// Get the animation object for the arms mesh
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
 	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &ACHGunRPG::FireActionEnd);
+	
 	if (TPAnimInstance)
 	{
-		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
+		TPAnimInstance->Montage_Play(Fire3PMontage, 1);
+		FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire3PMontage);
 	}
 	if (FPAnimInstance)
 	{
-		if(OwningCharacter->GetScopeAiming()) FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
-		else FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+		if(OwningCharacter->GetScopeAiming())
+		{
+			FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
+			FPAnimInstance->Montage_SetEndDelegate(EndDelegate, ScopeFire1PMontage);
+		}
+		else
+		{
+			FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+			FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire1PMontage);
+		}		
 	}
+
+	/*FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &ACHGunRPG::FireActionEnd);*/
+
 	
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;
 }
@@ -155,6 +254,10 @@ void ACHGunRPG::PullTrigger()
 		return;
 	}
 
+	// 미사일 메시 비활성화.
+	MissileMesh1P->SetVisibility(false);
+	MissileMesh3P->SetVisibility(false);
+	
 	OwningCharacter->bUseControllerRotationYaw = true;
 
 	// not aiming mode

@@ -57,6 +57,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class USkeletalMeshComponent> WeaponMesh3P;
 
+public:
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh1P() const {return WeaponMesh1P;}
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh3P() const {return WeaponMesh3P;}
+	
 	// Montage
 protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")

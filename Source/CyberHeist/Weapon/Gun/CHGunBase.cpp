@@ -16,6 +16,7 @@
 
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 // Sets default values
 ACHGunBase::ACHGunBase()
@@ -92,22 +93,34 @@ void ACHGunBase::Equip()
 	// FName AttachPoint = OwningCharacter->GetWeaponAttachPoint();
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 
+	const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
+	if(HandSocket)
+	{
+		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
+	}
+	
 	if (WeaponMesh1P)
 	{
 		// FName(TEXT("WeaponPoint"))
 		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);
-		
-		// WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachPoint);
-		WeaponMesh1P->SetRelativeLocation(WeaponMesh1PEquippedRelativeLocation);
+		// AttachToComponent(OwningCharacter->GetFirstPersonMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachPoint1P);
+		// WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachPoint1P);
+		// WeaponMesh1P->SetRelativeLocation(WeaponMesh1PEquippedRelativeLocation);
+
+		/*const USkeletalMeshSocket* HandSocket = OwningCharacter->GetFirstPersonMesh()->GetSocketByName(AttachPoint1P);
+		if(HandSocket)
+		{
+			HandSocket->AttachActor(this,OwningCharacter->GetFirstPersonMesh());
+		}*/
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
-		
+	
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 		{
-			WeaponMesh1P->SetVisibility(true, true);			
+			WeaponMesh1P->SetVisibility(true, true);
 		}
 		else
 		{
-			WeaponMesh1P->SetVisibility(false, true);			
+			WeaponMesh1P->SetVisibility(false, true);
 		}
 	}
 	
@@ -115,7 +128,15 @@ void ACHGunBase::Equip()
 	{		
 		// FName(TEXT("Weapon_rSocket"))
 		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
+		// WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachPoint3P);
+
+		/*const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
+		if(HandSocket)
+		{
+			HandSocket->AttachActor(this,OwningCharacter->GetMesh());
+		}*/
 		
+		// AttachToComponent(OwningCharacter->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachPoint3P);
 		// WeaponMesh3P->SetRelativeLocation(WeaponMesh3PEquippedRelativeLocation);
 		// WeaponMesh3P->SetRelativeRotation(FRotator(0, 0, -90.0f));
 		WeaponMesh3P->CastShadow = true;
@@ -123,7 +144,7 @@ void ACHGunBase::Equip()
 
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 		{
-			WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
+			// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
 			WeaponMesh3P->SetVisibility(false, true);
 		}
 		else

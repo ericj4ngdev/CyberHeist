@@ -584,19 +584,32 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 	{
 		// 1인칭
 		SetCharacterControl(ECharacterControlType::First);
+
+		if(CurrentWeapon)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon"));
+			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true);
+			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(false);
+		}
 		
 		ThirdPersonCamera->Deactivate();
 		FirstPersonCamera->Activate();
 
 		GetMesh()->SetVisibility(false, true);
 		FirstPersonMesh->SetVisibility(true, true);
-
+		
 		// Move third person mesh back so that the shadow doesn't look disconnected
-		GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation + FVector(-120.0f, 0.0f, 0.0f));
+		// GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation + FVector(-120.0f, 0.0f, 0.0f));
 	}
 	else
 	{
 		SetCharacterControl(ECharacterControlType::Third);
+
+		if(CurrentWeapon)
+		{
+			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(false);
+			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true);			
+		}
 		
 		FirstPersonCamera->Deactivate();
 		ThirdPersonCamera->Activate();
@@ -604,8 +617,10 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		FirstPersonMesh->SetVisibility(false, true);
 		GetMesh()->SetVisibility(true, true);
 
+		
+		
 		// Reset the third person mesh
-		GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation);
+		// GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation);
 	}
 }
 

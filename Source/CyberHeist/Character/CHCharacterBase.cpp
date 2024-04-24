@@ -255,7 +255,6 @@ void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewGun, bool bEquipWeapo
 	EquipWeapon(NewGun);	
 }
 
-
 void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon)
 {
 	if (NewWeapon == LastWeapon)
@@ -360,7 +359,6 @@ void ACHCharacterBase::PreviousWeapon()
 void ACHCharacterBase::NotifyComboActionEnd()
 {
 }
-
 
 void ACHCharacterBase::SetDead()
 {

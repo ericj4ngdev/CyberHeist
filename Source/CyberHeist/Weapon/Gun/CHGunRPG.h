@@ -33,7 +33,16 @@ protected:
 	/** Projectile class to spawn */
 	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
 	TSubclassOf<class ACHProjectile> ProjectileClass;
-	
+
+private:
+	FVector SpawnLocation; 
+	FRotator SpawnRotation;
+public:
+	FORCEINLINE FVector GetSpawnLocation() const {return SpawnLocation;}
+	// 캐릭터 로테이션 
+
+private:
+	void FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded);
 public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;

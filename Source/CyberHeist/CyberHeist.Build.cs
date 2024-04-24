@@ -10,7 +10,7 @@ public class CyberHeist : ModuleRules
 
         PublicIncludePaths.AddRange(new string[] { "CyberHeist" });
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "EnhancedInput", "UMG", "NavigationSystem", "AIModule", "GameplayTasks", "MotionWarping" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" , "EnhancedInput", "UMG", "NavigationSystem", "AIModule", "GameplayTasks", "MotionWarping", "Niagara" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

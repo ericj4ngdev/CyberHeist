@@ -5,10 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Character/CHCharacterBase.h"
-#include "Character/CHCharacterPlayer.h"
 #include "CHProjectile.generated.h"
 
-class USphereComponent;
 class UProjectileMovementComponent;
 
 UCLASS()
@@ -16,28 +14,72 @@ class CYBERHEIST_API ACHProjectile : public AActor
 {
 	GENERATED_BODY()
 	
-	/** Sphere collision component */
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-	USphereComponent* CollisionComp;
-
-	/** Projectile movement component */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	UProjectileMovementComponent* ProjectileMovement;
-
-	UPROPERTY(EditAnywhere)
-	float Damage = 50;
-
 public:	
-	// Sets default values for this actor's properties
 	ACHProjectile();
 
-	/** called when projectile hits something */
+	virtual void Destroyed() override;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UBoxComponent> CollisionComp;
+	
+	UPROPERTY()
+	TObjectPtr<class UNiagaraComponent> TrailSystemComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UProjectileMovementComponent> ProjectileMovementComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USkeletalMeshComponent> ProjectileMesh;
+
+	UPROPERTY()
+	TObjectPtr<class UParticleSystemComponent> TracerComponent;
+	
+	UBoxComponent* GetCollisionComp() const { return CollisionComp; }
+	
+	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovementComponent; }
+	
+	UPROPERTY(EditAnywhere)
+	float InitialSpeed = 15000;
+
+	// Only set this for Grenades and Rockets
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+
+	// Doesn't matter for Grenades and Rockets
+	UPROPERTY(EditAnywhere)
+	float HeadShotDamage = 40.f;
+
+protected:
+	virtual void BeginPlay() override;
+	void StartDestroyTimer();
+	void DestroyTimerFinished();
+	void SpawnTrailSystem();
+	void ExplodeDamage();
+
 	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	/** Returns CollisionComp subobject **/
-	USphereComponent* GetCollisionComp() const { return CollisionComp; }
-	/** Returns ProjectileMovement subobject **/
-	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UParticleSystem> ImpactParticles;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USoundCue> ImpactSound;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UNiagaraSystem> TrailSystem;
+	
+	UPROPERTY(EditAnywhere)
+	float DamageInnerRadius = 200.f;
+
+	UPROPERTY(EditAnywhere)
+	float DamageOuterRadius = 500.f;
+
+private:
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UParticleSystem> Tracer;
+
+	FTimerHandle DestroyTimer;
+
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 3.f;
 };
