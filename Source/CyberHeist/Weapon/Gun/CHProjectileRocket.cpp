@@ -6,7 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystemInstanceController.h"
-#include "Sound/SoundCue.h"
+// #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
@@ -29,14 +29,14 @@ void ACHProjectileRocket::BeginPlay()
 	/*if (!HasAuthority())
 	{
 	}*/
-	/*if(CollisionComp->OnComponentHit.IsAlreadyBound(this,&ACHProjectileRocket::OnHit) == false)
+	/*if(CollisionComp->OnComponentHit.IsAlreadyBound(this,&ACHProjectile::OnHit) == false)
 	{
-		CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectileRocket::OnHit);		
+		CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectileRocket::OnHit);
 	}*/
 
 	SpawnTrailSystem();
 
-	if (ProjectileLoop && LoopingSoundAttenuation)
+	/*if (ProjectileLoop && LoopingSoundAttenuation)
 	{
 		ProjectileLoopComponent = UGameplayStatics::SpawnSoundAttached(
 			ProjectileLoop,
@@ -52,7 +52,7 @@ void ACHProjectileRocket::BeginPlay()
 			(USoundConcurrency*)nullptr,
 			false
 		);
-	}
+	}*/
 }
 
 
@@ -61,20 +61,20 @@ void ACHProjectileRocket::Destroyed()
 	Super::Destroyed();
 }
 
-void ACHProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-                                FVector NormalImpulse, const FHitResult& Hit)
+void ACHProjectileRocket::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
+	UE_LOG(LogTemp, Log, TEXT("ACHProjectileRocket::OnHit"));
 	if(OtherActor == nullptr)
 	{
 		UE_LOG(LogTemp,Warning, TEXT("OtherActor = nullptr"));
 		return;
 	}
-	if(HitComp == nullptr)
+	/*if(HitComp == nullptr)
 	{
 		UE_LOG(LogTemp,Warning, TEXT("HitComp = nullptr"));
 		return;
-	}
+	}*/
 	if(OtherComp == nullptr)
 	{
 		UE_LOG(LogTemp,Warning, TEXT("OtherComp = nullptr"));
@@ -83,17 +83,10 @@ void ACHProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 	
 	UE_LOG(LogTemp, Warning, TEXT("FDamageEvent"));
 	UE_LOG(LogTemp, Warning, TEXT("OnHit"));
-	UE_LOG(LogTemp, Warning, TEXT("HitComp : %s"), *HitComp->GetName());
+	// UE_LOG(LogTemp, Warning, TEXT("HitComp : %s"), SweepResult.ImpactPoint);
 	UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
 	UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
 
-	// DrawDebugBox(GetWorld(),)
-	// USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(OtherComp); 
-	// DrawDebugMesh(GetWorld(),SkeletalMeshComponent->)
-	// Cast<USkeletalMeshComponent>(OtherComp);
-	// DrawDebugCapsule(GetWorld(), HigherCapsuleOrigin, CheckRange, CheckCoverSphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawHighColor, false, 5.0f);
-	
-	
 	if (OtherActor == GetOwner())
 	{
 		return;
@@ -106,10 +99,10 @@ void ACHProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
 	}
-	if (ImpactSound)
+	/*if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}
+	}*/
 	if (ProjectileMesh)
 	{
 		ProjectileMesh->SetVisibility(false);
@@ -127,5 +120,5 @@ void ACHProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 		ProjectileLoopComponent->Stop();
 	}
 
-	Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+	Super::OnHit(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }

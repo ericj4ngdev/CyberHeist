@@ -7,7 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Particles/ParticleSystem.h"
-#include "Sound/SoundCue.h"
+// #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CHPlayerController.h"
 #include "Character/CHCharacterPlayer.h"
@@ -20,9 +20,11 @@ ACHProjectile::ACHProjectile()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
+	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	SetRootComponent(SceneComponent);
+	
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
-	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
+	// CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	CollisionComp->SetupAttachment(SceneComponent);
 
 	
@@ -41,10 +43,17 @@ void ACHProjectile::Destroyed()
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
 	}
-	if (ImpactSound)
+	/*if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}
+	}*/
+}
+
+void ACHProjectile::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	DrawDebugBox(GetWorld(),CollisionComp->GetComponentLocation(),CollisionComp->GetScaledBoxExtent(), FColor::Red,false, 0.2f);
 }
 
 void ACHProjectile::BeginPlay()
@@ -65,10 +74,10 @@ void ACHProjectile::BeginPlay()
 
 	if(ProjectileMovementComponent) ProjectileMovementComponent->InitialSpeed = InitialSpeed;
 	
-	CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectile::OnHit);
-	/*if (HasAuthority())
-	{
-	}*/
+	// CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectile::OnHit);
+	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHProjectile::OnHit);
+
+	
 }
 
 void ACHProjectile::StartDestroyTimer()
@@ -128,7 +137,7 @@ void ACHProjectile::ExplodeDamage()
 	}
 }
 
-void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ACHProjectile::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Destroy();
 	/*ACHCharacterPlayer* MyOwner = Cast<ACHCharacterPlayer>(GetOwner());

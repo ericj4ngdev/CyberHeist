@@ -64,7 +64,7 @@ void ACHGunRPG::Equip()
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-	{		
+	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
@@ -82,7 +82,6 @@ void ACHGunRPG::Equip()
 			// EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRPG::Reload);
 		}
 	}
-	
 }
 
 void ACHGunRPG::UnEquip()
@@ -221,19 +220,19 @@ void ACHGunRPG::Fire()
 	if (TPAnimInstance)
 	{
 		TPAnimInstance->Montage_Play(Fire3PMontage, 1);
-		FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire3PMontage);
+		//FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire3PMontage);
 	}
 	if (FPAnimInstance)
 	{
 		if(OwningCharacter->GetScopeAiming())
 		{
 			FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
-			FPAnimInstance->Montage_SetEndDelegate(EndDelegate, ScopeFire1PMontage);
+			// FPAnimInstance->Montage_SetEndDelegate(EndDelegate, ScopeFire1PMontage);
 		}
 		else
 		{
 			FPAnimInstance->Montage_Play(Fire1PMontage, 1);
-			FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire1PMontage);
+			// FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire1PMontage);
 		}		
 	}
 

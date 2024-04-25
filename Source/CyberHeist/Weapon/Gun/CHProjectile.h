@@ -18,7 +18,7 @@ public:
 	ACHProjectile();
 
 	virtual void Destroyed() override;
-
+	virtual void Tick(float DeltaSeconds) override;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class USceneComponent> SceneComponent;
 	
@@ -60,7 +60,7 @@ protected:
 	void ExplodeDamage();
 
 	UFUNCTION()
-	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	virtual void OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UParticleSystem> ImpactParticles;
