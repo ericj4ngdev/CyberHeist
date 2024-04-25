@@ -14,7 +14,9 @@ ACHProjectile::ACHProjectile()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
+	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	SetRootComponent(SceneComponent);
+	
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	CollisionComp->SetupAttachment(SceneComponent);
