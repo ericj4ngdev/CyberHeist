@@ -29,7 +29,10 @@ void ACHProjectileRocket::BeginPlay()
 	/*if (!HasAuthority())
 	{
 	}*/
-	CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectileRocket::OnHit);
+	/*if(CollisionComp->OnComponentHit.IsAlreadyBound(this,&ACHProjectileRocket::OnHit) == false)
+	{
+		CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectileRocket::OnHit);		
+	}*/
 
 	SpawnTrailSystem();
 
@@ -61,6 +64,36 @@ void ACHProjectileRocket::Destroyed()
 void ACHProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                                 FVector NormalImpulse, const FHitResult& Hit)
 {
+
+	if(OtherActor == nullptr)
+	{
+		UE_LOG(LogTemp,Warning, TEXT("OtherActor = nullptr"));
+		return;
+	}
+	if(HitComp == nullptr)
+	{
+		UE_LOG(LogTemp,Warning, TEXT("HitComp = nullptr"));
+		return;
+	}
+	if(OtherComp == nullptr)
+	{
+		UE_LOG(LogTemp,Warning, TEXT("OtherComp = nullptr"));
+		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("FDamageEvent"));
+	UE_LOG(LogTemp, Warning, TEXT("OnHit"));
+	UE_LOG(LogTemp, Warning, TEXT("HitComp : %s"), *HitComp->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
+
+	// DrawDebugBox(GetWorld(),)
+	// USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(OtherComp); 
+	// DrawDebugMesh(GetWorld(),SkeletalMeshComponent->)
+	// Cast<USkeletalMeshComponent>(OtherComp);
+	// DrawDebugCapsule(GetWorld(), HigherCapsuleOrigin, CheckRange, CheckCoverSphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawHighColor, false, 5.0f);
+	
+	
 	if (OtherActor == GetOwner())
 	{
 		return;
@@ -93,4 +126,6 @@ void ACHProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 	{
 		ProjectileLoopComponent->Stop();
 	}
+
+	Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }

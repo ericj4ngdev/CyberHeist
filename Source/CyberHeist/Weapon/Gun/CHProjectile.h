@@ -18,6 +18,9 @@ public:
 	ACHProjectile();
 
 	virtual void Destroyed() override;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USceneComponent> SceneComponent;
 	
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UBoxComponent> CollisionComp;
@@ -38,8 +41,8 @@ public:
 	
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovementComponent; }
 	
-	UPROPERTY(EditAnywhere)
-	float InitialSpeed = 15000;
+	UPROPERTY(EditAnywhere, Category = "Setting")
+	float InitialSpeed;
 
 	// Only set this for Grenades and Rockets
 	UPROPERTY(EditAnywhere)

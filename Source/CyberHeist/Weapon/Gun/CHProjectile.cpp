@@ -20,9 +20,12 @@ ACHProjectile::ACHProjectile()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
+	SetRootComponent(SceneComponent);
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
-	SetRootComponent(CollisionComp);
+	CollisionComp->SetupAttachment(SceneComponent);
+
+	
 	// CollisionComp->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	// CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	// CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -60,7 +63,9 @@ void ACHProjectile::BeginPlay()
 		);
 	}
 
-	// CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectile::OnHit);
+	if(ProjectileMovementComponent) ProjectileMovementComponent->InitialSpeed = InitialSpeed;
+	
+	CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectile::OnHit);
 	/*if (HasAuthority())
 	{
 	}*/
