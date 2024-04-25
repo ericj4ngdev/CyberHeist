@@ -24,14 +24,14 @@ protected:
 	// UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 
-	UPROPERTY(EditAnywhere)
+	/*UPROPERTY(EditAnywhere)
 	TObjectPtr<class USoundCue> ProjectileLoop;
 
 	UPROPERTY()
 	TObjectPtr<class UAudioComponent> ProjectileLoopComponent;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class USoundAttenuation> LoopingSoundAttenuation;
+	TObjectPtr<class USoundAttenuation> LoopingSoundAttenuation;*/
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UProjectileMovementComponent> RocketMovementComponent;

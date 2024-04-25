@@ -33,14 +33,14 @@ ACHProjectile::ACHProjectile()
 void ACHProjectile::Destroyed()
 {
 	Super::Destroyed();
-	if (ImpactParticles)
+	/*if (ImpactParticles)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
 	}
 	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}
+	}*/
 }
 
 void ACHProjectile::BeginPlay()
@@ -81,7 +81,7 @@ void ACHProjectile::DestroyTimerFinished()
 
 void ACHProjectile::SpawnTrailSystem()
 {
-	if (TrailSystem)
+	/*if (TrailSystem)
 	{
 		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			TrailSystem,
@@ -92,12 +92,12 @@ void ACHProjectile::SpawnTrailSystem()
 			EAttachLocation::KeepWorldPosition,
 			false
 		);
-	}
+	}*/
 }
 
 void ACHProjectile::ExplodeDamage()
 {
-	APawn* FiringPawn = GetInstigator();
+	/*APawn* FiringPawn = GetInstigator();
 	//if (FiringPawn && HasAuthority())
 	if (FiringPawn)
 	{
@@ -118,7 +118,7 @@ void ACHProjectile::ExplodeDamage()
 				FiringController // InstigatorController
 			);
 		}
-	}
+	}*/
 }
 
 void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

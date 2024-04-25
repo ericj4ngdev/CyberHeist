@@ -18,7 +18,6 @@ ACHProjectileRocket::ACHProjectileRocket()
 
 	RocketMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("RocketMovementComponent"));
 	RocketMovementComponent->bRotationFollowsVelocity = true;
-	// RocketMovementComponent->SetIsReplicated(true);
 }
 
 
@@ -36,7 +35,7 @@ void ACHProjectileRocket::BeginPlay()
 
 	SpawnTrailSystem();
 
-	if (ProjectileLoop && LoopingSoundAttenuation)
+	/*if (ProjectileLoop && LoopingSoundAttenuation)
 	{
 		ProjectileLoopComponent = UGameplayStatics::SpawnSoundAttached(
 			ProjectileLoop,
@@ -52,7 +51,7 @@ void ACHProjectileRocket::BeginPlay()
 			(USoundConcurrency*)nullptr,
 			false
 		);
-	}
+	}*/
 }
 
 
@@ -102,30 +101,7 @@ void ACHProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 
 	StartDestroyTimer();
 
-	if (ImpactParticles)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-	}
-	if (ImpactSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}
-	if (ProjectileMesh)
-	{
-		ProjectileMesh->SetVisibility(false);
-	}
-	if (CollisionComp)
-	{
-		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	if (TrailSystemComponent && TrailSystemComponent->GetSystemInstanceController())
-	{
-		TrailSystemComponent->GetSystemInstanceController()->Deactivate();
-	}
-	if (ProjectileLoopComponent && ProjectileLoopComponent->IsPlaying())
-	{
-		ProjectileLoopComponent->Stop();
-	}
+	
 
 	Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }

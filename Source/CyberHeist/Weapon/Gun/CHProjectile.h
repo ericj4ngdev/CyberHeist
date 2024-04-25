@@ -65,8 +65,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UParticleSystem> ImpactParticles;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USoundCue> ImpactSound;
+	/*UPROPERTY(EditAnywhere)
+	TObjectPtr<USoundBase> ImpactSound;*/
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UNiagaraSystem> TrailSystem;
