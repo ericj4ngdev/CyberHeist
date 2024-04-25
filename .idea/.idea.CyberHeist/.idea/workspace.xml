@@ -12,16 +12,8 @@
   <component name="ChangeListManager">
     <list default="true" id="7739d67a-23c9-4874-abdf-0d716b9f9448" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_NPC.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_NPC.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRifle.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRifle.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRpg.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRpg.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_Rocket.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_Rocket.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Mesh/Rocket_Launcher/SK_Rocket_Launcher_Skeleton.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FPS_Rocket_Launcher/Mesh/Rocket_Launcher/SK_Rocket_Launcher_Skeleton.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/CyberHeist.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/CyberHeist.Build.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHProjectile.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHProjectile.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHProjectileRocket.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHProjectileRocket.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -183,7 +175,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1714066757326</updated>
-      <workItem from="1714066760147" duration="1956000" />
+      <workItem from="1714066760147" duration="3088000" />
     </task>
     <servers />
   </component>

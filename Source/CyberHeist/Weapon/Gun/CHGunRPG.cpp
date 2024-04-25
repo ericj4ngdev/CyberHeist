@@ -172,7 +172,6 @@ void ACHGunRPG::Fire()
 			
 			SpawnLocation = SocketTransform.GetLocation(); 
 			SpawnRotation = (bHit ? TargetRotation : SocketTransform.GetRotation().Rotator());
-			// SpawnRotation = SocketTransform.GetRotation().Rotator();
 			
 			Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 			if(Projectile) Projectile->SetOwner(OwningCharacter);
@@ -185,21 +184,15 @@ void ACHGunRPG::Fire()
 			HitTarget = HitResult.ImpactPoint;
 			FVector ToTarget = HitTarget - SocketTransform.GetLocation();
 			FRotator TargetRotation = ToTarget.Rotation();
-			/*FVector ToTarget = HitTarget - SocketTransform.GetLocation();
-			FRotator TargetRotation = ToTarget.Rotation();*/
-			
+						
 			SpawnLocation = SocketTransform.GetLocation(); 
 			SpawnRotation = (bHit ? TargetRotation : SocketTransform.GetRotation().Rotator());
 
 			Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 			if(Projectile) Projectile->SetOwner(OwningCharacter);
 		}
-		
-		
-		
 		// ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-
-		
+		CurrentAmmoInClip--;
 	}
 	
 	
@@ -220,19 +213,19 @@ void ACHGunRPG::Fire()
 	if (TPAnimInstance)
 	{
 		TPAnimInstance->Montage_Play(Fire3PMontage, 1);
-		//FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire3PMontage);
+		FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire3PMontage);
 	}
 	if (FPAnimInstance)
 	{
 		if(OwningCharacter->GetScopeAiming())
 		{
 			FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
-			// FPAnimInstance->Montage_SetEndDelegate(EndDelegate, ScopeFire1PMontage);
+			FPAnimInstance->Montage_SetEndDelegate(EndDelegate, ScopeFire1PMontage);
 		}
 		else
 		{
 			FPAnimInstance->Montage_Play(Fire1PMontage, 1);
-			// FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire1PMontage);
+			FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire1PMontage);
 		}		
 	}
 
