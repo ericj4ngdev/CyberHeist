@@ -6,7 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystemInstanceController.h"
-// #include "Sound/SoundCue.h"
+#include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
@@ -36,7 +36,7 @@ void ACHProjectileRocket::BeginPlay()
 
 	SpawnTrailSystem();
 
-	/*if (ProjectileLoop && LoopingSoundAttenuation)
+	if (ProjectileLoop && LoopingSoundAttenuation)
 	{
 		ProjectileLoopComponent = UGameplayStatics::SpawnSoundAttached(
 			ProjectileLoop,
@@ -52,7 +52,7 @@ void ACHProjectileRocket::BeginPlay()
 			(USoundConcurrency*)nullptr,
 			false
 		);
-	}*/
+	}
 }
 
 
@@ -99,10 +99,10 @@ void ACHProjectileRocket::OnHit(UPrimitiveComponent* OverlappedComponent, AActor
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
 	}
-	/*if (ImpactSound)
+	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}*/
+	}
 	if (ProjectileMesh)
 	{
 		ProjectileMesh->SetVisibility(false);

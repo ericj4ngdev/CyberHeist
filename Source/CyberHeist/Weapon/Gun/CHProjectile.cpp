@@ -7,7 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Particles/ParticleSystem.h"
-// #include "Sound/SoundCue.h"
+#include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CHPlayerController.h"
 #include "Character/CHCharacterPlayer.h"
@@ -25,6 +25,7 @@ ACHProjectile::ACHProjectile()
 	
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	// CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
+	// ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisionComp->SetupAttachment(SceneComponent);
 
 	
@@ -43,10 +44,10 @@ void ACHProjectile::Destroyed()
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
 	}
-	/*if (ImpactSound)
+	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}*/
+	}
 }
 
 void ACHProjectile::Tick(float DeltaSeconds)
@@ -77,6 +78,7 @@ void ACHProjectile::BeginPlay()
 	// CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectile::OnHit);
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHProjectile::OnHit);
 
+	ECollisionEnabled::Type CollisionType = CollisionComp->GetCollisionEnabled();
 	
 }
 
