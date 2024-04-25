@@ -3,45 +3,126 @@
 
 #include "Weapon/Gun/CHProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "Components/SphereComponent.h"
-#include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
-#include "Player/CHPlayerController.h"
-#include "Character/CHCharacterPlayer.h"
-
+#include "Components/BoxComponent.h"
+#include "Sound/SoundCue.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 ACHProjectile::ACHProjectile()
 {
-	// Use a sphere as a simple collision representation
-	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-	CollisionComp->InitSphereRadius(10.0f);
+	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
+
+	SetRootComponent(SceneComponent);
+	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
-	CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectile::OnHit);		// set up a notification for when this component hits something blocking
-	// CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHProjectile::OnSphereBeginOverlap);
+	CollisionComp->SetupAttachment(SceneComponent);
 
-	// Players can't walk on it
-	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
-	CollisionComp->CanCharacterStepUpOn = ECB_No;
+	
+	// CollisionComp->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	// CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	// CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	// CollisionComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	// CollisionComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	// CollisionComp->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
+}
 
-	// Set as root component
-	RootComponent = CollisionComp;
+void ACHProjectile::Destroyed()
+{
+	Super::Destroyed();
+	if (ImpactParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+	}
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
+}
 
-	// Use a ProjectileMovementComponent to govern this projectile's movement
-	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
-	ProjectileMovement->UpdatedComponent = CollisionComp;
-	ProjectileMovement->InitialSpeed = 5000.f;
-	ProjectileMovement->MaxSpeed = 5000.f;
-	ProjectileMovement->bRotationFollowsVelocity = true;
-	ProjectileMovement->bShouldBounce = true;
+void ACHProjectile::BeginPlay()
+{
+	Super::BeginPlay();
+	if (Tracer)
+	{
+		TracerComponent = UGameplayStatics::SpawnEmitterAttached
+		(
+			Tracer,
+			CollisionComp,
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition
+		);
+	}
 
-	// Die after 3 seconds by default
-	InitialLifeSpan = 3.0f;
+	if(ProjectileMovementComponent) ProjectileMovementComponent->InitialSpeed = InitialSpeed;
+	
+	CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectile::OnHit);
+}
 
+void ACHProjectile::StartDestroyTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		DestroyTimer,
+		this,
+		&ACHProjectile::DestroyTimerFinished,
+		DestroyTime
+	);
+}
+
+void ACHProjectile::DestroyTimerFinished()
+{
+	Destroy();
+}
+
+void ACHProjectile::SpawnTrailSystem()
+{
+	if (TrailSystem)
+	{
+		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			TrailSystem,
+			GetRootComponent(),
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+}
+
+void ACHProjectile::ExplodeDamage()
+{
+	APawn* FiringPawn = GetInstigator();
+	//if (FiringPawn && HasAuthority())
+	if (FiringPawn)
+	{
+		AController* FiringController = FiringPawn->GetController();
+		if (FiringController)
+		{
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				this, // World context object
+				Damage, // BaseDamage
+				10.f, // MinimumDamage
+				GetActorLocation(), // Origin
+				DamageInnerRadius, // DamageInnerRadius
+				DamageOuterRadius, // DamageOuterRadius
+				1.f, // DamageFalloff
+				UDamageType::StaticClass(), // DamageTypeClass
+				TArray<AActor*>(), // IgnoreActors
+				this, // DamageCauser
+				FiringController // InstigatorController
+			);
+		}
+	}
 }
 
 void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	ACHCharacterPlayer* MyOwner = Cast<ACHCharacterPlayer>(GetOwner());
+	Destroy();
+	/*ACHCharacterPlayer* MyOwner = Cast<ACHCharacterPlayer>(GetOwner());
 	if (MyOwner == nullptr) return;
 	ACHPlayerController* OwnerInstigator = Cast<ACHPlayerController>(MyOwner->GetInstigatorController());
 	if (OwnerInstigator == nullptr) return;
@@ -50,14 +131,9 @@ void ACHProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPri
 	{
 		FDamageEvent DamageEvent;
 		OtherActor->TakeDamage(Damage, DamageEvent, OwnerInstigator, this);
-		// UE_LOG(LogTemp, Warning, TEXT("FDamageEvent"));
-		// UE_LOG(LogTemp, Warning, TEXT("OnHit"));
-		// UE_LOG(LogTemp, Warning, TEXT("HitComp : %s"), *HitComp->GetName());
-		// UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
-		// UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
 
 		if(OtherComp->IsSimulatingPhysics()) OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-		Destroy();		
-	}
+		// Destroy();		
+	}*/
 	// UE_LOG(LogTemp, Log, TEXT("OnHit"));	
 }
