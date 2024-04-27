@@ -16,6 +16,7 @@
 
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 ACHGunRifle::ACHGunRifle() 
 {
@@ -25,7 +26,47 @@ void ACHGunRifle::Equip()
 {
 	Super::Equip();
 
-	OwningCharacter->SetHasRifle(true);
+	// OwningCharacter->SetHasRifle(true);
+
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+
+	const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
+	if(HandSocket)
+	{
+		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
+	}
+	
+	if (WeaponMesh1P)
+	{
+		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		
+		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
+	
+		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		{
+			WeaponMesh1P->SetVisibility(true, true);
+		}
+		else
+		{
+			WeaponMesh1P->SetVisibility(false, true);
+		}
+	}
+	
+	if (WeaponMesh3P)
+	{		
+		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
+		WeaponMesh3P->CastShadow = true;
+		// WeaponMesh3P->bCastHiddenShadow = true;
+
+		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		{
+			// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
+			WeaponMesh3P->SetVisibility(false, true);
+		}
+		else
+		{
+			WeaponMesh3P->SetVisibility(true, true);
+		}
+	}
 	
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))

@@ -587,9 +587,11 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 
 		if(CurrentWeapon)
 		{
-			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon"));
+			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
 			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true);
 			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(false);
+			// 다른 무기는 왜 보이냐... 시점바뀌면 무조건 보이게 했나?
+			// 그렇다고 왜 3인칭으로 가면 RPG가 보이냐고... Equip했나... 
 		}
 		
 		ThirdPersonCamera->Deactivate();
@@ -607,6 +609,7 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 
 		if(CurrentWeapon)
 		{
+			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
 			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(false);
 			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true);			
 		}
@@ -616,11 +619,6 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 
 		FirstPersonMesh->SetVisibility(false, true);
 		GetMesh()->SetVisibility(true, true);
-
-		
-		
-		// Reset the third person mesh
-		// GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation);
 	}
 }
 

@@ -62,6 +62,54 @@ void ACHGunRPG::Equip()
 {
 	Super::Equip();
 
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+
+	const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
+	if(HandSocket)
+	{
+		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
+	}
+	
+	if (WeaponMesh1P)
+	{
+		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		
+		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
+	
+		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		{
+			WeaponMesh1P->SetVisibility(true, true);
+			ScopeMesh1P->SetVisibility(true, true);
+			MissileMesh1P->SetVisibility(true, true);
+		}
+		else
+		{
+			WeaponMesh1P->SetVisibility(false, true);			
+			ScopeMesh1P->SetVisibility(false, true);
+			MissileMesh1P->SetVisibility(false, true);
+		}
+	}
+	
+	if (WeaponMesh3P)
+	{		
+		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
+		WeaponMesh3P->CastShadow = true;
+		// WeaponMesh3P->bCastHiddenShadow = true;
+
+		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		{
+			// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
+			WeaponMesh3P->SetVisibility(false, true);
+			ScopeMesh3P->SetVisibility(false, true);
+			MissileMesh3P->SetVisibility(false, true);
+		}
+		else
+		{
+			WeaponMesh3P->SetVisibility(true, true);
+			ScopeMesh3P->SetVisibility(true, true);
+			MissileMesh3P->SetVisibility(true, true);
+		}
+	}
+	
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{
@@ -87,6 +135,16 @@ void ACHGunRPG::Equip()
 void ACHGunRPG::UnEquip()
 {
 	Super::UnEquip();
+
+	ScopeMesh1P->SetVisibility(false, true);
+	ScopeMesh1P->CastShadow = false;
+	MissileMesh1P->SetVisibility(false, true);
+	MissileMesh1P->CastShadow = false;
+	
+	ScopeMesh3P->SetVisibility(false, true);
+	ScopeMesh3P->CastShadow = false;
+	MissileMesh3P->SetVisibility(false, true);
+	MissileMesh3P->CastShadow = false;	
 }
 
 void ACHGunRPG::Fire()
