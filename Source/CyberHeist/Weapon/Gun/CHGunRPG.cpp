@@ -113,12 +113,19 @@ void ACHGunRPG::Equip()
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		
+		if(Subsystem->HasMappingContext(FireMappingContext))
 		{
-			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-			Subsystem->AddMappingContext(FireMappingContext, 0);
+			UE_LOG(LogTemp, Log, TEXT("Have FireMappingContext"));
+			return;
 		}
-
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("No FireMappingContext"));
+		}
+		// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
+		Subsystem->AddMappingContext(FireMappingContext, 0);
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRPG::PullTrigger);	
@@ -129,6 +136,7 @@ void ACHGunRPG::Equip()
 			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);
 			// EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRPG::Reload);
 		}
+		
 	}
 }
 

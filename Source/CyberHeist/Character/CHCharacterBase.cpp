@@ -252,7 +252,8 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 {
 	if(NewWeapon == nullptr) return;
 	if (NewWeapon == LastWeapon) return;
-	
+
+	// 총 교체시 중복임
 	UnEquipWeapon(LastWeapon);
 
 	if (NewWeapon)

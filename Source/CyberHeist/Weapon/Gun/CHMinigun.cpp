@@ -101,22 +101,25 @@ void ACHMinigun::Equip()
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{		
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if(Subsystem->HasMappingContext(FireMappingContext))
 		{
+			return;
+		}
 			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
 			Subsystem->AddMappingContext(FireMappingContext, 0);
-		}
 
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
-		{
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHMinigun::PullTrigger);	
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHMinigun::CancelPullTrigger);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHMinigun::StartAim);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHMinigun::StopAim);
-			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartPrecisionAim);
-			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StopPrecisionAim);
-			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHMinigun::Reload);
-		}
+			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+			{
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHMinigun::PullTrigger);	
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHMinigun::CancelPullTrigger);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHMinigun::StartAim);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHMinigun::StopAim);
+				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartPrecisionAim);
+				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StopPrecisionAim);
+				EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHMinigun::Reload);
+			}
+		
 	}
 }
 
