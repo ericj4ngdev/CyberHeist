@@ -82,17 +82,13 @@ UAnimMontage* ACHGunBase::GetEquip3PMontage() const
 
 void ACHGunBase::Equip()
 {
-	if (!OwningCharacter)
+	if (OwningCharacter == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s %s OwningCharacter is nullptr"), *FString(__FUNCTION__), *GetName());
 		return;
 	}
 	
 	bIsEquipped = true;
-
-	// FName AttachPoint = OwningCharacter->GetWeaponAttachPoint();
-	
-	
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -164,12 +160,14 @@ void ACHGunBase::CancelPullTrigger()
 }
 
 void ACHGunBase::StartAim()
-{	
+{
+	// 총의 IMC를 기존 플레이어 IMC 보다 높게 하기
+	
 }
 
 void ACHGunBase::StopAim()
 {
-	
+	// 총의 IMC를 기존 플레이어 IMC 보다 낮게 하기 
 }
 
 void ACHGunBase::StartPrecisionAim()
@@ -194,16 +192,17 @@ void ACHGunBase::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 	AttachToComponent(OwningCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	if (OwningCharacter->GetCurrentWeapon() != this)
+	/*if (OwningCharacter->GetCurrentWeapon() != this)
 	{
 		WeaponMesh3P->CastShadow = false;
 		WeaponMesh3P->SetVisibility(true, true);
 		WeaponMesh3P->SetVisibility(false, true);
-	}
+	}*/
 }
 
 void ACHGunBase::PickUpOnTouch(ACHCharacterBase* InCharacter)
 {
+	bIsEquipped = true;
 	InCharacter->AddWeaponToInventory(this,true);
 }
 

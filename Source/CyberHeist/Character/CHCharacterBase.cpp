@@ -150,6 +150,11 @@ void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* Ch
 	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
 }
 
+void ACHCharacterBase::SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority)
+{
+	
+}
+
 void ACHCharacterBase::Aim()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -236,20 +241,18 @@ void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)
 	}
 }
 
-void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewGun, bool bEquipWeapon)
+void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewWeapon, bool bEquipWeapon)
 {
-	Inventory.Weapons.Add(NewGun);
-	NewGun->SetOwningCharacter(this);
-	EquipWeapon(NewGun);	
+	if(NewWeapon == nullptr) return;
+	Inventory.Weapons.Add(NewWeapon);
+	SetCurrentWeapon(NewWeapon, CurrentWeapon);
 }
 
 void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon)
 {
-	if (NewWeapon == LastWeapon)
-	{
-		return;
-	}
-
+	if(NewWeapon == nullptr) return;
+	if (NewWeapon == LastWeapon) return;
+	
 	UnEquipWeapon(LastWeapon);
 
 	if (NewWeapon)
@@ -302,11 +305,14 @@ ACHGunBase* ACHCharacterBase::GetCurrentWeapon() const
 
 void ACHCharacterBase::NextWeapon()
 {
+	// 인벤에 아무것도 없으면 
+	UE_LOG(LogTemp, Log, TEXT("%d"), Inventory.Weapons.Num());
 	if (Inventory.Weapons.Num() < 2)
 	{
 		return;
 	}
 
+	UE_LOG(LogTemp, Log, TEXT("NextWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
 	UnEquipWeapon(CurrentWeapon);
 	CurrentWeapon = nullptr;
@@ -328,6 +334,7 @@ void ACHCharacterBase::PreviousWeapon()
 		return;
 	}
 
+	UE_LOG(LogTemp, Log, TEXT("PreviousWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
 
 	UnEquipWeapon(CurrentWeapon);

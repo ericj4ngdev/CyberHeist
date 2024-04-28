@@ -109,7 +109,6 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	}
 	
 	CurrentCharacterControlType = ECharacterControlType::Third;
-
 	bIsFirstPersonPerspective = false;
 }
 
@@ -204,8 +203,11 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 		UInputMappingContext* NewMappingContext = NewCharacterControl->InputMappingContext;
 		if (NewMappingContext)
 		{
-			Subsystem->AddMappingContext(NewMappingContext, 0);
+			Subsystem->AddMappingContext(NewMappingContext, 1);
+			
 		}
+		// IMC.Add(Subsystem->GetPlayerInput());
+		// UE_LOG(LogTemp, Log, TEXT("%s"), *IMC[0]->GetName()); 
 	}
 	CurrentCharacterControlType = NewCharacterControlType;
 
@@ -232,6 +234,29 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
 	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
 	CameraBoom->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
+}
+
+void ACHCharacterPlayer::SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority)
+{
+	Super::SetMappingContextPriority(MappingContext, Priority);
+
+	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
+
+	// Change IMC 
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+	{
+		// 없는 IMC를 제거할 수는 없으므로 캐릭터가 IMC가지고 있는지 체크하기  
+		if(Subsystem->HasMappingContext(MappingContext))
+		{
+			UE_LOG(LogTemp, Log, TEXT("SetMappingContextPriority"));
+			Subsystem->RemoveMappingContext(MappingContext);
+			Subsystem->AddMappingContext(MappingContext, Priority);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("There is no MappingContext"));
+		}
+	}
 }
 
 void ACHCharacterPlayer::Jump()
@@ -588,8 +613,8 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		if(CurrentWeapon)
 		{
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
-			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true);
-			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(false);
+			// CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
+			// CurrentWeapon->GetWeaponMesh3P()->SetVisibility(false);
 			// 다른 무기는 왜 보이냐... 시점바뀌면 무조건 보이게 했나?
 			// 그렇다고 왜 3인칭으로 가면 RPG가 보이냐고... Equip했나... 
 		}
@@ -607,11 +632,12 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 	{
 		SetCharacterControl(ECharacterControlType::Third);
 
+		// Inventory.Weapons[]
 		if(CurrentWeapon)
 		{
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
-			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(false);
-			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true);			
+			// CurrentWeapon->GetWeaponMesh1P()->SetVisibility(false);
+			// CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true);			
 		}
 		
 		FirstPersonCamera->Deactivate();

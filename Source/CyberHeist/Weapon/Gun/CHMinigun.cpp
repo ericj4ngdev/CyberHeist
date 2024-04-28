@@ -104,7 +104,7 @@ void ACHMinigun::Equip()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-			Subsystem->AddMappingContext(FireMappingContext, 1);
+			Subsystem->AddMappingContext(FireMappingContext, 0);
 		}
 
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
@@ -410,6 +410,9 @@ void ACHMinigun::StartAim()
 	}
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+
+	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
@@ -485,6 +488,9 @@ void ACHMinigun::StopAim()
 	}	
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+
+	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
+	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 	{

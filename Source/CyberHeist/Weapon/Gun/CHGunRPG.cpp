@@ -116,7 +116,7 @@ void ACHGunRPG::Equip()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-			Subsystem->AddMappingContext(FireMappingContext, 1);
+			Subsystem->AddMappingContext(FireMappingContext, 0);
 		}
 
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
@@ -363,6 +363,7 @@ void ACHGunRPG::CancelPullTrigger()
 void ACHGunRPG::StartAim()
 {
 	Super::StartAim();
+
 	if(!bIsEquipped) return;
 	if(bReloading)
 	{
@@ -371,7 +372,10 @@ void ACHGunRPG::StartAim()
 		return;
 	}
 	
-	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);	
+
+	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
@@ -410,8 +414,11 @@ void ACHGunRPG::StopAim()
 
 	if(!bIsEquipped) return;
 	// if(bReloading) return;
-	
-	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);	
+
+	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
+		
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 	{

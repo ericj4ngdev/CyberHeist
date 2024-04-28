@@ -35,7 +35,7 @@ public:
 public:
 	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType) override;
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData) override;
-
+	virtual void SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority) override;
 // Camera Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))

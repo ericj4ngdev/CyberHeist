@@ -26,7 +26,8 @@ void ACHGunRifle::Equip()
 {
 	Super::Equip();
 
-	// OwningCharacter->SetHasRifle(true);
+	if(!bIsEquipped) return;
+	OwningCharacter->SetHasRifle(true);
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 
@@ -43,11 +44,11 @@ void ACHGunRifle::Equip()
 	
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 		{
-			WeaponMesh1P->SetVisibility(true, true);
+			WeaponMesh1P->SetVisibility(true);
 		}
 		else
 		{
-			WeaponMesh1P->SetVisibility(false, true);
+			WeaponMesh1P->SetVisibility(false);
 		}
 	}
 	
@@ -60,11 +61,11 @@ void ACHGunRifle::Equip()
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 		{
 			// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
-			WeaponMesh3P->SetVisibility(false, true);
+			WeaponMesh3P->SetVisibility(false);
 		}
 		else
 		{
-			WeaponMesh3P->SetVisibility(true, true);
+			WeaponMesh3P->SetVisibility(true);
 		}
 	}
 	
@@ -74,7 +75,7 @@ void ACHGunRifle::Equip()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-			Subsystem->AddMappingContext(FireMappingContext, 1);
+			Subsystem->AddMappingContext(FireMappingContext, 0);
 		}
 
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
@@ -271,6 +272,9 @@ void ACHGunRifle::StartAim()
 	}
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+
+	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
@@ -311,6 +315,9 @@ void ACHGunRifle::StopAim()
 	// if(bReloading) return;
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+
+	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
+	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 	{

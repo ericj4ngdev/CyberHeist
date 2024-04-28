@@ -75,12 +75,14 @@ public:
 	
 protected:
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData);
-
+	virtual void SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority);
+		
 	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
 	TMap<ECharacterControlType, class UCHCharacterControlData*> CharacterControlManager;
 
 public:
 	ECharacterControlType CurrentCharacterControlType;
+	TMap<ECharacterControlType, class UCHCharacterControlData*> GetCharacterControlManager() {return CharacterControlManager;}
 	FORCEINLINE ECharacterControlType GetCurrentCharacterControlType() { return CurrentCharacterControlType; }
 	FORCEINLINE void SetCurrentCharacterControlType(ECharacterControlType Type) {	CurrentCharacterControlType = Type;	}
 
@@ -206,7 +208,7 @@ public:
 	UPROPERTY()
 	FCHCharacterInventory Inventory;
 	
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "GASShooter|Inventory")
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Inventory")
 	TArray<TSubclassOf<ACHGunBase>> DefaultInventoryWeaponClasses;
 	
 	UPROPERTY(EditAnywhere, Category = "Inventory", Meta = (AllowPrivateAccess = "true"))
@@ -215,6 +217,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void AddWeaponToInventory(ACHGunBase* NewGun, bool bEquipWeapon);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon);
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -233,7 +236,7 @@ public:
 	virtual void PreviousWeapon();
 
 protected:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TObjectPtr<class ACHGunBase> CurrentWeapon;
 
 	// AI
