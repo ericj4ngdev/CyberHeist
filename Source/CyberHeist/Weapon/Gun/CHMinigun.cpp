@@ -102,8 +102,8 @@ void ACHMinigun::Equip()
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{		
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		bool bHave = Subsystem->HasMappingContext(FireMappingContext);
-		if(bHave)
+		
+		if(Subsystem->HasMappingContext(FireMappingContext))
 		{
 			UE_LOG(LogTemp, Log, TEXT("[ACHMinigun] Have FireMappingContext"));
 		}
@@ -111,20 +111,12 @@ void ACHMinigun::Equip()
 		{
 			UE_LOG(LogTemp, Log, TEXT("[ACHMinigun] No FireMappingContext"));
 			Subsystem->AddMappingContext(FireMappingContext, 0);
-
-			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+			if(!OwningCharacter->GetbHasMinigunInputBindings())
 			{
-				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHMinigun::PullTrigger);	
-				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHMinigun::CancelPullTrigger);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHMinigun::StartAim);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHMinigun::StopAim);
-				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartPrecisionAim);
-				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StopPrecisionAim);
-				EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHMinigun::Reload);
-			}
+				SetupWeaponInputComponent();
+				OwningCharacter->SetbHasMinigunInputBindings(true);
+			}		
 		}
-			
-		
 	}
 }
 
@@ -663,6 +655,26 @@ void ACHMinigun::Reload()
 	{
 		bReloading = false;		
 	}, ReloadInterval, false);
+}
+
+void ACHMinigun::SetupWeaponInputComponent()
+{
+	Super::SetupWeaponInputComponent();
+
+	if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+	{
+		// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
+		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		{
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHMinigun::PullTrigger);	
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHMinigun::CancelPullTrigger);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHMinigun::StartAim);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHMinigun::StopAim);
+			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartPrecisionAim);
+			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StopPrecisionAim);
+			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHMinigun::Reload);
+		}
+	}
 }
 
 void ACHMinigun::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)

@@ -177,8 +177,6 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|Ammo")
 	uint8 bInfiniteAmmo : 1;
-
-	
 	
 	FTimerHandle DurationTimerHandle;	
 	FTimerHandle FireTimerHandle;
@@ -224,7 +222,7 @@ public:
 	virtual void StartPrecisionAim();
 	virtual void StopPrecisionAim();
 	virtual void Reload();
-
+	virtual void SetupWeaponInputComponent();
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter);	
 	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter);	
 	virtual void StopParticleSystem();
@@ -238,6 +236,10 @@ protected:
 	uint8 bTrigger : 1;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|State")
-	uint8 bReloading : 1;	
+	uint8 bReloading : 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "CHGunBase|State")
+	uint8 bInputBindingsSetup : 1;
+	
 	// virtual void SetWeaponProperties();
 };

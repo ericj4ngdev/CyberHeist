@@ -72,9 +72,8 @@ void ACHGunRifle::Equip()
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{		
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		bool bHave = Subsystem->HasMappingContext(FireMappingContext);
-		if(bHave)
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
+		if(Subsystem->HasMappingContext(FireMappingContext))
 		{
 			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
 		}
@@ -82,16 +81,10 @@ void ACHGunRifle::Equip()
 		{
 			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
 			Subsystem->AddMappingContext(FireMappingContext, 0);
-		
-			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+			if(!OwningCharacter->GetbHasRifleInputBindings())
 			{
-				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRifle::PullTrigger);	
-				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRifle::CancelPullTrigger);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRifle::StartAim);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRifle::StopAim);
-				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartPrecisionAim);
-				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StopPrecisionAim);
-				EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRifle::Reload);
+				SetupWeaponInputComponent();
+				OwningCharacter->SetbHasRifleInputBindings(true);
 			}
 		}
 	}
@@ -488,6 +481,26 @@ void ACHGunRifle::Reload()
 	{
 		bReloading = false;		
 	}, ReloadInterval, false);
+}
+
+void ACHGunRifle::SetupWeaponInputComponent()
+{
+	Super::SetupWeaponInputComponent();
+
+	if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+	{
+		// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
+		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		{
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRifle::PullTrigger);	
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRifle::CancelPullTrigger);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRifle::StartAim);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRifle::StopAim);
+			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartPrecisionAim);
+			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StopPrecisionAim);
+			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRifle::Reload);
+		}
+	}
 }
 
 void ACHGunRifle::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)

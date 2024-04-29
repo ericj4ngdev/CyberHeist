@@ -2,22 +2,12 @@
 
 
 #include "Weapon/Gun/CHGunBase.h"
-#include "AIController.h"
-#include "CHProjectile.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "Animation/CHAnimInstance.h"
 #include "Character/CHCharacterBase.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputMappingContext.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
 
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
-#include "Engine/SkeletalMeshSocket.h"
 
 // Sets default values
 ACHGunBase::ACHGunBase()
@@ -54,6 +44,7 @@ ACHGunBase::ACHGunBase()
 
 	bReloading = false;
 	bInfiniteAmmo = false;
+	bInputBindingsSetup = false;
 }
 
 // Called when the game starts or when spawned
@@ -183,6 +174,11 @@ void ACHGunBase::StopPrecisionAim()
 
 void ACHGunBase::Reload()
 {
+}
+
+void ACHGunBase::SetupWeaponInputComponent()
+{
+	
 }
 
 void ACHGunBase::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)

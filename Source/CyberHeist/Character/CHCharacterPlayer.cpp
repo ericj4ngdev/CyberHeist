@@ -669,6 +669,7 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		FirstPersonMesh->SetVisibility(false, true);
 		GetMesh()->SetVisibility(true, true);
 	}
+	UE_LOG(LogTemp,Warning,TEXT("SetPerspective"));
 }
 
 void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
@@ -715,6 +716,7 @@ void ACHCharacterPlayer::StartSprint()
 		return;
 	}
 	// if() return;
+	UE_LOG(LogTemp, Log, TEXT("StartSprint"));
 	bSprint = true;
 }
 

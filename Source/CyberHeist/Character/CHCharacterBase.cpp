@@ -125,8 +125,10 @@ void ACHCharacterBase::BeginPlay()
 	// Weapon = GetWorld()->SpawnActor<ACHGunBase>();
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
 	bCovered = false;
-	// Weapon->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon_rSocket"));
-	// Weapon->SetOwner(this);	
+
+	SetbHasRPGInputBindings(false);
+	SetbHasRifleInputBindings(false);
+	SetbHasMinigunInputBindings(false);
 }
 
 USkeletalMeshComponent* ACHCharacterBase::GetFirstPersonMesh() const
@@ -308,40 +310,54 @@ void ACHCharacterBase::NextWeapon()
 {
 	// 인벤에 아무것도 없으면 
 	UE_LOG(LogTemp, Log, TEXT("%d"), Inventory.Weapons.Num());
-	if (Inventory.Weapons.Num() < 2)
+	/*if (Inventory.Weapons.Num() < 2)
 	{
 		return;
-	}
+	}*/
 
 	UE_LOG(LogTemp, Log, TEXT("NextWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
 	UnEquipWeapon(CurrentWeapon);
-	CurrentWeapon = nullptr;
-
-	if (CurrentWeaponIndex == INDEX_NONE)
+	if((CurrentWeaponIndex + 1) >= Inventory.Weapons.Num())
+	{
+		CurrentWeapon = nullptr;		
+	}
+	else
+	{
+		EquipWeapon(Inventory.Weapons[(CurrentWeaponIndex + 1) % Inventory.Weapons.Num()]);		
+	}
+	/*if (CurrentWeaponIndex == INDEX_NONE)
 	{
 		EquipWeapon(Inventory.Weapons[0]);
 	}
 	else
 	{
 		EquipWeapon(Inventory.Weapons[(CurrentWeaponIndex + 1) % Inventory.Weapons.Num()]);
-	}
+	}*/
 }
 
 void ACHCharacterBase::PreviousWeapon()
 {
-	if (Inventory.Weapons.Num() < 2)
+	/*if (Inventory.Weapons.Num() < 2)
 	{
 		return;
-	}
+	}*/
 
 	UE_LOG(LogTemp, Log, TEXT("PreviousWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
+	UnEquipWeapon(CurrentWeapon);	
 
-	UnEquipWeapon(CurrentWeapon);
-	CurrentWeapon = nullptr;
-
-	if (CurrentWeaponIndex == INDEX_NONE)
+	if((CurrentWeaponIndex - 1) < 0)
+	{
+		CurrentWeapon = nullptr;		
+	}
+	else
+	{
+		int32 IndexOfPrevWeapon = FMath::Abs(CurrentWeaponIndex - 1 + Inventory.Weapons.Num()) % Inventory.Weapons.Num();
+		EquipWeapon(Inventory.Weapons[IndexOfPrevWeapon]);
+	}
+	
+	/*if (CurrentWeaponIndex == INDEX_NONE)
 	{
 		EquipWeapon(Inventory.Weapons[0]);
 	}
@@ -349,7 +365,7 @@ void ACHCharacterBase::PreviousWeapon()
 	{
 		int32 IndexOfPrevWeapon = FMath::Abs(CurrentWeaponIndex - 1 + Inventory.Weapons.Num()) % Inventory.Weapons.Num();
 		EquipWeapon(Inventory.Weapons[IndexOfPrevWeapon]);
-	}
+	}*/
 }
 
 void ACHCharacterBase::NotifyComboActionEnd()

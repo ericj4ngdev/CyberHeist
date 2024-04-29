@@ -111,12 +111,11 @@ void ACHGunRPG::Equip()
 	}
 	
 	// Set up action bindings
-	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 	{
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		
-		bool bHave = Subsystem->HasMappingContext(FireMappingContext);
-		if(bHave)
+				
+		if(Subsystem->HasMappingContext(FireMappingContext))
 		{
 			UE_LOG(LogTemp, Log, TEXT("[CHRPG] Have FireMappingContext"));
 		}
@@ -124,15 +123,14 @@ void ACHGunRPG::Equip()
 		{
 			UE_LOG(LogTemp, Log, TEXT("[CHRPG] No FireMappingContext"));
 			Subsystem->AddMappingContext(FireMappingContext, 0);
-			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+
+			// only once
+			// 캐릭터에게 변수 줘야 함. 총이 캐릭터 변수 가지고 판단하기.
+			if(!OwningCharacter->GetbHasRPGInputBindings())
 			{
-				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRPG::PullTrigger);	
-				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRPG::CancelPullTrigger);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRPG::StartAim);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
-				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
-				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);			
-			}
+				SetupWeaponInputComponent();
+				OwningCharacter->SetbHasRPGInputBindings(true);
+			}			
 		}
 	}
 }
@@ -151,14 +149,18 @@ void ACHGunRPG::UnEquip()
 	MissileMesh3P->SetVisibility(false, true);
 	MissileMesh3P->CastShadow = false;
 
-	/*if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-	{
+	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	{		
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{			
-			Subsystem->RemoveMappingContext(FireMappingContext);
-			UE_LOG(LogTemp, Log, TEXT("[ACHGunRPG] Removed %s"), *FireMappingContext->GetName());
+		{
+			if(Subsystem->HasMappingContext(FireMappingContext))
+			{
+				Subsystem->RemoveMappingContext(FireMappingContext);
+				UE_LOG(LogTemp, Log, TEXT("[ACHGunRPG] Removed %s"), *FireMappingContext->GetName());
+			}
+			
 		}
-	}*/
+	}
 }
 
 void ACHGunRPG::Fire()
@@ -388,7 +390,7 @@ void ACHGunRPG::StartAim()
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);	
 
-	// PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
 	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 	{
@@ -586,6 +588,23 @@ void ACHGunRPG::Reload()
 	{
 		bReloading = false;		
 	}, ReloadInterval, false);
+}
+
+void ACHGunRPG::SetupWeaponInputComponent()
+{
+	if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+	{
+		// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
+		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		{		
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRPG::PullTrigger);	
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRPG::CancelPullTrigger);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRPG::StartAim);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
+			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
+			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);			
+		}
+	}
 }
 
 void ACHGunRPG::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)

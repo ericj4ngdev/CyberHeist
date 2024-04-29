@@ -54,8 +54,11 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bScopeAiming = OwnerActor->GetScopeAiming();
 		if(OwnerActor->GetCurrentWeapon())
 		{
-			CurrentWeapon = OwnerActor->GetCurrentWeapon()->WeaponType;		
-			
+			CurrentWeapon = OwnerActor->GetCurrentWeapon()->WeaponType;	
+		}
+		else
+		{
+			CurrentWeapon = ECHWeaponType::UnArmed;
 		}
 	}
 	

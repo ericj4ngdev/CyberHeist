@@ -239,6 +239,21 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TObjectPtr<class ACHGunBase> CurrentWeapon;
 
+private:
+	// state
+	uint8 bHasRPGInputBindings : 1;
+	uint8 bHasRifleInputBindings : 1;
+	uint8 bHasMinigunInputBindings : 1;
+
+public:
+	uint8 GetbHasRPGInputBindings(){return bHasRPGInputBindings;}
+	uint8 GetbHasRifleInputBindings(){return bHasRifleInputBindings;}
+	uint8 GetbHasMinigunInputBindings(){return bHasMinigunInputBindings;}
+	void SetbHasRPGInputBindings(uint8 NewBool){bHasRPGInputBindings = NewBool;}
+	void SetbHasRifleInputBindings(uint8 NewBool){bHasRifleInputBindings = NewBool;}
+	void SetbHasMinigunInputBindings(uint8 NewBool){bHasMinigunInputBindings = NewBool;}
+	
+	
 	// AI
 public:
 	virtual void NotifyComboActionEnd();
