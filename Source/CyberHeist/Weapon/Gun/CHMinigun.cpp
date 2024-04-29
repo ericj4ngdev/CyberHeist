@@ -13,7 +13,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
-
+#include "InputMappingContext.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/SkeletalMeshSocket.h"
@@ -102,11 +102,14 @@ void ACHMinigun::Equip()
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{		
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		if(Subsystem->HasMappingContext(FireMappingContext))
+		bool bHave = Subsystem->HasMappingContext(FireMappingContext);
+		if(bHave)
 		{
-			return;
+			UE_LOG(LogTemp, Log, TEXT("[ACHMinigun] Have FireMappingContext"));
 		}
-			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("[ACHMinigun] No FireMappingContext"));
 			Subsystem->AddMappingContext(FireMappingContext, 0);
 
 			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
@@ -119,6 +122,8 @@ void ACHMinigun::Equip()
 				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StopPrecisionAim);
 				EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHMinigun::Reload);
 			}
+		}
+			
 		
 	}
 }
@@ -130,7 +135,16 @@ void ACHMinigun::UnEquip()
 	CannonMesh1P->SetVisibility(false, true);
 	CannonMesh1P->CastShadow = false;
 	CannonMesh3P->SetVisibility(false, true);
-	CannonMesh3P->CastShadow = false;	
+	CannonMesh3P->CastShadow = false;
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->RemoveMappingContext(FireMappingContext);
+			UE_LOG(LogTemp, Log, TEXT("[ACHMinigun] Removed %s"), *FireMappingContext->GetName());
+		}
+	}
 }
 
 void ACHMinigun::Fire()
@@ -414,7 +428,7 @@ void ACHMinigun::StartAim()
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
-	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	
 	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 	{
@@ -444,6 +458,9 @@ void ACHMinigun::StartAim()
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);			
 		}
 	}
+
+	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	
 	// if Pull Triggering, pass
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
 }

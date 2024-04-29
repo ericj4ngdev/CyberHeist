@@ -195,24 +195,28 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	{		
 		// Subsystem->ClearAllMappings();
 		UInputMappingContext* PrevMappingContext = PrevCharacterControl->InputMappingContext;
-		if (PrevMappingContext)
-		{
-			Subsystem->RemoveMappingContext(PrevMappingContext);			
-		}
-		
 		UInputMappingContext* NewMappingContext = NewCharacterControl->InputMappingContext;
-		if (NewMappingContext)
-		{
-			Subsystem->AddMappingContext(NewMappingContext, 1);
+		/*if(PrevMappingContext->GetName() != NewMappingContext->GetName())
+		{*/
+			if (PrevMappingContext)
+			{
+				Subsystem->RemoveMappingContext(PrevMappingContext);			
+			}
+		
+			if (NewMappingContext)
+			{
+				Subsystem->AddMappingContext(NewMappingContext, 1);
 			
-		}
+			}
+		UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *PrevMappingContext->GetName(), *NewMappingContext->GetName());
+		
 		// IMC.Add(Subsystem->GetPlayerInput());
 		// UE_LOG(LogTemp, Log, TEXT("%s"), *IMC[0]->GetName()); 
 	}
 	CurrentCharacterControlType = NewCharacterControlType;
 
-	FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
-	UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), *EnumAsString);
+	/*FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
+	UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), *EnumAsString);*/
 
 	// UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), CurrentCharacterControlType)
 }
@@ -245,12 +249,31 @@ void ACHCharacterPlayer::SetMappingContextPriority(const UInputMappingContext* M
 	// Change IMC 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
+
+		/*UInputMappingContext* PrevMappingContext = MappingContext;
+		UInputMappingContext* NewMappingContext = MappingContext;
+		/*if(PrevMappingContext->GetName() != NewMappingContext->GetName())
+		{#1#
+		if (PrevMappingContext)
+		{
+			Subsystem->RemoveMappingContext(PrevMappingContext);			
+		}
+		
+		if (NewMappingContext)
+		{
+			Subsystem->AddMappingContext(NewMappingContext, 1);
+			
+		}
+		UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *PrevMappingContext->GetName(), *NewMappingContext->GetName());*/
+		// ---------------------------------------------------------
+		
 		// 없는 IMC를 제거할 수는 없으므로 캐릭터가 IMC가지고 있는지 체크하기  
 		if(Subsystem->HasMappingContext(MappingContext))
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetMappingContextPriority"));
 			Subsystem->RemoveMappingContext(MappingContext);
 			Subsystem->AddMappingContext(MappingContext, Priority);
+			UE_LOG(LogTemp, Log, TEXT("SetMappingContextPriority"));
+			UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *MappingContext->GetName(), *MappingContext->GetName());
 		}
 		else
 		{

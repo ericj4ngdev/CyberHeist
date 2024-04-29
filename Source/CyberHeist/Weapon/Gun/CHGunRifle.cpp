@@ -13,7 +13,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
-
+#include "InputMappingContext.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/SkeletalMeshSocket.h"
@@ -73,15 +73,16 @@ void ACHGunRifle::Equip()
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{		
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		if(Subsystem->HasMappingContext(FireMappingContext))
+		bool bHave = Subsystem->HasMappingContext(FireMappingContext);
+		if(bHave)
 		{
-			return;
+			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
 		}
-			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-			
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
 			Subsystem->AddMappingContext(FireMappingContext, 0);
 		
-
 			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 			{
 				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRifle::PullTrigger);	
@@ -92,13 +93,25 @@ void ACHGunRifle::Equip()
 				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StopPrecisionAim);
 				EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRifle::Reload);
 			}
-		
+		}
 	}
 }
 
 void ACHGunRifle::UnEquip()
 {
 	Super::UnEquip();
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			if(Subsystem->HasMappingContext(FireMappingContext))
+			{
+				Subsystem->RemoveMappingContext(FireMappingContext);
+				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Removed %s"), *FireMappingContext->GetName());				
+			}
+		}
+	}
 }
 
 void ACHGunRifle::Fire()

@@ -8,8 +8,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Animation/CHAnimInstance.h"
 #include "Character/CHCharacterBase.h"
-#include "Character/CHCharacterPlayer.h"
-#include "KisMet/GameplayStatics.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
@@ -109,14 +110,14 @@ void ACHGunBase::UnEquip()
 	WeaponMesh3P->SetVisibility(false, false);
 	WeaponMesh3P->CastShadow = false;
 	
-	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	/*if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
+		{			
 			Subsystem->RemoveMappingContext(FireMappingContext);
+			UE_LOG(LogTemp, Log, TEXT("[ ] Removed %s"), *FireMappingContext->GetName());
 		}
-	}
+	}*/
 }
 
 void ACHGunBase::Fire()

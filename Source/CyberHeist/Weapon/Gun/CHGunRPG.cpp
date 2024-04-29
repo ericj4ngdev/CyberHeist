@@ -13,7 +13,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
-
+#include "InputMappingContext.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/SkeletalMeshSocket.h"
@@ -115,28 +115,25 @@ void ACHGunRPG::Equip()
 	{
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		
-		if(Subsystem->HasMappingContext(FireMappingContext))
+		bool bHave = Subsystem->HasMappingContext(FireMappingContext);
+		if(bHave)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Have FireMappingContext"));
-			return;
+			UE_LOG(LogTemp, Log, TEXT("[CHRPG] Have FireMappingContext"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Log, TEXT("No FireMappingContext"));
+			UE_LOG(LogTemp, Log, TEXT("[CHRPG] No FireMappingContext"));
+			Subsystem->AddMappingContext(FireMappingContext, 0);
+			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+			{
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRPG::PullTrigger);	
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRPG::CancelPullTrigger);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRPG::StartAim);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
+				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
+				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);			
+			}
 		}
-		// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-		Subsystem->AddMappingContext(FireMappingContext, 0);
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
-		{
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRPG::PullTrigger);	
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRPG::CancelPullTrigger);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRPG::StartAim);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
-			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
-			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);
-			// EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRPG::Reload);
-		}
-		
 	}
 }
 
@@ -152,7 +149,16 @@ void ACHGunRPG::UnEquip()
 	ScopeMesh3P->SetVisibility(false, true);
 	ScopeMesh3P->CastShadow = false;
 	MissileMesh3P->SetVisibility(false, true);
-	MissileMesh3P->CastShadow = false;	
+	MissileMesh3P->CastShadow = false;
+
+	/*if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{			
+			Subsystem->RemoveMappingContext(FireMappingContext);
+			UE_LOG(LogTemp, Log, TEXT("[ACHGunRPG] Removed %s"), *FireMappingContext->GetName());
+		}
+	}*/
 }
 
 void ACHGunRPG::Fire()
@@ -382,7 +388,7 @@ void ACHGunRPG::StartAim()
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);	
 
-	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	// PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
 	
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 	{
@@ -412,6 +418,7 @@ void ACHGunRPG::StartAim()
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);			
 		}
 	}
+
 	// if Pull Triggering, pass
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
 }
