@@ -93,8 +93,12 @@ void ACHGunRPG::Equip()
 	{		
 		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
 		WeaponMesh3P->CastShadow = true;
-		// WeaponMesh3P->bCastHiddenShadow = true;
-
+		WeaponMesh3P->bCastHiddenShadow = true;
+		ScopeMesh3P->CastShadow = true;
+		ScopeMesh3P->bCastHiddenShadow = true;
+		MissileMesh3P->CastShadow = true;
+		MissileMesh3P->bCastHiddenShadow = true;
+		
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 		{
 			// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show

@@ -56,7 +56,7 @@ void ACHGunRifle::Equip()
 	{		
 		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
 		WeaponMesh3P->CastShadow = true;
-		// WeaponMesh3P->bCastHiddenShadow = true;
+		WeaponMesh3P->bCastHiddenShadow = true;
 
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 		{

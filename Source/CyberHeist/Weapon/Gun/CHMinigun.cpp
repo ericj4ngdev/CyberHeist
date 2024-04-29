@@ -84,7 +84,9 @@ void ACHMinigun::Equip()
 		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
 		WeaponMesh3P->CastShadow = true;
 		WeaponMesh3P->bCastHiddenShadow = true;
-
+		CannonMesh3P->CastShadow = true;
+		CannonMesh3P->bCastHiddenShadow = true;
+		
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 		{
 			// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show

@@ -30,12 +30,13 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	ThirdPersonCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	ThirdPersonCamera->bUsePawnControlRotation = false;
 
+	GetMesh()->bCastHiddenShadow = true;
+	
 	// FirstPersonCamera
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCamera->SetupAttachment(RootComponent);	
 	FirstPersonCamera->bUsePawnControlRotation = true;
-	// FirstPersonCamera->bAutoActivate = false;
-
+	
 	FirstPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(FName("FirstPersonMesh"));
 	FirstPersonMesh->SetupAttachment(FirstPersonCamera);
 	FirstPersonMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -43,6 +44,7 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	FirstPersonMesh->bReceivesDecals = false;
 	FirstPersonMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 	FirstPersonMesh->CastShadow = false;
+	FirstPersonMesh->bCastHiddenShadow = false;
 	FirstPersonMesh->SetVisibility(false, true);
 
 	GetMesh()->bCastHiddenShadow = true;
@@ -635,6 +637,8 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		
 		ThirdPersonCamera->Deactivate();
 		GetMesh()->SetVisibility(false, true);
+		GetMesh()->CastShadow = true;
+		GetMesh()->bCastHiddenShadow = true;
 
 		FirstPersonCamera->Activate();
 		FirstPersonMesh->SetVisibility(true);
@@ -654,6 +658,9 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 
 		ThirdPersonCamera->Activate();
 		GetMesh()->SetVisibility(true);
+		GetMesh()->CastShadow = true;
+		GetMesh()->bCastHiddenShadow = true;
+		
 		if(CurrentWeapon)
 		{
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);

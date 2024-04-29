@@ -25,16 +25,15 @@ ACHGunBase::ACHGunBase()
 	WeaponMesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(FName("WeaponMesh1P"));
 	WeaponMesh1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	WeaponMesh1P->CastShadow = false;
-	WeaponMesh1P->SetVisibility(false, false);
-	// 이거 부모가 켜지면 같이 켜지는건가... 
+	WeaponMesh1P->SetVisibility(false, false);	
 	WeaponMesh1P->SetupAttachment(CollisionComp);
 	// WeaponMesh1P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 	
 	WeaponMesh3P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh3P"));
 	WeaponMesh3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	WeaponMesh3P->SetupAttachment(CollisionComp);
-	// WeaponMesh3P->SetRelativeLocation(WeaponMesh3PickupRelativeLocation);
+	WeaponMesh3P->SetupAttachment(CollisionComp);	
 	WeaponMesh3P->CastShadow = true;
+	
 	WeaponMesh3P->SetVisibility(true, false);
 	WeaponMesh3P->SetupAttachment(CollisionComp);
 	// WeaponMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
@@ -99,17 +98,9 @@ void ACHGunBase::UnEquip()
 	WeaponMesh1P->CastShadow = false;
 	
 	// WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
-	WeaponMesh3P->SetVisibility(false, false);
-	WeaponMesh3P->CastShadow = false;
-	
-	/*if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{			
-			Subsystem->RemoveMappingContext(FireMappingContext);
-			UE_LOG(LogTemp, Log, TEXT("[ ] Removed %s"), *FireMappingContext->GetName());
-		}
-	}*/
+	WeaponMesh3P->SetVisibility(false, true);
+ 	WeaponMesh3P->CastShadow = false;
+	WeaponMesh3P->bCastHiddenShadow = false;
 }
 
 void ACHGunBase::Fire()

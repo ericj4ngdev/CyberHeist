@@ -40,6 +40,7 @@ ACHCharacterBase::ACHCharacterBase()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
+	
 
 	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FP.CHC_FP'"));
 	if (FirstPersonDataRef.Object)
@@ -313,7 +314,8 @@ ACHGunBase* ACHCharacterBase::GetCurrentWeapon() const
 void ACHCharacterBase::NextWeapon()
 {
 	// 인벤에 아무것도 없으면 
-
+	if(Inventory.Weapons.Num() == 0) return;
+	
 	UE_LOG(LogTemp, Log, TEXT("NextWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
 	UnEquipWeapon(CurrentWeapon);
@@ -343,6 +345,7 @@ void ACHCharacterBase::NextWeapon()
 
 void ACHCharacterBase::PreviousWeapon()
 {
+	if(Inventory.Weapons.Num() == 0) return;
 	UE_LOG(LogTemp, Log, TEXT("PreviousWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
 	UnEquipWeapon(CurrentWeapon);	
