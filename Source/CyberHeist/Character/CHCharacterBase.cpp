@@ -256,7 +256,11 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 	if (NewWeapon == LastWeapon) return;
 
 	// 총 교체시 중복임
-	UnEquipWeapon(LastWeapon);
+	// 맨손이면 해제할 게 없는데??
+	if(LastWeapon)
+	{
+		UnEquipWeapon(LastWeapon);		
+	}
 
 	if (NewWeapon)
 	{
@@ -309,63 +313,52 @@ ACHGunBase* ACHCharacterBase::GetCurrentWeapon() const
 void ACHCharacterBase::NextWeapon()
 {
 	// 인벤에 아무것도 없으면 
-	UE_LOG(LogTemp, Log, TEXT("%d"), Inventory.Weapons.Num());
-	/*if (Inventory.Weapons.Num() < 2)
-	{
-		return;
-	}*/
 
 	UE_LOG(LogTemp, Log, TEXT("NextWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
 	UnEquipWeapon(CurrentWeapon);
-	if((CurrentWeaponIndex + 1) >= Inventory.Weapons.Num())
+
+	int32 IndexOfNextWeapon = 0;
+	if(Inventory.Weapons.Num() == 1)
 	{
-		CurrentWeapon = nullptr;		
+		IndexOfNextWeapon = CurrentWeaponIndex + 1;
 	}
 	else
 	{
-		EquipWeapon(Inventory.Weapons[(CurrentWeaponIndex + 1) % Inventory.Weapons.Num()]);		
+		IndexOfNextWeapon = (CurrentWeaponIndex + 1) % Inventory.Weapons.Num();
 	}
-	/*if (CurrentWeaponIndex == INDEX_NONE)
+	
+	// IndexOfNextWeapon = (CurrentWeaponIndex + 1);
+
+	UE_LOG(LogTemp, Log, TEXT("CurrentWeaponIndex : %d"), CurrentWeaponIndex);
+	UE_LOG(LogTemp, Log, TEXT("IndexOfNextWeapon : %d"), IndexOfNextWeapon);
+	UE_LOG(LogTemp, Log, TEXT("Inventory.Weapons.Num() : %d"), Inventory.Weapons.Num());
+	
+	if(IndexOfNextWeapon >= Inventory.Weapons.Num())
 	{
-		EquipWeapon(Inventory.Weapons[0]);
+		CurrentWeapon = nullptr;
 	}
 	else
 	{
-		EquipWeapon(Inventory.Weapons[(CurrentWeaponIndex + 1) % Inventory.Weapons.Num()]);
-	}*/
+		EquipWeapon(Inventory.Weapons[IndexOfNextWeapon]);		
+	}
 }
 
 void ACHCharacterBase::PreviousWeapon()
 {
-	/*if (Inventory.Weapons.Num() < 2)
-	{
-		return;
-	}*/
-
 	UE_LOG(LogTemp, Log, TEXT("PreviousWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
 	UnEquipWeapon(CurrentWeapon);	
 
-	if((CurrentWeaponIndex - 1) < 0)
+	int32 IndexOfPrevWeapon = FMath::Abs(CurrentWeaponIndex - 1 + Inventory.Weapons.Num()) % Inventory.Weapons.Num();
+	if(IndexOfPrevWeapon <= 0)
 	{
 		CurrentWeapon = nullptr;		
 	}
 	else
-	{
-		int32 IndexOfPrevWeapon = FMath::Abs(CurrentWeaponIndex - 1 + Inventory.Weapons.Num()) % Inventory.Weapons.Num();
+	{		
 		EquipWeapon(Inventory.Weapons[IndexOfPrevWeapon]);
-	}
-	
-	/*if (CurrentWeaponIndex == INDEX_NONE)
-	{
-		EquipWeapon(Inventory.Weapons[0]);
-	}
-	else
-	{
-		int32 IndexOfPrevWeapon = FMath::Abs(CurrentWeaponIndex - 1 + Inventory.Weapons.Num()) % Inventory.Weapons.Num();
-		EquipWeapon(Inventory.Weapons[IndexOfPrevWeapon]);
-	}*/
+	}	
 }
 
 void ACHCharacterBase::NotifyComboActionEnd()
