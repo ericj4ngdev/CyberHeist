@@ -632,44 +632,35 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 	{
 		// 1인칭
 		SetCharacterControl(ECharacterControlType::First);
+		
+		ThirdPersonCamera->Deactivate();
+		GetMesh()->SetVisibility(false, true);
 
+		FirstPersonCamera->Activate();
+		FirstPersonMesh->SetVisibility(true);
 		if(CurrentWeapon)
 		{
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
-			// CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
+			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
 			// CurrentWeapon->GetWeaponMesh3P()->SetVisibility(false);
-			// 다른 무기는 왜 보이냐... 시점바뀌면 무조건 보이게 했나?
-			// 그렇다고 왜 3인칭으로 가면 RPG가 보이냐고... Equip했나... 
 		}
-		
-		ThirdPersonCamera->Deactivate();
-		FirstPersonCamera->Activate();
-
-		GetMesh()->SetVisibility(false, true);
-		FirstPersonMesh->SetVisibility(true, true);
-		
-		// Move third person mesh back so that the shadow doesn't look disconnected
-		// GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation + FVector(-120.0f, 0.0f, 0.0f));
 	}
 	else
 	{
 		SetCharacterControl(ECharacterControlType::Third);
+		
+		FirstPersonCamera->Deactivate();
+		FirstPersonMesh->SetVisibility(false, true);
 
-		// Inventory.Weapons[]
+		ThirdPersonCamera->Activate();
+		GetMesh()->SetVisibility(true);
 		if(CurrentWeapon)
 		{
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
+			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true, true);			
 			// CurrentWeapon->GetWeaponMesh1P()->SetVisibility(false);
-			// CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true);			
 		}
-		
-		FirstPersonCamera->Deactivate();
-		ThirdPersonCamera->Activate();
-
-		FirstPersonMesh->SetVisibility(false, true);
-		GetMesh()->SetVisibility(true, true);
-	}
-	UE_LOG(LogTemp,Warning,TEXT("SetPerspective"));
+	}	
 }
 
 void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)

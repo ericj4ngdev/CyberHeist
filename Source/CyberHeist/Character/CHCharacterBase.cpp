@@ -327,12 +327,9 @@ void ACHCharacterBase::NextWeapon()
 	{
 		IndexOfNextWeapon = (CurrentWeaponIndex + 1) % Inventory.Weapons.Num();
 	}
-	
-	// IndexOfNextWeapon = (CurrentWeaponIndex + 1);
-
-	UE_LOG(LogTemp, Log, TEXT("CurrentWeaponIndex : %d"), CurrentWeaponIndex);
+	/*UE_LOG(LogTemp, Log, TEXT("CurrentWeaponIndex : %d"), CurrentWeaponIndex);
 	UE_LOG(LogTemp, Log, TEXT("IndexOfNextWeapon : %d"), IndexOfNextWeapon);
-	UE_LOG(LogTemp, Log, TEXT("Inventory.Weapons.Num() : %d"), Inventory.Weapons.Num());
+	UE_LOG(LogTemp, Log, TEXT("Inventory.Weapons.Num() : %d"), Inventory.Weapons.Num());*/
 	
 	if(IndexOfNextWeapon >= Inventory.Weapons.Num())
 	{
