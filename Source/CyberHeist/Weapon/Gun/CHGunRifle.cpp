@@ -116,9 +116,9 @@ void ACHGunRifle::Fire()
 		
 	// UE_LOG(LogTemp, Warning, TEXT("PullTrigger"));
 	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
-	Effect->Activate(true);
+	/*Effect->Activate(true);
 	float Duration = 0.1f; // Set the duration time in seconds
-	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunBase::StopParticleSystem, Duration, false);
+	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunBase::StopParticleSystem, Duration, false);*/
 
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr)
@@ -126,14 +126,15 @@ void ACHGunRifle::Fire()
 		UE_LOG(LogTemp, Warning, TEXT("OwnerPawn"));
 		return;
 	}
-	AController* OwnerController = OwnerPawn->GetController();
+	AController* OwnerController = OwnerPawn->GetController();	
 	ensure(OwnerController);
+	
 	if (OwnerController == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
 		return;
 	}
-
+	
 	FVector Location;
 	FRotator Rotation;
 	OwnerController->GetPlayerViewPoint(Location, Rotation);
@@ -148,34 +149,117 @@ void ACHGunRifle::Fire()
 	
 	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
 	
-	FVector End = Location + Rotation.Vector() * MaxRange;
-
 	// LineTrace
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
+	
+	FTransform SocketTransform;
+	if(OwningCharacter->IsInFirstPersonPerspective())
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
+		if(MuzzleFlashSocket == nullptr) return; 
+	}
+	else
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
+		if(MuzzleFlashSocket == nullptr) return; 
+	}
+	
+	FVector TraceStart = SocketTransform.GetLocation();
+	
+	// FVector HitTarget = Hit.ImpactPoint;
+	FVector End = Location + Rotation.Vector() * MaxRange;
+	//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
+	
+	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_Visibility, Params);
 
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
 	if (bSuccess)
 	{
-		FVector ShotDirection = -Rotation.Vector();
-		DrawDebugPoint(GetWorld(), Hit.Location, 20, FColor::Red, true);
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),ImpactEffect, Hit.Location, ShotDirection.Rotation());
-
-		AActor* HitActor = Hit.GetActor();
-		if (HitActor != nullptr)
+		// FVector ShotDirection = -Rotation.Vector();
+		// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
+		DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
+		const float DamageToCause = Hit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
+		
+		// 맞은 부위 효과
+		if(ImpactEffect)
 		{
-			FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
-			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
+			UGameplayStatics::SpawnEmitterAtLocation
+			(
+				GetWorld(),
+				ImpactEffect,
+				Hit.Location, 
+				Hit.ImpactNormal.Rotation()
+			);			
+		}
+
+		// AActor* HitActor = Hit.GetActor();
+		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
+		if (CharacterBase)
+		{
+			FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
+			CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 		}
 	}
-
-	// Try and play the sound if specified
-	if (FireSound != nullptr)
+	// 궤적
+	FVector BeamEnd = End;
+	if (Hit.bBlockingHit)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwningCharacter->GetActorLocation());
+		// BeamEnd = Hit.ImpactPoint;
+		BeamEnd = Hit.Location;
 	}
+	else
+	{
+		Hit.Location = End;
+	}
+	
+	if (TraceParticles)
+	{
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			TraceParticles,
+			TraceStart,
+			FRotator::ZeroRotator,
+			true
+		);
+		if (Beam)
+		{
+			// Target은 그냥 임의로 지은 것.
+			Beam->SetVectorParameter(FName("Target"), BeamEnd);
+		}
+	}
+	
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			HitSound,
+			Hit.ImpactPoint
+		);
+	}
+	
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			FireSound,
+			GetActorLocation()
+		);
+	}
+
+	if (MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			MuzzleFlash,
+			SocketTransform
+		);
+	}
+	
+	
 
 	// Get the animation object for the arms mesh
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();

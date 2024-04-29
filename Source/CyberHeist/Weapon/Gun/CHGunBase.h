@@ -111,22 +111,26 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "CHGunBase")
 	FVector WeaponMesh3PEquippedRelativeLocation;
 	
-	UPROPERTY(VisibleAnywhere, Category = "CHGunBase|Effect")
-	TObjectPtr<class UParticleSystemComponent> Effect;
+	/*UPROPERTY(VisibleAnywhere, Category = "CHGunBase|Effect")
+	TObjectPtr<class UParticleSystemComponent> Effect;*/
 
 	UPROPERTY(EditAnywhere, Category = "CHGunBase|Effect")
 	TObjectPtr<class UParticleSystem> MuzzleFlash;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UParticleSystem> TraceParticles;
+
 	UPROPERTY(EditAnywhere, Category = "CHGunBase|Effect")
 	TObjectPtr<class UParticleSystem> ImpactEffect;
 
-	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Effect")
 	FVector MuzzleOffset;
-	
-	/** Sound to play each time we fire */
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Audio")
 	TObjectPtr<class USoundBase> FireSound;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Audio")
+	TObjectPtr<class USoundBase> HitSound;
 
 	// properties
 public:
@@ -150,7 +154,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
 	float Damage;
-		
+
+	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
+	float HeadShotDamage;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Properties")
 	ECHFireMode FireMode;
 

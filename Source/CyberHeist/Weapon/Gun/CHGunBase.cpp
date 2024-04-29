@@ -38,20 +38,23 @@ ACHGunBase::ACHGunBase()
 	WeaponMesh3P->SetupAttachment(CollisionComp);
 	// WeaponMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 
-	Effect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Effect"));
-	Effect->bAutoActivate = false;
-	Effect->SetupAttachment(CollisionComp);
+	// Effect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Effect"));
+	// Effect->bAutoActivate = false;
+	// Effect->SetupAttachment(CollisionComp);
 
 	bReloading = false;
 	bInfiniteAmmo = false;
 	bInputBindingsSetup = false;
+
+	MaxRange = 10000.f;
+	HeadShotDamage = 100.f;
 }
 
 // Called when the game starts or when spawned
 void ACHGunBase::BeginPlay()
 {
 	Super::BeginPlay();
-	Effect->AttachToComponent(WeaponMesh3P, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("MuzzleFlashSocket"));
+	// Effect->AttachToComponent(WeaponMesh3P, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("MuzzleFlashSocket"));
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);	
 }
 
@@ -197,7 +200,7 @@ void ACHGunBase::PickUpOnTouch(ACHCharacterBase* InCharacter)
 
 void ACHGunBase::StopParticleSystem()
 {
-	Effect->Deactivate();
+	// Effect->Deactivate();
 	// UE_LOG(LogTemp, Warning, TEXT("StopParticleSystem"));
 }
 

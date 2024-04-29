@@ -218,8 +218,8 @@ void ACHGunRPG::Fire()
 	// ====================================
 	
 	// Try and play effect
-	float Duration = 0.1f;				// Set the duration time in seconds
-	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunRPG::StopParticleSystem, Duration, false);
+	// float Duration = 0.1f;				// Set the duration time in seconds
+	// GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunRPG::StopParticleSystem, Duration, false);
 
 	//Set Spawn Collision Handling Override
 	FActorSpawnParameters ActorSpawnParams;
@@ -237,7 +237,7 @@ void ACHGunRPG::Fire()
 	}
 	
 	UWorld* const World = GetWorld();
-	if (World != nullptr)
+	if (World)
 	{
 		if(OwningCharacter->IsInFirstPersonPerspective())
 		{
@@ -305,12 +305,7 @@ void ACHGunRPG::Fire()
 			FPAnimInstance->Montage_Play(Fire1PMontage, 1);
 			FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire1PMontage);
 		}		
-	}
-
-	/*FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &ACHGunRPG::FireActionEnd);*/
-
-	
+	}	
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;
 }
 

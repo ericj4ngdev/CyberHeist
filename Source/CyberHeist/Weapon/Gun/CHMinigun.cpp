@@ -147,13 +147,7 @@ void ACHMinigun::Fire()
 	// 쏘는 몽타주가 여기 있다. 총알이 다 차거나 재장전 중일 때 예외처리는 여기서 해야할 듯. 
 	if(!bIsEquipped) return;
 	if(bReloading || CurrentAmmoInClip <= 0) return;
-		
-	// UE_LOG(LogTemp, Warning, TEXT("PullTrigger"));
-	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
-	Effect->Activate(true);
-	float Duration = 0.1f; // Set the duration time in seconds
-	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunBase::StopParticleSystem, Duration, false);
-
+	
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr)
 	{
@@ -182,33 +176,115 @@ void ACHMinigun::Fire()
 	
 	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
 	
-	FVector End = Location + Rotation.Vector() * MaxRange;
-
 	// LineTrace
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
+	// FString SocketName = "Muzzle_1";
+	FTransform SocketTransform;
+	if(OwningCharacter->IsInFirstPersonPerspective())
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh1P->GetSocketByName("Muzzle_1");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh1P);
+		if(MuzzleFlashSocket == nullptr) return; 
+	}
+	else
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh3P->GetSocketByName("Muzzle_1");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh3P);
+		if(MuzzleFlashSocket == nullptr) return; 
+	}
+	
+	FVector TraceStart = SocketTransform.GetLocation();
+	
+	// FVector HitTarget = Hit.ImpactPoint;
+	FVector End = Location + Rotation.Vector() * MaxRange;
+	//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
+	
+	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_Visibility, Params);
+
 	if (bSuccess)
 	{
-		FVector ShotDirection = -Rotation.Vector();
-		DrawDebugPoint(GetWorld(), Hit.Location, 20, FColor::Red, true);
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),ImpactEffect, Hit.Location, ShotDirection.Rotation());
-
-		AActor* HitActor = Hit.GetActor();
-		if (HitActor != nullptr)
+		// FVector ShotDirection = -Rotation.Vector();
+		// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
+		DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
+		const float DamageToCause = Hit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
+		
+		// 맞은 부위 효과
+		if(ImpactEffect)
 		{
-			FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
-			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
+			UGameplayStatics::SpawnEmitterAtLocation
+			(
+				GetWorld(),
+				ImpactEffect,
+				Hit.Location, 
+				Hit.ImpactNormal.Rotation()
+			);			
+		}
+
+		// AActor* HitActor = Hit.GetActor();
+		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
+		if (CharacterBase)
+		{
+			FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
+			CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 		}
 	}
-
-	// Try and play the sound if specified
-	if (FireSound != nullptr)
+	// 궤적
+	FVector BeamEnd = End;
+	if (Hit.bBlockingHit)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwningCharacter->GetActorLocation());
+		// BeamEnd = Hit.ImpactPoint;
+		BeamEnd = Hit.Location;
+	}
+	else
+	{
+		Hit.Location = End;
+	}
+	
+	if (TraceParticles)
+	{
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			TraceParticles,
+			TraceStart,
+			FRotator::ZeroRotator,
+			true
+		);
+		if (Beam)
+		{
+			// Target은 그냥 임의로 지은 것.
+			Beam->SetVectorParameter(FName("Target"), BeamEnd);
+		}
+	}
+	
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			HitSound,
+			Hit.ImpactPoint
+		);
+	}
+	
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			FireSound,
+			GetActorLocation()
+		);
+	}
+
+	if (MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			MuzzleFlash,
+			SocketTransform
+		);
 	}
 
 	UAnimInstance* Weapon1pAnimInstance = WeaponMesh1P->GetAnimInstance();
