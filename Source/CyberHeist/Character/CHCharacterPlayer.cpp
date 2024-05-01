@@ -31,6 +31,10 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	ThirdPersonCamera->bUsePawnControlRotation = false;
 
 	GetMesh()->bCastHiddenShadow = true;
+
+	// Camera1PBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera1PBoom"));
+	// Camera1PBoom->SetupAttachment(RootComponent);
+	// Camera1PBoom->TargetArmLength
 	
 	// FirstPersonCamera
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
@@ -109,6 +113,18 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	{
 		TakeCoverAction = InputActionTakeCoverRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionRightTiltRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_RightTilt.IA_RightTilt'"));
+	if (nullptr != InputActionRightTiltRef.Object)
+	{
+		RightTiltAction = InputActionRightTiltRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionLeftTiltRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_LeftTilt.IA_LeftTilt'"));
+	if (nullptr != InputActionLeftTiltRef.Object)
+	{
+		LeftTiltAction = InputActionLeftTiltRef.Object;
+	}
 	
 	CurrentCharacterControlType = ECharacterControlType::Third;
 	bIsFirstPersonPerspective = false;
@@ -174,6 +190,10 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ChangePrevWeaponAction, ETriggerEvent::Triggered, this, &ACHCharacterBase::PreviousWeapon);
 
 	EnhancedInputComponent->BindAction(TakeCoverAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TakeCover);
+	EnhancedInputComponent->BindAction(RightTiltAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::RightTilt);
+	EnhancedInputComponent->BindAction(LeftTiltAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::LeftTilt);
+	EnhancedInputComponent->BindAction(RightTiltAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopTilt);
+	EnhancedInputComponent->BindAction(LeftTiltAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopTilt);
 }
 
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
@@ -194,8 +214,7 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 
 	// Change IMC 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-	{		
-		// Subsystem->ClearAllMappings();
+	{	
 		UInputMappingContext* PrevMappingContext = PrevCharacterControl->InputMappingContext;
 		UInputMappingContext* NewMappingContext = NewCharacterControl->InputMappingContext;
 		/*if(PrevMappingContext->GetName() != NewMappingContext->GetName())
@@ -217,8 +236,8 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	}
 	CurrentCharacterControlType = NewCharacterControlType;
 
-	/*FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
-	UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), *EnumAsString);*/
+	FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
+	UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), *EnumAsString);
 
 	// UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), CurrentCharacterControlType)
 }
@@ -621,6 +640,39 @@ void ACHCharacterPlayer::TakeCover()
 	}	
 }
 
+void ACHCharacterPlayer::RightTilt()
+{
+	if(IsInFirstPersonPerspective())
+	{
+		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::RightTilt()"));
+		TiltAngle = 110;
+		// Camera1PBoom->SetWorldRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, TiltAngle));
+		//Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, TiltAngle));
+		// Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, Camera1PBoom->GetComponentRotation().Roll + 20));
+	}
+}
+
+void ACHCharacterPlayer::LeftTilt()
+{
+	if(IsInFirstPersonPerspective())
+	{
+		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::LeftTilt()"));
+		TiltAngle = 70;
+		// Camera1PBoom->SetWorldRotation(FRotator(0,TiltAngle,0));
+		// Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, Camera1PBoom->GetComponentRotation().Roll - 20));
+	}
+}
+
+void ACHCharacterPlayer::StopTilt()
+{
+	if(IsInFirstPersonPerspective())
+	{
+		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::StopTilt()"));
+		TiltAngle = 90;		
+		// Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, TiltAngle));
+	}
+}
+
 void ACHCharacterPlayer::TogglePerspective()
 {
 	bIsFirstPersonPerspective = !bIsFirstPersonPerspective;
@@ -646,7 +698,6 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		{
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
 			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
-			// CurrentWeapon->GetWeaponMesh3P()->SetVisibility(false);
 		}
 	}
 	else
@@ -664,8 +715,7 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		if(CurrentWeapon)
 		{
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
-			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true, true);			
-			// CurrentWeapon->GetWeaponMesh1P()->SetVisibility(false);
+			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true, true);
 		}
 	}	
 }

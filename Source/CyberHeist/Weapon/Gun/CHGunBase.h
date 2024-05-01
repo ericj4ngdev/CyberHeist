@@ -41,6 +41,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaSeconds ) override;
+	
 	// Pickup on touch
 	virtual void NotifyActorBeginOverlap(class AActor* Other) override;
 
@@ -57,6 +60,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class USkeletalMeshComponent> WeaponMesh3P;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class UCameraComponent> ScopeCamera;
+
+	
 public:
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh1P() const {return WeaponMesh1P;}
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh3P() const {return WeaponMesh3P;}
@@ -112,7 +119,7 @@ protected:
 	FVector WeaponMesh3PEquippedRelativeLocation;
 	
 	/*UPROPERTY(VisibleAnywhere, Category = "CHGunBase|Effect")
-	TObjectPtr<class UParticleSystemComponent> Effect;*/
+	FName MuzzlePoint;*/
 
 	UPROPERTY(EditAnywhere, Category = "CHGunBase|Effect")
 	TObjectPtr<class UParticleSystem> MuzzleFlash;

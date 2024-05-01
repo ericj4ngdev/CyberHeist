@@ -97,6 +97,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
 	uint8 bFPScopeAiming : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	float TiltAngle;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> AimActionMontage;
 
@@ -109,6 +112,7 @@ public:
 	FORCEINLINE uint8 GetTPAimingCloser() const { return bTPAimingCloser; }
 	FORCEINLINE void SetScopeAiming(uint8 bNewFPScopeAiming){ bFPScopeAiming = bNewFPScopeAiming; }
 	FORCEINLINE uint8 GetScopeAiming() const { return bFPScopeAiming; }
+	FORCEINLINE float GetTiltAngle() const { return TiltAngle; }
 	
 	// Cover
 protected:

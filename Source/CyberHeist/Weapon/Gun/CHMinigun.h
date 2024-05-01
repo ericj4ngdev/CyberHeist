@@ -29,6 +29,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 	TObjectPtr<class UAnimMontage> CannonRotateMontage;
 	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|Audio")
+	TObjectPtr<class USoundCue> CannonRotateSound;
+	// USoundCue* CannonRotateSound;
+    	
 public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;

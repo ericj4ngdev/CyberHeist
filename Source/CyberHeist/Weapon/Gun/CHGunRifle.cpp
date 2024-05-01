@@ -17,6 +17,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Player/CHPlayerController.h"
 
 ACHGunRifle::ACHGunRifle() 
 {
@@ -431,6 +432,11 @@ void ACHGunRifle::StopAim()
 		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{		
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		{
+			
+			PlayerController->SetViewTargetWithBlend(OwningCharacter,0);			
+		}
 		// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
 	}
 	
@@ -451,7 +457,6 @@ void ACHGunRifle::StartPrecisionAim()
 	if(!bIsEquipped) return;
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-
 	
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
@@ -459,12 +464,17 @@ void ACHGunRifle::StartPrecisionAim()
 		PlayerCharacter->SetTPAimingCloser(true);
 		// 카메라 위치 수정
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
+		// PlayerController->SetViewTargetWithBlend(this,0.2);
 	}
 
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
-		PlayerCharacter->SetScopeAiming(true);
+		// PlayerCharacter->SetScopeAiming(true);
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		{
+			PlayerController->SetViewTargetWithBlend(this,0.2);			
+		}
 	}
 }
 
@@ -484,7 +494,11 @@ void ACHGunRifle::StopPrecisionAim()
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
-		PlayerCharacter->SetScopeAiming(false);
+		// PlayerCharacter->SetScopeAiming(false);
+		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		{
+			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);			
+		}
 	}	
 }
 

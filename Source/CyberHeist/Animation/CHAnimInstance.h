@@ -52,6 +52,7 @@ public:
 	void SetCoverState(uint8 TakeHighCover, uint8 TakeLowCover);
 	void SetCoveredDirection(uint8 bRight);
 	void Recoil(float Multiplier);
+	void SetTilt();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
@@ -94,7 +95,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
 	uint8 bScopeAiming : 1;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	float TiltAngle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
 	uint8 bShouldMove : 1;

@@ -2,6 +2,8 @@
 
 
 #include "Weapon/Gun/CHGunBase.h"
+
+#include "Camera/CameraComponent.h"
 #include "Character/CHCharacterBase.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -38,6 +40,10 @@ ACHGunBase::ACHGunBase()
 	WeaponMesh3P->SetupAttachment(CollisionComp);
 	// WeaponMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 
+	ScopeCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ScopeCamera"));
+	ScopeCamera->SetupAttachment(WeaponMesh1P);	
+	ScopeCamera->bUsePawnControlRotation = true;	
+	
 	// Effect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Effect"));
 	// Effect->bAutoActivate = false;
 	// Effect->SetupAttachment(CollisionComp);
@@ -56,6 +62,29 @@ void ACHGunBase::BeginPlay()
 	Super::BeginPlay();
 	// Effect->AttachToComponent(WeaponMesh3P, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("MuzzleFlashSocket"));
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);	
+}
+
+void ACHGunBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// 총구에서 레이저를 쏜다
+	// 총구 앞에 Hit가 되면 몽타주 재생
+	
+	/*FTransform SocketTransform;
+	if(OwningCharacter->IsInFirstPersonPerspective())
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName();
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
+		if(MuzzleFlashSocket == nullptr) return; 
+	}
+	else
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
+		if(MuzzleFlashSocket == nullptr) return; 
+	}*/
+	
 }
 
 void ACHGunBase::NotifyActorBeginOverlap(AActor* Other)

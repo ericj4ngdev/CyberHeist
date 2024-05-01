@@ -12,7 +12,7 @@
 #include "KisMet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/DamageEvents.h"
-#include "Components/CapsuleComponent.h"
+#include "Sound/SoundCue.h"
 #include "InputMappingContext.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
@@ -320,9 +320,10 @@ void ACHMinigun::PullTrigger()
 		return;
 	}
 
-	bShooting = true;
-	
+	bShooting = true;	
 	OwningCharacter->bUseControllerRotationYaw = true;
+
+	
 
 	// 총 발사 Animation Montage
 	if(CannonRotateMontage == nullptr)
@@ -464,6 +465,15 @@ void ACHMinigun::StartAim()
 		return;
 	}
 	bAiming = true;
+
+	if (CannonRotateSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			CannonRotateSound,
+			GetActorLocation()
+		);
+	}
 	
 	// 총 발사 Animation Montage
 	if(CannonRotateMontage == nullptr)
@@ -545,6 +555,7 @@ void ACHMinigun::StopAim()
 	bAiming = false;
 	if(bShooting == false)
 	{
+		// UGameplayStatics::StopSou
 		// 총 발사 Animation Montage
 		if(CannonRotateMontage == nullptr)
 		{
