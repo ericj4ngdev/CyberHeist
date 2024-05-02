@@ -62,7 +62,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		bAiming = OwnerActor->GetAiming();
 		bPrecisionAiming = OwnerActor->GetTPAimingCloser();
-		bScopeAiming = OwnerActor->GetScopeAiming();
+		// bScopeAiming = OwnerActor->GetScopeAiming();
 		TiltAngle = OwnerActor->GetTiltAngle();
 		
 		if(OwnerActor->GetCurrentWeapon())

@@ -17,6 +17,7 @@ class CYBERHEIST_API ACHPlayerController : public APlayerController
 public:
 	ACHPlayerController();
 
+	virtual void Tick(float DeltaSeconds) override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -27,4 +28,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 		TObjectPtr<class UCHHUDWidget> CHHUDWidget;
+
+	void UpdateRotation(float DeltaTime) override;
 };

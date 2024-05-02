@@ -13,6 +13,14 @@ ACHPlayerController::ACHPlayerController()
 	}
 }
 
+void ACHPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// UE_LOG(LogTemp, Warning, TEXT("[ACHPlayerController::Tick] %s"),*PlayerCameraManager.GetName())
+	
+}
+
 void ACHPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -25,4 +33,14 @@ void ACHPlayerController::BeginPlay()
 	{
 		CHHUDWidget->AddToViewport();
 	}
+}
+
+void ACHPlayerController::UpdateRotation(float DeltaTime)
+{
+	FRotator DeltaRot(RotationInput);
+	FRotator ViewRotation = GetControlRotation();
+
+	// UE_LOG(LogTemp, Warning, TEXT("[ACHPlayerController::UpdateRotation] DeltaRot: [%s], ViewRot: [%s]"), *DeltaRot.ToString(), *ViewRotation.ToString());
+	
+	Super::UpdateRotation(DeltaTime);
 }

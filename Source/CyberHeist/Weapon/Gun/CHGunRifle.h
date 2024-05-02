@@ -17,6 +17,9 @@ class CYBERHEIST_API ACHGunRifle : public ACHGunBase
 public:
 	ACHGunRifle();
 
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+
 public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;

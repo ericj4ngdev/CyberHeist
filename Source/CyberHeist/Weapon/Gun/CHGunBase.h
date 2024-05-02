@@ -48,6 +48,7 @@ protected:
 	virtual void NotifyActorBeginOverlap(class AActor* Other) override;
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<class ACHCharacterBase> OwningCharacter;
 	
 protected:
@@ -231,9 +232,13 @@ public:
 	virtual void EndShoot();
 	virtual void PullTrigger();
 	virtual void CancelPullTrigger();
+	UFUNCTION(BlueprintCallable)
 	virtual void StartAim();
+	UFUNCTION(BlueprintCallable)
 	virtual void StopAim();
+	UFUNCTION(BlueprintCallable)
 	virtual void StartPrecisionAim();
+	UFUNCTION(BlueprintCallable)
 	virtual void StopPrecisionAim();
 	virtual void Reload();
 	virtual void SetupWeaponInputComponent();

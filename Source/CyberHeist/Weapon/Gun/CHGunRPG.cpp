@@ -17,6 +17,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Player/CHPlayerController.h"
 
 ACHGunRPG::ACHGunRPG()
 {
@@ -55,6 +56,7 @@ ACHGunRPG::ACHGunRPG()
 
 void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 {
+	StopAim();
 	Reload();
 }
 
@@ -413,6 +415,10 @@ void ACHGunRPG::StartAim()
 		if(PlayerCharacter->GetScopeAiming())
 		{
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+			if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+			{
+				PlayerController->SetViewTargetWithBlend(this,0.2);
+			}
 		}
 		else
 		{
@@ -449,11 +455,25 @@ void ACHGunRPG::StopAim()
 		}
 	}
 		
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
+	/*if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
 		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{		
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
 		// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
+	}*/
+
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	{		
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+	}
+	
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		{			
+			PlayerController->SetViewTargetWithBlend(OwningCharacter,0);			
+		}
 	}
 	
 	if(!bTrigger)
@@ -471,6 +491,12 @@ void ACHGunRPG::StartPrecisionAim()
 	Super::StartPrecisionAim();
 	// 휠 올리면 호출되는 함수
 	if(!bIsEquipped) return;
+	if(bReloading)
+	{
+		// cancel aim
+		StopAim();
+		return;
+	}
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
@@ -487,6 +513,11 @@ void ACHGunRPG::StartPrecisionAim()
 	{
 		PlayerCharacter->SetScopeAiming(true);
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+		if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+		{			
+			UE_LOG(LogTemp,Log,TEXT("[ACHGunRifle::StartPrecisionAim()] GetViewTarget : %s"),*PlayerController->GetViewTarget()->GetName());
+			PlayerController->SetViewTargetWithBlend(this,0.2);
+		}
 	}
 }
 
@@ -507,6 +538,10 @@ void ACHGunRPG::StopPrecisionAim()
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
 		PlayerCharacter->SetScopeAiming(false);
+		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		{
+			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);			
+		}
 	}	
 }
 

@@ -14,6 +14,7 @@
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
 #include "InputMappingContext.h"
+#include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/SkeletalMeshSocket.h"
@@ -21,6 +22,22 @@
 
 ACHGunRifle::ACHGunRifle() 
 {
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void ACHGunRifle::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	
+}
+
+void ACHGunRifle::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// UE_LOG(LogTemp,Warning,TEXT("[ACHGunRifle::Tick] ScopeCamLoc: [%s]"), *ScopeCamera->GetComponentLocation().ToString())
+	
 }
 
 void ACHGunRifle::Equip()
@@ -393,6 +410,10 @@ void ACHGunRifle::StartAim()
 		if(PlayerCharacter->GetScopeAiming())
 		{
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+			if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+			{
+				PlayerController->SetViewTargetWithBlend(this,0.2);
+			}
 		}
 		else
 		{
@@ -428,16 +449,28 @@ void ACHGunRifle::StopAim()
 		}
 	}
 		
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
+	/*if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
 		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{		
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
-		{
-			
-			PlayerController->SetViewTargetWithBlend(OwningCharacter,0);			
-		}
+		
 		// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
+	}*/
+
+
+	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	{		
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+	}
+	
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+	{
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		{			
+			PlayerController->SetViewTargetWithBlend(OwningCharacter,0);
+			OwningCharacter->bUseControllerRotationPitch = true;
+		}
 	}
 	
 	if(!bTrigger)
@@ -455,6 +488,12 @@ void ACHGunRifle::StartPrecisionAim()
 	Super::StartPrecisionAim();
 	// 휠 올리면 호출되는 함수
 	if(!bIsEquipped) return;
+	if(bReloading)
+	{
+		// cancel aim
+		StopAim();
+		return;
+	}
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	
@@ -469,11 +508,12 @@ void ACHGunRifle::StartPrecisionAim()
 
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
-		// PlayerCharacter->SetScopeAiming(true);
+		PlayerCharacter->SetScopeAiming(true);
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
-		{
-			PlayerController->SetViewTargetWithBlend(this,0.2);			
+		if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(OwningCharacter->GetController()))
+		{			
+			UE_LOG(LogTemp,Log,TEXT("[ACHGunRifle::StartPrecisionAim()] GetViewTarget : %s"),*PlayerController->GetViewTarget()->GetName());
+			PlayerController->SetViewTargetWithBlend(this,0.2);
 		}
 	}
 }
@@ -494,8 +534,8 @@ void ACHGunRifle::StopPrecisionAim()
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
-		// PlayerCharacter->SetScopeAiming(false);
-		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		PlayerCharacter->SetScopeAiming(false);
+		if(ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(OwningCharacter->GetController()))
 		{
 			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);			
 		}

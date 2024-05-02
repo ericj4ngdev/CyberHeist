@@ -350,6 +350,9 @@ void ACHCharacterPlayer::FirstLook(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);		// modify
+
+	// UE_LOG(LogTemp, Warning, TEXT("LookAxisVector.X : %f, LookAxisVector.Y : %f"), LookAxisVector.X, LookAxisVector.Y);
+	
 }
 
 void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
