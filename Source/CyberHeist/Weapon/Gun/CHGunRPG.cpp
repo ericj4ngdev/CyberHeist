@@ -19,6 +19,9 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Player/CHPlayerController.h"
 
+#include "GameFramework/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
+
 ACHGunRPG::ACHGunRPG()
 {
 	DefaultFireMode = ECHFireMode::SemiAuto;
@@ -28,30 +31,34 @@ ACHGunRPG::ACHGunRPG()
 	ScopeMesh1P->CastShadow = false;
 	ScopeMesh1P->SetVisibility(false, true);
 	ScopeMesh1P->SetupAttachment(WeaponMesh1P);
-	ScopeMesh1P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	// ScopeMesh1P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 
 	ScopeMesh3P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ScopeMesh3P"));
 	ScopeMesh3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	ScopeMesh3P->SetupAttachment(WeaponMesh3P);
 	ScopeMesh3P->CastShadow = true;
 	ScopeMesh3P->SetVisibility(true, true);
-	ScopeMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	// ScopeMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 
 	MissileMesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(FName("MissileMesh1P"));
 	MissileMesh1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	MissileMesh1P->CastShadow = false;
 	MissileMesh1P->SetVisibility(false, true);
 	MissileMesh1P->SetupAttachment(WeaponMesh1P);
-	MissileMesh1P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	// MissileMesh1P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 
 	MissileMesh3P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MissileMesh3P"));
 	MissileMesh3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	MissileMesh3P->SetupAttachment(WeaponMesh3P);
 	MissileMesh3P->CastShadow = true;
 	MissileMesh3P->SetVisibility(true, true);
-	MissileMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	// MissileMesh3P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 	
-	
+	Lens = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Lens"));
+	Lens->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Lens->SetupAttachment(CollisionComp);
+	Lens->CastShadow = true;
+	Lens->SetVisibility(false);	
 }
 
 void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
@@ -63,14 +70,13 @@ void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 void ACHGunRPG::Equip()
 {
 	Super::Equip();
-
+	
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 
 	const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
 	if(HandSocket)
 	{
-		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
-		
+		HandSocket->AttachActor(this,OwningCharacter->GetMesh());		
 	}
 	
 	if (WeaponMesh1P)
@@ -82,14 +88,16 @@ void ACHGunRPG::Equip()
 		{
 			WeaponMesh1P->SetVisibility(true, true);
 			ScopeMesh1P->SetVisibility(true, true);
-			MissileMesh1P->SetVisibility(true, true);
+			MissileMesh1P->SetVisibility(true, true);		
 		}
 		else
 		{
 			WeaponMesh1P->SetVisibility(false, true);			
 			ScopeMesh1P->SetVisibility(false, true);
-			MissileMesh1P->SetVisibility(false, true);
+			MissileMesh1P->SetVisibility(false, true);		
 		}
+		
+		Lens->SetVisibility(false);
 	}
 	
 	if (WeaponMesh3P)
@@ -416,14 +424,17 @@ void ACHGunRPG::StartAim()
 		if(PlayerCharacter->GetScopeAiming())
 		{
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-			/*if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+			if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 			{
-				PlayerController->SetViewTargetWithBlend(this,0.2);
-			}*/
+				PlayerController->SetViewTargetWithBlend(this,0.1);
+				OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);	// 팔 보이게 하기
+				Lens->SetVisibility(true);
+			}
 		}
 		else
 		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);			
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+			Lens->SetVisibility(false);
 		}
 	}
 
@@ -452,29 +463,26 @@ void ACHGunRPG::StopAim()
 		}
 		else
 		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);			
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);		
 		}
 	}
-		
-	/*if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
-		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
-	{		
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-		// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
-	}*/
 
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
-	{		
+	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+		Lens->SetVisibility(false);
 	}
 	
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-		/*if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		Lens->SetVisibility(false);
+		
+		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 		{			
-			PlayerController->SetViewTargetWithBlend(OwningCharacter,0);			
-		}*/
+			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.1f);
+			OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);
+		}
 	}
 	
 	if(!bTrigger)
@@ -514,11 +522,12 @@ void ACHGunRPG::StartPrecisionAim()
 	{
 		PlayerCharacter->SetScopeAiming(true);
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-		/*if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-		{			
-			UE_LOG(LogTemp,Log,TEXT("[ACHGunRifle::StartPrecisionAim()] GetViewTarget : %s"),*PlayerController->GetViewTarget()->GetName());
+		if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+		{
+			Lens->SetVisibility(true);
 			PlayerController->SetViewTargetWithBlend(this,0.2);
-		}*/
+			OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);
+		}
 	}
 }
 
@@ -539,10 +548,13 @@ void ACHGunRPG::StopPrecisionAim()
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
 		PlayerCharacter->SetScopeAiming(false);
-		/*if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		Lens->SetVisibility(false);
+		
+		OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);
+		if(ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(OwningCharacter->GetController()))
 		{
-			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);			
-		}*/
+			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);	
+		}
 	}	
 }
 
@@ -627,6 +639,8 @@ void ACHGunRPG::Reload()
 
 void ACHGunRPG::SetupWeaponInputComponent()
 {
+	Super::SetupWeaponInputComponent();
+	
 	if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 	{
 		// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
@@ -637,9 +651,56 @@ void ACHGunRPG::SetupWeaponInputComponent()
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRPG::StartAim);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
 			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
-			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);			
+			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);
+			EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHGunRPG::FirstLook);
 		}
 	}
+}
+
+void ACHGunRPG::FirstLook(const FInputActionValue& Value)
+{
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+	
+	if(OwningCharacter)
+	{		
+		ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+		{
+			// WeaponMesh1P->AddRelativeRotation(FRotator(0,0,LookAxisVector.Y));
+			FRotator NewRotation = WeaponMesh1P->GetRelativeRotation() + FRotator(0,0,LookAxisVector.Y);
+
+			UE_LOG(LogTemp, Log, TEXT("NewRotation P : %f, Y : %f R : %f"), NewRotation.Pitch,NewRotation.Yaw, NewRotation.Roll)
+			
+			/*if(NewRotation.Roll > -10.0f)
+			{
+				NewRotation.Roll = -90.0f;
+			}
+			if(NewRotation.Roll < -170.0f)
+			{
+				NewRotation.Roll = -170.0f;
+			}*/
+			/*if(NewRotation.Roll < -90.0f && NewRotation.Roll > -170.0f)
+			{
+				
+			}*/
+			NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -170.0f, -10.0f);
+			
+
+			// 잘되는 버전			
+			WeaponMesh1P->SetRelativeRotation(NewRotation);
+		}
+		else
+		{
+			WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
+		}
+	}
+}
+
+void ACHGunRPG::SetWeaponMeshVisibility(uint8 bVisible)
+{
+	Super::SetWeaponMeshVisibility(bVisible);
+
+	Lens->SetVisibility(bVisible == 1);
 }
 
 void ACHGunRPG::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)

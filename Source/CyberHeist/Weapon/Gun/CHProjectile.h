@@ -46,11 +46,17 @@ public:
 
 	// Only set this for Grenades and Rockets
 	UPROPERTY(EditAnywhere)
-	float Damage = 20.f;
+	float ExplosionDamage;
+
+	UPROPERTY(EditAnywhere)
+	float MinimumDamage;
+
+	UPROPERTY(EditAnywhere)
+	float DamageFalloff;
 
 	// Doesn't matter for Grenades and Rockets
 	UPROPERTY(EditAnywhere)
-	float HeadShotDamage = 40.f;
+	float HeadShotDamage = 100.f;
 
 protected:
 	virtual void BeginPlay() override;

@@ -136,13 +136,7 @@ void ACHGunRifle::Fire()
 	// 쏘는 몽타주가 여기 있다. 총알이 다 차거나 재장전 중일 때 예외처리는 여기서 해야할 듯. 
 	if(!bIsEquipped) return;
 	if(bReloading || CurrentAmmoInClip <= 0) return;
-		
-	// UE_LOG(LogTemp, Warning, TEXT("PullTrigger"));
-	// UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
-	/*Effect->Activate(true);
-	float Duration = 0.1f; // Set the duration time in seconds
-	GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunBase::StopParticleSystem, Duration, false);*/
-
+	
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr)
 	{
@@ -198,14 +192,14 @@ void ACHGunRifle::Fire()
 	FVector End = Location + Rotation.Vector() * MaxRange;
 	//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
 	
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_Visibility, Params);
+	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
 
 	if (bSuccess)
 	{
 		// FVector ShotDirection = -Rotation.Vector();
 		// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
 		DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
-		const float DamageToCause = Hit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
+		const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 		
 		// 맞은 부위 효과
 		if(ImpactEffect)
@@ -416,13 +410,10 @@ void ACHGunRifle::StartAim()
 		{
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
 			
-			// if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-			if(APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0))
-			{				
-				OwningCharacter->bUseControllerRotationYaw = true;						
-				PlayerController->SetViewTargetWithBlend(this,0.1);
-				OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);		// 팔 보이게 하기
-				// Possess를 할까?
+			if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+			{
+				PlayerController->SetViewTargetWithBlend(this,0.2f);
+				OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);	// 팔 보이게 하기
 			}
 		}
 		else
@@ -458,15 +449,6 @@ void ACHGunRifle::StopAim()
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);			
 		}
 	}
-		
-	/*if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
-		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
-	{		
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-		
-		// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
-	}*/
-
 
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{		
@@ -478,8 +460,7 @@ void ACHGunRifle::StopAim()
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
 		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 		{			
-			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.1f);
-			// ScopeCamera->SetRelativeRotation(PlayerController)
+			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2f);
 			OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기		
 			OwningCharacter->bUseControllerRotationPitch = true;
 		}
@@ -492,7 +473,6 @@ void ACHGunRifle::StopAim()
 	else
 	{
 		OwningCharacter->bUseControllerRotationYaw = true;
-		OwningCharacter->bUseControllerRotationYaw = true;		
 	}
 }
 
@@ -522,13 +502,10 @@ void ACHGunRifle::StartPrecisionAim()
 	{
 		PlayerCharacter->SetScopeAiming(true);
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-		// if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(OwningCharacter->GetController()))
-		if(APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+		if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(OwningCharacter->GetController()))
 		{			
-			UE_LOG(LogTemp,Log,TEXT("[ACHGunRifle::StartPrecisionAim()] GetViewTarget : %s"),*PlayerController->GetViewTarget()->GetName());
-			PlayerController->SetViewTargetWithBlend(this,0.1);
-			OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);	
-			// EnableInput(PlayerController);		
+			PlayerController->SetViewTargetWithBlend(this,0.2);
+			OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);
 		}
 	}
 }
@@ -553,7 +530,7 @@ void ACHGunRifle::StopPrecisionAim()
 		OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기
 		if(ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(OwningCharacter->GetController()))
 		{
-			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.1);
+			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);
 			// DisableInput(PlayerController);		
 		}
 	}	
@@ -662,7 +639,7 @@ void ACHGunRifle::SetupWeaponInputComponent()
 void ACHGunRifle::FirstLook(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
-	UE_LOG(LogTemp, Warning, TEXT("LookAxisVector.X : %f, LookAxisVector.Y : %f"), LookAxisVector.X, LookAxisVector.Y);
+	// UE_LOG(LogTemp, Warning, TEXT("LookAxisVector.X : %f, LookAxisVector.Y : %f"), LookAxisVector.X, LookAxisVector.Y);
 	if(OwningCharacter)
 	{
 		// float Pitch = FMath::Clamp(LookAxisVector.Y, 80,-80);
@@ -672,7 +649,6 @@ void ACHGunRifle::FirstLook(const FInputActionValue& Value)
 			float Pitch = LookAxisVector.Y;
 			UE_LOG(LogTemp, Warning, TEXT("LookAxisVector.X : %f, LookAxisVector.Y : %f"), LookAxisVector.X, LookAxisVector.Y);
 			// ScopeCamera->SetRelativeRotation(FRotator(Pitch,LookAxisVector.X,Pitch));
-			// this->Addre(FRotator(-Pitch,0,0));
 
 			// 총기 자체를 움직이게 하자. 확대 조준시 손은 없애자.		
 			// AddActorLocalRotation(FRotator(0,0,Pitch));
@@ -695,8 +671,12 @@ void ACHGunRifle::FirstLook(const FInputActionValue& Value)
 			WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
 		}
 	}
-	// UE_LOG(LogTemp, Warning, TEXT("LookAxisVector.X : %f, LookAxisVector.Y : %f"), LookAxisVector.X, LookAxisVector.Y);
-	
+	// UE_LOG(LogTemp, Warning, TEXT("LookAxisVector.X : %f, LookAxisVector.Y : %f"), LookAxisVector.X, LookAxisVector.Y);	
+}
+
+void ACHGunRifle::SetWeaponMeshVisibility(uint8 bVisible)
+{
+	Super::SetWeaponMeshVisibility(bVisible);
 }
 
 void ACHGunRifle::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)

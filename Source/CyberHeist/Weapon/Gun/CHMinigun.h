@@ -45,6 +45,8 @@ public:
 	virtual void StopPrecisionAim() override;
 	virtual void Reload() override;
 	virtual void SetupWeaponInputComponent() override;
+	
+	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;
 public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
 	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 

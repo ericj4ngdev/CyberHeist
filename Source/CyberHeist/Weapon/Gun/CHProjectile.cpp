@@ -124,12 +124,12 @@ void ACHProjectile::ExplodeDamage()
 		{
 			UGameplayStatics::ApplyRadialDamageWithFalloff(
 				this, // World context object
-				Damage, // BaseDamage
-				10.f, // MinimumDamage
+				ExplosionDamage, // BaseDamage
+				MinimumDamage, // MinimumDamage
 				GetActorLocation(), // Origin
 				DamageInnerRadius, // DamageInnerRadius
 				DamageOuterRadius, // DamageOuterRadius
-				1.f, // DamageFalloff
+				DamageFalloff, // DamageFalloff
 				UDamageType::StaticClass(), // DamageTypeClass
 				TArray<AActor*>(), // IgnoreActors
 				this, // DamageCauser

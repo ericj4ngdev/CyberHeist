@@ -232,6 +232,9 @@ public:
 	virtual void EndShoot();
 	virtual void PullTrigger();
 	virtual void CancelPullTrigger();
+
+	virtual void SetWeaponMeshVisibility(uint8 bVisible);
+	
 	UFUNCTION(BlueprintCallable)
 	virtual void StartAim();
 	UFUNCTION(BlueprintCallable)

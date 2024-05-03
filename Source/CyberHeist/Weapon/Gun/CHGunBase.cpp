@@ -175,6 +175,10 @@ void ACHGunBase::CancelPullTrigger()
 	
 }
 
+void ACHGunBase::SetWeaponMeshVisibility(uint8 bVisible)
+{
+}
+
 void ACHGunBase::StartAim()
 {
 	// 총의 IMC를 기존 플레이어 IMC 보다 높게 하기

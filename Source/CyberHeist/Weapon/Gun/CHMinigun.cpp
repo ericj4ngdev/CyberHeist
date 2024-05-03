@@ -766,6 +766,12 @@ void ACHMinigun::SetupWeaponInputComponent()
 	}
 }
 
+void ACHMinigun::SetWeaponMeshVisibility(uint8 bVisible)
+{
+	Super::SetWeaponMeshVisibility(bVisible);
+	
+}
+
 void ACHMinigun::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 {
 	Super::SetOwningCharacter(InOwningCharacter);

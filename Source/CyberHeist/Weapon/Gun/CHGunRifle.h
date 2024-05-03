@@ -38,6 +38,7 @@ public:
 	virtual void SetupWeaponInputComponent() override;
 	void FirstLook(const FInputActionValue& Value);
 
+	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;
 public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
 	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 

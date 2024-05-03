@@ -702,6 +702,7 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		{
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
 			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
+			CurrentWeapon->SetWeaponMeshVisibility(false);
 		}
 	}
 	else

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "Weapon/Gun/CHGunBase.h"
 #include "CHGunRPG.generated.h"
 
@@ -16,7 +17,10 @@ class CYBERHEIST_API ACHGunRPG : public ACHGunBase
 
 public:
 	ACHGunRPG();
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> FirstLookAction;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class USkeletalMeshComponent> ScopeMesh1P;
@@ -34,6 +38,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
 	TSubclassOf<class ACHProjectile> ProjectileClass;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMeshComponent> Lens;
+	
 private:
 	FVector SpawnLocation; 
 	FRotator SpawnRotation;
@@ -54,8 +61,11 @@ public:
 	virtual void StartPrecisionAim() override;
 	virtual void StopPrecisionAim() override;
 	virtual void Reload() override;
-
 	virtual void SetupWeaponInputComponent() override;
+	void FirstLook(const FInputActionValue& Value);
+
+	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;
+	
 public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
 	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 
