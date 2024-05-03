@@ -18,7 +18,8 @@ void ACHPlayerController::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	// UE_LOG(LogTemp, Warning, TEXT("[ACHPlayerController::Tick] %s"),*PlayerCameraManager.GetName())
-	
+	// UE_LOG(LogTemp, Warning, TEXT("[ACHPlayerController::Tick] %s"),*PlayerCameraManager->GetCameraViewPoint())
+	// GetPlayerViewPoint()
 }
 
 void ACHPlayerController::BeginPlay()
@@ -27,7 +28,7 @@ void ACHPlayerController::BeginPlay()
 
 	FInputModeGameOnly GameOnlyInputMode;
 	SetInputMode(GameOnlyInputMode);
-
+	
 	CHHUDWidget = CreateWidget<UCHHUDWidget>(this, CHHUDWidgetClass);
 	if (CHHUDWidget)
 	{
@@ -37,8 +38,8 @@ void ACHPlayerController::BeginPlay()
 
 void ACHPlayerController::UpdateRotation(float DeltaTime)
 {
-	FRotator DeltaRot(RotationInput);
-	FRotator ViewRotation = GetControlRotation();
+	// FRotator DeltaRot(RotationInput);
+	// FRotator ViewRotation = GetControlRotation();
 
 	// UE_LOG(LogTemp, Warning, TEXT("[ACHPlayerController::UpdateRotation] DeltaRot: [%s], ViewRot: [%s]"), *DeltaRot.ToString(), *ViewRotation.ToString());
 	

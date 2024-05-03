@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "Weapon/Gun/CHGunBase.h"
 #include "CHGunRifle.generated.h"
 
@@ -20,6 +21,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> FirstLookAction;
+	
 public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;
@@ -32,6 +36,8 @@ public:
 	virtual void StopPrecisionAim() override;
 	virtual void Reload() override;
 	virtual void SetupWeaponInputComponent() override;
+	void FirstLook(const FInputActionValue& Value);
+
 public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
 	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 

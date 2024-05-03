@@ -14,7 +14,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnHighCoverSignature, uint8 /*combat */);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnLowCoverSignature, uint8 /*combat */);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCoverStateSignature, uint8 /*bHigh */, uint8 /*bLow */);
 
-UENUM()
+UENUM(BlueprintType)
 enum class ECharacterControlType : uint8
 {
 	First,
@@ -81,6 +81,7 @@ protected:
 	TMap<ECharacterControlType, class UCHCharacterControlData*> CharacterControlManager;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ECharacterControlType CurrentCharacterControlType;
 	TMap<ECharacterControlType, class UCHCharacterControlData*> GetCharacterControlManager() {return CharacterControlManager;}
 	FORCEINLINE ECharacterControlType GetCurrentCharacterControlType() { return CurrentCharacterControlType; }

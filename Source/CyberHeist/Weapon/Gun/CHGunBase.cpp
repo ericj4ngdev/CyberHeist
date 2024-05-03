@@ -210,7 +210,7 @@ void ACHGunBase::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 	OwningCharacter = InOwningCharacter;
 	if (OwningCharacter == nullptr)	return;
 	SetOwner(OwningCharacter);
-	AttachToComponent(OwningCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+	//AttachToComponent(OwningCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	/*if (OwningCharacter->GetCurrentWeapon() != this)

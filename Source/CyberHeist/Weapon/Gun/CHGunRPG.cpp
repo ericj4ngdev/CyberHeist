@@ -70,6 +70,7 @@ void ACHGunRPG::Equip()
 	if(HandSocket)
 	{
 		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
+		
 	}
 	
 	if (WeaponMesh1P)
@@ -415,10 +416,10 @@ void ACHGunRPG::StartAim()
 		if(PlayerCharacter->GetScopeAiming())
 		{
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-			if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+			/*if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 			{
 				PlayerController->SetViewTargetWithBlend(this,0.2);
-			}
+			}*/
 		}
 		else
 		{
@@ -470,10 +471,10 @@ void ACHGunRPG::StopAim()
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		/*if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 		{			
 			PlayerController->SetViewTargetWithBlend(OwningCharacter,0);			
-		}
+		}*/
 	}
 	
 	if(!bTrigger)
@@ -513,11 +514,11 @@ void ACHGunRPG::StartPrecisionAim()
 	{
 		PlayerCharacter->SetScopeAiming(true);
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-		if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+		/*if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 		{			
 			UE_LOG(LogTemp,Log,TEXT("[ACHGunRifle::StartPrecisionAim()] GetViewTarget : %s"),*PlayerController->GetViewTarget()->GetName());
 			PlayerController->SetViewTargetWithBlend(this,0.2);
-		}
+		}*/
 	}
 }
 
@@ -538,10 +539,10 @@ void ACHGunRPG::StopPrecisionAim()
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
 		PlayerCharacter->SetScopeAiming(false);
-		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		/*if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 		{
 			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);			
-		}
+		}*/
 	}	
 }
 

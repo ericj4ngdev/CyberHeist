@@ -146,6 +146,7 @@ void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* Ch
 {
 	// Pawn
 	bUseControllerRotationYaw = CharacterControlData->bUseControllerRotationYaw;
+	bUseControllerRotationPitch = CharacterControlData->bUseControllerRotationPitch;
 
 	// CharacteMovement
 	GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;

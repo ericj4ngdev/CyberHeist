@@ -22,6 +22,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = Pawn)
 	uint32 bUseControllerRotationYaw : 1;
 
+	UPROPERTY(EditAnywhere, Category = Pawn)
+	uint32 bUseControllerRotationPitch : 1;
+	
 	// Movement
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
 	uint32 bOrientRotationToMovement : 1;
