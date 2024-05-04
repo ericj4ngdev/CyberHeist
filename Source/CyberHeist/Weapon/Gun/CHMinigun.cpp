@@ -203,14 +203,14 @@ void ACHMinigun::Fire()
 	FVector End = Location + Rotation.Vector() * MaxRange;
 	//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
 	
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_Visibility, Params);
+	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
 
 	if (bSuccess)
 	{
 		// FVector ShotDirection = -Rotation.Vector();
 		// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
 		DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
-		const float DamageToCause = Hit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
+		const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 		
 		// 맞은 부위 효과
 		if(ImpactEffect)

@@ -192,7 +192,7 @@ void ACHGunRifle::Fire()
 	FVector End = Location + Rotation.Vector() * MaxRange;
 	//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
 	
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
+	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
 
 	if (bSuccess)
 	{

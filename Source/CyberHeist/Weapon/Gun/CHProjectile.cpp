@@ -27,7 +27,7 @@ ACHProjectile::ACHProjectile()
 	// CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	// ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CollisionComp->SetupAttachment(SceneComponent);
-
+	
 	
 	// CollisionComp->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	// CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -54,7 +54,7 @@ void ACHProjectile::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	DrawDebugBox(GetWorld(),CollisionComp->GetComponentLocation(),CollisionComp->GetScaledBoxExtent(), FColor::Red,false, 0.2f);
+	// DrawDebugBox(GetWorld(),CollisionComp->GetComponentLocation(),CollisionComp->GetScaledBoxExtent(), FColor::Red,false, 0.2f);
 }
 
 void ACHProjectile::BeginPlay()
@@ -141,19 +141,5 @@ void ACHProjectile::ExplodeDamage()
 
 void ACHProjectile::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Destroy();
-	/*ACHCharacterPlayer* MyOwner = Cast<ACHCharacterPlayer>(GetOwner());
-	if (MyOwner == nullptr) return;
-	ACHPlayerController* OwnerInstigator = Cast<ACHPlayerController>(MyOwner->GetInstigatorController());
-	if (OwnerInstigator == nullptr) return;
-
-	if (OtherActor && OtherActor != this && OtherComp)
-	{
-		FDamageEvent DamageEvent;
-		OtherActor->TakeDamage(Damage, DamageEvent, OwnerInstigator, this);
-
-		if(OtherComp->IsSimulatingPhysics()) OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-		// Destroy();		
-	}*/
-	// UE_LOG(LogTemp, Log, TEXT("OnHit"));	
+	Destroy();	
 }
