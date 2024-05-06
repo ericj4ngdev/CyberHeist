@@ -115,7 +115,7 @@ ACHCharacterBase::ACHCharacterBase()
 	// Motion
 	MotionWarpComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarping"));
 
-	
+	CurrentCharacterControlType = ECharacterControlType::Third;
 }
 
 // Called when the game starts or when spawned
@@ -134,7 +134,7 @@ void ACHCharacterBase::BeginPlay()
 
 USkeletalMeshComponent* ACHCharacterBase::GetFirstPersonMesh() const
 {
-	return FirstPersonMesh;
+	return FirstPersonMesh;	
 }
 
 USkeletalMeshComponent* ACHCharacterBase::GetThirdPersonMesh() const
@@ -371,14 +371,17 @@ void ACHCharacterBase::SetDead()
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	PlayDeadAnimation();
 	SetActorEnableCollision(false);
-	HpBar->SetHiddenInGame(true);
+	// HpBar->SetHiddenInGame(true);
 }
 
 void ACHCharacterBase::PlayDeadAnimation()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	AnimInstance->StopAllMontages(0.0f);
-	AnimInstance->Montage_Play(DeadMontage, 1.0f);
+	if(DeadMontage)
+	{
+		AnimInstance->Montage_Play(DeadMontage, 1.0f);		
+	}
 	// UE_LOG(LogTemp, Log, TEXT("DeadMontage"));
 }
 

@@ -297,14 +297,17 @@ void ACHMinigun::Fire()
 	
 	// Get the animation object for the arms mesh
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
 	if (TPAnimInstance)
 	{
 		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
 	}
-	if (FPAnimInstance)
+	if(OwningCharacter->GetFirstPersonMesh())
 	{
-		FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+		UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
+		if (FPAnimInstance)
+		{
+			FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+		}
 	}
 	
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	

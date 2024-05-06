@@ -26,7 +26,7 @@ protected:
 protected:
 	void SetHp(float NewHp);
 
-	UPROPERTY(VisibleInstanceOnly, Category = Stat)
+	UPROPERTY(EditAnywhere, Category = Stat)
 		float MaxHp;
 
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)

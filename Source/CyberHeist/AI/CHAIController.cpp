@@ -10,6 +10,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "CHAI.h"
 #include "Character/CHCharacterBase.h"
+#include "Character/CHCharacterPlayer.h"
 #include "GameFramework/Character.h"
 #include "KisMet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -19,7 +20,7 @@
 
 ACHAIController::ACHAIController()
 {
-	static ConstructorHelpers::FObjectFinder<UBlackboardData> BBAssetRef(TEXT("/Script/AIModule.BlackboardData'/Game/CyberHeist/AI/BB_CHCharacter.BB_CHCharacter'"));
+	/*static ConstructorHelpers::FObjectFinder<UBlackboardData> BBAssetRef(TEXT("/Script/AIModule.BlackboardData'/Game/CyberHeist/AI/BB_CHCharacter.BB_CHCharacter'"));
 	if (nullptr != BBAssetRef.Object)
 	{
 		BBAsset = BBAssetRef.Object;
@@ -29,7 +30,7 @@ ACHAIController::ACHAIController()
 	if (nullptr != BTAssetRef.Object)
 	{
 		BTAsset = BTAssetRef.Object;
-	}
+	}*/
 
 	// Create AIPerceptionComponent
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
@@ -96,7 +97,7 @@ void ACHAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
 	// Handle sight stimulus
 	// ACharacter* Character = Cast<ACharacter>(Actor);
 	// APawn* ControllingPawn = SetPawn();
-	ACHCharacterBase* CharacterActor = Cast<ACHCharacterBase>(Actor);
+	ACHCharacterPlayer* CharacterActor = Cast<ACHCharacterPlayer>(Actor);
 	if(CharacterActor == nullptr) return;
 	// if(Character != UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)) return;
 	

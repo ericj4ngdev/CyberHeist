@@ -26,13 +26,13 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UBlackboardData> BBAsset;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UBehaviorTree> BTAsset;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UAIPerceptionComponent> AIPerception;
 
 	UFUNCTION()

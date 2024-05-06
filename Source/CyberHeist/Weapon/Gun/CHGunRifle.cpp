@@ -62,7 +62,7 @@ void ACHGunRifle::Equip()
 	
 	if (WeaponMesh1P)
 	{
-		AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		
+		AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		// 여기 npc가 총 들떄, 분명 null이라 에러 뜰텐데 
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
 		
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
@@ -280,15 +280,18 @@ void ACHGunRifle::Fire()
 
 	// Get the animation object for the arms mesh
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
 	if (TPAnimInstance)
 	{
 		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
 	}
-	if (FPAnimInstance)
+	if(OwningCharacter->GetFirstPersonMesh())
 	{
-		if(OwningCharacter->GetScopeAiming()) FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
-		else FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+		UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
+		if (FPAnimInstance)
+		{
+			if(OwningCharacter->GetScopeAiming()) FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
+			else FPAnimInstance->Montage_Play(Fire1PMontage, 1);
+		}
 	}
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 }

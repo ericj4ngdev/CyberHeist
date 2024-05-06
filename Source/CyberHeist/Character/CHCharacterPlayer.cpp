@@ -685,11 +685,15 @@ void ACHCharacterPlayer::TogglePerspective()
 
 void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 {
-	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim) return;
+	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
+	|| CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
+	|| CurrentCharacterControlType == ECharacterControlType::FirstAim
+	|| CurrentCharacterControlType == ECharacterControlType::FirstScopeAim) return;
 	if (Is1PPerspective)
 	{
 		// 1인칭
 		SetCharacterControl(ECharacterControlType::First);
+		bCovered = false;
 		
 		ThirdPersonCamera->Deactivate();
 		GetMesh()->SetVisibility(false, true);
@@ -707,6 +711,7 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 	}
 	else
 	{
+		bCovered = false;
 		SetCharacterControl(ECharacterControlType::Third);
 		
 		FirstPersonCamera->Deactivate();
