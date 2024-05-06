@@ -3,6 +3,7 @@
 
 #include "Character/CHCharacterNonPlayer.h"
 #include "AI/CHAIController.h"
+#include "AI/CHAI.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ACHCharacterNonPlayer::ACHCharacterNonPlayer()
@@ -78,6 +79,24 @@ void ACHCharacterNonPlayer::NotifyComboActionEnd()
 {
 	Super::NotifyComboActionEnd();
 	OnAttackFinished.ExecuteIfBound();		 // Broadcast UBTTask_Attack return Succeeded
+}
+
+void ACHCharacterNonPlayer::SetMovementSpeed(ECHAIMovementSpeed Speed)
+{
+	switch (Speed) {
+	case ECHAIMovementSpeed::Idle:
+		GetCharacterMovement()->MaxWalkSpeed = 0;
+		break;
+	case ECHAIMovementSpeed::Walking:
+		GetCharacterMovement()->MaxWalkSpeed = 100;
+		break;
+	case ECHAIMovementSpeed::Jogging:
+		GetCharacterMovement()->MaxWalkSpeed = 300;
+		break;
+	case ECHAIMovementSpeed::Sprinting:
+		GetCharacterMovement()->MaxWalkSpeed = 400;
+		break;
+	}
 }
 
 void ACHCharacterNonPlayer::Cover()

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "AI/CHAI.h"
 #include "CHCharacterAIInterface.generated.h"
 
 
@@ -34,4 +35,5 @@ public:
 	virtual void CancelAttackByAI() = 0;
 	virtual void Cover() = 0;
 	virtual void UnCover() = 0;
+	virtual void SetMovementSpeed(ECHAIMovementSpeed Speed)=0;
 };
