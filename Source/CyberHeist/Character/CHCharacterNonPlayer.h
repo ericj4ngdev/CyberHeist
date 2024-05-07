@@ -38,6 +38,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void StartAimWeapon() override;
 
+	UFUNCTION(BlueprintCallable)
+	virtual void StopAimWeapon() override;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void Cover() override;

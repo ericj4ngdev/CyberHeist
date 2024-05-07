@@ -37,4 +37,5 @@ public:
 	virtual void UnCover() = 0;
 	virtual void SetMovementSpeed(ECHAIMovementSpeed Speed)=0;
 	virtual void StartAimWeapon() = 0;
+	virtual void StopAimWeapon() = 0;
 };

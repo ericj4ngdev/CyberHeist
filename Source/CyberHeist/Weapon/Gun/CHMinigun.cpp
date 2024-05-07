@@ -341,7 +341,6 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
 	
 		FVector Location;
 		FRotator Rotation;
-		OwnerController->GetPlayerViewPoint(Location, Rotation);
 	
 		AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
 		if(AIController)
@@ -466,9 +465,20 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
 		
 		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
  			
-		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunBase::EndShoot, FireInterval, false);	// End Attack.
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHMinigun::EndShoot, FireInterval, false);	// End Attack.
 	}
 	// return Super::FireByAI(AttackTarget);
+}
+
+void ACHMinigun::EndShoot()
+{
+	Super::EndShoot();
+
+	UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+	if(WeaponMeshFireMontage)
+	{
+		Weapon3pAnimInstance->Montage_Stop(2.0f,WeaponMeshFireMontage);
+	}
 }
 
 void ACHMinigun::PullTrigger()
@@ -484,8 +494,6 @@ void ACHMinigun::PullTrigger()
 	bShooting = true;	
 	OwningCharacter->SetIsAttacking(bShooting);
 	OwningCharacter->bUseControllerRotationYaw = true;
-
-	
 
 	// 총 발사 Animation Montage
 	if(CannonRotateMontage == nullptr)

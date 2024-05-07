@@ -38,6 +38,7 @@ public:
 	virtual void UnEquip() override;
 	virtual void Fire() override;
 	virtual void FireByAI(AActor* AttackTarget) override;
+	virtual void EndShoot() override;
 	virtual void PullTrigger() override;
 	virtual void CancelPullTrigger() override;
 	virtual void StartAim() override;

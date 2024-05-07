@@ -51,6 +51,7 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	OwnerComp.GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, &OwnerComp]()
 	{
 		// OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISATTACKING, false);
+		
 		UE_LOG(LogTemp,Log,TEXT("Stop"));
 		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
