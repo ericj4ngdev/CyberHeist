@@ -2,6 +2,8 @@
 
 
 #include "Character/CHCharacterNonPlayer.h"
+
+#include "BrainComponent.h"
 #include "AI/CHAIController.h"
 #include "AI/CHAI.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -19,10 +21,22 @@ ACHCharacterNonPlayer::ACHCharacterNonPlayer()
 void ACHCharacterNonPlayer::SetDead()
 {
 	Super::SetDead();
-
+	
+	ACHAIController* CHAIController = Cast<ACHAIController>(GetController());
+    if (CHAIController)
+    {
+    	CHAIController->StopAI();
+    }
+	
 	FTimerHandle DeadTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda(
 		[&]() {
+			TArray<AActor*> AttachedActors;
+			GetAttachedActors(AttachedActors,false);
+			for (AActor*& AttachedActor : AttachedActors)
+			{
+				AttachedActor->Destroy();
+			}
 			Destroy();
 		}
 	), DeadEventDelayTime, false);

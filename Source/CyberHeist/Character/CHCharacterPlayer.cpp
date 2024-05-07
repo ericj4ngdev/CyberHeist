@@ -337,7 +337,7 @@ void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
 	if(bAiming) speed = WalkSpeed;
 	if(CurrentWeapon)
 	{
-		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = WalkSpeed;
+		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = SneakSpeed;
 	}
 	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
 	AddMovementInput(RightDirection, MovementVector.X * speed);
@@ -475,7 +475,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		if(bAiming) speed = WalkSpeed;
 		if(CurrentWeapon)
 		{
-			if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = WalkSpeed;
+			if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = SneakSpeed;
 		}
 	
 		// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
