@@ -27,3 +27,12 @@ enum class ECHAIMovementSpeed : uint8
 	Jogging			UMETA(DisplayName = "Jogging"),		// 2
 	Sprinting	UMETA(DisplayName = "Sprinting"),		// 3	
 };
+
+UENUM(BlueprintType)
+enum class ECHAISense : uint8
+{
+	None			UMETA(DisplayName = "None"),		// 0	
+	Sight		UMETA(DisplayName = "Sight"),			// 1
+	Hearing			UMETA(DisplayName = "Hearing"),		// 2
+	Damage	UMETA(DisplayName = "Damage"),		// 3	
+};

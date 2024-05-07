@@ -41,6 +41,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ECHAIMovementSpeed CurrentAIMovementSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ECHAISense AISense;
 	
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
@@ -68,6 +71,9 @@ private:
 	void HandleSensedSight(AActor* Actor);
 
 	UFUNCTION()
+	void HandleLostSight(AActor* Actor);
+
+	UFUNCTION()
 	void HandleSensedSound(FVector Location);
 	
 	UFUNCTION()
@@ -81,5 +87,5 @@ public:
 	void SetStateAsInvestigating(FVector Location);
 	void SetStateAsDead();
 	void SetStateAsSeeking(FVector Location);
-	void CanSenseActor();
+	bool CanSenseActor(AActor* Target);
 };

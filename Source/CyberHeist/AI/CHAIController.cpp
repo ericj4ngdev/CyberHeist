@@ -64,9 +64,9 @@ ACHAIController::ACHAIController()
 		// Set the dominant sense
 		AIPerception->SetDominantSense(SightConfig->GetSenseImplementation());
 
-		// AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIController::HandleSightSense);
-		AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIController::HandleSoundSense);
-		AIPerception->OnPerceptionUpdated.AddDynamic(this,&ACHAIController::HandleSenses);
+		AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIController::HandleSightSense);
+		// AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIController::HandleSoundSense);
+		// AIPerception->OnPerceptionUpdated.AddDynamic(this,&ACHAIController::HandleSenses);
 	}
 	
 }
@@ -106,19 +106,43 @@ void ACHAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
 	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>()) return;
 
 	// Handle sight stimulus
-	// ACharacter* Character = Cast<ACharacter>(Actor);
-	// APawn* ControllingPawn = SetPawn();
 	ACHCharacterPlayer* CharacterActor = Cast<ACHCharacterPlayer>(Actor);
 	if(CharacterActor == nullptr) return;
-	
-	
+		
 	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
 	UObject* TargetActor = UKismetMathLibrary::SelectObject(CharacterActor, nullptr, Stimulus.WasSuccessfullySensed());
-	BlackboardPtr->SetValueAsObject(BBKEY_TARGETACTOR, TargetActor);
+	// BlackboardPtr->SetValueAsObject(BBKEY_TARGETACTOR, TargetActor);
+	BlackboardPtr->SetValueAsObject(AttackTargetKeyName, TargetActor);
 	if(Stimulus.WasSuccessfullySensed())
 	{
 		BlackboardPtr->SetValueAsVector(BBKEY_LASTKNOWNLOCATION, Stimulus.StimulusLocation);
-	}	
+	}
+	else
+	{
+		BlackboardPtr->SetValueAsObject(AttackTargetKeyName, nullptr);
+		// SetStateAsSeeking()
+	}
+
+	switch (GetCurrentAIState())
+	{
+	case ECHAIState::Passive:
+		SetStateAsAttacking(CharacterActor,false);
+		break;
+	case ECHAIState::Attacking:
+		break;
+	case ECHAIState::Frozen:
+		SetStateAsAttacking(CharacterActor,false);
+		break;
+	case ECHAIState::Investigating:
+		SetStateAsAttacking(CharacterActor,false);
+		break;
+	case ECHAIState::Dead:
+		break;
+	case ECHAIState::Seeking:
+		SetStateAsAttacking(CharacterActor,false);
+		break;
+	default: ;
+	}
 }
 
 void ACHAIController::HandleSoundSense(AActor* Actor, FAIStimulus Stimulus)
@@ -129,11 +153,20 @@ void ACHAIController::HandleSoundSense(AActor* Actor, FAIStimulus Stimulus)
 }
 
 void ACHAIController::HandleSenses(const TArray<AActor*>& Actors)
-{
-	for (auto Element : Actors)
+{	
+	for (auto Target : Actors)
 	{
-		HandleSensedSight(Element);
-		HandleSensedDamage(Element);
+		// if() 감지 여부
+		if(CanSenseActor(Target))
+		{
+			HandleSensedSight(Target);			
+		}
+		else
+		{
+			HandleLostSight(Target);
+		}
+		// HandleSensedDamage(Target);
+
 		
 		/*FActorPerceptionBlueprintInfo Info;
 		AIPerception->GetActorsPerception(Element,Info);
@@ -170,6 +203,31 @@ void ACHAIController::HandleSensedSight(AActor* Actor)
 	}
 }
 
+void ACHAIController::HandleLostSight(AActor* Actor)
+{
+	if(Actor == AttackTarget)
+	{
+		switch (GetCurrentAIState())
+		{
+		case ECHAIState::Passive:
+			break;
+		case ECHAIState::Attacking:
+			SetStateAsSeeking(Actor->GetActorLocation());
+			break;
+		case ECHAIState::Frozen:
+			SetStateAsSeeking(Actor->GetActorLocation());
+			break;
+		case ECHAIState::Investigating:
+			SetStateAsSeeking(Actor->GetActorLocation());
+			break;
+		case ECHAIState::Dead:
+			break;
+		case ECHAIState::Seeking:
+			break;
+		default: ;
+		}
+	}
+}
 
 void ACHAIController::HandleSensedSound(FVector Location)
 {
@@ -284,8 +342,18 @@ void ACHAIController::SetStateAsSeeking(FVector Location)
 	BlackboardPtr->SetValueAsVector(PointOfInterestKeyName, Location);	
 }
 
-void ACHAIController::CanSenseActor()
+bool ACHAIController::CanSenseActor(AActor* Target)
 {
-	// AIPerception->GetActorsPerception()
+	FActorPerceptionBlueprintInfo Info;
+	AIPerception->GetActorsPerception(Target,Info);
+	
+	for (auto Stimulus : Info.LastSensedStimuli)
+	{		
+		if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>())
+		{
+			return Stimulus.WasSuccessfullySensed();			
+		}
+	}
+	return false;
 }
 
