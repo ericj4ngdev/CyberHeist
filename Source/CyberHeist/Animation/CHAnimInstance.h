@@ -67,7 +67,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Variable)
 	float GroundSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Variable)
+	float Direction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Variable)
 	uint8 bIsFalling : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Variable)
