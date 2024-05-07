@@ -96,8 +96,8 @@ void ACHAIController::StopAI()
 void ACHAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	// SetStateAsPassive();
 	RunAI();
+	// SetStateAsPassive();
 }
 
 void ACHAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
@@ -106,42 +106,19 @@ void ACHAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
 	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>()) return;
 
 	// Handle sight stimulus
+	// ACharacter* Character = Cast<ACharacter>(Actor);
+	// APawn* ControllingPawn = SetPawn();
 	ACHCharacterPlayer* CharacterActor = Cast<ACHCharacterPlayer>(Actor);
 	if(CharacterActor == nullptr) return;
-		
+	// if(Character != UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)) return;
+	
+	
 	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
 	UObject* TargetActor = UKismetMathLibrary::SelectObject(CharacterActor, nullptr, Stimulus.WasSuccessfullySensed());
-	// BlackboardPtr->SetValueAsObject(BBKEY_TARGETACTOR, TargetActor);
-	BlackboardPtr->SetValueAsObject(AttackTargetKeyName, TargetActor);
+	BlackboardPtr->SetValueAsObject(BBKEY_TARGETACTOR, TargetActor);
 	if(Stimulus.WasSuccessfullySensed())
 	{
 		BlackboardPtr->SetValueAsVector(BBKEY_LASTKNOWNLOCATION, Stimulus.StimulusLocation);
-	}
-	else
-	{
-		BlackboardPtr->SetValueAsObject(AttackTargetKeyName, nullptr);
-		// SetStateAsSeeking()
-	}
-
-	switch (GetCurrentAIState())
-	{
-	case ECHAIState::Passive:
-		SetStateAsAttacking(CharacterActor,false);
-		break;
-	case ECHAIState::Attacking:
-		break;
-	case ECHAIState::Frozen:
-		SetStateAsAttacking(CharacterActor,false);
-		break;
-	case ECHAIState::Investigating:
-		SetStateAsAttacking(CharacterActor,false);
-		break;
-	case ECHAIState::Dead:
-		break;
-	case ECHAIState::Seeking:
-		SetStateAsAttacking(CharacterActor,false);
-		break;
-	default: ;
 	}
 }
 
