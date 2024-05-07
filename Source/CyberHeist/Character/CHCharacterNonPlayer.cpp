@@ -99,6 +99,15 @@ void ACHCharacterNonPlayer::SetMovementSpeed(ECHAIMovementSpeed Speed)
 	}
 }
 
+void ACHCharacterNonPlayer::StartAimWeapon()
+{
+	if(GetCurrentWeapon())
+	{
+		GetCurrentWeapon()->StartAim();
+		SetAiming(true);
+	}
+}
+
 void ACHCharacterNonPlayer::Cover()
 {
 	Crouch();

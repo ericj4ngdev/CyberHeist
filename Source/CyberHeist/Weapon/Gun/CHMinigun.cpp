@@ -511,38 +511,39 @@ void ACHMinigun::StartAim()
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
-	
-	
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
+	if(PlayerCharacter)
 	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
-	}
-
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
-	{
-		if(!PlayerCharacter->GetCovered())
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 		{
-			UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
-		}		
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
-		PlayerCharacter->SetCoveredAttackMotion(true);
-	}
-
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
-	{
-		// 조준 여부 변수 추가
-		// PlayerCharacter->SetAiming(true);  // 근데 이건 밑에 코드에서 해줌
-		if(PlayerCharacter->GetScopeAiming())
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
 		}
-		else
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);			
-		}
-	}
 
-	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+		{
+			if(!PlayerCharacter->GetCovered())
+			{
+				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
+			}		
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
+			PlayerCharacter->SetCoveredAttackMotion(true);
+		}
+
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		{
+			// 조준 여부 변수 추가
+			// PlayerCharacter->SetAiming(true);  // 근데 이건 밑에 코드에서 해줌
+			if(PlayerCharacter->GetScopeAiming())
+			{
+				PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+			}
+			else
+			{
+				PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);			
+			}
+		}
+
+		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	}
 	
 	// if Pull Triggering, pass
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
@@ -593,29 +594,31 @@ void ACHMinigun::StopAim()
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
-	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
-	
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
-		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
+	if(PlayerCharacter)
 	{
-		if(PlayerCharacter->GetCovered())
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
-			PlayerCharacter->SetCoveredAttackMotion(false);			
-		}
-		else
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);			
-		}
-	}
-		
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
-		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
-	{		
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-		// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
-	}
+		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
 	
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
+			|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
+		{
+			if(PlayerCharacter->GetCovered())
+			{
+				PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
+				PlayerCharacter->SetCoveredAttackMotion(false);			
+			}
+			else
+			{
+				PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);			
+			}
+		}
+		
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
+			|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+		{		
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+			// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
+		}
+	}
 	if(!bTrigger)
 	{
 		OwningCharacter->SetAiming(false); // if PullTriggering, pass
@@ -634,15 +637,16 @@ void ACHMinigun::StartPrecisionAim()
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
-	
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
+	if(PlayerCharacter)
 	{
-		// 조준경 bool 변수 -> 애니메이션에 전달
-		PlayerCharacter->SetTPAimingCloser(true);
-		// 카메라 위치 수정
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
+		{
+			// 조준경 bool 변수 -> 애니메이션에 전달
+			PlayerCharacter->SetTPAimingCloser(true);
+			// 카메라 위치 수정
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
+		}
 	}
-
 	/*if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
 		PlayerCharacter->SetScopeAiming(true);
@@ -657,12 +661,14 @@ void ACHMinigun::StopPrecisionAim()
 	if(!bIsEquipped) return;
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
+	if(PlayerCharacter)
 	{
-		PlayerCharacter->SetTPAimingCloser(false);
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);		
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
+		{
+			PlayerCharacter->SetTPAimingCloser(false);
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);		
+		}
 	}
-	
 	/*if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
 		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);

@@ -73,6 +73,7 @@ private:
 	UFUNCTION()
 	void HandleSensedDamage(AActor* Actor);
 
+public:
 	ECHAIState GetCurrentAIState();
 	void SetStateAsPassive();
 	void SetStateAsAttacking(AActor* Target, bool UseLastKnownAttackTarget);

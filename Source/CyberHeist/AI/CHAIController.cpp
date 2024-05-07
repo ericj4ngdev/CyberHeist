@@ -96,7 +96,7 @@ void ACHAIController::StopAI()
 void ACHAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	SetStateAsPassive();
+	// SetStateAsPassive();
 	RunAI();
 }
 

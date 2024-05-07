@@ -12,31 +12,19 @@
   <component name="ChangeListManager">
     <list default="true" id="973d144e-de77-4949-8d68-1ef304aea923" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BB_CHCharacter.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CHCloneAIContoller.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CHCloneAIContoller.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CHJuggernautAIContoller.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CHJuggernautAIContoller.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BTDecorator_IsAttacking.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BTTask_BPEnterCover.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BTTask_BPUnCover.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BTTask_ClearBlackboardValue.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BTTask_GoBackIntoCover.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BTTask_SetCombatMode.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BTTask_SetIsAttacking.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BT_CHClone.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BT_CHJuggernaut.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/Context_Player.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS_Cover.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS_Demo.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS_FindAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS_FindAttack.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS_FindCover.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS_Tester.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS_Tester.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAI.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAI.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BB_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BB_Enemy.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_Enemy.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/Tasks/BTTask_BPUnCover.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/Tasks/BTTask_BPUnCover.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/Tasks/BTTask_GoBackIntoCover.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/Tasks/BTTask_GoBackIntoCover.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Interface/CHCharacterAIInterface.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Interface/CHCharacterAIInterface.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,29 +126,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;C++ Project.CyberHeist.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;UnrealLogSettings&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "C++ Project.CyberHeist.executor": "Debug",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "UnrealLogSettings",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;rider.external.source.directories&quot;: [
-      &quot;C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\DecompilerCache&quot;,
-      &quot;C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\SourcesCache&quot;,
-      &quot;C:\\Users\\Jang\\AppData\\Local\\Symbols\\src&quot;
+  "keyToStringList": {
+    "rider.external.source.directories": [
+      "C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\DecompilerCache",
+      "C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\SourcesCache",
+      "C:\\Users\\Jang\\AppData\\Local\\Symbols\\src"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="C++ Project.CyberHeist">
     <configuration name="CyberHeist" type="CppProject" factoryName="C++ Project">
       <configuration_1>
@@ -300,7 +288,9 @@
       <workItem from="1714834652750" duration="4704000" />
       <workItem from="1714877407416" duration="2408000" />
       <workItem from="1714979906024" duration="12377000" />
-      <workItem from="1714997874206" duration="2733000" />
+      <workItem from="1714997874206" duration="5234000" />
+      <workItem from="1715003150290" duration="11153000" />
+      <workItem from="1715042307089" duration="3826000" />
     </task>
     <servers />
   </component>

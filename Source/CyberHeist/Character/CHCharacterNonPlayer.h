@@ -31,7 +31,12 @@ protected:
 	virtual void AttackByAI() override;
 	virtual void CancelAttackByAI() override;
 	virtual void NotifyComboActionEnd() override;
+
+	UFUNCTION(BlueprintCallable)
 	virtual void SetMovementSpeed(ECHAIMovementSpeed Speed) override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void StartAimWeapon() override;
 
 public:
 	UFUNCTION(BlueprintCallable)

@@ -135,13 +135,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> DeadMontage;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsDead;
+	
 	// 죽는 함수
 	virtual void SetDead();
+
 	// 몽타주 재생 함수
 	void PlayDeadAnimation();
 
 	float DeadEventDelayTime = 5.0f;	
-	
+public:
+	bool GetIsDead();
+
 public:
 	void SetHasRifle(bool bNewHasRifle);
 	bool GetHasRifle();

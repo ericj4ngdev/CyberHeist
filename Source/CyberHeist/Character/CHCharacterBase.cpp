@@ -371,7 +371,13 @@ void ACHCharacterBase::SetDead()
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	PlayDeadAnimation();
 	SetActorEnableCollision(false);
+	bIsDead = true;
 	// HpBar->SetHiddenInGame(true);
+}
+
+bool ACHCharacterBase::GetIsDead()
+{
+	return bIsDead;
 }
 
 void ACHCharacterBase::PlayDeadAnimation()
