@@ -283,7 +283,7 @@ void ACHAIController::SetStateAsAttacking(AActor* Target, bool bUseLastKnownAtta
 		// }
 		UBlackboardComponent* BlackboardPtr = Blackboard.Get();
 		BlackboardPtr->SetValueAsObject(AttackTargetKeyName, NewAttackTarget);
-		// BlackboardPtr->SetValueAsEnum(StateKeyName,static_cast<uint8>(ECHAIState::Attacking));
+		BlackboardPtr->SetValueAsEnum(StateKeyName,static_cast<uint8>(ECHAIState::Attacking));
 		BlackboardPtr->SetValueAsInt(StateKeyName,static_cast<int32>(ECHAIState::Attacking));
 		AttackTarget = NewAttackTarget;
 	}
