@@ -246,6 +246,9 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 {
 	Super::SetCharacterControlData(CharacterControlData);
 
+	FirstPersonCamera->bUsePawnControlRotation = CharacterControlData->bFPP_UsePawnControlRotation;
+	ThirdPersonCamera->bUsePawnControlRotation = CharacterControlData->bTPP_UsePawnControlRotation;
+	
 	// ThirdPersonCamera->SetRelativeLocation(CharacterControlData->CameraPosition);
 	FirstPersonCamera->SetRelativeLocation(CharacterControlData->FP_CameraPosition);
 	FirstPersonCamera->FieldOfView = CharacterControlData->FP_FieldOfView;

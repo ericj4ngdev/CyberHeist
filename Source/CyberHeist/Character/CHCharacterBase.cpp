@@ -152,6 +152,9 @@ void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* Ch
 	GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;
 	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
 	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
+
+	
+	
 }
 
 void ACHCharacterBase::SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority)

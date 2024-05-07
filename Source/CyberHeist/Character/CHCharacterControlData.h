@@ -24,6 +24,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Pawn)
 	uint32 bUseControllerRotationPitch : 1;
+
+	UPROPERTY(EditAnywhere, Category = Pawn)
+	uint32 bUseControllerRotationRoll : 1;
 	
 	// Movement
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
@@ -40,16 +43,22 @@ public:
 	TObjectPtr<class UInputMappingContext> InputMappingContext;
 
 	// Camera
-	UPROPERTY(EditAnywhere, Category = Camera)
+	UPROPERTY(EditAnywhere, Category = ThirdCamera)
 	FVector TP_CameraPosition;
 
-	UPROPERTY(EditAnywhere, Category = Camera)
-	FVector FP_CameraPosition;
+	UPROPERTY(EditAnywhere, Category = ThirdCamera)
+	uint32 bTPP_UsePawnControlRotation : 1;
 
-	UPROPERTY(EditAnywhere, Category = Camera, meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "Third Person FOV", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
+	UPROPERTY(EditAnywhere, Category = ThirdCamera, meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "Third Person FOV", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
 	float TP_FieldOfView;
 	
-	UPROPERTY(EditAnywhere, Category = Camera, meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "First Person FOV", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
+	UPROPERTY(EditAnywhere, Category = FirstCamera)
+	FVector FP_CameraPosition;
+
+	UPROPERTY(EditAnywhere, Category = FirstCamera)
+	uint32 bFPP_UsePawnControlRotation : 1;	
+	
+	UPROPERTY(EditAnywhere, Category = FirstCamera, meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "First Person FOV", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
 	float FP_FieldOfView;
 	
 	// 스프링 
