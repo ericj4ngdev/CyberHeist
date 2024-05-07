@@ -147,6 +147,8 @@ void ACHMinigun::Fire()
 	// 쏘는 몽타주가 여기 있다. 총알이 다 차거나 재장전 중일 때 예외처리는 여기서 해야할 듯. 
 	if(!bIsEquipped) return;
 	if(bReloading || CurrentAmmoInClip <= 0) return;
+
+	// OwningCharacter->SetIsAttacking(true);
 	
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr)
@@ -313,6 +315,162 @@ void ACHMinigun::Fire()
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 }
 
+void ACHMinigun::FireByAI(AActor* AttackTarget)
+{
+	if(OwningCharacter)
+	{
+		OwningCharacter->SetAiming(true);
+
+		if(!bIsEquipped) return;
+		if(bReloading || CurrentAmmoInClip <= 0) return;
+		OwningCharacter->SetIsAttacking(true);
+	
+		APawn* OwnerPawn = Cast<APawn>(GetOwner());
+		if (OwnerPawn == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OwnerPawn"));
+			return;
+		}
+		AController* OwnerController = OwnerPawn->GetController();
+		ensure(OwnerController);
+		if (OwnerController == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+			return;
+		}
+	
+		FVector Location;
+		FRotator Rotation;
+		OwnerController->GetPlayerViewPoint(Location, Rotation);
+	
+		AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
+		if(AIController)
+		{		
+			// Location, Rotation을 총구로 설정하기
+			Rotation = GetOwner()->GetActorRotation();
+			Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
+		}
+			
+		// LineTrace
+		FHitResult Hit;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+		Params.AddIgnoredActor(GetOwner());
+			
+		FTransform SocketTransform;
+		const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh3P->GetSocketByName("Muzzle_1");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh3P);
+		if(MuzzleFlashSocket == nullptr) return; 
+				
+		FVector TraceStart = SocketTransform.GetLocation();
+		FVector End = AttackTarget->GetActorLocation();
+		
+		//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
+		
+		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+	
+		if (bSuccess)
+		{
+			// FVector ShotDirection = -Rotation.Vector();
+			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
+			DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
+			const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+			
+			// 맞은 부위 효과
+			if(ImpactEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation
+				(
+					GetWorld(),
+					ImpactEffect,
+					Hit.Location, 
+					Hit.ImpactNormal.Rotation()
+				);			
+			}
+	
+			// AActor* HitActor = Hit.GetActor();
+			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
+			if (CharacterBase)
+			{
+				FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
+				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+			}
+		}
+		// 궤적
+		FVector BeamEnd = End;
+		if (Hit.bBlockingHit)
+		{
+			// BeamEnd = Hit.ImpactPoint;
+			BeamEnd = Hit.Location;
+		}
+		else
+		{
+			Hit.Location = End;
+		}
+		
+		if (TraceParticles)
+		{
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				TraceParticles,
+				TraceStart,
+				FRotator::ZeroRotator,
+				true
+			);
+			if (Beam)
+			{
+				// Target은 그냥 임의로 지은 것.
+				Beam->SetVectorParameter(FName("Target"), BeamEnd);
+			}
+		}
+		
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				HitSound,
+				Hit.ImpactPoint
+			);
+		}
+		
+		if (FireSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				FireSound,
+				GetActorLocation()
+			);
+		}
+	
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				MuzzleFlash,
+				SocketTransform
+			);
+		}
+	
+		UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+		if(WeaponMeshFireMontage)
+		{
+			Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
+		}
+		
+		// Get the animation object for the arms mesh
+		UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+		if (TPAnimInstance)
+		{
+			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
+		}		
+		
+		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
+ 			
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunBase::EndShoot, FireInterval, false);	// End Attack.
+	}
+	// return Super::FireByAI(AttackTarget);
+}
+
 void ACHMinigun::PullTrigger()
 {
 	Super::PullTrigger();
@@ -324,6 +482,7 @@ void ACHMinigun::PullTrigger()
 	}
 
 	bShooting = true;	
+	OwningCharacter->SetIsAttacking(bShooting);
 	OwningCharacter->bUseControllerRotationYaw = true;
 
 	
@@ -397,7 +556,8 @@ void ACHMinigun::CancelPullTrigger()
 	if(!bIsEquipped) return;
 
 	bShooting = false;
-
+	OwningCharacter->SetIsAttacking(bShooting);
+	
 	UAnimInstance* Weapon1pAnimInstance = WeaponMesh1P->GetAnimInstance();
 	UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
 	if(WeaponMeshFireMontage)

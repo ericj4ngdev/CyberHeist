@@ -140,16 +140,9 @@ void ACHGunBase::Fire()
 	
 }
 
-uint8 ACHGunBase::FireByAI()
+void ACHGunBase::FireByAI(AActor* AttackTarget)
 {
-	if(OwningCharacter)
-	{
-		OwningCharacter->SetAiming(true);
-		Fire();
-		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunBase::EndShoot, FireInterval, false);	// End Attack.
-		return true;
-	}
-	return false;
+
 }
 
 void ACHGunBase::EndShoot()

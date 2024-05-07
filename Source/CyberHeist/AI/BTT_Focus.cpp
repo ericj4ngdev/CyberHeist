@@ -10,6 +10,7 @@
 
 UBTT_Focus::UBTT_Focus()
 {
+	NodeName = "BTT_Focus";
 }
 
 EBTNodeResult::Type UBTT_Focus::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

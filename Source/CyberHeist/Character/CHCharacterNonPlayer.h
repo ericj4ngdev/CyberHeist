@@ -20,7 +20,7 @@ public:
 
 public:
 	virtual void SetDead() override;
-
+	
 	// AI Section
 protected:
 	virtual float GetAIPatrolRadius() override;
@@ -28,7 +28,7 @@ protected:
 	virtual float GetAIAttackRange() override;
 	virtual float GetAITurnSpeed() override;
 	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished) override;
-	virtual void AttackByAI() override;
+	virtual void AttackByAI(AActor* Target) override;
 	virtual void CancelAttackByAI() override;
 	virtual void NotifyComboActionEnd() override;
 

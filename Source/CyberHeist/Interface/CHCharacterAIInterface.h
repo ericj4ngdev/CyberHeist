@@ -31,7 +31,7 @@ public:
 	virtual float GetAITurnSpeed() = 0;
 
 	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished) = 0;
-	virtual void AttackByAI() = 0;
+	virtual void AttackByAI(AActor* Target) = 0;
 	virtual void CancelAttackByAI() = 0;
 	virtual void Cover() = 0;
 	virtual void UnCover() = 0;

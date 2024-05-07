@@ -37,6 +37,7 @@ public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;
 	virtual void Fire() override;
+	virtual void FireByAI(AActor* AttackTarget) override;
 	virtual void PullTrigger() override;
 	virtual void CancelPullTrigger() override;
 	virtual void StartAim() override;
@@ -45,7 +46,6 @@ public:
 	virtual void StopPrecisionAim() override;
 	virtual void Reload() override;
 	virtual void SetupWeaponInputComponent() override;
-	
 	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;
 public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;

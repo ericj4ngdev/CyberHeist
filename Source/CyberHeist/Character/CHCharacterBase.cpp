@@ -375,9 +375,19 @@ void ACHCharacterBase::SetDead()
 	// HpBar->SetHiddenInGame(true);
 }
 
+void ACHCharacterBase::SetIsAttacking(uint8 IsAttack)
+{
+	bIsAttacking = IsAttack;
+}
+
 bool ACHCharacterBase::GetIsDead()
 {
 	return bIsDead;
+}
+
+uint8 ACHCharacterBase::GetIsAttacking()
+{
+	return bIsAttacking;
 }
 
 void ACHCharacterBase::PlayDeadAnimation()
@@ -389,14 +399,4 @@ void ACHCharacterBase::PlayDeadAnimation()
 		AnimInstance->Montage_Play(DeadMontage, 1.0f);		
 	}
 	// UE_LOG(LogTemp, Log, TEXT("DeadMontage"));
-}
-
-void ACHCharacterBase::SetHasRifle(bool bNewHasRifle)
-{
-	bHasRifle = bNewHasRifle;
-}
-
-bool ACHCharacterBase::GetHasRifle()
-{
-	return bHasRifle;
 }

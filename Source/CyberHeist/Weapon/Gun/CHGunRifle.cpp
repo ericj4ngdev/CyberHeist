@@ -50,7 +50,7 @@ void ACHGunRifle::Equip()
 	Super::Equip();
 
 	if(!bIsEquipped) return;
-	OwningCharacter->SetHasRifle(true);
+	// OwningCharacter->SetHasRifle(true);
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 

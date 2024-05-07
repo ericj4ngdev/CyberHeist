@@ -152,7 +152,7 @@ void UCHWeaponComponent::AttachWeapon(ACHCharacterPlayer* TargetCharacter)
 	AttachToComponent(Character->GetMesh(), AttachmentRules, FName(TEXT("Weapon_rSocket")));
 
 	// switch bHasRifle so the animation blueprint can switch to another animation set
-	Character->SetHasRifle(true);
+	// Character->SetHasRifle(true);
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))

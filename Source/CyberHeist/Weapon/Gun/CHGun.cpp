@@ -168,7 +168,7 @@ void ACHGun::Equip()
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// switch bHasRifle so the animation blueprint can switch to another animation set
-	OwningCharacter->SetHasRifle(true);
+	// OwningCharacter->SetHasRifle(true);
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))

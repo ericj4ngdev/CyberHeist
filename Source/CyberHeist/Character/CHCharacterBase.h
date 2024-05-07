@@ -144,18 +144,18 @@ protected:
 	// 몽타주 재생 함수
 	void PlayDeadAnimation();
 
-	float DeadEventDelayTime = 5.0f;	
+	float DeadEventDelayTime = 5.0f;
+
+	// Attack
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 bIsAttacking;
+
+	
 public:
 	bool GetIsDead();
-
-public:
-	void SetHasRifle(bool bNewHasRifle);
-	bool GetHasRifle();
-
-	/** Bool for AnimBP to switch to another animation set */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
-	bool bHasRifle;
-
+	virtual void SetIsAttacking(uint8 IsAttack);
+	uint8 GetIsAttacking();
+	
 public:	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
