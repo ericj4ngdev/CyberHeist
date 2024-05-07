@@ -11,12 +11,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="973d144e-de77-4949-8d68-1ef304aea923" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/Tasks/BTTask_SetCombatMode.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/Tasks/BTTask_SetCombatMode.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTTask_Attack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTTask_Attack.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_Enemy.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -238,7 +234,7 @@
       <workItem from="1715003150290" duration="11153000" />
       <workItem from="1715042307089" duration="16533000" />
       <workItem from="1715063534143" duration="5477000" />
-      <workItem from="1715076654294" duration="8683000" />
+      <workItem from="1715076654294" duration="11435000" />
     </task>
     <servers />
   </component>
