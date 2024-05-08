@@ -4,7 +4,7 @@ using UnrealBuildTool;
 
 public class CyberHeist : ModuleRules
 {
-	public CyberHeist(ReadOnlyTargetRules Target) : base(Target)
+	public CyberHeist(ReadOnlyTargetRules Target) : base(Target) 
 	{
 		bUseUnity = false;
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
