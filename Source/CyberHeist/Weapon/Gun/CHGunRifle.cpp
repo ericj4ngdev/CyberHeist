@@ -296,6 +296,169 @@ void ACHGunRifle::Fire()
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 }
 
+void ACHGunRifle::FireByAI(AActor* AttackTarget)
+{
+	Super::FireByAI(AttackTarget);
+
+	if(OwningCharacter)
+	{
+		OwningCharacter->SetAiming(true);
+
+		if(!bIsEquipped) return;
+		if(bReloading || CurrentAmmoInClip <= 0) return;
+		OwningCharacter->SetIsAttacking(true);
+	
+		APawn* OwnerPawn = Cast<APawn>(GetOwner());
+		if (OwnerPawn == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OwnerPawn"));
+			return;
+		}
+		AController* OwnerController = OwnerPawn->GetController();
+		ensure(OwnerController);
+		if (OwnerController == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+			return;
+		}
+	
+		FVector Location;
+		FRotator Rotation;
+	
+		AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
+		if(AIController)
+		{		
+			// Location, Rotation을 총구로 설정하기
+			Rotation = GetOwner()->GetActorRotation();
+			Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
+		}
+			
+		// LineTrace
+		FHitResult Hit;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+		Params.AddIgnoredActor(GetOwner());
+			
+		FTransform SocketTransform;
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
+		if(MuzzleFlashSocket == nullptr) return; 
+				
+		FVector TraceStart = SocketTransform.GetLocation();
+		FVector End = AttackTarget->GetActorLocation();
+		
+		//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
+		
+		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+	
+		if (bSuccess)
+		{
+			// FVector ShotDirection = -Rotation.Vector();
+			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
+			DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
+			const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+			
+			// 맞은 부위 효과
+			if(ImpactEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation
+				(
+					GetWorld(),
+					ImpactEffect,
+					Hit.Location, 
+					Hit.ImpactNormal.Rotation()
+				);			
+			}
+	
+			// AActor* HitActor = Hit.GetActor();
+			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
+			if (CharacterBase)
+			{
+				FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
+				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+			}
+		}
+		// 궤적
+		FVector BeamEnd = End;
+		if (Hit.bBlockingHit)
+		{
+			// BeamEnd = Hit.ImpactPoint;
+			BeamEnd = Hit.Location;
+		}
+		else
+		{
+			Hit.Location = End;
+		}
+		
+		if (TraceParticles)
+		{
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				TraceParticles,
+				TraceStart,
+				FRotator::ZeroRotator,
+				true
+			);
+			if (Beam)
+			{
+				// Target은 그냥 임의로 지은 것.
+				Beam->SetVectorParameter(FName("Target"), BeamEnd);
+			}
+		}
+		
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				HitSound,
+				Hit.ImpactPoint
+			);
+		}
+		
+		if (FireSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				FireSound,
+				GetActorLocation()
+			);
+		}
+	
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				MuzzleFlash,
+				SocketTransform
+			);
+		}
+	
+		UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+		if(WeaponMeshFireMontage)
+		{
+			Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
+		}
+		
+		// Get the animation object for the arms mesh
+		UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+		if (TPAnimInstance)
+		{
+			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
+		}		
+		
+		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
+ 			
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::EndShoot, FireInterval, false);	// End Attack.
+	}	
+}
+
+void ACHGunRifle::EndShoot()
+{
+	Super::EndShoot();
+
+	
+}
+
 void ACHGunRifle::PullTrigger()
 {
 	Super::PullTrigger();
@@ -388,40 +551,43 @@ void ACHGunRifle::StartAim()
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
-	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	if(PlayerCharacter)
+	{
+		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
 	
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
-	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
-	}
-
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
-	{
-		if(!PlayerCharacter->GetCovered())
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 		{
-			UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
-		}		
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
-		PlayerCharacter->SetCoveredAttackMotion(true);
-	}
-
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
-	{
-		// 조준 여부 변수 추가
-		// PlayerCharacter->SetAiming(true);  // 근데 이건 밑에 코드에서 해줌
-		if(PlayerCharacter->GetScopeAiming())
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-			
-			if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-			{
-				PlayerController->SetViewTargetWithBlend(this,0.2f);
-				OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);	// 팔 보이게 하기
-			}
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
 		}
-		else
-		{			
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);	
+
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+		{
+			if(!PlayerCharacter->GetCovered())
+			{
+				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
+			}		
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
+			PlayerCharacter->SetCoveredAttackMotion(true);
+		}
+
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		{
+			// 조준 여부 변수 추가
+			// PlayerCharacter->SetAiming(true);  // 근데 이건 밑에 코드에서 해줌
+			if(PlayerCharacter->GetScopeAiming())
+			{
+				PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+			
+				if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+				{
+					PlayerController->SetViewTargetWithBlend(this,0.2f);
+					OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);	// 팔 보이게 하기
+				}
+			}
+			else
+			{			
+				PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);	
+			}
 		}
 	}
 	// if Pull Triggering, pass
@@ -436,39 +602,40 @@ void ACHGunRifle::StopAim()
 	// if(bReloading) return;
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-
-	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
-	
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
-		|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
+	if(PlayerCharacter)
 	{
-		if(PlayerCharacter->GetCovered())
+		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
+	
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
+			|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
-			PlayerCharacter->SetCoveredAttackMotion(false);	
+			if(PlayerCharacter->GetCovered())
+			{
+				PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
+				PlayerCharacter->SetCoveredAttackMotion(false);	
+			}
+			else
+			{
+				PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);			
+			}
 		}
-		else
-		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);			
-		}
-	}
 
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
-	{		
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-	}
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+		{		
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+		}
 	
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
-	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
-		if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
-		{			
-			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2f);
-			OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기		
-			OwningCharacter->bUseControllerRotationPitch = true;
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+		{
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+			if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+			{			
+				PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2f);
+				OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기		
+				OwningCharacter->bUseControllerRotationPitch = true;
+			}
 		}
 	}
-	
 	if(!bTrigger)
 	{
 		OwningCharacter->SetAiming(false); // if PullTriggering, pass
@@ -492,23 +659,25 @@ void ACHGunRifle::StartPrecisionAim()
 	}
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
+	if(PlayerCharacter)
 	{
-		// 조준경 bool 변수 -> 애니메이션에 전달
-		PlayerCharacter->SetTPAimingCloser(true);
-		// 카메라 위치 수정
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
-	}
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
+		{
+			// 조준경 bool 변수 -> 애니메이션에 전달
+			PlayerCharacter->SetTPAimingCloser(true);
+			// 카메라 위치 수정
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
+		}
 
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
-	{
-		PlayerCharacter->SetScopeAiming(true);
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-		if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(OwningCharacter->GetController()))
-		{			
-			PlayerController->SetViewTargetWithBlend(this,0.2);
-			OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+		{
+			PlayerCharacter->SetScopeAiming(true);
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+			if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(OwningCharacter->GetController()))
+			{			
+				PlayerController->SetViewTargetWithBlend(this,0.2);
+				OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);
+			}
 		}
 	}
 }
@@ -520,23 +689,26 @@ void ACHGunRifle::StopPrecisionAim()
 	if(!bIsEquipped) return;
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
+	if(PlayerCharacter)
 	{
-		PlayerCharacter->SetTPAimingCloser(false);
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);		
-	}
-	
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
-	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
-		PlayerCharacter->SetScopeAiming(false);
-		OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기
-		if(ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(OwningCharacter->GetController()))
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 		{
-			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);
-			// DisableInput(PlayerController);		
+			PlayerCharacter->SetTPAimingCloser(false);
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);		
 		}
-	}	
+	
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+		{
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+			PlayerCharacter->SetScopeAiming(false);
+			OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기
+			if(ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(OwningCharacter->GetController()))
+			{
+				PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);
+				// DisableInput(PlayerController);		
+			}
+		}
+	}
 }
 
 void ACHGunRifle::Reload()

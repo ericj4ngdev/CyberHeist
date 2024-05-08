@@ -18,7 +18,7 @@ class CYBERHEIST_API UBTT_SetMovementSpeed : public UBTTask_BlueprintBase
 public:
 	UBTT_SetMovementSpeed();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ECHAIMovementSpeed MovementSpeed;
 	
 protected:

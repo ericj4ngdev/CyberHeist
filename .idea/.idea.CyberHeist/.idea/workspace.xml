@@ -11,8 +11,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="973d144e-de77-4949-8d68-1ef304aea923" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_Enemy.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CHCloneAIContoller.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CHCloneAIContoller.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CHJuggernautAIContoller.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CHJuggernautAIContoller.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BB_CHCharacter.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BB_Enemy.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHClone.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHClone.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHJuggernaut.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHJuggernaut.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_Enemy.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/Context_Player.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/EQS_Cover.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/EQS_Demo.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/EQS_FindAttack.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/EQS_FindAttack.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/EQS_FindCover.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/EQS_Seeking.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/EQS_Seeking.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/EQS_Tester.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/EQS/EQS_Tester.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Clone.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Clone.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Enemy.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Enemy.umap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTT_SetMovementSpeed.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTT_SetMovementSpeed.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,29 +88,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "C++ Project.CyberHeist.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "UnrealLogSettings",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;C++ Project.CyberHeist.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;UnrealLogSettings&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "rider.external.source.directories": [
-      "C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\DecompilerCache",
-      "C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\SourcesCache",
-      "C:\\Users\\Jang\\AppData\\Local\\Symbols\\src"
+  &quot;keyToStringList&quot;: {
+    &quot;rider.external.source.directories&quot;: [
+      &quot;C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\DecompilerCache&quot;,
+      &quot;C:\\Users\\Jang\\AppData\\Roaming\\JetBrains\\Rider2023.3\\resharper-host\\SourcesCache&quot;,
+      &quot;C:\\Users\\Jang\\AppData\\Local\\Symbols\\src&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="C++ Project.CyberHeist">
     <configuration name="CyberHeist" type="CppProject" factoryName="C++ Project">
       <configuration_1>
@@ -234,7 +254,8 @@
       <workItem from="1715003150290" duration="11153000" />
       <workItem from="1715042307089" duration="16533000" />
       <workItem from="1715063534143" duration="5477000" />
-      <workItem from="1715076654294" duration="11435000" />
+      <workItem from="1715076654294" duration="11572000" />
+      <workItem from="1715128942699" duration="7870000" />
     </task>
     <servers />
   </component>

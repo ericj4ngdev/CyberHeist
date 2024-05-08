@@ -111,8 +111,7 @@ void ACHAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
 	ACHCharacterPlayer* CharacterActor = Cast<ACHCharacterPlayer>(Actor);
 	if(CharacterActor == nullptr) return;
 	// if(Character != UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)) return;
-	
-	
+		
 	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
 	UObject* TargetActor = UKismetMathLibrary::SelectObject(CharacterActor, nullptr, Stimulus.WasSuccessfullySensed());
 	BlackboardPtr->SetValueAsObject(BBKEY_TARGETACTOR, TargetActor);
