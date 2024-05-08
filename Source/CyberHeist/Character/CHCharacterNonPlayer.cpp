@@ -102,7 +102,7 @@ void ACHCharacterNonPlayer::SetMovementSpeed(ECHAIMovementSpeed Speed)
 		GetCharacterMovement()->MaxWalkSpeed = 0;
 		break;
 	case ECHAIMovementSpeed::Walking:
-		GetCharacterMovement()->MaxWalkSpeed = 100;
+		GetCharacterMovement()->MaxWalkSpeed = 150;
 		break;
 	case ECHAIMovementSpeed::Jogging:
 		GetCharacterMovement()->MaxWalkSpeed = 300;

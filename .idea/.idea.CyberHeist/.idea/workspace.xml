@@ -15,11 +15,10 @@
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CloneAIController_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CloneAIController_Test.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BB_CHCloneTest.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BB_CHCloneTest.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHClone_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHClone_Test.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHJuggernaut.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHJuggernaut.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/SubTree/BT_SubTree_Passive.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/SubTree/BT_SubTree_Passive.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/SubTree/BT_SubTree_Seeking.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/SubTree/BT_SubTree_Seeking.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/Decorators/BTD_CanSeeTarget.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/Decorators/BTD_CanSeeTarget.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Clone.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_Clone.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCharacter_TP.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCharacter_TP.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Enemy.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Enemy.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -209,7 +208,7 @@
       <workItem from="1715042307089" duration="16533000" />
       <workItem from="1715063534143" duration="5477000" />
       <workItem from="1715076654294" duration="11572000" />
-      <workItem from="1715128942699" duration="11847000" />
+      <workItem from="1715128942699" duration="12838000" />
     </task>
     <servers />
   </component>
