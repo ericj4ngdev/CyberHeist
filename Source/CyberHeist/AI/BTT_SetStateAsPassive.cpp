@@ -29,7 +29,7 @@ EBTNodeResult::Type UBTT_SetStateAsPassive::ExecuteTask(UBehaviorTreeComponent& 
 	}
 
 	AAIController* OwnerController = OwnerComp.GetAIOwner();
-	Cast<ACHAIController>(OwnerController)->SetStateAsPassive();
+	// Cast<ACHAIController>(OwnerController)->SetStateAsPassive();
 	
 	return EBTNodeResult::Succeeded;
 }

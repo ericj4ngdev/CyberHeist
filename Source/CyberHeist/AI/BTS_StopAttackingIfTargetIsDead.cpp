@@ -46,7 +46,7 @@ void UBTS_StopAttackingIfTargetIsDead::TickNode(UBehaviorTreeComponent& OwnerCom
 
 	if(TargetActor->GetIsDead())
 	{
-		Cast<ACHAIController>(AIOwner)->SetStateAsPassive();
+		// Cast<ACHAIController>(AIOwner)->SetStateAsPassive();
 	}
 	
 }

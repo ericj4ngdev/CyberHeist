@@ -121,7 +121,7 @@ void ACHAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
 	}
 }
 
-void ACHAIController::HandleSoundSense(AActor* Actor, FAIStimulus Stimulus)
+/*void ACHAIController::HandleSoundSense(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Hearing>()) return;
 
@@ -150,7 +150,7 @@ void ACHAIController::HandleSenses(const TArray<AActor*>& Actors)
 		{
 			
 		}
-		HandleSensedSound(AIPerception->GetActorsPerception(Element,Info));*/
+		HandleSensedSound(AIPerception->GetActorsPerception(Element,Info));#1#
 	}
 }
 
@@ -331,5 +331,5 @@ bool ACHAIController::CanSenseActor(AActor* Target)
 		}
 	}
 	return false;
-}
+}*/
 

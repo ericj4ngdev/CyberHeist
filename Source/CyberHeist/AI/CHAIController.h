@@ -24,7 +24,7 @@ public:
 	void StopAI();
 
 public:
-	TArray<AActor*> KnownSeenActors;
+	/*TArray<AActor*> KnownSeenActors;
 	AActor* AttackTarget;
 
 	UPROPERTY(EditAnywhere)
@@ -43,7 +43,7 @@ public:
 	ECHAIMovementSpeed CurrentAIMovementSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ECHAISense AISense;
+	ECHAISense AISense;*/
 	
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
@@ -55,13 +55,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UBehaviorTree> BTAsset;
 
-	UPROPERTY(EditAnywhere)
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UAIPerceptionComponent> AIPerception;
 
 	UFUNCTION()
 	void HandleSightSense(AActor* Actor, FAIStimulus Stimulus);
 
-	UFUNCTION()
+	/*UFUNCTION()
 	void HandleSoundSense(AActor* Actor, FAIStimulus Stimulus);
 
 	UFUNCTION()
@@ -87,5 +88,5 @@ public:
 	void SetStateAsInvestigating(FVector Location);
 	void SetStateAsDead();
 	void SetStateAsSeeking(FVector Location);
-	bool CanSenseActor(AActor* Target);
+	bool CanSenseActor(AActor* Target);*/
 };
