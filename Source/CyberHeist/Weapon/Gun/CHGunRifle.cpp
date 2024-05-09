@@ -296,6 +296,21 @@ void ACHGunRifle::Fire()
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 }
 
+void ACHGunRifle::PullTriggerByAI(AActor* AttackTarget)
+{
+	Super::PullTriggerByAI(AttackTarget);
+	FTimerDelegate TimerCallback;
+	TimerCallback.BindLambda([&]()
+	{
+		FireByAI(AttackTarget);
+	});
+	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, TimerCallback, FireInterval, true);
+	/*GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FTimerDelegate::CreateLambda([&]
+	{
+		FireByAI(AttackTarget);
+	}), FireInterval, true);*/
+}
+
 void ACHGunRifle::FireByAI(AActor* AttackTarget)
 {
 	Super::FireByAI(AttackTarget);
@@ -324,7 +339,8 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 	
 		FVector Location;
 		FRotator Rotation;
-	
+		OwnerController->GetPlayerViewPoint(Location, Rotation);
+		
 		AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
 		if(AIController)
 		{		
@@ -345,9 +361,10 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		if(MuzzleFlashSocket == nullptr) return; 
 				
 		FVector TraceStart = SocketTransform.GetLocation();
-		FVector End = AttackTarget->GetActorLocation();
-		
-		//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
+		FVector End = Location + Rotation.Vector() * MaxRange;
+		// FVector End = AttackTarget->GetActorLocation();
+		//FVector HitTarget = Hit.ImpactPoint;
+		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
 		
 		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
 	
@@ -448,7 +465,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		
 		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
  			
-		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::EndShoot, FireInterval, false);	// End Attack.
+		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::EndShoot, FireInterval, false);	// End Attack.
 	}	
 }
 

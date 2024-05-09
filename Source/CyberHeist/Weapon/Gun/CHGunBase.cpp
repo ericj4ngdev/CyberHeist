@@ -140,6 +140,11 @@ void ACHGunBase::Fire()
 	
 }
 
+void ACHGunBase::PullTriggerByAI(AActor* AttackTarget)
+{
+	
+}
+
 void ACHGunBase::FireByAI(AActor* AttackTarget)
 {
 

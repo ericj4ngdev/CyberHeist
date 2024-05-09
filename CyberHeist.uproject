@@ -25,7 +25,7 @@
 		},
 		{
 			"Name": "AICoverSystem",
-			"Enabled": false,
+			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/0966972104ff4e94874096f15cf4f7f5"
 		},
 		{

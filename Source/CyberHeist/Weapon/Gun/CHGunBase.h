@@ -228,6 +228,7 @@ public:
 	virtual void Equip();
 	virtual void UnEquip();
 	virtual void Fire();
+	virtual void PullTriggerByAI(AActor* AttackTarget);
 	virtual void FireByAI(AActor* AttackTarget);
 	virtual void EndShoot();
 	virtual void PullTrigger();

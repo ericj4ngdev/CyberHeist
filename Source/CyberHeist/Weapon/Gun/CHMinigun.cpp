@@ -315,6 +315,12 @@ void ACHMinigun::Fire()
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 }
 
+void ACHMinigun::PullTriggerByAI(AActor* AttackTarget)
+{
+	Super::PullTriggerByAI(AttackTarget);
+	FireByAI(AttackTarget);	
+}
+
 void ACHMinigun::FireByAI(AActor* AttackTarget)
 {
 	if(OwningCharacter)

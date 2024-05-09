@@ -27,7 +27,7 @@ void ACHCharacterNonPlayer::SetDead()
     {
     	CHAIController->StopAI();
     }
-	
+	CancelAttackByAI();
 	FTimerHandle DeadTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda(
 		[&]() {
@@ -72,8 +72,8 @@ void ACHCharacterNonPlayer::AttackByAI(AActor* Target)
 	if(Inventory.Weapons.IsEmpty()) return;
 	if(CurrentWeapon == nullptr) return;
 	
-	CurrentWeapon->FireByAI(Target);
-	
+	// CurrentWeapon->FireByAI(Target);
+	CurrentWeapon->PullTriggerByAI(Target);
 	// 바로 초기화 말고 공격은 하고 
 	// GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->FireTimerHandle);
 	// CurrentWeapon->CancelPullTrigger();
@@ -85,6 +85,7 @@ void ACHCharacterNonPlayer::CancelAttackByAI()
 	if(GetIsAttacking())
 	{
 		UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::CancelAttackByAI"));
+		CurrentWeapon->EndShoot();
 		CurrentWeapon->CancelPullTrigger();
 	}
 }
