@@ -89,6 +89,7 @@ void ACHAIController::StopAI()
 	UBehaviorTreeComponent* BTComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
 	if (BTComponent)
 	{
+		ClearFocus(EAIFocusPriority::Gameplay);
 		BTComponent->StopTree();  // 중지
 	}
 }

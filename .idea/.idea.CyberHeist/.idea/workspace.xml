@@ -10,17 +10,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="973d144e-de77-4949-8d68-1ef304aea923" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CloneAIController_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BP_CloneAIController_Test.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHClone_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHClone_Test.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Enemy.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Enemy.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTS_StopAttackingIfTargetIsDead.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTS_StopAttackingIfTargetIsDead.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTT_SetStateAsPassive.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTT_SetStateAsPassive.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.h" afterDir="false" />
-    </list>
+    <list default="true" id="973d144e-de77-4949-8d68-1ef304aea923" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
