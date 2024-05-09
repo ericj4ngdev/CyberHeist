@@ -28,7 +28,9 @@ protected:
 	virtual float GetAIAttackRange() override;
 	virtual float GetAITurnSpeed() override;
 	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished) override;
+	UFUNCTION(BlueprintCallable)
 	virtual void AttackByAI(AActor* Target) override;
+	UFUNCTION(BlueprintCallable)
 	virtual void CancelAttackByAI() override;
 	virtual void NotifyComboActionEnd() override;
 
