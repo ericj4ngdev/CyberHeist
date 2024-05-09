@@ -196,6 +196,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	uint8 bSprint : 1;
 
+	// UFUNCTION(Blueprintable)
+	// void FootStepSound();
+
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Motion, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UMotionWarpingComponent> MotionWarpComponent;

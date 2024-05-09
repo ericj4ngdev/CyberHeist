@@ -19,6 +19,7 @@ public:
 	ACHCharacterNonPlayer();
 
 public:
+	UFUNCTION(BlueprintCallable)
 	virtual void SetDead() override;
 	
 	// AI Section
