@@ -39,10 +39,12 @@ EBTNodeResult::Type UBTT_Focus::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 	if(FocusActor)
 	{
 		OwnerController->SetFocus(FocusActor);
+		UE_LOG(LogTemp, Log, TEXT("FocusActor : %s "), *FocusActor->GetActorLocation().ToString());
 	}
 	else
-	{
+	{		
 		FVector FocusLocation =BlackboardComp->GetValueAsVector(FocusTarget.SelectedKeyName);
+		
 			// UBTFunctionLibrary::GetBlackboardValueAsVector(this,FocusTarget);
 		if(FAISystem::IsValidLocation(FocusLocation))
 		{

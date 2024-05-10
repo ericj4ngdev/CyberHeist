@@ -47,4 +47,8 @@ public:
 	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 
 	virtual void StopParticleSystem() override;
 
+	UPROPERTY()
+	TObjectPtr<class AActor> AttackTargetActor;
+
+	void FireByAI();
 };
