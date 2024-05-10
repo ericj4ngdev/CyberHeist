@@ -303,14 +303,11 @@ void ACHGunRifle::Fire()
 void ACHGunRifle::PullTriggerByAI(AActor* AttackTarget)
 {
 	Super::PullTriggerByAI(AttackTarget);
-	AttackTargetActor = AttackTarget;
+
 	// FireByAI(AttackTarget);
 	
 	FTimerDelegate TimerCallback = FTimerDelegate::CreateUObject(this, &ACHGunRifle::FireByAI, AttackTarget);
 	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, TimerCallback, FireInterval, true);
-
-
-
 	
 	/*TimerCallback.BindLambda([&]()
 	{
@@ -325,7 +322,6 @@ void ACHGunRifle::PullTriggerByAI(AActor* AttackTarget)
 void ACHGunRifle::FireByAI(AActor* AttackTarget)
 {
 	Super::FireByAI(AttackTarget);
-
 	
 	if(OwningCharacter)
 	{
@@ -334,6 +330,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		if(!bIsEquipped) return;
 		if(bReloading || CurrentAmmoInClip <= 0) return;
 		OwningCharacter->SetIsAttacking(true);
+		// return;
 	
 		APawn* OwnerPawn = Cast<APawn>(GetOwner());
 		if (OwnerPawn == nullptr)
@@ -348,7 +345,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 			UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
 			return;
 		}
-	
+		
 		FVector Location;
 		FRotator Rotation;
 		OwnerController->GetPlayerViewPoint(Location, Rotation);
@@ -377,8 +374,8 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		FVector End = AttackTarget->GetActorLocation();
 		//FVector HitTarget = Hit.ImpactPoint;
 		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
-		
 		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(Hit.GetActor()));
 	
 		if (bSuccess)
 		{

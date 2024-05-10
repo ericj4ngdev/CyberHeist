@@ -86,7 +86,7 @@ void ACHCharacterNonPlayer::CancelAttackByAI()
 	{
 		UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::CancelAttackByAI"));
 		CurrentWeapon->EndShoot();
-		CurrentWeapon->CancelPullTrigger();
+		// CurrentWeapon->CancelPullTrigger();
 	}
 }
 
