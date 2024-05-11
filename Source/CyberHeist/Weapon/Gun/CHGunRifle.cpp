@@ -308,15 +308,7 @@ void ACHGunRifle::PullTriggerByAI(AActor* AttackTarget)
 	
 	FTimerDelegate TimerCallback = FTimerDelegate::CreateUObject(this, &ACHGunRifle::FireByAI, AttackTarget);
 	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, TimerCallback, FireInterval, true);
-	
-	/*TimerCallback.BindLambda([&]()
-	{
-		FireByAI(AttackTarget);
-	});
-	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, TimerCallback, FireInterval, true);*/
-
-
-	// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::FireByAI, FireInterval, true);	
+		
 }
 
 void ACHGunRifle::FireByAI(AActor* AttackTarget)
@@ -474,7 +466,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		
 		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
  			
-		// GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::EndShoot, FireInterval, false);	// End Attack.
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::EndShoot, FireInterval, false);	// End Attack.
 	}	
 }
 

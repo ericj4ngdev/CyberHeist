@@ -72,12 +72,19 @@ void ACHCharacterNonPlayer::AttackByAI(AActor* Target)
 	if(Inventory.Weapons.IsEmpty()) return;
 	if(CurrentWeapon == nullptr) return;
 	
-	// CurrentWeapon->FireByAI(Target);
-	CurrentWeapon->PullTriggerByAI(Target);
+	CurrentWeapon->FireByAI(Target);
+	// CurrentWeapon->PullTriggerByAI(Target);
 	// 바로 초기화 말고 공격은 하고 
 	// GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->FireTimerHandle);
 	// CurrentWeapon->CancelPullTrigger();
 	// UE_LOG(LogTemp, Log, TEXT("ACHCharacterNonPlayer::AttackByAI"));
+}
+
+void ACHCharacterNonPlayer::AutoAttackByAI(AActor* Target)
+{
+	if(Inventory.Weapons.IsEmpty()) return;
+	if(CurrentWeapon == nullptr) return;
+	CurrentWeapon->PullTriggerByAI(Target);
 }
 
 void ACHCharacterNonPlayer::CancelAttackByAI()
@@ -135,11 +142,13 @@ void ACHCharacterNonPlayer::StopAimWeapon()
 
 void ACHCharacterNonPlayer::Cover()
 {
+	bCovered = true;
 	Crouch();
 	// UE_LOG(LogTemp, Log, TEXT("Cover"));
 }
 
 void ACHCharacterNonPlayer::UnCover()
 {
+	bCovered = false;
 	UnCrouch();
 }

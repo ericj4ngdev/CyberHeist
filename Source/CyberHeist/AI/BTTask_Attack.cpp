@@ -48,14 +48,14 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	AIPawn->AttackByAI(AttackActor);			// 공격 후 막줄에 NotifyComboActionEnd로
 
 	// 3초 후에 ISATTACKING = false로 만들고 공격 멈추기
-	OwnerComp.GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, &OwnerComp]()
+	/*OwnerComp.GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, &OwnerComp]()
 	{
 		// OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISATTACKING, false);
 		
 		UE_LOG(LogTemp,Log,TEXT("Stop"));
 		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-	}, Duration, false);
+	}, Duration, false);*/
 	
 	return EBTNodeResult::InProgress;
 }
