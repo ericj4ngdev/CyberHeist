@@ -230,6 +230,7 @@ public:
 	virtual void Fire();
 	virtual void PullTriggerByAI(AActor* AttackTarget);
 	virtual void FireByAI(AActor* AttackTarget);
+	virtual void AutoFireByAI(AActor* AttackTarget);
 	virtual void EndShoot();
 	virtual void PullTrigger();
 	virtual void CancelPullTrigger();

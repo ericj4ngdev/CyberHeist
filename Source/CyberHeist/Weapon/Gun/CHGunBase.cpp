@@ -150,6 +150,10 @@ void ACHGunBase::FireByAI(AActor* AttackTarget)
 
 }
 
+void ACHGunBase::AutoFireByAI(AActor* AttackTarget)
+{
+}
+
 void ACHGunBase::EndShoot()
 {
 	if(!bIsEquipped) return;
