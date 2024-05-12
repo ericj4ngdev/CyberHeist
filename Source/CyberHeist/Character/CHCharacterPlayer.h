@@ -142,8 +142,7 @@ public:
 	void StartSprint();
 	void StopSprint();
 	 
-public:	
-	TObjectPtr<class UCHAnimInstance> CHAnimInstance;
+
 
 	
 

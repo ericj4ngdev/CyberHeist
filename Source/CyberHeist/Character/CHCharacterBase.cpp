@@ -12,6 +12,7 @@
 #include "UI/CHHpBarWidget.h"
 #include "Engine/DamageEvents.h"
 #include "MotionWarpingComponent.h"
+#include "Animation/CHAnimInstance.h"
 #include "Weapon/Gun/CHGunBase.h"
 
 
@@ -127,6 +128,8 @@ void ACHCharacterBase::BeginPlay()
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
 	bCovered = false;
 
+	CHAnimInstance = Cast<UCHAnimInstance>(GetMesh()->GetAnimInstance());
+	
 	SetbHasRPGInputBindings(false);
 	SetbHasRifleInputBindings(false);
 	SetbHasMinigunInputBindings(false);

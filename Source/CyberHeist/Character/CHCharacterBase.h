@@ -268,7 +268,8 @@ public:
 	void SetbHasRifleInputBindings(uint8 NewBool){bHasRifleInputBindings = NewBool;}
 	void SetbHasMinigunInputBindings(uint8 NewBool){bHasMinigunInputBindings = NewBool;}
 	
-	
+public:	
+	TObjectPtr<class UCHAnimInstance> CHAnimInstance;
 	// AI
 public:
 	virtual void NotifyComboActionEnd();

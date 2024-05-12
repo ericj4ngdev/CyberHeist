@@ -137,7 +137,7 @@ void ACHCharacterPlayer::BeginPlay()
 	RadianForEscapeCover = FMath::DegreesToRadians(AngleForEscapeCover);
 	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), AngleForEscapeCover,FMath::Cos(AngleForEscapeCover));
 	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), RadianForEscapeCover,FMath::Cos(RadianForEscapeCover));
-	CHAnimInstance = Cast<UCHAnimInstance>(GetMesh()->GetAnimInstance());
+	// CHAnimInstance = Cast<UCHAnimInstance>(GetMesh()->GetAnimInstance());
 	// InputVectorDirectionByCamera = 0.f;
 	StartingThirdPersonMeshLocation = GetMesh()->GetRelativeLocation();
 	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
@@ -501,7 +501,6 @@ void ACHCharacterPlayer::TakeCover()
 	// 1인칭일 때는 비활성화
 	if(IsInFirstPersonPerspective())
 	{
-		// 기울이기 기능 넣자 ㅋㅋㅋ
 		return;
 	}
 	

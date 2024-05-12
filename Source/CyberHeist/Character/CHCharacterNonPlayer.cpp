@@ -6,6 +6,7 @@
 #include "BrainComponent.h"
 #include "AI/CHAIController.h"
 #include "AI/CHAI.h"
+#include "Animation/CHAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ACHCharacterNonPlayer::ACHCharacterNonPlayer()
@@ -140,15 +141,37 @@ void ACHCharacterNonPlayer::StopAimWeapon()
 }
 
 
-void ACHCharacterNonPlayer::Cover()
+void ACHCharacterNonPlayer::Cover(bool High, bool Right)
 {
-	bCovered = true;
-	Crouch();
 	// UE_LOG(LogTemp, Log, TEXT("Cover"));
+	if(High)
+	{
+		CHAnimInstance->SetCoveredDirection(Right);
+		OnCoverState.Broadcast(High,true);
+		bCovered = true;
+	}
+	else
+	{
+		CHAnimInstance->SetCoveredDirection(Right);
+		OnCoverState.Broadcast(High, true);
+		Crouch();
+		UE_LOG(LogTemp, Log, TEXT("AI Low Covered"));
+		bCovered = true;
+	}
+
+	/*CHAnimInstance->SetCoveredDirection(Right);
+	OnCoverState.Broadcast(High,true);
+	bCovered = true;
+	if(!High)
+	{
+		// OnCoverState.Broadcast(High, true);		
+		Crouch();
+		UE_LOG(LogTemp, Log, TEXT("AI Low Covered"));
+	}	*/
 }
 
 void ACHCharacterNonPlayer::UnCover()
 {
-	bCovered = false;
 	UnCrouch();
+	bCovered = false;
 }

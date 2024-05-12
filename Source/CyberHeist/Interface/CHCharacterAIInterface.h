@@ -34,7 +34,7 @@ public:
 	virtual void AttackByAI(AActor* Target) = 0;
 	virtual void AutoAttackByAI(AActor* Target) = 0;
 	virtual void CancelAttackByAI() = 0;
-	virtual void Cover() = 0;
+	virtual void Cover(bool High, bool Right) = 0;
 	virtual void UnCover() = 0;
 	virtual void SetMovementSpeed(ECHAIMovementSpeed Speed)=0;
 	virtual void StartAimWeapon() = 0;

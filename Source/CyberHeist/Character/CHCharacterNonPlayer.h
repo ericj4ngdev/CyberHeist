@@ -48,7 +48,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable)
-	virtual void Cover() override;
+	virtual void Cover(bool High, bool Right) override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void UnCover() override;
