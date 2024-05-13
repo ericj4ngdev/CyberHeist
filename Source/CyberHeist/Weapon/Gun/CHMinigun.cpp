@@ -17,6 +17,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ACHMinigun::ACHMinigun()
 {
@@ -48,6 +49,25 @@ ACHMinigun::ACHMinigun()
 	
 	bAiming = false;
 	bShooting = false;
+	
+	FireInterval = 0.04f;
+	ReloadInterval = 3.f;
+	ShootingPreparationTime = 1.f;
+	MaxRange = 10000.f;
+	
+	Damage = 15.f;
+	HeadShotDamage = 100.0f;
+
+	RecoilYaw = 0.2f;
+	RecoilPitch = 0.43f;
+	AimedRecoilYaw = 0.1f;
+	AimedRecoilPitch = 0.15f;
+
+	CurrentAmmoInClip = 1000;
+	ClipSize = 1000;
+	CurrentAmmo = 1000;
+	MaxAmmoCapacity = 9999;
+	bInfiniteAmmo = true;
 }
 
 void ACHMinigun::Equip()
@@ -184,6 +204,23 @@ void ACHMinigun::Fire()
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 
+	if(bHoldGun)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Not Aim"));
+		float RYaw = UKismetMathLibrary::RandomFloatInRange(-RecoilYaw, RecoilYaw);
+		float RPitch = UKismetMathLibrary::RandomFloatInRange(-RecoilPitch,0.0f);
+		OwnerPawn->AddControllerYawInput(RYaw);
+		OwnerPawn->AddControllerPitchInput(RPitch);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Aim"));
+		float RYaw = UKismetMathLibrary::RandomFloatInRange(-AimedRecoilYaw, AimedRecoilYaw);
+		float RPitch = UKismetMathLibrary::RandomFloatInRange(-AimedRecoilPitch,0.0f);
+		OwnerPawn->AddControllerYawInput(RYaw);
+		OwnerPawn->AddControllerPitchInput(RPitch);
+	}
+	
 	// FString SocketName = "Muzzle_1";
 	FTransform SocketTransform;
 	if(OwningCharacter->IsInFirstPersonPerspective())
@@ -641,6 +678,7 @@ void ACHMinigun::StartAim()
 		StopAim();
 		return;
 	}
+	bHoldGun = false;
 	bAiming = true;
 
 	if (CannonRotateSound)
@@ -730,6 +768,7 @@ void ACHMinigun::StopAim()
 	if(!bIsEquipped) return;
 	// if(bReloading) return;
 
+	bHoldGun = true;
 	bAiming = false;
 	if(bShooting == false)
 	{
@@ -807,47 +846,13 @@ void ACHMinigun::StartPrecisionAim()
 {
 	Super::StartPrecisionAim();
 	// 휠 올리면 호출되는 함수
-	if(!bIsEquipped) return;
-	
-	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-
-	if(PlayerCharacter)
-	{
-		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
-		{
-			// 조준경 bool 변수 -> 애니메이션에 전달
-			PlayerCharacter->SetTPAimingCloser(true);
-			// 카메라 위치 수정
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
-		}
-	}
-	/*if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
-	{
-		PlayerCharacter->SetScopeAiming(true);
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-	}*/
+	bHoldGun = false;
 }
 
 void ACHMinigun::StopPrecisionAim()
 {
 	Super::StopPrecisionAim();
-	// 휠 내리면 호출되는 함수
-	if(!bIsEquipped) return;
-	
-	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	if(PlayerCharacter)
-	{
-		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
-		{
-			PlayerCharacter->SetTPAimingCloser(false);
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);		
-		}
-	}
-	/*if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
-	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
-		PlayerCharacter->SetScopeAiming(false);
-	}*/
+	// 휠 내리면 호출되는 함수	
 }
 
 void ACHMinigun::Reload()

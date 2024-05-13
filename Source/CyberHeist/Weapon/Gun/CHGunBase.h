@@ -119,78 +119,87 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "CHGunBase")
 	FVector WeaponMesh3PEquippedRelativeLocation;
 	
-	/*UPROPERTY(VisibleAnywhere, Category = "CHGunBase|Effect")
-	FName MuzzlePoint;*/
-
-	UPROPERTY(EditAnywhere, Category = "CHGunBase|Effect")
+	UPROPERTY(EditAnywhere, Category = "Properties|Effect")
 	TObjectPtr<class UParticleSystem> MuzzleFlash;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UParticleSystem> TraceParticles;
 
-	UPROPERTY(EditAnywhere, Category = "CHGunBase|Effect")
+	UPROPERTY(EditAnywhere, Category = "Properties|Effect")
 	TObjectPtr<class UParticleSystem> ImpactEffect;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Effect")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Effect")
 	FVector MuzzleOffset;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Audio")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Audio")
 	TObjectPtr<class USoundBase> FireSound;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Audio")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Audio")
 	TObjectPtr<class USoundBase> HitSound;
 
 	// properties
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Weapon")
 	ECHWeaponType WeaponType;	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Properties")
+	UPROPERTY(VisibleAnywhere, Category = "Properties|Weapon")
 	ECHFireMode DefaultFireMode;
-	
-	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
-	float FireInterval = 0.1f;
 
-	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
-	float ReloadInterval = 2.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Weapon")
+	ECHFireMode FireMode;
 	
-	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
+	UPROPERTY(EditAnywhere, Category = "Properties|Fire")
+	float FireInterval;
+
+	UPROPERTY(EditAnywhere, Category = "Properties|Fire")
+	float ReloadInterval;
+	
+	UPROPERTY(EditAnywhere, Category = "Properties|Fire")
 	float ShootingPreparationTime = 0.2f;
 	
-	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
+	UPROPERTY(EditAnywhere, Category = "Properties|Fire")
 	float MaxRange;
 	
-	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
+	UPROPERTY(EditAnywhere, Category = "Properties|Damage")
 	float Damage;
 
-	UPROPERTY(EditAnywhere, Category = "CHGunBase|Properties")
+	UPROPERTY(EditAnywhere, Category = "Properties|Damage")
 	float HeadShotDamage;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Properties")
-	ECHFireMode FireMode;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Properties")
+	UPROPERTY(EditAnywhere, Category = "Properties|Recoil")
+	float RecoilYaw;
+
+	UPROPERTY(EditAnywhere, Category = "Properties|Recoil")
+	float RecoilPitch;
+
+	UPROPERTY(EditAnywhere, Category = "Properties|Recoil")
+	float AimedRecoilYaw;
+
+	UPROPERTY(EditAnywhere, Category = "Properties|Recoil")
+	float AimedRecoilPitch;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Weapon")
 	FName AttachPoint1P;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CHGunBase|Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Weapon")
 	FName AttachPoint3P;
 
 	// How much ammo in the clip the gun starts with
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
 	int32 CurrentAmmoInClip;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
 	int32 ClipSize;
 
 	// Ammo except in clip
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
 	int32 CurrentAmmo;
 	
 	// maximum bullet capacity
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
 	int32 MaxAmmoCapacity;
 	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
 	uint8 bInfiniteAmmo : 1;
 	
 	FTimerHandle DurationTimerHandle;	
@@ -253,17 +262,20 @@ public:
 
 	// state
 protected:
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|State")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|State")
 	uint8 bIsEquipped : 1;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|State")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|State")
 	uint8 bTrigger : 1;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "CHGunBase|State")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|State")
 	uint8 bReloading : 1;
 
-	UPROPERTY(BlueprintReadOnly, Category = "CHGunBase|State")
+	UPROPERTY(BlueprintReadOnly, Category = "Properties|State")
 	uint8 bInputBindingsSetup : 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Properties|State")
+	uint8 bHoldGun : 1;
 	
 	// virtual void SetWeaponProperties();
 };

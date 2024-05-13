@@ -18,11 +18,31 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Player/CHPlayerController.h"
 
 ACHGunRifle::ACHGunRifle() 
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	FireInterval = 0.1f;
+	ReloadInterval = 2.f;
+	ShootingPreparationTime = 0.2f;
+	MaxRange = 10000.f;
+	
+	Damage = 15.f;
+	HeadShotDamage = 100.0f;
+
+	RecoilYaw = 0.2f;
+	RecoilPitch = 0.43f;
+	AimedRecoilYaw = 0.1f;
+	AimedRecoilPitch = 0.15f;
+
+	CurrentAmmoInClip = 30;
+	ClipSize = 30;
+	CurrentAmmo = 180;
+	MaxAmmoCapacity = 999;
+	bInfiniteAmmo = false;
 }
 
 void ACHGunRifle::BeginPlay()
@@ -172,9 +192,24 @@ void ACHGunRifle::Fire()
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 
-	// 조작에 값을 랜덤으로 준다. 
-	// OwnerPawn->AddControllerYawInput(랜덤값);
-	// OwnerPawn->AddControllerPitchInput
+	// 조작에 값을 랜덤으로 준다.
+	// float RRoll = UKismetMathLibrary::RandomFloatInRange(-2.5f, -5.0f);
+	if(bHoldGun)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Not Aim"));
+		float RYaw = UKismetMathLibrary::RandomFloatInRange(-RecoilYaw, RecoilYaw);
+		float RPitch = UKismetMathLibrary::RandomFloatInRange(-RecoilPitch,0.0f);
+		OwnerPawn->AddControllerYawInput(RYaw);
+		OwnerPawn->AddControllerPitchInput(RPitch);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Aim"));
+		float RYaw = UKismetMathLibrary::RandomFloatInRange(-AimedRecoilYaw, AimedRecoilYaw);
+		float RPitch = UKismetMathLibrary::RandomFloatInRange(-AimedRecoilPitch,0.0f);
+		OwnerPawn->AddControllerYawInput(RYaw);
+		OwnerPawn->AddControllerPitchInput(RPitch);
+	}
 	
 	FTransform SocketTransform;
 	if(OwningCharacter->IsInFirstPersonPerspective())
@@ -303,12 +338,23 @@ void ACHGunRifle::Fire()
 void ACHGunRifle::PullTriggerByAI(AActor* AttackTarget)
 {
 	Super::PullTriggerByAI(AttackTarget);
-
-	// FireByAI(AttackTarget);
-	
+	if(bReloading)
+	{
+		CancelPullTrigger();
+		return;
+	}
+	if(CurrentAmmoInClip <= 0)
+	{
+		if(CurrentAmmo <= 0)
+		{
+			UE_LOG(LogTemp,Log,TEXT("Find Ammo"));
+			return;
+		}
+		Reload();
+		return;
+	}	
 	FTimerDelegate TimerCallback = FTimerDelegate::CreateUObject(this, &ACHGunRifle::AutoFireByAI, AttackTarget);
-	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, TimerCallback, FireInterval, true);
-		
+	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, TimerCallback, FireInterval, true);		
 }
 
 void ACHGunRifle::FireByAI(AActor* AttackTarget)
@@ -320,7 +366,22 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		OwningCharacter->SetAiming(true);
 
 		if(!bIsEquipped) return;
-		if(bReloading || CurrentAmmoInClip <= 0) return;
+		if(bReloading)
+		{
+			CancelPullTrigger();
+			return;
+		}
+		if(CurrentAmmoInClip <= 0)
+		{
+			if(CurrentAmmo <= 0)
+			{
+				UE_LOG(LogTemp,Log,TEXT("Find Ammo"));
+				return;
+			}
+			Reload();
+			return;
+		}
+		
 		OwningCharacter->SetIsAttacking(true);
 		// return;
 	
@@ -643,7 +704,17 @@ void ACHGunRifle::PullTrigger()
 		CancelPullTrigger();
 		return;
 	}
-
+	if(CurrentAmmoInClip <= 0)
+	{
+		if(CurrentAmmo <= 0)
+		{
+			UE_LOG(LogTemp,Log,TEXT("Find Ammo"));
+			return;
+		}
+		Reload();
+		return;
+	}	
+	
 	OwningCharacter->bUseControllerRotationYaw = true;
 
 	// not aiming mode
@@ -671,7 +742,7 @@ void ACHGunRifle::PullTrigger()
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 	{
-		// hold a gun
+		// hold a gun. 총 들기만 하고 Aim은 아닌걸로		
 		OwningCharacter->SetAiming(true);
 
 		if(FireMode == ECHFireMode::FullAuto)
@@ -725,7 +796,7 @@ void ACHGunRifle::StartAim()
 		StopAim();
 		return;
 	}
-	
+	bHoldGun = false;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
 	if(PlayerCharacter)
@@ -777,7 +848,7 @@ void ACHGunRifle::StopAim()
 
 	if(!bIsEquipped) return;
 	// if(bReloading) return;
-	
+	bHoldGun = true;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if(PlayerCharacter)
 	{
@@ -834,7 +905,7 @@ void ACHGunRifle::StartPrecisionAim()
 		StopAim();
 		return;
 	}
-	
+	bHoldGun = false;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if(PlayerCharacter)
 	{
@@ -939,9 +1010,13 @@ void ACHGunRifle::Reload()
 	
 	// 플레이어 재장전 Animation Montage
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();
-	if(FPAnimInstance) FPAnimInstance->Montage_Play(Reload1PMontage,1);
 	if(TPAnimInstance) TPAnimInstance->Montage_Play(Reload3PMontage, 1);
+	
+	if(OwningCharacter->GetFirstPersonMesh())
+	{
+		UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();
+		if(FPAnimInstance) FPAnimInstance->Montage_Play(Reload1PMontage,1);		
+	}
 
 	// 탄창 증가
 

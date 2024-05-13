@@ -167,9 +167,7 @@ void ACHCharacterBase::SetMappingContextPriority(const UInputMappingContext* Map
 
 void ACHCharacterBase::Aim()
 {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-
-	AnimInstance->Montage_Play(AimActionMontage);
+	CHAnimInstance->Montage_Play(AimActionMontage);
 }
 
 void ACHCharacterBase::PostInitializeComponents()
@@ -233,7 +231,7 @@ uint8 ACHCharacterBase::IsInFirstPersonPerspective() const
 void ACHCharacterBase::SetAiming(uint8 bNewAiming)
 {
 	bAiming = bNewAiming;
-	OnCombat.Broadcast(bAiming);
+	OnCombat.Broadcast(bAiming);		// UI
 }
 
 void ACHCharacterBase::SetCharacterControl(ECharacterControlType NewCharacterControlType)

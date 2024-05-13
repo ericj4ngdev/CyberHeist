@@ -44,16 +44,9 @@ ACHGunBase::ACHGunBase()
 	ScopeCamera->SetupAttachment(WeaponMesh1P);	
 	ScopeCamera->bUsePawnControlRotation = true;	
 	
-	// Effect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Effect"));
-	// Effect->bAutoActivate = false;
-	// Effect->SetupAttachment(CollisionComp);
-
-	bReloading = false;
-	bInfiniteAmmo = false;
+	bReloading = false;	
 	bInputBindingsSetup = false;
-
-	MaxRange = 10000.f;
-	HeadShotDamage = 100.f;
+	bHoldGun = true;
 }
 
 // Called when the game starts or when spawned

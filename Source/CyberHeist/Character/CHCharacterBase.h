@@ -104,6 +104,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> AimActionMontage;
 
+public:
 	void Aim();
 	
 public:
