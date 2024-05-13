@@ -752,14 +752,15 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 		{
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
 			CameraBoom->SocketOffset = FVector(NewCharacterControl->TP_CameraPosition.X,NewCharacterControl->TP_CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->TP_CameraPosition.Z);
-			SetActorLocation(GetActorLocation() + MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius());
+			SetActorLocation(GetActorLocation() + MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
+			// 도는 방향 정하기
 			UE_LOG(LogTemp, Log, TEXT("+ MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius()"));				
 		}
 		else
 		{
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
 			CameraBoom->SocketOffset = FVector(NewCharacterControl->TP_CameraPosition.X,NewCharacterControl->TP_CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->TP_CameraPosition.Z);
-			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius());
+			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
 		}
 		break;
 	case ECoverState::None:

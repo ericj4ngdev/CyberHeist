@@ -664,10 +664,12 @@ void ACHGunRifle::PullTrigger()
 		}
 	}
 
+	// 엄폐한 상태에서 바로 쏘지는 못함. 조준을 꼭 해야 함. 
+	if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover) return;
+	
 	// 아직 조준하지 않은 상태. 
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third
-		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First
-		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 	{
 		// hold a gun
 		OwningCharacter->SetAiming(true);
