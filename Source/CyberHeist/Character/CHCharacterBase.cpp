@@ -42,7 +42,6 @@ ACHCharacterBase::ACHCharacterBase()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
 	
-
 	static ConstructorHelpers::FObjectFinder<UCHCharacterControlData> FirstPersonDataRef(TEXT("/Script/CyberHeist.CHCharacterControlData'/Game/CyberHeist/CharacterControl/CHC_FP.CHC_FP'"));
 	if (FirstPersonDataRef.Object)
 	{
@@ -116,6 +115,7 @@ ACHCharacterBase::ACHCharacterBase()
 	// Motion
 	MotionWarpComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarping"));
 
+	bNearWall = false;
 	CurrentCharacterControlType = ECharacterControlType::Third;
 }
 
@@ -132,7 +132,12 @@ void ACHCharacterBase::BeginPlay()
 	
 	SetbHasRPGInputBindings(false);
 	SetbHasRifleInputBindings(false);
-	SetbHasMinigunInputBindings(false);
+	SetbHasMinigunInputBindings(false);	
+}
+
+void ACHCharacterBase::Tick(float DeltaSeconds)
+{
+	// Super::Tick(DeltaSeconds);	
 }
 
 USkeletalMeshComponent* ACHCharacterBase::GetFirstPersonMesh() const

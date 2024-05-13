@@ -101,6 +101,12 @@ protected:
 	/* 총 자체 재장전 애니메이션*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 	TObjectPtr<class UAnimMontage> ReloadWeaponMontage;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> Withhold1PMontage;
+	
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+	TObjectPtr<class UAnimMontage> Withhold3PMontage;
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Animation")

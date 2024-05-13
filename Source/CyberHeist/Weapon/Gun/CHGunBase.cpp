@@ -177,7 +177,11 @@ void ACHGunBase::SetWeaponMeshVisibility(uint8 bVisible)
 void ACHGunBase::StartAim()
 {
 	// 총의 IMC를 기존 플레이어 IMC 보다 높게 하기
-	
+	if(OwningCharacter->bNearWall)
+	{
+		// 총기 접은 몽타주 재생
+		return;
+	}
 }
 
 void ACHGunBase::StopAim()

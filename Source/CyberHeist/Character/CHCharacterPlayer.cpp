@@ -52,6 +52,14 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	FirstPersonMesh->SetVisibility(false, true);
 
 	GetMesh()->bCastHiddenShadow = true;
+
+
+	CollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("DetectWall"));
+	CollisionComp->SetupAttachment(FirstPersonCamera);
+
+	// CollisionComp->InitCapsuleSize(10.f, 50.0f);
+	// CollisionComp->Draw
+	// CapsuleComponent->SetRelativeRotation()
 	
 	// Input
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputChangeActionControlRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ChangeControl.IA_ChangeControl'"));
@@ -143,6 +151,10 @@ void ACHCharacterPlayer::BeginPlay()
 	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
 	SetCharacterControl(CurrentCharacterControlType);
 	SetPerspective(bIsFirstPersonPerspective);
+
+	// 이벤트 등록
+	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHCharacterPlayer::OnNearWall);
+	CollisionComp->OnComponentEndOverlap.AddDynamic(this,&ACHCharacterPlayer::OnFarFromWall);
 }
 
 void ACHCharacterPlayer::Tick(float DeltaTime)
@@ -157,11 +169,35 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 	DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
 	DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + RightDirection * 100.0f, 10.0f, FColor::Blue, false, -1, 0 ,5.0f);
 	
-	FVector Start = GetActorUpVector() * 10.0f + GetActorLocation();
-	FVector End = GetActorForwardVector() * 50.0f + Start;
-	DrawDebugDirectionalArrow(GetWorld(),Start, End, 10.0f, FColor::Red, false, -1, 0 ,10.0f);
+	FVector Start_ = GetActorUpVector() * 10.0f + GetActorLocation();
+	FVector End_ = GetActorForwardVector() * 50.0f + Start_;
+	DrawDebugDirectionalArrow(GetWorld(),Start_, End_, 10.0f, FColor::Red, false, -1, 0 ,10.0f);
 
-	// GetActorRotation().Vector() = Forward()
+	if (CollisionComp)
+	{
+		// 캡슐의 위치와 방향 설정
+		FVector CapsuleLocation = CollisionComp->GetComponentLocation();
+		FRotator CapsuleRotation = CollisionComp->GetComponentRotation();
+
+		// 캡슐의 반지름과 높이 설정
+		float CapsuleRadius = CollisionComp->GetScaledCapsuleRadius();
+		float CapsuleHalfHeight = CollisionComp->GetScaledCapsuleHalfHeight();
+
+		// Trace 시작점과 끝점 설정
+		FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
+		FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
+		
+		FHitResult HitResult;
+		FCollisionQueryParams TraceParams(FName(TEXT("Coveace")), true, this);
+		// Params.AddIgnoredActor(this);
+		// TraceParams.AddIgnoredActor(GetOwner());
+		// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
+		bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), TraceParams);
+		
+		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+		// Debug 캡슐 그리기
+		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+	}	
 }
 
 void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -785,6 +821,28 @@ void ACHCharacterPlayer::StopSprint()
 { 
 	bSprint = false; 
 	UE_LOG(LogTemp, Log, TEXT("bSprint is %s"), bSprint ? TEXT("true") : TEXT("false"));
+}
+
+void ACHCharacterPlayer::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(bCovered) return;
+	
+	GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->ShootTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->FireTimerHandle);	
+	SetAiming(false);		
+	
+	SetNearWall(true);
+	UE_LOG(LogTemp,Log, TEXT("[OnNearWall] %d"), GetNearWall());
+}
+
+void ACHCharacterPlayer::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	// 충돌 탈출 시, false로 전환.
+	SetNearWall(false);
+	
+	UE_LOG(LogTemp,Log, TEXT("[OnFarFromWall] %d"), GetNearWall());
 }
 
 void ACHCharacterPlayer::SetupHUDWidget(UCHHUDWidget* InHUDWidget)

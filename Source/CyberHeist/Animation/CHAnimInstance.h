@@ -100,6 +100,9 @@ protected:
 	uint8 bScopeAiming : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	uint8 bWithholdWeapon : 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
 	float TiltAngle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)

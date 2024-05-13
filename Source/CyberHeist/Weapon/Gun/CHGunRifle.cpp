@@ -698,6 +698,12 @@ void ACHGunRifle::EndShoot()
 void ACHGunRifle::PullTrigger()
 {
 	Super::PullTrigger();
+	if(OwningCharacter->GetNearWall())
+	{
+		CancelPullTrigger();
+		return;
+	}
+	
 	if(!bIsEquipped) return;
 	if(bReloading)
 	{
@@ -790,6 +796,9 @@ void ACHGunRifle::StartAim()
 {
 	Super::StartAim();
 	if(!bIsEquipped) return;
+	UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] Before bNearWall : %d"),OwningCharacter->GetNearWall());
+	if(OwningCharacter->GetNearWall()) return;
+	UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] After bNearWall : %d"),OwningCharacter->GetNearWall());
 	if(bReloading)
 	{
 		// cancel aim
@@ -1053,8 +1062,8 @@ void ACHGunRifle::SetupWeaponInputComponent()
 		{
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRifle::PullTrigger);	
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRifle::CancelPullTrigger);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRifle::StartAim);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRifle::StopAim);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartAim);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHGunRifle::StopAim);
 			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartPrecisionAim);
 			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StopPrecisionAim);
 			EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHGunRifle::FirstLook);
