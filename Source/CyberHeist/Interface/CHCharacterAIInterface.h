@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoverSystemPublicData.h"
 #include "UObject/Interface.h"
 #include "AI/CHAI.h"
 #include "CHCharacterAIInterface.generated.h"
@@ -35,7 +36,9 @@ public:
 	virtual void AutoAttackByAI(AActor* Target) = 0;
 	virtual void CancelAttackByAI() = 0;
 	virtual void Cover(bool High, bool Right) = 0;
+	virtual void TakeCover(FCover Cover) = 0;
 	virtual void UnCover() = 0;
+	virtual void UnCoverAim(FCover Cover) = 0;
 	virtual void SetMovementSpeed(ECHAIMovementSpeed Speed)=0;
 	virtual void StartAimWeapon() = 0;
 	virtual void StopAimWeapon() = 0;

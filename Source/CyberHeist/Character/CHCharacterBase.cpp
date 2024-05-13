@@ -368,6 +368,34 @@ void ACHCharacterBase::PreviousWeapon()
 	}	
 }
 
+void ACHCharacterBase::MoveActorLocation(const FVector& Destination, float InterpSpeed)
+{
+	// 플레이어의 현재 위치와 목표 위치
+	FVector CurrentLocation = GetActorLocation();
+	FVector TargetLocation = Destination; // 목표 위치 설정
+
+	// 타이머 간격을 동적으로 가져오기
+	float DeltaTime = FApp::GetDeltaTime();
+
+	// 타이머를 이용하여 일정 간격으로 위치 업데이트
+	FTimerHandle MovementTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(MovementTimerHandle, [&, CurrentLocation, TargetLocation]()
+	{
+		// 현재 위치에서 목표 위치로의 보간
+		FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, InterpSpeed);
+
+		// 새로운 위치 설정
+		SetActorLocation(NewLocation);
+
+		// 목표 위치에 도달했을 때 타이머 중지
+		if (NewLocation.Equals(TargetLocation, 1.0f))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(MovementTimerHandle);
+		}
+	}, DeltaTime, true);
+}
+
+
 void ACHCharacterBase::NotifyComboActionEnd()
 {
 }

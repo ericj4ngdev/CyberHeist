@@ -76,7 +76,7 @@ public:
 protected:
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData);
 	virtual void SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority);
-		
+	
 	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
 	TMap<ECharacterControlType, class UCHCharacterControlData*> CharacterControlManager;
 
@@ -270,6 +270,8 @@ public:
 	
 public:	
 	TObjectPtr<class UCHAnimInstance> CHAnimInstance;
+
+	void MoveActorLocation(const FVector& Destination, float InterpSpeed);
 	// AI
 public:
 	virtual void NotifyComboActionEnd();

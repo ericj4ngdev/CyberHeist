@@ -18,12 +18,12 @@ UBTS_StayCovered::UBTS_StayCovered()
 
 void UBTS_StayCovered::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
+	// Super::OnBecomeRelevant(OwnerComp, NodeMemory);
 
 	AAIController* OwnerController = OwnerComp.GetAIOwner();
 
 	// =====================================================
-	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
+	APawn* ControllingPawn = OwnerController->GetPawn();
 	if (nullptr == ControllingPawn)
 	{
 		return;
@@ -45,12 +45,15 @@ void UBTS_StayCovered::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8
 			FCover Cover = MyBlackboard->GetValue<UBlackboardKeyType_Cover>(BlackboardKey.GetSelectedKeyID());
 			if (Cover.IsValid())
 			{
-				if(Cover.Data.bLeftCoverStanding)
+				AIPawn->StopAimWeapon();
+				AIPawn->TakeCover(Cover);
+				/*if(Cover.Data.bLeftCoverStanding)
 				{
 					// 왼쪽 커버 재생
 					UE_LOG(LogTemp, Log, TEXT("bLeftCoverStanding"));
 					AIPawn->StopAimWeapon();
 					AIPawn->Cover(true, false);
+					// AIPawn->TakeCover(Cover);
 					//StopAim
 					return;
 				}
@@ -81,7 +84,7 @@ void UBTS_StayCovered::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8
 					AIPawn->StopAimWeapon();
 					AIPawn->Cover(false, true);
 					return;
-				}
+				}*/
 			}			
 		}
 	}
@@ -107,11 +110,11 @@ void UBTS_StayCovered::OnCeaseRelevant(UBehaviorTreeComponent& OwnerComp, uint8*
 		return;
 	}	
 	// =====================================================
-
+	
 	ACoverSystem* CoverSystem = ACoverSystem::GetCoverSystem(OwnerController);
 	
 	if (AIPawn != nullptr && CoverSystem != nullptr)
 	{
-		AIPawn->UnCover();
+		AIPawn->UnCover();		
 	}
 }

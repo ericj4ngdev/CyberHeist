@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoverSystemPublicData.h"
 #include "Character/CHCharacterBase.h"
 #include "Interface/CHCharacterAIInterface.h"
 #include "CHCharacterNonPlayer.generated.h"
@@ -18,6 +19,7 @@ class CYBERHEIST_API ACHCharacterNonPlayer : public ACHCharacterBase, public ICH
 public:
 	ACHCharacterNonPlayer();
 
+	virtual void Tick(float DeltaSeconds) override;
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void SetDead() override;
@@ -51,7 +53,13 @@ public:
 	virtual void Cover(bool High, bool Right) override;
 
 	UFUNCTION(BlueprintCallable)
+	virtual void TakeCover(FCover Cover) override;
+	
+	UFUNCTION(BlueprintCallable)
 	virtual void UnCover() override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void UnCoverAim(FCover Cover) override;
 	
 	FAICharacterAttackFinished OnAttackFinished;
 };

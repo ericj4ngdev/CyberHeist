@@ -7,6 +7,7 @@
 #include "AI/CHAIController.h"
 #include "AI/CHAI.h"
 #include "Animation/CHAnimInstance.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ACHCharacterNonPlayer::ACHCharacterNonPlayer()
@@ -17,6 +18,14 @@ ACHCharacterNonPlayer::ACHCharacterNonPlayer()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	// GetCharacterMovement()->bCanCrouch = true;
+}
+
+void ACHCharacterNonPlayer::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	FVector Start = GetActorUpVector() * 10.0f + GetActorLocation();
+	FVector End = GetActorForwardVector() * 50.0f + Start;
+	DrawDebugDirectionalArrow(GetWorld(),Start, End, 10.0f, FColor::Red, false, -1, 0 ,10.0f);
 }
 
 void ACHCharacterNonPlayer::SetDead()
@@ -146,6 +155,7 @@ void ACHCharacterNonPlayer::Cover(bool High, bool Right)
 	// UE_LOG(LogTemp, Log, TEXT("Cover"));
 	if(High)
 	{
+		// 벽 수직 정보? 가져오면 그에 맞게 엄폐?
 		CHAnimInstance->SetCoveredDirection(Right);
 		OnCoverState.Broadcast(High,true);
 		bCovered = true;
@@ -170,8 +180,93 @@ void ACHCharacterNonPlayer::Cover(bool High, bool Right)
 	}	*/
 }
 
-void ACHCharacterNonPlayer::UnCover()
+void ACHCharacterNonPlayer::TakeCover(FCover Cover)
 {
+	// Cover.Data.Location;
+	// Cover.Data.DirectionToWall;
+	SetActorLocation(Cover.Data.Location);
+	SetActorRotation(Cover.Data.Rotation);
+	bCovered = true;
+	
+	if(Cover.Data.bLeftCoverStanding)
+	{
+		CHAnimInstance->SetCoveredDirection(false);
+		OnCoverState.Broadcast(true,true);
+		return;
+	}
+	if(Cover.Data.bRightCoverStanding)
+	{
+		CHAnimInstance->SetCoveredDirection(true);
+		OnCoverState.Broadcast(true,true);
+		return;
+	}
+
+	if(Cover.Data.bLeftCoverCrouched)
+	{
+		CHAnimInstance->SetCoveredDirection(false);
+		OnCoverState.Broadcast(false,true);
+		Crouch();
+		return;
+	}
+	if(Cover.Data.bRightCoverCrouched)
+	{
+		CHAnimInstance->SetCoveredDirection(true);
+		OnCoverState.Broadcast(false,true);
+		Crouch();
+		return;
+	}
+	if(Cover.Data.bFrontCoverCrouched)
+	{
+		CHAnimInstance->SetCoveredDirection(false);
+		OnCoverState.Broadcast(false,true);
+		Crouch();
+	}
+	
+}
+
+void ACHCharacterNonPlayer::UnCoverAim(FCover Cover)
+{
+	// 이미 uncrouch함.
+	UE_LOG(LogTemp,Log,TEXT("ACHCharacterNonPlayer::UnCoverAim"));
+	StartAimWeapon();
+	UE_LOG(LogTemp,Log, TEXT("%s"), *GetActorLocation().ToString());
+	if(Cover.Data.bLeftCoverStanding)
+	{
+		// 얼마나 나올지를 플레이어와의 거리로 계산 가능?
+		SetActorLocation(GetActorLocation() - GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius()*2);
+		// MoveActorLocation(GetActorLocation() - GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius()*2, 0.2);
+	}
+	else if (Cover.Data.bRightCoverStanding)
+	{
+		SetActorLocation(GetActorLocation() + GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius()*2);
+		// MoveActorLocation(GetActorLocation() + GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius()*2, 0.2);
+	}
+	// 낮은 경우는 그냥 일어나면 되어서 패스.
+	
+	/*switch (CHAnimInstance->GetCurrentCoverState())
+	{
+	case ECoverState::Low:
+		UnCrouch();
+		break;
+	case ECoverState::High:
+		// float Distance;
+		if(Cover.Data.bLeftCoverStanding)
+		{
+			// 얼마나 나올지를 플레이어와의 거리로 계산 가능?
+			MoveActorLocation(GetActorLocation() - GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius(), 10);
+		}
+		else if (Cover.Data.bRightCoverStanding)
+		{
+			MoveActorLocation(GetActorLocation() + GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius(), 10);
+		}
+		break;
+	case ECoverState::None:
+		break;
+	}*/
+}
+
+void ACHCharacterNonPlayer::UnCover()
+{	
 	UnCrouch();
 	bCovered = false;
 }
