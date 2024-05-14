@@ -23,6 +23,6 @@ void UUCHCrossHairWidget::NativeConstruct()
 void UUCHCrossHairWidget::SetCombatMode(uint8 bCombat)
 {
     // UE_LOG(LogTemp, Log, TEXT("UUCHCrossHairWidget"));
-    UE_LOG(LogTemp, Log, TEXT("bCombat : %u"), static_cast<uint32>(bCombat));
+    // UE_LOG(LogTemp, Log, TEXT("bCombat : %u"), static_cast<uint32>(bCombat));
     // bCombat ? SetVisibility(ESlateVisibility::Visible) : SetVisibility(ESlateVisibility::Hidden);
 }

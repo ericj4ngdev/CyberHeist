@@ -715,11 +715,6 @@ void ACHGunRifle::EndShoot()
 void ACHGunRifle::PullTrigger()
 {
 	Super::PullTrigger();
-	if(OwningCharacter->GetNearWall())
-	{
-		CancelPullTrigger();
-		return;
-	}
 	
 	if(!bIsEquipped) return;
 	if(bReloading)
@@ -737,16 +732,15 @@ void ACHGunRifle::PullTrigger()
 		Reload();
 		return;
 	}	
-	
+	if(OwningCharacter->GetNearWall()) return;
 	OwningCharacter->bUseControllerRotationYaw = true;
-
-	// not aiming mode
+	
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
-		OwningCharacter->SetAiming(true);
+		// OwningCharacter->SetAiming(true);
 
 		if(FireMode == ECHFireMode::FullAuto)
 		{
@@ -765,6 +759,11 @@ void ACHGunRifle::PullTrigger()
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 	{
+		if(OwningCharacter->GetNearWall())
+		{
+			CancelPullTrigger();
+			return;
+		}
 		// hold a gun. 총 들기만 하고 Aim은 아닌걸로		
 		OwningCharacter->SetAiming(true);
 
@@ -813,9 +812,9 @@ void ACHGunRifle::StartAim()
 {
 	Super::StartAim();
 	if(!bIsEquipped) return;
-	UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] Before bNearWall : %d"),OwningCharacter->GetNearWall());
-	if(OwningCharacter->GetNearWall()) return;
-	UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] After bNearWall : %d"),OwningCharacter->GetNearWall());
+	// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] Before bNearWall : %d"),OwningCharacter->GetNearWall());
+	// if(OwningCharacter->GetNearWall()) return;
+	// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] After bNearWall : %d"),OwningCharacter->GetNearWall());
 	if(bReloading)
 	{
 		// cancel aim
@@ -865,6 +864,7 @@ void ACHGunRifle::StartAim()
 		}
 	}
 	// if Pull Triggering, pass
+	if(OwningCharacter->GetNearWall()) return;
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
 }
 

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/CHCharacterBase.h"
 #include "InputActionValue.h"
+#include "Components/TimelineComponent.h"
 #include "Weapon/Gun/CHGun.h"
 #include "Interface/CHCharacterHUDInterface.h"
 #include "Interface/CHCrossHairWidgetInterface.h"
@@ -26,7 +27,7 @@ class CYBERHEIST_API ACHCharacterPlayer : public ACHCharacterBase, public ICHCha
 public:
 	ACHCharacterPlayer();
 
-protected:	
+protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
@@ -104,10 +105,35 @@ protected:
 	void ThirdMove(const FInputActionValue& Value);
 	void ThirdLook(const FInputActionValue& Value);
 	void TakeCover();
-	void RightTilt();
-	void LeftTilt();
-	void StopTilt();
 
+	
+	UFUNCTION()
+	void SetTiltingRightValue(float Output);
+	UFUNCTION()
+	void SetTiltingLeftValue(float Output);
+	void TiltRight();
+	void TiltRightRelease();
+	void TiltLeft();
+	void TiltLeftRelease();
+	// void StopTilt(const float Value);
+
+	UPROPERTY(EditAnywhere) // Timeline 생성
+	FTimeline TiltingLeftTimeline;
+	
+	UPROPERTY(EditAnywhere) // Timeline 생성
+	FTimeline TiltingRightTimeline;
+
+	UPROPERTY(EditAnywhere) // Timeline 커브
+	TObjectPtr<UCurveFloat> TiltingCurveFloat;
+
+	FVector CameraCurrentPosition;
+	FVector CameraDesiredPosition;
+	FRotator CameraCurrentRotation;
+	FRotator CameraDesiredRotation;
+
+	uint8 bTiltReleaseLeft : 1;
+	uint8 bTiltReleaseRight : 1;
+	
 	// Toggles between perspectives
 	void TogglePerspective();
 

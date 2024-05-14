@@ -136,6 +136,9 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	
 	CurrentCharacterControlType = ECharacterControlType::Third;
 	bIsFirstPersonPerspective = false;
+
+	bTiltReleaseLeft = false; 
+	bTiltReleaseRight = false;
 }
 
 void ACHCharacterPlayer::BeginPlay()
@@ -155,12 +158,30 @@ void ACHCharacterPlayer::BeginPlay()
 	// 이벤트 등록
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHCharacterPlayer::OnNearWall);
 	CollisionComp->OnComponentEndOverlap.AddDynamic(this,&ACHCharacterPlayer::OnFarFromWall);
+	// Tilting Timeline Binding
+	if (TiltingCurveFloat)
+	{		
+		FOnTimelineFloat TiltLeftTimelineProgress;
+		FOnTimelineFloat TiltRightTimelineProgress;
+		TiltLeftTimelineProgress.BindDynamic(this, &ACHCharacterPlayer::SetTiltingLeftValue);
+		TiltRightTimelineProgress.BindDynamic(this, &ACHCharacterPlayer::SetTiltingRightValue);
+		TiltingLeftTimeline.AddInterpFloat(TiltingCurveFloat, TiltLeftTimelineProgress);
+		TiltingRightTimeline.AddInterpFloat(TiltingCurveFloat, TiltRightTimelineProgress);
+	}
+	
 }
 
 void ACHCharacterPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	if (IsInFirstPersonPerspective())
+	{
+		TiltingLeftTimeline.TickTimeline(DeltaTime);
+		TiltingRightTimeline.TickTimeline(DeltaTime);
+	}
+	
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);				// (1,0,0) 카메라 전방
@@ -197,7 +218,9 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
 		// Debug 캡슐 그리기
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
-	}	
+	}
+
+	
 }
 
 void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -226,10 +249,10 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ChangePrevWeaponAction, ETriggerEvent::Triggered, this, &ACHCharacterBase::PreviousWeapon);
 
 	EnhancedInputComponent->BindAction(TakeCoverAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TakeCover);
-	EnhancedInputComponent->BindAction(RightTiltAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::RightTilt);
-	EnhancedInputComponent->BindAction(LeftTiltAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::LeftTilt);
-	EnhancedInputComponent->BindAction(RightTiltAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopTilt);
-	EnhancedInputComponent->BindAction(LeftTiltAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopTilt);
+	EnhancedInputComponent->BindAction(RightTiltAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TiltRight);
+	EnhancedInputComponent->BindAction(LeftTiltAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TiltLeft);
+	EnhancedInputComponent->BindAction(RightTiltAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::TiltRightRelease);
+	EnhancedInputComponent->BindAction(LeftTiltAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::TiltLeftRelease);
 }
 
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
@@ -265,7 +288,7 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 				Subsystem->AddMappingContext(NewMappingContext, 1);
 			
 			}
-		UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *PrevMappingContext->GetName(), *NewMappingContext->GetName());
+		// UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *PrevMappingContext->GetName(), *NewMappingContext->GetName());
 		
 		// IMC.Add(Subsystem->GetPlayerInput());
 		// UE_LOG(LogTemp, Log, TEXT("%s"), *IMC[0]->GetName()); 
@@ -332,8 +355,8 @@ void ACHCharacterPlayer::SetMappingContextPriority(const UInputMappingContext* M
 		{
 			Subsystem->RemoveMappingContext(MappingContext);
 			Subsystem->AddMappingContext(MappingContext, Priority);
-			UE_LOG(LogTemp, Log, TEXT("SetMappingContextPriority"));
-			UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *MappingContext->GetName(), *MappingContext->GetName());
+			// UE_LOG(LogTemp, Log, TEXT("SetMappingContextPriority"));
+			// UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *MappingContext->GetName(), *MappingContext->GetName());
 		}
 		else
 		{
@@ -682,36 +705,143 @@ void ACHCharacterPlayer::TakeCover()
 	}	
 }
 
-void ACHCharacterPlayer::RightTilt()
+void ACHCharacterPlayer::SetTiltingRightValue(const float Value)
 {
-	if(IsInFirstPersonPerspective())
+	if (bTiltReleaseRight)
 	{
-		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::RightTilt()"));
+		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
+		CameraDesiredPosition = FVector(0,0,60);
+		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
+		CameraDesiredRotation = FRotator::ZeroRotator;
+	}
+	else
+	{
+		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
+		CameraDesiredPosition = FVector(0,50,60);
+		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
+		CameraDesiredRotation = FRotator(0, 0, 20);
+	}
+
+	// RLerp와 TimeLine Value 값을 통한 자연스러운 기울이기
+	const FRotator RLerp = UKismetMathLibrary::RLerp(CameraCurrentRotation, CameraDesiredRotation, Value, true);
+	const FVector VLerp = UKismetMathLibrary::VLerp(CameraCurrentPosition, CameraDesiredPosition, Value);
+	const FTransform TLerp = UKismetMathLibrary::MakeTransform(VLerp, RLerp);
+	// 해당 트랜스폼 할당
+	FirstPersonCamera->SetRelativeTransform(TLerp);
+}
+
+void ACHCharacterPlayer::SetTiltingLeftValue(const float Value)
+{
+	if (bTiltReleaseLeft)
+	{
+		// UE_LOG(LogTemp, Log, TEXT("[SetTiltingLeftValue] bTiltReleaseLeft : %d"), bTiltReleaseLeft);
+		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
+		CameraDesiredPosition = FVector(0,0,60);
+		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
+		CameraDesiredRotation = FRotator::ZeroRotator;
+	}
+	else
+	{
+		// UE_LOG(LogTemp, Log, TEXT("[SetTiltingLeftValue] bTiltReleaseLeft : %d"), bTiltReleaseLeft);
+		// 눌렀을 때, 
+		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
+		CameraDesiredPosition = FVector(0,-50,60);
+		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
+		CameraDesiredRotation = FRotator(0, 0, -20);
+	}
+	// RLerp와 TimeLine Value 값을 통한 자연스러운 기울이기
+	const FRotator RLerp = UKismetMathLibrary::RLerp(CameraCurrentRotation, CameraDesiredRotation, Value, true);
+	const FVector VLerp = UKismetMathLibrary::VLerp(CameraCurrentPosition, CameraDesiredPosition, Value);
+	const FTransform TLerp = UKismetMathLibrary::MakeTransform(VLerp, RLerp);
+	// 해당 트랜스폼 할당
+	FirstPersonCamera->SetRelativeTransform(TLerp);
+}
+
+void ACHCharacterPlayer::TiltRight()
+{
+	if (IsInFirstPersonPerspective())
+	{
+		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltRight()"));
+		bTiltReleaseLeft = false;
+		bTiltReleaseRight = false;
+		if (TiltingLeftTimeline.IsPlaying())
+		{
+			TiltingLeftTimeline.Stop();
+		}
+		if (TiltingRightTimeline.IsPlaying())
+		{
+			TiltingRightTimeline.Stop();
+		}
+		TiltingRightTimeline.PlayFromStart();
+	}
+	/*if(IsInFirstPersonPerspective())
+	{
 		TiltAngle = 110;
 		// Camera1PBoom->SetWorldRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, TiltAngle));
 		//Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, TiltAngle));
 		// Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, Camera1PBoom->GetComponentRotation().Roll + 20));
+	}*/
+}
+
+void ACHCharacterPlayer::TiltRightRelease()
+{
+	if (IsInFirstPersonPerspective())
+	{
+		bTiltReleaseLeft = true;
+		bTiltReleaseRight = true;
+		if (TiltingLeftTimeline.IsPlaying())
+		{
+			TiltingLeftTimeline.Stop();
+		}
+		if (TiltingRightTimeline.IsPlaying())
+		{
+			TiltingRightTimeline.Stop();
+		}
+		TiltingRightTimeline.PlayFromStart();
 	}
 }
 
-void ACHCharacterPlayer::LeftTilt()
+void ACHCharacterPlayer::TiltLeft()
 {
-	if(IsInFirstPersonPerspective())
+	if (IsInFirstPersonPerspective())
+	{
+		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltLeft()"));
+		bTiltReleaseLeft = false;
+		bTiltReleaseRight = false;
+		if (TiltingLeftTimeline.IsPlaying())
+		{
+			TiltingLeftTimeline.Stop();
+		}
+		if (TiltingRightTimeline.IsPlaying())
+		{
+			TiltingRightTimeline.Stop();
+		}
+		TiltingLeftTimeline.PlayFromStart();
+	}
+	/*if(IsInFirstPersonPerspective())
 	{
 		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::LeftTilt()"));
 		TiltAngle = 70;
 		// Camera1PBoom->SetWorldRotation(FRotator(0,TiltAngle,0));
 		// Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, Camera1PBoom->GetComponentRotation().Roll - 20));
-	}
+	}*/
 }
 
-void ACHCharacterPlayer::StopTilt()
+void ACHCharacterPlayer::TiltLeftRelease()
 {
-	if(IsInFirstPersonPerspective())
+	if (IsInFirstPersonPerspective())
 	{
-		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::StopTilt()"));
-		TiltAngle = 90;		
-		// Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, TiltAngle));
+		bTiltReleaseLeft = true;
+		bTiltReleaseRight = true;
+		if (TiltingLeftTimeline.IsPlaying())
+		{
+			TiltingLeftTimeline.Stop();
+		}
+		if (TiltingRightTimeline.IsPlaying())
+		{
+			TiltingRightTimeline.Stop();
+		}
+		TiltingLeftTimeline.PlayFromStart();
 	}
 }
 
@@ -827,10 +957,16 @@ void ACHCharacterPlayer::OnNearWall(UPrimitiveComponent* OverlappedComponent, AA
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if(bCovered) return;
-	
-	GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->ShootTimerHandle);
-	GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->FireTimerHandle);	
-	SetAiming(false);		
+
+	if(CurrentWeapon)
+	{		
+		CurrentWeapon->StopAim();			// 총 내리기
+		CurrentWeapon->CancelPullTrigger();
+
+		GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->ShootTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->FireTimerHandle);
+	}
+	// SetAiming(false);
 	
 	SetNearWall(true);
 	UE_LOG(LogTemp,Log, TEXT("[OnNearWall] %d"), GetNearWall());

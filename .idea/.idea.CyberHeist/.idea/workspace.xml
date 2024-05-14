@@ -12,7 +12,16 @@
   <component name="ChangeListManager">
     <list default="true" id="973d144e-de77-4949-8d68-1ef304aea923" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRifle.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRifle.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCHCharacter_FP.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCHCharacter_FP.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Input/Actions/IA_Aim.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Input/Actions/IA_Aim.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Input/Actions/IA_LeftTilt.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Input/Actions/IA_LeftTilt.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Input/Actions/IA_RightTilt.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Input/Actions/IA_RightTilt.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Animation/CHAnimInstance.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Animation/CHAnimInstance.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/UI/UCHCrossHairWidget.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/UI/UCHCrossHairWidget.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -215,7 +224,7 @@
       <workItem from="1715529137500" duration="850000" />
       <workItem from="1715556067598" duration="35558000" />
       <workItem from="1715611834375" duration="6096000" />
-      <workItem from="1715644765486" duration="6286000" />
+      <workItem from="1715644765486" duration="13696000" />
     </task>
     <servers />
   </component>
