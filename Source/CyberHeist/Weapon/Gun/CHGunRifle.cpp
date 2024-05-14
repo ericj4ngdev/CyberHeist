@@ -171,29 +171,8 @@ void ACHGunRifle::Fire()
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
 		return;
 	}
-	
-	FVector Location;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(Location, Rotation);
 
-	AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
-	if(AIController)
-	{		
-		// Location, Rotation을 총구로 설정하기
-		Rotation = GetOwner()->GetActorRotation();
-		Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
-	}
-	
-	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
-	
-	// LineTrace
-	FHitResult Hit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
-
-	// 조작에 값을 랜덤으로 준다.
-	// float RRoll = UKismetMathLibrary::RandomFloatInRange(-2.5f, -5.0f);
+	// Recoil
 	if(bHoldGun)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Not Aim"));
@@ -224,52 +203,92 @@ void ACHGunRifle::Fire()
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
 		if(MuzzleFlashSocket == nullptr) return; 
 	}
-	
-	FVector TraceStart = SocketTransform.GetLocation();
-	
-	// FVector HitTarget = Hit.ImpactPoint;
-	FVector End = Location + Rotation.Vector() * MaxRange;
-	//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
-	
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
 
-	if (bSuccess)
+	FVector Location;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(Location, Rotation);
+	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
+	
+	// LineTrace
+	FHitResult ScreenLaserHit;
+	FHitResult MuzzleLaserHit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+
+	FVector TraceEnd = Location + Rotation.Vector() * MaxRange;
+	
+	// 화면 중앙 레이저
+	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, Location, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
+	DrawDebugLine(GetWorld(),Location,TraceEnd,FColor::Red,true);
+	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, true);
+
+	FVector HitLocation = ScreenLaserHit.Location;
+	AActor* HitActor = ScreenLaserHit.GetActor();
+
+	FVector MuzzleStart = SocketTransform.GetLocation();
+	// FVector MuzzleEnd = MuzzleStart + SocketTransform.GetRotation().Vector() * MaxRange;
+	// 총구 방향
+	// (HitLocation - MuzzleStart) * 1.25f
+	FVector MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f; 
+	// 총구에서 레이저
+	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
+	DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, true);
+	DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, true);
+	
+	const float DamageToCause = ScreenLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+	UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s , ScreenLaserHit : %s"), *GetNameSafe(MuzzleLaserHit.GetActor()),*GetNameSafe(ScreenLaserHit.GetActor()));
+
+	// 위치가 같다면 정중앙 효과
+	// 다르면 총구 레이저 효과
+	
+	if(MuzzleLaserHit.Location.Equals(HitLocation))
 	{
-		// FVector ShotDirection = -Rotation.Vector();
-		// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-		DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
-		const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
-		
-		// 맞은 부위 효과
 		if(ImpactEffect)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation
 			(
 				GetWorld(),
 				ImpactEffect,
-				Hit.Location, 
-				Hit.ImpactNormal.Rotation()
+				ScreenLaserHit.Location, 
+				ScreenLaserHit.ImpactNormal.Rotation()
 			);			
 		}
-
-		// AActor* HitActor = Hit.GetActor();
-		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
-		if (CharacterBase)
-		{
-			FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
-			CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
-		}
-	}
-	// 궤적
-	FVector BeamEnd = End;
-	if (Hit.bBlockingHit)
-	{
-		// BeamEnd = Hit.ImpactPoint;
-		BeamEnd = Hit.Location;
 	}
 	else
 	{
-		Hit.Location = End;
+		if(ImpactEffect)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation
+			(
+				GetWorld(),
+				ImpactEffect,
+				MuzzleLaserHit.Location, 
+				MuzzleLaserHit.ImpactNormal.Rotation()
+			);			
+		}
+	}
+	
+	if(MuzzleLaserHit.GetActor() == HitActor)		
+	{		
+		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(ScreenLaserHit.GetActor());
+		if (CharacterBase)
+		{
+			FPointDamageEvent DamageEvent(DamageToCause, ScreenLaserHit, ScreenLaserHit.ImpactNormal, nullptr);
+			CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+		}
+	}	
+	
+	// 궤적
+	FVector BeamEnd = TraceEnd;
+	if (ScreenLaserHit.bBlockingHit)
+	{
+		// BeamEnd = Hit.ImpactPoint;
+		BeamEnd = ScreenLaserHit.Location;
+	}
+	else
+	{
+		ScreenLaserHit.Location = TraceEnd;
 	}
 	
 	if (TraceParticles)
@@ -277,7 +296,7 @@ void ACHGunRifle::Fire()
 		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
 			GetWorld(),
 			TraceParticles,
-			TraceStart,
+			MuzzleStart,
 			FRotator::ZeroRotator,
 			true
 		);
@@ -293,7 +312,7 @@ void ACHGunRifle::Fire()
 		UGameplayStatics::PlaySoundAtLocation(
 			this,
 			HitSound,
-			Hit.ImpactPoint
+			ScreenLaserHit.ImpactPoint
 		);
 	}
 	
@@ -314,8 +333,6 @@ void ACHGunRifle::Fire()
 			SocketTransform
 		);
 	}
-	
-	
 
 	// Get the animation object for the arms mesh
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
