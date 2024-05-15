@@ -737,6 +737,12 @@ void ACHCharacterPlayer::StopCover()
 
 void ACHCharacterPlayer::TakeCrouch()
 {
+	if(CHAnimInstance->GetCurrentCoverState() == ECoverState::Low)
+	{
+		// 1인칭 전환시 CoverState None으로 바꾸기
+		// StopCover();로 해줌
+		return;
+	}
 	if(bIsCrouched)
 	{
 		StopCrouch();
@@ -753,6 +759,10 @@ void ACHCharacterPlayer::StartCrouch()
 	{
 		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) return;
 	}
+	/*if(bCovered)
+	{
+		SetCharacterControl(ECharacterControlType::ThirdCover);
+	}*/
 	Crouch();
 	
 }
