@@ -598,7 +598,7 @@ void ACHCharacterPlayer::StartCover()
 		// Take Cover
 	// float CharacterHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	UE_LOG(LogTemp, Log, TEXT("CharacterHalfHeight : %f"), CharacterHalfHeight);
-	FVector HighStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 2) + GetActorUpVector() * CharacterHalfHeight;				// 캐릭터 위치를 시작점으로 설정
+	FVector HighStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 2) + GetActorUpVector() * CharacterHalfHeight * 0.5f;				// 캐릭터 위치를 시작점으로 설정
 	FVector LowerStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 2) - GetActorUpVector() * CharacterHalfHeight * 0.5f;		// 캐릭터 위치를 시작점으로 설정
 	
 	// float Radius = CharacterHalfHeight * 0.5f;									// 구체의 반경 설정
