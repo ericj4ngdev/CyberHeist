@@ -523,7 +523,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		{
 			// Cancel Cover Anim Montage
 			OnCoverState.Broadcast(false, false);
-			UnCrouch();
+			// UnCrouch();
 			// 입력 속성 변경
 
 			// Aim이면 조준상태 유지하면서 나오게 하기 위함
@@ -720,8 +720,6 @@ void ACHCharacterPlayer::StartCover()
 
 void ACHCharacterPlayer::StopCover()
 {
-	// UnCover
-	UnCrouch();
 	// Cancel Cover Anim Montage
 	OnCoverState.Broadcast(false,false);
 
