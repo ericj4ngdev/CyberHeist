@@ -220,17 +220,25 @@ void ACHGunRifle::Fire()
 	
 	// 화면 중앙 레이저
 	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, Location, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
-	DrawDebugLine(GetWorld(),Location,TraceEnd,FColor::Red,false, 2);
+	DrawDebugLine(GetWorld(),Location, TraceEnd,FColor::Red,false, 2);
 	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
 
 	FVector HitLocation = ScreenLaserHit.Location;
 	AActor* HitActor = ScreenLaserHit.GetActor();
-
+	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
 	FVector MuzzleStart = SocketTransform.GetLocation();
-	// FVector MuzzleEnd = MuzzleStart + SocketTransform.GetRotation().Vector() * MaxRange;
-	// 총구 방향
-	// (HitLocation - MuzzleStart) * 1.25f
-	FVector MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f; 
+
+	FVector MuzzleEnd;
+	if(HitLocation.Equals(FVector::ZeroVector))
+	{
+		MuzzleEnd = TraceEnd;
+	}
+	else
+	{
+		MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f; 
+	}
+	UE_LOG(LogTemp, Log, TEXT("HitLocation.Equals(FVector::ZeroVector) : %d "), HitLocation.Equals(FVector::ZeroVector));
+	
 	// 총구에서 레이저
 	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
 	DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
