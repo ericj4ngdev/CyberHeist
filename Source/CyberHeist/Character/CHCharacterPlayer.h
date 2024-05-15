@@ -107,6 +107,7 @@ protected:
 	void FirstLook(const FInputActionValue& Value);
 	void ThirdMove(const FInputActionValue& Value);
 	void ThirdLook(const FInputActionValue& Value);
+	
 	void TakeCover();
 	void StartCover();
 	void StopCover();
@@ -114,12 +115,14 @@ protected:
 	void TakeCrouch();
 	void StartCrouch();
 	void StopCrouch();
-	// void UnCrouch();
+	
+	FRotator LastCoveredRotation;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CharacterHalfHeight;
 	
+	void ReturnCover();
 protected:
 	UFUNCTION()
 	void SetTiltingRightValue(float Output);

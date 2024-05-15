@@ -886,6 +886,7 @@ void ACHGunRifle::StopAim()
 			if(PlayerCharacter->GetCovered())
 			{
 				PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
+				PlayerCharacter->ReturnCover();
 				PlayerCharacter->SetCoveredAttackMotion(false);	
 			}
 			else

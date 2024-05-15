@@ -630,8 +630,9 @@ void ACHCharacterPlayer::StartCover()
 		if(HitHighCoverDetected)
 		{
 			// Move to Cover
-			FVector TargetLocation = HitLowCoverResult.Location;			
+			FVector TargetLocation = HitLowCoverResult.Location;
 			FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
+			LastCoveredRotation = TargetRotation;
 			// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
 
 			float Distance = FVector::Distance(TargetLocation,GetActorLocation());
@@ -731,6 +732,14 @@ void ACHCharacterPlayer::StopCover()
 			
 	bCovered = false;
 	UE_LOG(LogTemp, Log, TEXT("UnCovered"));
+}
+
+void ACHCharacterPlayer::ReturnCover()
+{
+	// UE_LOG(LogTemp, Warning, TEXT("LastCoveredLocation : %s , LastCoveredRotation : %s"), *LastCoveredLocation.ToString(), *LastCoveredRotation.ToString());
+	
+	// SetActorLocation(LastCoveredLocation);
+	SetActorRotation(LastCoveredRotation);
 }
 
 void ACHCharacterPlayer::TakeCrouch()
