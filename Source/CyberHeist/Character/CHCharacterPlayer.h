@@ -92,6 +92,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> LeftTiltAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> CrouchAction;
 	
 	/*void Shoot();
 	void CancelShoot();
@@ -105,8 +108,19 @@ protected:
 	void ThirdMove(const FInputActionValue& Value);
 	void ThirdLook(const FInputActionValue& Value);
 	void TakeCover();
-
+	void StartCover();
+	void StopCover();
 	
+	void TakeCrouch();
+	void StartCrouch();
+	void StopCrouch();
+	// void UnCrouch();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CharacterHalfHeight;
+	
+protected:
 	UFUNCTION()
 	void SetTiltingRightValue(float Output);
 	UFUNCTION()

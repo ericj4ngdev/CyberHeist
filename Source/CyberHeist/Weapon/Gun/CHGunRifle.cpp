@@ -220,8 +220,8 @@ void ACHGunRifle::Fire()
 	
 	// 화면 중앙 레이저
 	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, Location, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
-	DrawDebugLine(GetWorld(),Location,TraceEnd,FColor::Red,true);
-	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, true);
+	DrawDebugLine(GetWorld(),Location,TraceEnd,FColor::Red,false, 2);
+	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
 
 	FVector HitLocation = ScreenLaserHit.Location;
 	AActor* HitActor = ScreenLaserHit.GetActor();
@@ -233,8 +233,8 @@ void ACHGunRifle::Fire()
 	FVector MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f; 
 	// 총구에서 레이저
 	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
-	DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, true);
-	DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, true);
+	DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
+	DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);
 	
 	const float DamageToCause = ScreenLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 	UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s , ScreenLaserHit : %s"), *GetNameSafe(MuzzleLaserHit.GetActor()),*GetNameSafe(ScreenLaserHit.GetActor()));

@@ -133,18 +133,31 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 	{
 		LeftTiltAction = InputActionLeftTiltRef.Object;
 	}
+
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionCrouchRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_Crouch.IA_Crouch'"));
+	if (nullptr != InputActionCrouchRef.Object)
+	{
+		CrouchAction = InputActionCrouchRef.Object;
+	}
+	
 	
 	CurrentCharacterControlType = ECharacterControlType::Third;
 	bIsFirstPersonPerspective = false;
 
 	bTiltReleaseLeft = false; 
 	bTiltReleaseRight = false;
+	// 캐릭터라서 이렇게 초기화
+	CharacterHalfHeight = 96.f;
 }
 
 void ACHCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// CharacterHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	// CharacterHalfHeight
+	
 	RadianForEscapeCover = FMath::DegreesToRadians(AngleForEscapeCover);
 	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), AngleForEscapeCover,FMath::Cos(AngleForEscapeCover));
 	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), RadianForEscapeCover,FMath::Cos(RadianForEscapeCover));
@@ -253,6 +266,9 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(LeftTiltAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TiltLeft);
 	EnhancedInputComponent->BindAction(RightTiltAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::TiltRightRelease);
 	EnhancedInputComponent->BindAction(LeftTiltAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::TiltLeftRelease);
+	
+	EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TakeCrouch);
+	// EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopCrouch);
 }
 
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
@@ -412,10 +428,7 @@ void ACHCharacterPlayer::FirstLook(const FInputActionValue& Value)
 
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);		// modify
-	
-	
-	// UE_LOG(LogTemp, Warning, TEXT("LookAxisVector.X : %f, LookAxisVector.Y : %f"), LookAxisVector.X, LookAxisVector.Y);
-	
+	// UE_LOG(LogTemp, Warning, TEXT("LookAxisVector.X : %f, LookAxisVector.Y : %f"), LookAxisVector.X, LookAxisVector.Y);	
 }
 
 void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
@@ -532,6 +545,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 
 		float speed = bSprint ? RunSpeed : WalkSpeed;
 		if(bAiming) speed = WalkSpeed;
+		if(bIsCrouched) speed = SneakSpeed;
 		if(CurrentWeapon)
 		{
 			if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = SneakSpeed;
@@ -571,138 +585,185 @@ void ACHCharacterPlayer::TakeCover()
 	// Not Covered 
 	if(!bCovered)
 	{
-		float CharacterHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-		FVector HighStart = GetActorLocation() + GetActorUpVector() * CharacterHalfHeight;				// 캐릭터 위치를 시작점으로 설정
-		FVector LowerStart = GetActorLocation() - GetActorUpVector() * CharacterHalfHeight * 0.5f;		// 캐릭터 위치를 시작점으로 설정
-		
-		// float Radius = CharacterHalfHeight * 0.5f;									// 구체의 반경 설정
-		// CheckRange = 150.0f;													// 엄폐물 조사 반경
-		FVector HighEnd = HighStart + GetActorForwardVector() * CheckRange;			// 높이를 설정하여 바닥으로 Sphere Trace
-		FVector LowerEnd = LowerStart + GetActorForwardVector() * CheckRange;		// 높이를 설정하여 바닥으로 Sphere Trace
-
-		FHitResult HitHighCoverResult;
-		FCollisionQueryParams HighTraceParams(FName(TEXT("HighCoverTrace")), true, this);
-
-		FHitResult HitLowCoverResult;
-		FCollisionQueryParams LowTraceParams(FName(TEXT("LowCoverTrace")), true, this);
-		
-		bool HitHighCoverDetected = GetWorld()->SweepSingleByChannel(HitHighCoverResult, HighStart, HighEnd,
-			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CheckCoverSphereRadius), HighTraceParams);
-		bool HitLowCoverDetected = GetWorld()->SweepSingleByChannel(HitLowCoverResult, LowerStart, LowerEnd,
-			FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CheckCoverSphereRadius), LowTraceParams);
-		
-		// 감지
-		if (HitLowCoverDetected)
-		{
-			// 엄폐 방향 결정
-			FVector WallParallel = FVector(HitLowCoverResult.ImpactNormal.Y, -HitLowCoverResult.ImpactNormal.X, HitLowCoverResult.ImpactNormal.Z);
-			FVector ActorForward = GetActorForwardVector();
-
-			float Result = FVector::DotProduct(WallParallel, ActorForward);
-			CHAnimInstance->SetCoveredDirection(Result > 0);			
-			
-			if(HitHighCoverDetected)
-			{
-				// Move to Cover
-				FVector TargetLocation = HitLowCoverResult.Location;			
-				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
-				// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
-
-				float Distance = FVector::Distance(TargetLocation,GetActorLocation());
-				UE_LOG(LogTemp, Log, TEXT("Distance : %f"), Distance);
-				
-				if(Distance > 70.0f)
-				{
-					FMotionWarpingTarget Target;
-					Target.Name = FName("StartTakeCover");				
-					Target.Location = TargetLocation;
-					Target.Rotation = TargetRotation;
-					
-					MotionWarpComponent->AddOrUpdateWarpTarget(Target);
-					
-					CHAnimInstance->StopAllMontages(0.0f);
-					CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
-				}
-				// 도착하면 모션 멈추기...				
-				// Crouch();
-				// 엄폐 애니메이션
-				OnCoverState.Broadcast(true,true);
-				
-				// 움직임 속도 제한
-				GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
-				
-				// 입력 속성 변경
-				SetCharacterControl(ECharacterControlType::ThirdCover);
-				
-				UE_LOG(LogTemp, Log, TEXT("High Covered"));
-			}
-			else
-			{
-				// Move to Cover
-				FVector TargetLocation = HitLowCoverResult.Location; //  + HitLowCoverResult.ImpactNormal * 1.0f;				
-				FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
-				// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
-
-				float Distance = FVector::Distance(TargetLocation,GetActorLocation());
-				UE_LOG(LogTemp, Log, TEXT("Distance : %f"), Distance);
-				
-				// Play Cover Anim Montage
-				if(Distance > 70.0f)
-				{
-					FMotionWarpingTarget Target;
-					Target.Name = FName("StartTakeCover");				
-					Target.Location = TargetLocation;
-					Target.Rotation = TargetRotation;
-
-					MotionWarpComponent->AddOrUpdateWarpTarget(Target);
-					
-					CHAnimInstance->StopAllMontages(0.0f);
-					CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
-				}
-				
-				// 엄폐 애니메이션
-				OnCoverState.Broadcast(false, true);
-				Crouch();
-				// 움직임 속도 제한
-				GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
-				
-				// 입력 속성 변경
-				// 1인칭일 때는 무시
-				SetCharacterControl(ECharacterControlType::ThirdCover);
-				
-				UE_LOG(LogTemp, Log, TEXT("Low Covered"));
-			}			
-			bCovered = true;			
-		}
-		else
-		{
-			UnCrouch();
-			UE_LOG(LogTemp, Log, TEXT("Nothing to Cover"));			
-		}
-#if ENABLE_DRAW_DEBUG
-
-		FVector HigherCapsuleOrigin = HighStart + (HighEnd - HighStart) * 0.5f;		// = GetActorForwardVector() * CheckRange
-		FVector LowerCapsuleOrigin = LowerStart + (LowerEnd - LowerStart) * 0.5f;
-		
-		FColor DrawHighColor = HitHighCoverDetected ? FColor::Green : FColor::Red;		
-		FColor DrawLowerColor = HitLowCoverDetected ? FColor::Green : FColor::Red;
-
-		DrawDebugCapsule(GetWorld(), HigherCapsuleOrigin, CheckRange, CheckCoverSphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawHighColor, false, 5.0f);
-		DrawDebugCapsule(GetWorld(), LowerCapsuleOrigin, CheckRange, CheckCoverSphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawLowerColor, false, 5.0f);
-		
-#endif
+		StartCover();
 	}
 	else
 	{
-		UnCrouch();
-		// Cancel Cover Anim Montage
-		OnCoverState.Broadcast(false,false);
-		// 입력 속성 변경
-		SetCharacterControl(ECharacterControlType::Third);
-			
-		bCovered = false;
-		UE_LOG(LogTemp, Log, TEXT("UnCovered"));
+		StopCover();
 	}	
+}
+
+void ACHCharacterPlayer::StartCover()
+{
+		// Take Cover
+	// float CharacterHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	UE_LOG(LogTemp, Log, TEXT("CharacterHalfHeight : %f"), CharacterHalfHeight);
+	FVector HighStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 2) + GetActorUpVector() * CharacterHalfHeight;				// 캐릭터 위치를 시작점으로 설정
+	FVector LowerStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 2) - GetActorUpVector() * CharacterHalfHeight * 0.5f;		// 캐릭터 위치를 시작점으로 설정
+	
+	// float Radius = CharacterHalfHeight * 0.5f;									// 구체의 반경 설정
+	// CheckRange = 150.0f;													// 엄폐물 조사 반경
+	FVector HighEnd = HighStart + GetActorForwardVector() * CheckRange;			// 높이를 설정하여 바닥으로 Sphere Trace
+	FVector LowerEnd = LowerStart + GetActorForwardVector() * CheckRange;		// 높이를 설정하여 바닥으로 Sphere Trace
+
+	FHitResult HitHighCoverResult;
+	FCollisionQueryParams HighTraceParams(FName(TEXT("HighCoverTrace")), true, this);
+
+	FHitResult HitLowCoverResult;
+	FCollisionQueryParams LowTraceParams(FName(TEXT("LowCoverTrace")), true, this);
+	
+	bool HitHighCoverDetected = GetWorld()->SweepSingleByChannel(HitHighCoverResult, HighStart, HighEnd,
+		FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CheckCoverSphereRadius), HighTraceParams);
+	bool HitLowCoverDetected = GetWorld()->SweepSingleByChannel(HitLowCoverResult, LowerStart, LowerEnd,
+		FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CheckCoverSphereRadius), LowTraceParams);
+	
+	// 감지
+	if (HitLowCoverDetected)
+	{
+		// 엄폐 방향 결정
+		FVector WallParallel = FVector(HitLowCoverResult.ImpactNormal.Y, -HitLowCoverResult.ImpactNormal.X, HitLowCoverResult.ImpactNormal.Z);
+		FVector ActorForward = GetActorForwardVector();
+
+		float Result = FVector::DotProduct(WallParallel, ActorForward);
+		CHAnimInstance->SetCoveredDirection(Result > 0);			
+		
+		if(HitHighCoverDetected)
+		{
+			// Move to Cover
+			FVector TargetLocation = HitLowCoverResult.Location;			
+			FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
+			// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
+
+			float Distance = FVector::Distance(TargetLocation,GetActorLocation());
+			UE_LOG(LogTemp, Log, TEXT("Distance : %f"), Distance);
+			
+			if(Distance > 70.0f)
+			{
+				FMotionWarpingTarget Target;
+				Target.Name = FName("StartTakeCover");				
+				Target.Location = TargetLocation;
+				Target.Rotation = TargetRotation;
+				
+				MotionWarpComponent->AddOrUpdateWarpTarget(Target);
+				
+				CHAnimInstance->StopAllMontages(0.0f);
+				CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
+			}
+			// 도착하면 모션 멈추기...				
+			// Crouch();
+			// 엄폐 애니메이션
+			OnCoverState.Broadcast(true,true);
+			
+			// 움직임 속도 제한
+			GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
+			
+			// 입력 속성 변경
+			SetCharacterControl(ECharacterControlType::ThirdCover);
+			
+			UE_LOG(LogTemp, Log, TEXT("High Covered"));
+		}
+		else
+		{
+			// Move to Cover
+			FVector TargetLocation = HitLowCoverResult.Location; //  + HitLowCoverResult.ImpactNormal * 1.0f;				
+			FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
+			// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
+
+			float Distance = FVector::Distance(TargetLocation,GetActorLocation());
+			UE_LOG(LogTemp, Log, TEXT("Distance : %f"), Distance);
+			
+			// Play Cover Anim Montage
+			if(Distance > 70.0f)
+			{
+				FMotionWarpingTarget Target;
+				Target.Name = FName("StartTakeCover");				
+				Target.Location = TargetLocation;
+				Target.Rotation = TargetRotation;
+
+				MotionWarpComponent->AddOrUpdateWarpTarget(Target);
+				
+				CHAnimInstance->StopAllMontages(0.0f);
+				CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
+			}
+			
+			// 엄폐 애니메이션
+			OnCoverState.Broadcast(false, true);
+			Crouch();
+			// 움직임 속도 제한
+			GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
+			
+			// 입력 속성 변경
+			// 1인칭일 때는 무시
+			SetCharacterControl(ECharacterControlType::ThirdCover);
+			
+			UE_LOG(LogTemp, Log, TEXT("Low Covered"));
+		}			
+		bCovered = true;			
+	}
+	else
+	{
+		// UnCrouch();
+		UE_LOG(LogTemp, Log, TEXT("Nothing to Cover"));			
+	}
+#if ENABLE_DRAW_DEBUG
+
+	FVector HigherCapsuleOrigin = HighStart + (HighEnd - HighStart) * 0.5f;		// = GetActorForwardVector() * CheckRange
+	FVector LowerCapsuleOrigin = LowerStart + (LowerEnd - LowerStart) * 0.5f;
+	
+	FColor DrawHighColor = HitHighCoverDetected ? FColor::Green : FColor::Red;		
+	FColor DrawLowerColor = HitLowCoverDetected ? FColor::Green : FColor::Red;
+
+	DrawDebugCapsule(GetWorld(), HigherCapsuleOrigin, CheckRange, CheckCoverSphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawHighColor, false, 5.0f);
+	DrawDebugCapsule(GetWorld(), LowerCapsuleOrigin, CheckRange, CheckCoverSphereRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawLowerColor, false, 5.0f);		
+#endif
+}
+
+void ACHCharacterPlayer::StopCover()
+{
+	// UnCover
+	UnCrouch();
+	// Cancel Cover Anim Montage
+	OnCoverState.Broadcast(false,false);
+
+	// 입력 속성 변경(1인칭일 때는 변경 X)
+	if(!bIsFirstPersonPerspective)
+	{
+		SetCharacterControl(ECharacterControlType::Third);		
+	}
+			
+	bCovered = false;
+	UE_LOG(LogTemp, Log, TEXT("UnCovered"));
+}
+
+void ACHCharacterPlayer::TakeCrouch()
+{
+	if(bIsCrouched)
+	{
+		StopCrouch();
+	}
+	else
+	{
+		StartCrouch();		
+	}
+}
+
+void ACHCharacterPlayer::StartCrouch()
+{
+	if(CurrentWeapon)
+	{
+		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) return;
+	}
+	Crouch();
+	
+}
+
+void ACHCharacterPlayer::StopCrouch()
+{
+	if(CurrentWeapon)
+	{
+		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) return;
+	}
+	UnCrouch();
 }
 
 void ACHCharacterPlayer::SetTiltingRightValue(const float Value)
@@ -861,6 +922,7 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 	{
 		// 1인칭
 		SetCharacterControl(ECharacterControlType::First);
+		StopCover();
 		bCovered = false;
 		
 		ThirdPersonCamera->Deactivate();
@@ -879,6 +941,7 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 	}
 	else
 	{
+		// 3인칭
 		bCovered = false;
 		SetCharacterControl(ECharacterControlType::Third);
 		
