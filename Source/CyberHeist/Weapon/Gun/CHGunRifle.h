@@ -50,6 +50,4 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<class AActor> AttackTargetActor;
-
-	void FireByAI();
 };

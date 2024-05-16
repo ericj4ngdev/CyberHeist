@@ -39,6 +39,7 @@ public:
 	virtual void Fire() override;
 	virtual void PullTriggerByAI(AActor* AttackTarget) override;
 	virtual void FireByAI(AActor* AttackTarget) override;
+	virtual void AutoFireByAI(AActor* AttackTarget) override;
 	virtual void EndShoot() override;
 	virtual void PullTrigger() override;
 	virtual void CancelPullTrigger() override;

@@ -168,8 +168,6 @@ void ACHMinigun::Fire()
 	if(!bIsEquipped) return;
 	if(bReloading || CurrentAmmoInClip <= 0) return;
 
-	// OwningCharacter->SetIsAttacking(true);
-	
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr)
 	{
@@ -196,14 +194,6 @@ void ACHMinigun::Fire()
 		Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
 	}
 	
-	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
-	
-	// LineTrace
-	FHitResult Hit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
-
 	if(bHoldGun)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Not Aim"));
@@ -221,7 +211,6 @@ void ACHMinigun::Fire()
 		OwnerPawn->AddControllerPitchInput(RPitch);
 	}
 	
-	// FString SocketName = "Muzzle_1";
 	FTransform SocketTransform;
 	if(OwningCharacter->IsInFirstPersonPerspective())
 	{
@@ -235,6 +224,88 @@ void ACHMinigun::Fire()
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh3P);
 		if(MuzzleFlashSocket == nullptr) return; 
 	}
+
+	// LineTrace
+	FHitResult ScreenLaserHit;
+	FHitResult MuzzleLaserHit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+
+	FVector TraceEnd = Location + Rotation.Vector() * MaxRange;
+	
+	// 화면 중앙 레이저
+	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, Location, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
+	DrawDebugLine(GetWorld(),Location, TraceEnd,FColor::Red,false, 2);
+	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+
+	FVector HitLocation = ScreenLaserHit.Location;
+	AActor* HitActor = ScreenLaserHit.GetActor();
+	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
+	FVector MuzzleStart = SocketTransform.GetLocation();
+
+	FVector MuzzleEnd;
+	if(HitLocation.Equals(FVector::ZeroVector))
+	{
+		MuzzleEnd = TraceEnd;
+	}
+	else
+	{
+		MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f; 
+	}
+	UE_LOG(LogTemp, Log, TEXT("HitLocation.Equals(FVector::ZeroVector) : %d "), HitLocation.Equals(FVector::ZeroVector));
+	
+	// 총구에서 레이저
+	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
+	DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
+	DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);
+	
+	const float DamageToCause = ScreenLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+	UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s , ScreenLaserHit : %s"), *GetNameSafe(MuzzleLaserHit.GetActor()),*GetNameSafe(ScreenLaserHit.GetActor()));
+
+	// 위치가 같다면 정중앙 효과
+	// 다르면 총구 레이저 효과
+	
+	if(MuzzleLaserHit.Location.Equals(HitLocation))
+	{
+		if(ImpactEffect)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation
+			(
+				GetWorld(),
+				ImpactEffect,
+				ScreenLaserHit.Location, 
+				ScreenLaserHit.ImpactNormal.Rotation()
+			);			
+		}
+	}
+	else
+	{
+		if(ImpactEffect)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation
+			(
+				GetWorld(),
+				ImpactEffect,
+				MuzzleLaserHit.Location, 
+				MuzzleLaserHit.ImpactNormal.Rotation()
+			);			
+		}
+	}
+	
+	if(MuzzleLaserHit.GetActor() == HitActor)		
+	{		
+		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(ScreenLaserHit.GetActor());
+		if (CharacterBase)
+		{
+			FPointDamageEvent DamageEvent(DamageToCause, ScreenLaserHit, ScreenLaserHit.ImpactNormal, nullptr);
+			CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+		}
+	}	
+	/*FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
 	
 	FVector TraceStart = SocketTransform.GetLocation();
 	
@@ -270,17 +341,17 @@ void ACHMinigun::Fire()
 			FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
 			CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 		}
-	}
+	}*/
 	// 궤적
-	FVector BeamEnd = End;
-	if (Hit.bBlockingHit)
+	FVector BeamEnd = TraceEnd;
+	if (ScreenLaserHit.bBlockingHit)
 	{
 		// BeamEnd = Hit.ImpactPoint;
-		BeamEnd = Hit.Location;
+		BeamEnd = ScreenLaserHit.Location;
 	}
 	else
 	{
-		Hit.Location = End;
+		ScreenLaserHit.Location = TraceEnd;
 	}
 	
 	if (TraceParticles)
@@ -288,7 +359,7 @@ void ACHMinigun::Fire()
 		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
 			GetWorld(),
 			TraceParticles,
-			TraceStart,
+			MuzzleStart,
 			FRotator::ZeroRotator,
 			true
 		);
@@ -304,7 +375,7 @@ void ACHMinigun::Fire()
 		UGameplayStatics::PlaySoundAtLocation(
 			this,
 			HitSound,
-			Hit.ImpactPoint
+			ScreenLaserHit.ImpactPoint
 		);
 	}
 	
@@ -355,17 +426,51 @@ void ACHMinigun::Fire()
 void ACHMinigun::PullTriggerByAI(AActor* AttackTarget)
 {
 	Super::PullTriggerByAI(AttackTarget);
-	FireByAI(AttackTarget);	
+	if(bReloading)
+	{
+		CancelPullTrigger();
+		return;
+	}
+	if(CurrentAmmoInClip <= 0)
+	{
+		if(CurrentAmmo <= 0)
+		{
+			UE_LOG(LogTemp,Log,TEXT("Find Ammo"));
+			return;
+		}
+		Reload();
+		return;
+	}	
+	FireByAI(AttackTarget);
+	FTimerDelegate TimerCallback = FTimerDelegate::CreateUObject(this, &ACHMinigun::AutoFireByAI, AttackTarget);
+	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, TimerCallback, FireInterval, true);		
 }
 
 void ACHMinigun::FireByAI(AActor* AttackTarget)
 {
+	Super::FireByAI(AttackTarget);
+	
 	if(OwningCharacter)
 	{
 		OwningCharacter->SetAiming(true);
 
 		if(!bIsEquipped) return;
-		if(bReloading || CurrentAmmoInClip <= 0) return;
+		if(bReloading)
+		{
+			CancelPullTrigger();
+			return;
+		}
+		if(CurrentAmmoInClip <= 0)
+		{
+			if(CurrentAmmo <= 0)
+			{
+				UE_LOG(LogTemp,Log,TEXT("Find Ammo"));
+				return;
+			}
+			Reload();
+			return;
+		}
+		
 		OwningCharacter->SetIsAttacking(true);
 	
 		APawn* OwnerPawn = Cast<APawn>(GetOwner());
@@ -384,7 +489,8 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
 	
 		FVector Location;
 		FRotator Rotation;
-	
+		OwnerController->GetPlayerViewPoint(Location, Rotation);
+		
 		AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
 		if(AIController)
 		{		
@@ -405,11 +511,12 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
 		if(MuzzleFlashSocket == nullptr) return; 
 				
 		FVector TraceStart = SocketTransform.GetLocation();
+		//FVector End = Location + Rotation.Vector() * MaxRange;
 		FVector End = AttackTarget->GetActorLocation();
-		
-		//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
-		
+		//FVector HitTarget = Hit.ImpactPoint;
+		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
 		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(Hit.GetActor()));
 	
 		if (bSuccess)
 		{
@@ -510,7 +617,163 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
  			
 		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHMinigun::EndShoot, FireInterval, false);	// End Attack.
 	}
-	// return Super::FireByAI(AttackTarget);
+}
+
+void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
+{
+	Super::AutoFireByAI(AttackTarget);
+
+	if(OwningCharacter)
+	{
+		OwningCharacter->SetAiming(true);
+
+		if(!bIsEquipped) return;
+		if(bReloading || CurrentAmmoInClip <= 0) return;
+		OwningCharacter->SetIsAttacking(true);
+		// return;
+	
+		APawn* OwnerPawn = Cast<APawn>(GetOwner());
+		if (OwnerPawn == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OwnerPawn"));
+			return;
+		}
+		AController* OwnerController = OwnerPawn->GetController();
+		ensure(OwnerController);
+		if (OwnerController == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+			return;
+		}
+		
+		FVector Location;
+		FRotator Rotation;
+		OwnerController->GetPlayerViewPoint(Location, Rotation);
+		
+		AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
+		if(AIController)
+		{		
+			// Location, Rotation을 총구로 설정하기
+			Rotation = GetOwner()->GetActorRotation();
+			Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
+		}
+			
+		// LineTrace
+		FHitResult Hit;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+		Params.AddIgnoredActor(GetOwner());
+			
+		FTransform SocketTransform;
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
+		if(MuzzleFlashSocket == nullptr) return; 
+				
+		FVector TraceStart = SocketTransform.GetLocation();
+		//FVector End = Location + Rotation.Vector() * MaxRange;
+		FVector End = AttackTarget->GetActorLocation();
+		//FVector HitTarget = Hit.ImpactPoint;
+		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
+		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(Hit.GetActor()));
+	
+		if (bSuccess)
+		{
+			// FVector ShotDirection = -Rotation.Vector();
+			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
+			DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
+			const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+			
+			// 맞은 부위 효과
+			if(ImpactEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation
+				(
+					GetWorld(),
+					ImpactEffect,
+					Hit.Location, 
+					Hit.ImpactNormal.Rotation()
+				);			
+			}
+	
+			// AActor* HitActor = Hit.GetActor();
+			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
+			if (CharacterBase)
+			{
+				FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
+				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+			}
+		}
+		// 궤적
+		FVector BeamEnd = End;
+		if (Hit.bBlockingHit)
+		{
+			// BeamEnd = Hit.ImpactPoint;
+			BeamEnd = Hit.Location;
+		}
+		else
+		{
+			Hit.Location = End;
+		}
+		
+		if (TraceParticles)
+		{
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				TraceParticles,
+				TraceStart,
+				FRotator::ZeroRotator,
+				true
+			);
+			if (Beam)
+			{
+				// Target은 그냥 임의로 지은 것.
+				Beam->SetVectorParameter(FName("Target"), BeamEnd);
+			}
+		}
+		
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				HitSound,
+				Hit.ImpactPoint
+			);
+		}
+		
+		if (FireSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				FireSound,
+				GetActorLocation()
+			);
+		}
+	
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(
+				GetWorld(),
+				MuzzleFlash,
+				SocketTransform
+			);
+		}
+	
+		UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+		if(WeaponMeshFireMontage)
+		{
+			Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
+		}
+		
+		// Get the animation object for the arms mesh
+		UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+		if (TPAnimInstance)
+		{
+			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
+		}		
+		
+		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
+	}	
 }
 
 void ACHMinigun::EndShoot()
@@ -769,9 +1032,10 @@ void ACHMinigun::StopAim()
 	// if(bReloading) return;
 
 	bHoldGun = true;
-	bAiming = false;
+	// bAiming = false;
 	if(bShooting == false)
 	{
+		UE_LOG(LogTemp, Log, TEXT("StopAim"));
 		// UGameplayStatics::StopSou
 		// 총 발사 Animation Montage
 		if(CannonRotateMontage == nullptr)
@@ -825,8 +1089,7 @@ void ACHMinigun::StopAim()
 			}
 		}
 		
-		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
-			|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 		{		
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
 			// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
@@ -945,8 +1208,8 @@ void ACHMinigun::SetupWeaponInputComponent()
 		{
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHMinigun::PullTrigger);	
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHMinigun::CancelPullTrigger);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHMinigun::StartAim);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHMinigun::StopAim);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartAim);
+			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHMinigun::StopAim);
 			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartPrecisionAim);
 			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StopPrecisionAim);
 			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHMinigun::Reload);

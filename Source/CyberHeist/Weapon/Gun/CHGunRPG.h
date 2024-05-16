@@ -54,6 +54,7 @@ public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;
 	virtual void Fire() override;
+	virtual void EndShoot() override;
 	virtual void PullTrigger() override;
 	virtual void CancelPullTrigger() override;
 	virtual void StartAim() override;
