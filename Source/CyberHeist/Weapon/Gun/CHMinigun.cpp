@@ -301,47 +301,13 @@ void ACHMinigun::Fire()
 			FPointDamageEvent DamageEvent(DamageToCause, ScreenLaserHit, ScreenLaserHit.ImpactNormal, nullptr);
 			CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 		}
+		else
+		{
+			UGameplayStatics::ApplyDamage(HitActor,DamageToCause,OwnerController,this,UDamageType::StaticClass());
+			UE_LOG(LogTemp, Log, TEXT("HitActor : %s"), *GetNameSafe(HitActor))
+		}	
 	}	
-	/*FHitResult Hit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
 	
-	FVector TraceStart = SocketTransform.GetLocation();
-	
-	// FVector HitTarget = Hit.ImpactPoint;
-	FVector End = Location + Rotation.Vector() * MaxRange;
-	//FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
-	
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
-
-	if (bSuccess)
-	{
-		// FVector ShotDirection = -Rotation.Vector();
-		// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-		DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
-		const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
-		
-		// 맞은 부위 효과
-		if(ImpactEffect)
-		{
-			UGameplayStatics::SpawnEmitterAtLocation
-			(
-				GetWorld(),
-				ImpactEffect,
-				Hit.Location, 
-				Hit.ImpactNormal.Rotation()
-			);			
-		}
-
-		// AActor* HitActor = Hit.GetActor();
-		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
-		if (CharacterBase)
-		{
-			FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
-			CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
-		}
-	}*/
 	// 궤적
 	FVector BeamEnd = TraceEnd;
 	if (ScreenLaserHit.bBlockingHit)
