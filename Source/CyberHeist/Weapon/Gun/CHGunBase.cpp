@@ -199,6 +199,10 @@ void ACHGunBase::StopPrecisionAim()
 	
 }
 
+void ACHGunBase::StayPrecisionAim()
+{
+}
+
 void ACHGunBase::Reload()
 {
 }

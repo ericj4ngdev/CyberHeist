@@ -509,10 +509,6 @@ void ACHGunRPG::StopAim()
 	{
 		OwningCharacter->SetAiming(false); // if PullTriggering, pass
 	}
-	else
-	{
-		OwningCharacter->bUseControllerRotationYaw = true;		
-	}
 }
 
 void ACHGunRPG::StartPrecisionAim()
@@ -567,16 +563,32 @@ void ACHGunRPG::StopPrecisionAim()
 	
 	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
-		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+		// PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
 		PlayerCharacter->SetScopeAiming(false);
-		Lens->SetVisibility(false);
-		
+		Lens->SetVisibility(false);		
 		OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);
 		if(ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(OwningCharacter->GetController()))
 		{
 			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);	
 		}
+		if(OwningCharacter->GetNearWall()) return;
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
 	}	
+}
+
+void ACHGunRPG::StayPrecisionAim()
+{
+	Super::StayPrecisionAim();
+	if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+	{
+		if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(OwningCharacter->GetController()))
+		{
+			Lens->SetVisibility(true);	
+			PlayerController->SetViewTargetWithBlend(this,0.2);
+			OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);
+		}
+	}
+	
 }
 
 void ACHGunRPG::Reload()

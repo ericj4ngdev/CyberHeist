@@ -1082,6 +1082,11 @@ void ACHMinigun::StopPrecisionAim()
 	// 휠 내리면 호출되는 함수	
 }
 
+void ACHMinigun::StayPrecisionAim()
+{
+	Super::StayPrecisionAim();
+}
+
 void ACHMinigun::Reload()
 {
 	Super::Reload();
