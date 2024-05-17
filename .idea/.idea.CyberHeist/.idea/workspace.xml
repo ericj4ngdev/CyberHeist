@@ -12,15 +12,7 @@
   <component name="ChangeListManager">
     <list default="true" id="973d144e-de77-4949-8d68-1ef304aea923" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCharacter_TP.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Animation/ABP_CHCharacter_TP.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRifle.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRifle.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Input/IMC_First.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Input/IMC_First.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Input/IMC_Third.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Input/IMC_Third.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,7 +41,7 @@
     "C++ Project.CyberHeist.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Temp",
     "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",

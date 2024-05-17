@@ -25,7 +25,7 @@
 ACHGunRPG::ACHGunRPG()
 {
 	DefaultFireMode = ECHFireMode::SemiAuto;
-
+ 
 	ScopeMesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(FName("ScopeMesh1P"));
 	ScopeMesh1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	ScopeMesh1P->CastShadow = false;
@@ -652,7 +652,7 @@ void ACHGunRPG::SetupWeaponInputComponent()
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
 			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
 			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);
-			EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHGunRPG::FirstLook);
+			// EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHGunRPG::FirstLook);
 		}
 	}
 }
