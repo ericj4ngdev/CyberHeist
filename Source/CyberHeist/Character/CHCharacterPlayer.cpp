@@ -466,7 +466,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		// 각도에 따라 위치가 달라진다... 그냥 크기 1,0,-1로 고정해야 할 듯.
 		float Range = 150.0f;
 		float Radius = 5.0f;
-		FVector Start = RightHand * InputVectorDirectionByCamera * 45.0f  + GetActorLocation() + GetActorUpVector() * GetCapsuleComponent()->GetScaledCapsuleHalfHeight();			// 왼손, 오른손
+		FVector Start = RightHand * InputVectorDirectionByCamera * 45.0f  + GetActorLocation() + GetActorUpVector() * GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.7f;			// 왼손, 오른손
 		// UE_LOG(LogTemp, Log, TEXT("GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : %f"), GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
 		// FVector Start = RightHand * AngleForDirection * 45.0f  + GetActorLocation();			// 왼손, 오른손
 		FVector End = Start + (ForwardVector * Range);											// 벽쪽으로 레이저. 근데 - 안붙혀도 뒤로 나간다. 
@@ -598,8 +598,8 @@ void ACHCharacterPlayer::StartCover()
 		// Take Cover
 	// float CharacterHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	UE_LOG(LogTemp, Log, TEXT("CharacterHalfHeight : %f"), CharacterHalfHeight);
-	FVector HighStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 2) + GetActorUpVector() * CharacterHalfHeight * 0.5f;				// 캐릭터 위치를 시작점으로 설정
-	FVector LowerStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 2) - GetActorUpVector() * CharacterHalfHeight * 0.5f;		// 캐릭터 위치를 시작점으로 설정
+	FVector HighStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 1.5f) + GetActorUpVector() * CharacterHalfHeight * 0.5f;				// 캐릭터 위치를 시작점으로 설정
+	FVector LowerStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 1.5f) - GetActorUpVector() * CharacterHalfHeight * 0.5f;		// 캐릭터 위치를 시작점으로 설정
 	
 	// float Radius = CharacterHalfHeight * 0.5f;									// 구체의 반경 설정
 	// CheckRange = 150.0f;													// 엄폐물 조사 반경
