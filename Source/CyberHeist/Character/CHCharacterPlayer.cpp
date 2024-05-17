@@ -668,6 +668,7 @@ void ACHCharacterPlayer::StartCover()
 			// Move to Cover
 			FVector TargetLocation = HitLowCoverResult.Location; //  + HitLowCoverResult.ImpactNormal * 1.0f;				
 			FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
+			LastCoveredRotation = TargetRotation;
 			// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
 
 			float Distance = FVector::Distance(TargetLocation,GetActorLocation());
