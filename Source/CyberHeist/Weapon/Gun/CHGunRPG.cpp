@@ -533,28 +533,27 @@ void ACHGunRPG::StartPrecisionAim()
 	}
 	bHoldGun = false;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	if(PlayerCharacter)
+	
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 	{
-		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
-		{
-			// 조준경 bool 변수 -> 애니메이션에 전달
-			PlayerCharacter->SetTPAimingCloser(true);
-			// 카메라 위치 수정
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
-		}
+		// 조준경 bool 변수 -> 애니메이션에 전달
+		PlayerCharacter->SetTPAimingCloser(true);
+		// 카메라 위치 수정
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
+	}
 
-		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
+	{
+		PlayerCharacter->SetScopeAiming(true);
+		PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+		if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 		{
-			PlayerCharacter->SetScopeAiming(true);
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
-			if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-			{
-				Lens->SetVisibility(true);
-				PlayerController->SetViewTargetWithBlend(this,0.2);
-				OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);
-			}
+			Lens->SetVisibility(true);
+			PlayerController->SetViewTargetWithBlend(this,0.2);
+			OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);
 		}
 	}
+	
 }
 
 void ACHGunRPG::StopPrecisionAim()
@@ -676,6 +675,10 @@ void ACHGunRPG::SetupWeaponInputComponent()
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRPG::CancelPullTrigger);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartAim);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHGunRPG::StopAim);
+
+			// EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRPG::StartAim);
+			// EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
+			
 			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
 			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);
 			// EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHGunRPG::FirstLook);

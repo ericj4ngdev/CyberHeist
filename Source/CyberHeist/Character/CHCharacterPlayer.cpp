@@ -324,12 +324,12 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	FirstPersonCamera->bUsePawnControlRotation = CharacterControlData->bFPP_UsePawnControlRotation;
 	ThirdPersonCamera->bUsePawnControlRotation = CharacterControlData->bTPP_UsePawnControlRotation;
 	
-	// ThirdPersonCamera->SetRelativeLocation(CharacterControlData->CameraPosition);
+	// ThirdPersonCamera->SetRelativeLocation(CharacterControlData->TP_CameraPosition);
 	FirstPersonCamera->SetRelativeLocation(CharacterControlData->FP_CameraPosition);
-	FirstPersonCamera->FieldOfView = CharacterControlData->FP_FieldOfView;
 	ThirdPersonCamera->FieldOfView = CharacterControlData->TP_FieldOfView;
+	FirstPersonCamera->FieldOfView = CharacterControlData->FP_FieldOfView;
 	
-	CameraBoom->SocketOffset = CharacterControlData->TP_CameraPosition;	
+	CameraBoom->SocketOffset = CharacterControlData->SocketOffset;	
 	CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
 	CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
 	CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;

@@ -43,44 +43,47 @@ public:
 	TObjectPtr<class UInputMappingContext> InputMappingContext;
 
 	// Camera
-	UPROPERTY(EditAnywhere, Category = ThirdCamera)
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|Camera")
 	FVector TP_CameraPosition;
 
-	UPROPERTY(EditAnywhere, Category = ThirdCamera)
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|Camera")
 	uint32 bTPP_UsePawnControlRotation : 1;
 
-	UPROPERTY(EditAnywhere, Category = ThirdCamera, meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "Third Person FOV", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|Camera", meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "Third Person FOV", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
 	float TP_FieldOfView;
 	
-	UPROPERTY(EditAnywhere, Category = FirstCamera)
+	UPROPERTY(EditAnywhere, Category = "First Perspective|Camera")
 	FVector FP_CameraPosition;
 
-	UPROPERTY(EditAnywhere, Category = FirstCamera)
+	UPROPERTY(EditAnywhere, Category = "First Perspective|Camera")
 	uint32 bFPP_UsePawnControlRotation : 1;	
 	
-	UPROPERTY(EditAnywhere, Category = FirstCamera, meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "First Person FOV", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
+	UPROPERTY(EditAnywhere, Category = "First Perspective|Camera", meta = (ClampMin = "0.0", ClampMax = "180.0", DisplayName = "First Person FOV", UIMin = "0.0", UIMax = "180.0", Suffix = "°"))
 	float FP_FieldOfView;
 	
-	// 스프링 
-	UPROPERTY(EditAnywhere, Category = SpringArm)
+	// SpringArm
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|SpringArm")
+	FVector SocketOffset;
+	
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|SpringArm")
 	float TargetArmLength;
 
-	UPROPERTY(EditAnywhere, Category = SpringArm)
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|SpringArm")
 	FRotator RelativeRotation;
 
-	UPROPERTY(EditAnywhere, Category = SpringArm)
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|SpringArm")
 	uint32 bUsePawnControlRotation : 1;
 
-	UPROPERTY(EditAnywhere, Category = SpringArm)
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|SpringArm")
 	uint32 bInheritPitch : 1;
 
-	UPROPERTY(EditAnywhere, Category = SpringArm)
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|SpringArm")
 	uint32 bInheritYaw : 1;
 
-	UPROPERTY(EditAnywhere, Category = SpringArm)
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|SpringArm")
 	uint32 bInheritRoll : 1;
 
-	UPROPERTY(EditAnywhere, Category = SpringArm)
+	UPROPERTY(EditAnywhere, Category = "Third Perspective|SpringArm")
 	uint32 bDoCollisionTest : 1;
 
 };
