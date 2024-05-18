@@ -41,8 +41,8 @@ EBTNodeResult::Type UBTT_UnCoverAim::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	if (BlackboardComp != nullptr && CoverSystem != nullptr)
 	{
 		UE_LOG(LogTemp,Log,TEXT("[UBTT_UnCoverAim::ExecuteTask] 1"));
-		/*if (CoverKey.SelectedKeyType == UBlackboardKeyType_Cover::StaticClass())
-		{*/
+		if (CoverKey.SelectedKeyType == UBlackboardKeyType_Cover::StaticClass())
+		{
 			FCover Cover = BlackboardComp->GetValue<UBlackboardKeyType_Cover>(CoverKey.GetSelectedKeyID());
 			if(Cover.IsValid())
 			{
@@ -50,7 +50,7 @@ EBTNodeResult::Type UBTT_UnCoverAim::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 				AIPawn->UnCoverAim(Cover);
 				return EBTNodeResult::Succeeded;
 			}
-		// }
+		}
 	}	
 	
 	return EBTNodeResult::Failed;

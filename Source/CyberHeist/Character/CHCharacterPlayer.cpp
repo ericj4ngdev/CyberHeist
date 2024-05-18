@@ -16,6 +16,7 @@
 #include "CharacterStat/CHCharacterStatComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Player/CHPlayerController.h"
 #include "UI/UCHCrossHairWidget.h"
 
 ACHCharacterPlayer::ACHCharacterPlayer()
@@ -466,7 +467,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		// 각도에 따라 위치가 달라진다... 그냥 크기 1,0,-1로 고정해야 할 듯.
 		float Range = 150.0f;
 		float Radius = 5.0f;
-		FVector Start = RightHand * InputVectorDirectionByCamera * 45.0f  + GetActorLocation() + GetActorUpVector() * GetCapsuleComponent()->GetScaledCapsuleHalfHeight();			// 왼손, 오른손
+		FVector Start = RightHand * InputVectorDirectionByCamera * 45.0f  + GetActorLocation() + GetActorUpVector() * GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.7f;			// 왼손, 오른손
 		// UE_LOG(LogTemp, Log, TEXT("GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : %f"), GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
 		// FVector Start = RightHand * AngleForDirection * 45.0f  + GetActorLocation();			// 왼손, 오른손
 		FVector End = Start + (ForwardVector * Range);											// 벽쪽으로 레이저. 근데 - 안붙혀도 뒤로 나간다. 
@@ -504,7 +505,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		AngleForDirection = FVector::DotProduct(WallParallel,InputVector);		// y축 입력키도 반영하기 위한 내적
 		
 		// UE_LOG(LogTemp, Log, TEXT("Dir : %f "),Dir);
-		UE_LOG(LogTemp, Log, TEXT("AngleForDirection : %f "),AngleForDirection);
+		// UE_LOG(LogTemp, Log, TEXT("AngleForDirection : %f "),AngleForDirection);
 
 		// 40 degree ~ 180 degree = can cover
 		// Degree Uproperty 
@@ -598,8 +599,8 @@ void ACHCharacterPlayer::StartCover()
 		// Take Cover
 	// float CharacterHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	UE_LOG(LogTemp, Log, TEXT("CharacterHalfHeight : %f"), CharacterHalfHeight);
-	FVector HighStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 2) + GetActorUpVector() * CharacterHalfHeight * 0.5f;				// 캐릭터 위치를 시작점으로 설정
-	FVector LowerStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 2) - GetActorUpVector() * CharacterHalfHeight * 0.5f;		// 캐릭터 위치를 시작점으로 설정
+	FVector HighStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 1.5f) + GetActorUpVector() * CharacterHalfHeight * 0.5f;				// 캐릭터 위치를 시작점으로 설정
+	FVector LowerStart = FVector(GetActorLocation().X,  GetActorLocation().Y,CharacterHalfHeight * 1.5f) - GetActorUpVector() * CharacterHalfHeight * 0.5f;		// 캐릭터 위치를 시작점으로 설정
 	
 	// float Radius = CharacterHalfHeight * 0.5f;									// 구체의 반경 설정
 	// CheckRange = 150.0f;													// 엄폐물 조사 반경
@@ -800,6 +801,7 @@ void ACHCharacterPlayer::SetTiltingRightValue(const float Value)
 		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
 		CameraDesiredRotation = FRotator(0, 0, 20);
 	}
+	// UE_LOG(LogTemp, Log, TEXT("[SetTiltingRightValue] bTiltReleaseRight : %d"), bTiltReleaseRight)
 
 	// RLerp와 TimeLine Value 값을 통한 자연스러운 기울이기
 	const FRotator RLerp = UKismetMathLibrary::RLerp(CameraCurrentRotation, CameraDesiredRotation, Value, true);
@@ -840,7 +842,7 @@ void ACHCharacterPlayer::TiltRight()
 {
 	if (IsInFirstPersonPerspective())
 	{
-		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltRight()"));
+		// UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltRight()"));
 		bTiltReleaseLeft = false;
 		bTiltReleaseRight = false;
 		if (TiltingLeftTimeline.IsPlaying())
@@ -853,13 +855,6 @@ void ACHCharacterPlayer::TiltRight()
 		}
 		TiltingRightTimeline.PlayFromStart();
 	}
-	/*if(IsInFirstPersonPerspective())
-	{
-		TiltAngle = 110;
-		// Camera1PBoom->SetWorldRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, TiltAngle));
-		//Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, TiltAngle));
-		// Camera1PBoom->SetRelativeRotation(FRotator(Camera1PBoom->GetComponentRotation().Pitch,Camera1PBoom->GetComponentRotation().Yaw, Camera1PBoom->GetComponentRotation().Roll + 20));
-	}*/
 }
 
 void ACHCharacterPlayer::TiltRightRelease()
@@ -884,7 +879,7 @@ void ACHCharacterPlayer::TiltLeft()
 {
 	if (IsInFirstPersonPerspective())
 	{
-		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltLeft()"));
+		// UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltLeft()"));
 		bTiltReleaseLeft = false;
 		bTiltReleaseRight = false;
 		if (TiltingLeftTimeline.IsPlaying())
@@ -1039,9 +1034,14 @@ void ACHCharacterPlayer::OnNearWall(UPrimitiveComponent* OverlappedComponent, AA
 {
 	// if(bCovered) return;
 
+	SetNearWall(true);
 	if(CurrentWeapon)
 	{		
-		CurrentWeapon->StopAim();			// 총 내리기
+		// CurrentWeapon->StopAim();			// 총 내리기
+		CurrentWeapon->StopPrecisionAim();
+		// SetScopeAiming(false);
+		// ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(Controller);
+		// PlayerController->SetViewTargetWithBlend(this,0.2);
 		CurrentWeapon->CancelPullTrigger();
 
 		GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->ShootTimerHandle);
@@ -1049,7 +1049,6 @@ void ACHCharacterPlayer::OnNearWall(UPrimitiveComponent* OverlappedComponent, AA
 	}
 	// SetAiming(false);
 	
-	SetNearWall(true);
 	UE_LOG(LogTemp,Log, TEXT("[OnNearWall] %d"), GetNearWall());
 }
 
@@ -1058,6 +1057,21 @@ void ACHCharacterPlayer::OnFarFromWall(UPrimitiveComponent* OverlappedComponent,
 {
 	// 충돌 탈출 시, false로 전환.
 	SetNearWall(false);
+	if(CurrentWeapon)
+	{
+		CurrentWeapon->StayPrecisionAim();
+		/*if(CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+		{
+			if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller))
+			{			
+				PlayerController->SetViewTargetWithBlend(CurrentWeapon,0.2);
+				GetFirstPersonMesh()->SetVisibility(false);
+			}
+		}*/
+	}
+	
+	// 기존에 확대 조준 중이었으면 다시 확대 조준으로 돌아가기
+	
 	
 	UE_LOG(LogTemp,Log, TEXT("[OnFarFromWall] %d"), GetNearWall());
 }

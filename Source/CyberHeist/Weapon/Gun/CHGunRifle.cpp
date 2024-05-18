@@ -164,7 +164,8 @@ void ACHGunRifle::Fire()
 		return;
 	}
 	AController* OwnerController = OwnerPawn->GetController();	
-	ensure(OwnerController);	
+	ensure(OwnerController);
+	
 	if (OwnerController == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
@@ -287,8 +288,7 @@ void ACHGunRifle::Fire()
 		else
 		{
 			UGameplayStatics::ApplyDamage(HitActor,DamageToCause,OwnerController,this,UDamageType::StaticClass());
-			UE_LOG(LogTemp,Log,TEXT("HitActor : %s"), *GetNameSafe(HitActor))
-			// UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s , ScreenLaserHit : %s"), *GetNameSafe(MuzzleLaserHit.GetActor()),*GetNameSafe(ScreenLaserHit.GetActor()));
+			UE_LOG(LogTemp, Log, TEXT("HitActor : %s"), *GetNameSafe(HitActor))
 		}
 	}	
 	
@@ -826,7 +826,10 @@ void ACHGunRifle::StartAim()
 	Super::StartAim();
 	if(!bIsEquipped) return;
 	// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] Before bNearWall : %d"),OwningCharacter->GetNearWall());
-	// if(OwningCharacter->GetNearWall()) return;
+	/*if(!OwningCharacter->GetCovered())
+	{
+		if(OwningCharacter->GetNearWall()) return;		
+	}*/
 	// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] After bNearWall : %d"),OwningCharacter->GetNearWall());
 	if(bReloading)
 	{
@@ -909,7 +912,7 @@ void ACHGunRifle::StopAim()
 		}
 
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
-		{		
+		{
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
 		}
 	
@@ -917,20 +920,16 @@ void ACHGunRifle::StopAim()
 		{
 			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
 			if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
-			{			
+			{
+				UE_LOG(LogTemp, Log, TEXT("SetViewTargetWithBlend"));
 				PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2f);
-				OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기		
-				OwningCharacter->bUseControllerRotationPitch = true;
+				OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기	
 			}
 		}
 	}
 	if(!bTrigger)
 	{
 		OwningCharacter->SetAiming(false); // if PullTriggering, pass
-	}
-	else
-	{
-		OwningCharacter->bUseControllerRotationYaw = true;
 	}
 }
 
@@ -975,7 +974,7 @@ void ACHGunRifle::StopPrecisionAim()
 	Super::StopPrecisionAim();
 	// 휠 내리면 호출되는 함수
 	if(!bIsEquipped) return;
-	
+	// if(OwningCharacter->GetNearWall()) return;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if(PlayerCharacter)
 	{
@@ -987,14 +986,28 @@ void ACHGunRifle::StopPrecisionAim()
 	
 		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
 			PlayerCharacter->SetScopeAiming(false);
 			OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기
 			if(ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(OwningCharacter->GetController()))
 			{
 				PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);
-				// DisableInput(PlayerController);		
 			}
+			if(OwningCharacter->GetNearWall()) return;
+			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+		}
+	}
+}
+
+void ACHGunRifle::StayPrecisionAim()
+{
+	Super::StayPrecisionAim();
+
+	if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+	{
+		if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(OwningCharacter->GetController()))
+		{			
+			PlayerController->SetViewTargetWithBlend(this,0.2);
+			OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);
 		}
 	}
 }

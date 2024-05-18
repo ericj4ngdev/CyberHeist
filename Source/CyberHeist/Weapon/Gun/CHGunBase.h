@@ -260,6 +260,8 @@ public:
 	virtual void StartPrecisionAim();
 	UFUNCTION(BlueprintCallable)
 	virtual void StopPrecisionAim();
+
+	virtual void StayPrecisionAim();
 	virtual void Reload();
 	virtual void SetupWeaponInputComponent();
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter);	

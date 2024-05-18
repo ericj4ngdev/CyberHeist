@@ -39,7 +39,7 @@ public:
 	virtual void Fire() override;
 	virtual void PullTriggerByAI(AActor* AttackTarget) override;
 	virtual void FireByAI(AActor* AttackTarget) override;
-	virtual void AutoFireByAI(AActor* AttackTarget) override;
+	virtual void AutoFireByAI(AActor* AttackTarget)override;
 	virtual void EndShoot() override;
 	virtual void PullTrigger() override;
 	virtual void CancelPullTrigger() override;
@@ -47,6 +47,7 @@ public:
 	virtual void StopAim() override;
 	virtual void StartPrecisionAim() override;
 	virtual void StopPrecisionAim() override;
+	virtual void StayPrecisionAim() override;
 	virtual void Reload() override;
 	virtual void SetupWeaponInputComponent() override;
 	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;
