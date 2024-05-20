@@ -306,9 +306,6 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 			
 			}
 		// UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *PrevMappingContext->GetName(), *NewMappingContext->GetName());
-		
-		// IMC.Add(Subsystem->GetPlayerInput());
-		// UE_LOG(LogTemp, Log, TEXT("%s"), *IMC[0]->GetName()); 
 	}
 	CurrentCharacterControlType = NewCharacterControlType;
 
@@ -325,7 +322,7 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	FirstPersonCamera->bUsePawnControlRotation = CharacterControlData->bFPP_UsePawnControlRotation;
 	ThirdPersonCamera->bUsePawnControlRotation = CharacterControlData->bTPP_UsePawnControlRotation;
 	
-	// ThirdPersonCamera->SetRelativeLocation(CharacterControlData->TP_CameraPosition);
+	ThirdPersonCamera->SetRelativeLocation(CharacterControlData->TP_CameraPosition);
 	FirstPersonCamera->SetRelativeLocation(CharacterControlData->FP_CameraPosition);
 	ThirdPersonCamera->FieldOfView = CharacterControlData->TP_FieldOfView;
 	FirstPersonCamera->FieldOfView = CharacterControlData->FP_FieldOfView;
@@ -489,7 +486,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 			// 카메라 이동
 			// AngleForDirection > 0     // 방향
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
-			CameraBoom->SocketOffset = FVector(NewCharacterControl->TP_CameraPosition.X,NewCharacterControl->TP_CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->TP_CameraPosition.Z);
+			CameraBoom->SocketOffset = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y * InputVectorDirectionByCamera,NewCharacterControl->SocketOffset.Z);
 			// UE_LOG(LogTemp, Log, TEXT("NewCharacterControl->CameraPosition.Y : %f"), NewCharacterControl->CameraPosition.Y);
 
 				
@@ -993,7 +990,7 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 		if(bAim)
 		{
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
-			CameraBoom->SocketOffset = FVector(NewCharacterControl->TP_CameraPosition.X,NewCharacterControl->TP_CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->TP_CameraPosition.Z);
+			CameraBoom->SocketOffset = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y * InputVectorDirectionByCamera,NewCharacterControl->SocketOffset.Z);
 			SetActorLocation(GetActorLocation() + MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
 			// 도는 방향 정하기
 			UE_LOG(LogTemp, Log, TEXT("+ MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius()"));				
@@ -1001,7 +998,7 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 		else
 		{
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
-			CameraBoom->SocketOffset = FVector(NewCharacterControl->TP_CameraPosition.X,NewCharacterControl->TP_CameraPosition.Y * InputVectorDirectionByCamera,NewCharacterControl->TP_CameraPosition.Z);
+			CameraBoom->SocketOffset = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y * InputVectorDirectionByCamera,NewCharacterControl->SocketOffset.Z);
 			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
 		}
 		break;
