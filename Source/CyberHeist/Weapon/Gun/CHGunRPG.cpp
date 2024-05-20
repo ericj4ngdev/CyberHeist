@@ -56,7 +56,7 @@ ACHGunRPG::ACHGunRPG()
 	
 	Lens = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Lens"));
 	Lens->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	Lens->SetupAttachment(CollisionComp);
+	Lens->SetupAttachment(WeaponMesh1P);
 	Lens->CastShadow = true;
 	Lens->SetVisibility(false);	
 }
