@@ -5,4 +5,4 @@
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, CyberHeist, "CyberHeist" );
 
-DEFINE_LOG_CATEGORY(LogCH);
+DEFINE_LOG_CATEGORY(LogCHNetwork);

@@ -29,5 +29,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 		TObjectPtr<class UCHHUDWidget> CHHUDWidget;
 
-	void UpdateRotation(float DeltaTime) override;
+protected:
+	virtual void PostInitializeComponents() override;
+	virtual void PostNetInit() override;
+	virtual void OnPossess(APawn* InPawn) override;	
 };

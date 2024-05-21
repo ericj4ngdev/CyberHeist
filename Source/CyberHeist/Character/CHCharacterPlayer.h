@@ -30,7 +30,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void PostNetInit() override;
+	virtual void OnRep_Owner() override;
 public:	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

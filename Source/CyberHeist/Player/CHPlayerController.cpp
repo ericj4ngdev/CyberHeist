@@ -3,6 +3,7 @@
 
 #include "Player/CHPlayerController.h"
 #include "UI/CHHUDWidget.h"
+#include "CyberHeist.h"
 
 ACHPlayerController::ACHPlayerController()
 {
@@ -24,8 +25,11 @@ void ACHPlayerController::Tick(float DeltaSeconds)
 
 void ACHPlayerController::BeginPlay()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
+
 	Super::BeginPlay();
 
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 	FInputModeGameOnly GameOnlyInputMode;
 	SetInputMode(GameOnlyInputMode);
 	
@@ -36,12 +40,34 @@ void ACHPlayerController::BeginPlay()
 	}
 }
 
-void ACHPlayerController::UpdateRotation(float DeltaTime)
+void ACHPlayerController::PostInitializeComponents()
 {
-	// FRotator DeltaRot(RotationInput);
-	// FRotator ViewRotation = GetControlRotation();
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
+	Super::PostInitializeComponents();
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
+}
 
-	// UE_LOG(LogTemp, Warning, TEXT("[ACHPlayerController::UpdateRotation] DeltaRot: [%s], ViewRot: [%s]"), *DeltaRot.ToString(), *ViewRotation.ToString());
+void ACHPlayerController::PostNetInit()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
+	Super::PostNetInit();
+
+	UNetDriver* NetDriver = GetNetDriver();
+	if (NetDriver)
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Server Connection : %s"), *NetDriver->ServerConnection->GetName());
+	}
+	else
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No NetDriver"));
+	}
 	
-	Super::UpdateRotation(DeltaTime);
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
+}
+
+void ACHPlayerController::OnPossess(APawn* InPawn)
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
+	Super::OnPossess(InPawn);
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 }

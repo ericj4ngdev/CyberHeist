@@ -18,6 +18,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Player/CHPlayerController.h"
 #include "UI/UCHCrossHairWidget.h"
+#include "CyberHeist.h"
 
 ACHCharacterPlayer::ACHCharacterPlayer()
 {
@@ -196,7 +197,7 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 		TiltingRightTimeline.TickTimeline(DeltaTime);
 	}
 	
-	const FRotator Rotation = Controller->GetControlRotation();
+	/*const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);				// (1,0,0) 카메라 전방
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);					// (0,1,0) 
@@ -206,7 +207,7 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 	
 	FVector Start_ = GetActorUpVector() * 10.0f + GetActorLocation();
 	FVector End_ = GetActorForwardVector() * 50.0f + Start_;
-	DrawDebugDirectionalArrow(GetWorld(),Start_, End_, 10.0f, FColor::Red, false, -1, 0 ,10.0f);
+	DrawDebugDirectionalArrow(GetWorld(),Start_, End_, 10.0f, FColor::Red, false, -1, 0 ,10.0f);*/
 
 	if (CollisionComp)
 	{
@@ -235,6 +236,69 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 	}
 
 	
+}
+
+void ACHCharacterPlayer::PossessedBy(AController* NewController)
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("%s %s"), TEXT("Begin"), *GetName());
+	AActor* OwnerActor = GetOwner();
+	if (OwnerActor)
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), *OwnerActor->GetName());
+	}
+	else
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"));
+	}
+
+	Super::PossessedBy(NewController);
+
+	OwnerActor = GetOwner();
+	if (OwnerActor)
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), *OwnerActor->GetName());
+	}
+	else
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"));
+	}
+
+	CH_LOG(LogCHNetwork, Log, TEXT("%s %s"), TEXT("End"), *GetName());
+}
+
+void ACHCharacterPlayer::PostNetInit()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
+	
+	Super::PostNetInit();
+
+	AActor* OwnerActor = GetOwner();
+    if (OwnerActor)
+    {
+    	CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), *OwnerActor->GetName());
+    }
+    else
+    {
+    	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"));
+    }
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
+}
+
+void ACHCharacterPlayer::OnRep_Owner()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("%s %s"), *GetName(),TEXT("Begin"))
+	Super::OnRep_Owner();
+	AActor* OwnerActor = GetOwner();
+	if (OwnerActor)
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), *OwnerActor->GetName());
+	}
+	else
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"));
+	}
+	
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 }
 
 void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -274,6 +338,11 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
 {
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+	
 	UCHCharacterControlData* NewCharacterControl = CharacterControlManager[NewCharacterControlType];
 	UCHCharacterControlData* PrevCharacterControl = CharacterControlManager[CurrentCharacterControlType];
 
