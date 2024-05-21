@@ -268,7 +268,7 @@ void ACHCharacterPlayer::PossessedBy(AController* NewController)
 
 void ACHCharacterPlayer::PostNetInit()
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
+	CH_LOG(LogCHNetwork, Log, TEXT("%s %s"), TEXT("Begin"), *GetName())
 	
 	Super::PostNetInit();
 

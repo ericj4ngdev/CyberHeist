@@ -29,8 +29,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Stat)
 		float MaxHp;
 
-	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
-		float CurrentHp;
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentHp, Transient, VisibleInstanceOnly, Category = Stat)
+	float CurrentHp;
+	
 public:
 	FOnHpZeroDelegate OnHpZero;
 	FOnHpChangedDelegate OnHpChanged;
@@ -39,7 +40,11 @@ public:
 	FORCEINLINE float GetCurrentHp() { return CurrentHp; }
 	float ApplyDamage(float InDamage);
 
-	// Combat
-public:
-	// FOnCombatModeSignature OnCombat;
+protected:
+	virtual void BeginPlay() override;
+	virtual void ReadyForReplication() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+	void OnRep_CurrentHp();
 };

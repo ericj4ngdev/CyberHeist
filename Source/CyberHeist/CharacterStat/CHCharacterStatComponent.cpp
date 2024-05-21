@@ -2,6 +2,8 @@
 
 
 #include "CharacterStat/CHCharacterStatComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "CyberHeist.h"
 
 // Sets default values for this component's properties
 UCHCharacterStatComponent::UCHCharacterStatComponent()
@@ -10,6 +12,8 @@ UCHCharacterStatComponent::UCHCharacterStatComponent()
 	CurrentHp = MaxHp;
 
 	bWantsInitializeComponent = true;
+
+	SetIsReplicated(true); 
 }
 
 void UCHCharacterStatComponent::InitializeComponent()
@@ -22,7 +26,7 @@ void UCHCharacterStatComponent::InitializeComponent()
 void UCHCharacterStatComponent::SetHp(float NewHp)
 {
 	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, MaxHp);
-	// UE_LOG(LogTemp, Log, TEXT("SetHp"));
+	
 	OnHpChanged.Broadcast(CurrentHp);
 }
 
@@ -40,5 +44,34 @@ float UCHCharacterStatComponent::ApplyDamage(float InDamage)
 	}
 
 	return ActualDamage;
+}
+
+void UCHCharacterStatComponent::BeginPlay()
+{
+	CH_SUBLOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
+	Super::BeginPlay();
+}
+
+void UCHCharacterStatComponent::ReadyForReplication()
+{
+	CH_SUBLOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
+	Super::ReadyForReplication();
+}
+
+void UCHCharacterStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(UCHCharacterStatComponent, CurrentHp);
+}
+
+void UCHCharacterStatComponent::OnRep_CurrentHp()
+{
+	CH_SUBLOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
+	OnHpChanged.Broadcast(CurrentHp);
+	if (CurrentHp <= KINDA_SMALL_NUMBER)
+	{
+		OnHpZero.Broadcast();
+	}
 }
 
