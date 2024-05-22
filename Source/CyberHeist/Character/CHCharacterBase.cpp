@@ -3,6 +3,7 @@
 
 #include "Character/CHCharacterBase.h"
 
+#include "CyberHeist.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -277,9 +278,10 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 
 	if (NewWeapon)
 	{
+		// EquipWeapon();
 		// OnRep_CurrentWeapon();		// IMC 추가
-		NewWeapon->SetOwningCharacter(this);
 		CurrentWeapon = NewWeapon;
+		CurrentWeapon->SetOwningCharacter(this);
 		CurrentWeapon->Equip();
 
 		UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
@@ -303,6 +305,51 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 	}
 	
 }
+
+void ACHCharacterBase::OnRep_CurrentWeapon()
+{
+	CurrentWeapon->SetOwningCharacter(this);
+	CurrentWeapon->Equip();
+	UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
+	if (Equip1PMontage && GetFirstPersonMesh())
+	{
+		GetFirstPersonMesh()->GetAnimInstance()->Montage_Play(Equip1PMontage);
+	}
+
+	UAnimMontage* Equip3PMontage = CurrentWeapon->GetEquip3PMontage();
+	if (Equip3PMontage && GetThirdPersonMesh())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Equip3PMontage"));
+		GetThirdPersonMesh()->GetAnimInstance()->Montage_Play(Equip3PMontage);
+	}
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
+		if(Subsystem->HasMappingContext(CurrentWeapon->FireMappingContext))
+		{
+			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
+		}
+		else
+		{
+			Subsystem->AddMappingContext(CurrentWeapon->FireMappingContext, 0);
+			if(!GetbHasRifleInputBindings())
+			{
+				CurrentWeapon->SetupWeaponInputComponent();	
+				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
+				SetbHasRifleInputBindings(true);				
+			}
+		}
+	}
+}
+
+void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACHCharacterBase, CurrentWeapon);
+
+}
+
 
 void ACHCharacterBase::EquipWeapon(ACHGunBase* NewWeapon)
 {
@@ -372,35 +419,6 @@ void ACHCharacterBase::PreviousWeapon()
 	}	
 }
 
-void ACHCharacterBase::OnRep_CurrentWeapon()
-{
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
-		if(Subsystem->HasMappingContext(CurrentWeapon->FireMappingContext))
-		{
-			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
-		}
-		else
-		{
-			Subsystem->AddMappingContext(CurrentWeapon->FireMappingContext, 0);
-			if(!GetbHasRifleInputBindings())
-			{
-				CurrentWeapon->SetupWeaponInputComponent();	
-				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
-				SetbHasRifleInputBindings(true);				
-			}
-		}
-	}
-}
-
-void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ACHCharacterBase, CurrentWeapon);
-
-}
 
 void ACHCharacterBase::ClientRPCAddIMC_Implementation(ACHGunBase* NewGun, const UInputMappingContext* MappingContext)
 {
