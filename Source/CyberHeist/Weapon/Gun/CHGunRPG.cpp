@@ -61,6 +61,16 @@ ACHGunRPG::ACHGunRPG()
 	Lens->SetVisibility(false);	
 }
 
+void ACHGunRPG::NotifyActorBeginOverlap(AActor* Other)
+{
+	Super::NotifyActorBeginOverlap(Other);
+	if(HasAuthority())
+	{
+		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
+		CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
+	}
+}
+
 void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 {
 	StopAim();
@@ -684,8 +694,7 @@ void ACHGunRPG::SetupWeaponInputComponent()
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartAim);
 			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHGunRPG::StopAim);
 			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
-			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);
-			EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHGunRPG::FirstLook);
+			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);			
 		}
 	}
 }
@@ -739,11 +748,6 @@ void ACHGunRPG::SetWeaponMeshVisibility(uint8 bVisible)
 void ACHGunRPG::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 {
 	Super::SetOwningCharacter(InOwningCharacter);
-}
-
-void ACHGunRPG::PickUpOnTouch(ACHCharacterBase* InCharacter)
-{
-	Super::PickUpOnTouch(InCharacter);
 }
 
 void ACHGunRPG::StopParticleSystem()

@@ -5,11 +5,11 @@
 
 #include "Camera/CameraComponent.h"
 #include "Character/CHCharacterBase.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "Components/CapsuleComponent.h"
 
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ACHGunBase::ACHGunBase()
@@ -86,7 +86,22 @@ void ACHGunBase::NotifyActorBeginOverlap(AActor* Other)
 {
 	Super::NotifyActorBeginOverlap(Other);
 
-	PickUpOnTouch(Cast<ACHCharacterBase>(Other));	
+	if(HasAuthority())
+	{
+		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
+		if(CharacterBase)
+		{
+			bIsEquipped = true;
+			// OnRep_Equipped();
+			CharacterBase->AddWeaponToInventory(this,bIsEquipped);
+		}
+		// 여기서 클라 RPC 쏘기
+		// 총마다 IMC가 달라서 이건 자식에서 해줘야 할거 같은데
+		// 걍 자식한테 총까지 줘버려 ㅋㅋㅋㅋ
+		// 그런데 IMC가 자식에서 구현되어 있어서... 
+		// CharacterBase->ClientRPCAddIMC(FireMappingContext);
+		
+	}
 }
 
 UAnimMontage* ACHGunBase::GetEquip1PMontage() const
@@ -211,7 +226,7 @@ void ACHGunBase::Reload()
 
 void ACHGunBase::SetupWeaponInputComponent()
 {
-	
+	// SetOwningCharacter();
 }
 
 void ACHGunBase::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
@@ -230,21 +245,21 @@ void ACHGunBase::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 	}*/
 }
 
-void ACHGunBase::PickUpOnTouch(ACHCharacterBase* InCharacter)
-{
-	bIsEquipped = true;
-	InCharacter->AddWeaponToInventory(this,true);
-}
-
 void ACHGunBase::StopParticleSystem()
 {
 	// Effect->Deactivate();
 	// UE_LOG(LogTemp, Warning, TEXT("StopParticleSystem"));
 }
 
+void ACHGunBase::OnRep_Equipped()
+{
+	
+}
+
 void ACHGunBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ACHGunBase, bIsEquipped);	
 }
 
 void ACHGunBase::OnRep_Owner()

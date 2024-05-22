@@ -57,6 +57,8 @@ void ACHGunRifle::BeginPlay()
 		if(OwnerActor)
 		{
 			CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), *OwnerActor->GetName())
+
+			CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), GetLocalRole())
 		}
 		else
 		{
@@ -76,6 +78,16 @@ void ACHGunRifle::Tick(float DeltaSeconds)
 		UE_LOG(LogTemp,Warning,TEXT("[ACHGunRifle::Tick] PlayerController->GetControlRotation(): [%s]"), *PlayerController->GetControlRotation().ToString())
 		
 	}*/
+}
+
+void ACHGunRifle::NotifyActorBeginOverlap(AActor* Other)
+{
+	Super::NotifyActorBeginOverlap(Other);
+	if(HasAuthority())
+	{
+		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
+		CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
+	}
 }
 
 void ACHGunRifle::Equip()
@@ -124,9 +136,13 @@ void ACHGunRifle::Equip()
 			WeaponMesh3P->SetVisibility(true);
 		}
 	}
-	
+
+	// 오버랩 이벤트를 클라가 받으면 클라에서만 일어나야 함.
+	// 오버랩 끝났을 때? 
+	// 클라 RPC
+	// 액터컴포넌트를 추가시키면 자동 장착
 	// Set up action bindings
-	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	/*if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{		
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
 		if(Subsystem->HasMappingContext(FireMappingContext))
@@ -143,7 +159,9 @@ void ACHGunRifle::Equip()
 				OwningCharacter->SetbHasRifleInputBindings(true);
 			}
 		}
-	}
+	}*/
+	// 캐릭터 RPC. 총의 소유권이 서버에게 있어서 캐릭터에서 RPC를 받아야 한다.
+	// 인자로 IMC를 받아서 추가하는 함수를 캐릭터에서 호출한다. 
 }
 
 void ACHGunRifle::UnEquip()
@@ -1111,22 +1129,25 @@ void ACHGunRifle::Reload()
 void ACHGunRifle::SetupWeaponInputComponent()
 {
 	Super::SetupWeaponInputComponent();
-
-	if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+	if(OwningCharacter)
 	{
-		// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 		{
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRifle::PullTrigger);	
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRifle::CancelPullTrigger);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartAim);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHGunRifle::StopAim);
-			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartPrecisionAim);
-			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StopPrecisionAim);
-			// EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHGunRifle::FirstLook);
-			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRifle::Reload);
+			// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
+			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+			{
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRifle::PullTrigger);	
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRifle::CancelPullTrigger);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartAim);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHGunRifle::StopAim);
+				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartPrecisionAim);
+				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StopPrecisionAim);
+				// EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHGunRifle::FirstLook);
+				EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRifle::Reload);
+			}
 		}
 	}
+	
 }
 
 void ACHGunRifle::FirstLook(const FInputActionValue& Value)
@@ -1175,11 +1196,6 @@ void ACHGunRifle::SetWeaponMeshVisibility(uint8 bVisible)
 void ACHGunRifle::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 {
 	Super::SetOwningCharacter(InOwningCharacter);
-}
-
-void ACHGunRifle::PickUpOnTouch(ACHCharacterBase* InCharacter)
-{
-	Super::PickUpOnTouch(InCharacter);
 }
 
 void ACHGunRifle::StopParticleSystem()

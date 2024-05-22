@@ -16,6 +16,7 @@ class CYBERHEIST_API ACHMinigun : public ACHGunBase
 
 public:
 	ACHMinigun();
+	virtual void NotifyActorBeginOverlap(class AActor* Other) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -53,7 +54,6 @@ public:
 	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;
 public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
-	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 
 	virtual void StopParticleSystem() override;
 
 private:

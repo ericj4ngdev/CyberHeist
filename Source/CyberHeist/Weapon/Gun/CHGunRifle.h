@@ -19,10 +19,8 @@ public:
 	ACHGunRifle();
 
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> FirstLookAction;
+	virtual void Tick(float DeltaSeconds) override;	
+	virtual void NotifyActorBeginOverlap(class AActor* Other) override;
 	
 public:
 	virtual void Equip() override;
@@ -46,7 +44,6 @@ public:
 	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;
 public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
-	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 
 	virtual void StopParticleSystem() override;
 
 	UPROPERTY()

@@ -264,25 +264,27 @@ public:
 	virtual void StayPrecisionAim();
 	virtual void Reload();
 	virtual void SetupWeaponInputComponent();
-	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter);	
-	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter);	
+	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter);
 	virtual void StopParticleSystem();
 
 	// state
 protected:
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|State")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, ReplicatedUsing = OnRep_Equipped, Category = "Properties|State")
 	uint8 bIsEquipped : 1;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|State")
+	UFUNCTION()
+	void OnRep_Equipped();
+	
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Properties|State")
 	uint8 bTrigger : 1;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|State")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Properties|State")
 	uint8 bReloading : 1;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Properties|State")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Properties|State")
 	uint8 bInputBindingsSetup : 1;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Properties|State")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Properties|State")
 	uint8 bHoldGun : 1;
 	
 protected:

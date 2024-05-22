@@ -70,6 +70,16 @@ ACHMinigun::ACHMinigun()
 	bInfiniteAmmo = true;
 }
 
+void ACHMinigun::NotifyActorBeginOverlap(AActor* Other)
+{
+	Super::NotifyActorBeginOverlap(Other);
+	if(HasAuthority())
+	{
+		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
+		CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
+	}
+}
+
 void ACHMinigun::Equip()
 {
 	Super::Equip();
@@ -178,7 +188,7 @@ void ACHMinigun::Fire()
 	ensure(OwnerController);
 	if (OwnerController == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController"))
 		return;
 	}
 
@@ -1195,11 +1205,6 @@ void ACHMinigun::SetWeaponMeshVisibility(uint8 bVisible)
 void ACHMinigun::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 {
 	Super::SetOwningCharacter(InOwningCharacter);
-}
-
-void ACHMinigun::PickUpOnTouch(ACHCharacterBase* InCharacter)
-{
-	Super::PickUpOnTouch(InCharacter);
 }
 
 void ACHMinigun::StopParticleSystem()

@@ -17,9 +17,7 @@ class CYBERHEIST_API ACHGunRPG : public ACHGunBase
 
 public:
 	ACHGunRPG();
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> FirstLookAction;
+	virtual void NotifyActorBeginOverlap(class AActor* Other) override;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -69,6 +67,5 @@ public:
 	
 public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
-	virtual void PickUpOnTouch(ACHCharacterBase* InCharacter) override; 
 	virtual void StopParticleSystem() override;
 };

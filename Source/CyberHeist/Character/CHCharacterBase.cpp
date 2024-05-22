@@ -2,6 +2,8 @@
 
 
 #include "Character/CHCharacterBase.h"
+
+#include "EnhancedInputSubsystems.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon/Gun/CHGun.h"
@@ -259,15 +261,14 @@ void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewWeapon, bool bEquipWe
 	if(NewWeapon == nullptr) return;
 	Inventory.Weapons.Add(NewWeapon);
 	SetCurrentWeapon(NewWeapon, CurrentWeapon);
+	// ServerEquipWeapon(NewWeapon, CurrentWeapon);		// 서버 RPC쏴주기 나 장착한다아	
 }
 
 void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon)
 {
 	if(NewWeapon == nullptr) return;
-	if (NewWeapon == LastWeapon) return;
+	if(NewWeapon == LastWeapon) return;
 
-	// 총 교체시 중복임
-	// 맨손이면 해제할 게 없는데??
 	if(LastWeapon)
 	{
 		UnEquipWeapon(LastWeapon);		
@@ -275,12 +276,10 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 
 	if (NewWeapon)
 	{
-		// Weapons coming from OnRep_CurrentWeapon won't have the owner set
 		CurrentWeapon = NewWeapon;
 		CurrentWeapon->SetOwningCharacter(this);
 		CurrentWeapon->Equip();
 
-		// change gun animation
 		UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
 		if (Equip1PMontage && GetFirstPersonMesh())
 		{
@@ -371,6 +370,28 @@ void ACHCharacterBase::PreviousWeapon()
 	}	
 }
 
+void ACHCharacterBase::ClientRPCAddIMC_Implementation(ACHGunBase* NewGun, const UInputMappingContext* MappingContext)
+{
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
+		if(Subsystem->HasMappingContext(MappingContext))
+		{
+			// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
+		}
+		else
+		{
+			// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
+			Subsystem->AddMappingContext(MappingContext, 0);
+			if(!GetbHasRifleInputBindings())
+			{
+				NewGun->SetupWeaponInputComponent();	
+				SetbHasRifleInputBindings(true);				
+			}
+		}
+	}
+}
+
 void ACHCharacterBase::MoveActorLocation(const FVector& Destination, float InterpSpeed)
 {
 	// 플레이어의 현재 위치와 목표 위치
@@ -397,7 +418,6 @@ void ACHCharacterBase::MoveActorLocation(const FVector& Destination, float Inter
 		}
 	}, DeltaTime, true);
 }
-
 
 void ACHCharacterBase::NotifyComboActionEnd()
 {
