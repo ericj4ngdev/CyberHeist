@@ -61,7 +61,16 @@ ACHGunRPG::ACHGunRPG()
 	Lens->SetVisibility(false);	
 }
 
-void ACHGunRPG::NotifyActorBeginOverlap(AActor* Other)
+void ACHGunRPG::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+
+	ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
+	CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
+}
+
+/*void ACHGunRPG::NotifyActorBeginOverlap(AActor* Other)
 {
 	Super::NotifyActorBeginOverlap(Other);
 	if(HasAuthority())
@@ -69,7 +78,7 @@ void ACHGunRPG::NotifyActorBeginOverlap(AActor* Other)
 		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
 		CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
 	}
-}
+}*/
 
 void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 {

@@ -45,8 +45,11 @@ protected:
 	virtual void Tick(float DeltaSeconds ) override;
 	
 	// Pickup on touch
-	virtual void NotifyActorBeginOverlap(class AActor* Other) override;
+	// virtual void NotifyActorBeginOverlap(class AActor* Other) override;
 
+	UFUNCTION()
+	virtual void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<class ACHCharacterBase> OwningCharacter;

@@ -56,7 +56,7 @@ void ACHGunBase::BeginPlay()
 	Super::BeginPlay();
 	// Effect->AttachToComponent(WeaponMesh3P, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("MuzzleFlashSocket"));
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	
+	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHGunBase::OnSphereBeginOverlap);
 }
 
 void ACHGunBase::Tick(float DeltaSeconds)
@@ -82,7 +82,7 @@ void ACHGunBase::Tick(float DeltaSeconds)
 	
 }
 
-void ACHGunBase::NotifyActorBeginOverlap(AActor* Other)
+/*void ACHGunBase::NotifyActorBeginOverlap(AActor* Other)
 {
 	Super::NotifyActorBeginOverlap(Other);
 
@@ -101,6 +101,17 @@ void ACHGunBase::NotifyActorBeginOverlap(AActor* Other)
 		// 그런데 IMC가 자식에서 구현되어 있어서... 
 		// CharacterBase->ClientRPCAddIMC(FireMappingContext);
 		
+	}
+}*/
+
+void ACHGunBase::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
+	if(CharacterBase)
+	{
+		bIsEquipped = true;
+		CharacterBase->AddWeaponToInventory(this,bIsEquipped);
 	}
 }
 

@@ -79,8 +79,16 @@ void ACHGunRifle::Tick(float DeltaSeconds)
 		
 	}*/
 }
+void ACHGunRifle::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
-void ACHGunRifle::NotifyActorBeginOverlap(AActor* Other)
+	ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
+	CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
+}
+
+/*void ACHGunRifle::NotifyActorBeginOverlap(AActor* Other)
 {
 	Super::NotifyActorBeginOverlap(Other);
 	if(HasAuthority())
@@ -88,8 +96,9 @@ void ACHGunRifle::NotifyActorBeginOverlap(AActor* Other)
 		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
 		CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
 	}
-}
+}*/
 
+// 캐릭터를 받아올까? 뭐가 문제일까?
 void ACHGunRifle::Equip()
 {
 	Super::Equip();

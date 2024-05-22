@@ -377,11 +377,11 @@ void ACHCharacterBase::ClientRPCAddIMC_Implementation(ACHGunBase* NewGun, const 
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
 		if(Subsystem->HasMappingContext(MappingContext))
 		{
-			// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
+			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
 		}
 		else
 		{
-			// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
+			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
 			Subsystem->AddMappingContext(MappingContext, 0);
 			if(!GetbHasRifleInputBindings())
 			{

@@ -70,7 +70,16 @@ ACHMinigun::ACHMinigun()
 	bInfiniteAmmo = true;
 }
 
-void ACHMinigun::NotifyActorBeginOverlap(AActor* Other)
+void ACHMinigun::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+
+	ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
+	CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
+}
+
+/*void ACHMinigun::NotifyActorBeginOverlap(AActor* Other)
 {
 	Super::NotifyActorBeginOverlap(Other);
 	if(HasAuthority())
@@ -78,7 +87,7 @@ void ACHMinigun::NotifyActorBeginOverlap(AActor* Other)
 		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
 		CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
 	}
-}
+}*/
 
 void ACHMinigun::Equip()
 {
