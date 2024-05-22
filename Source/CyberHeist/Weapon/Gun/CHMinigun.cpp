@@ -70,25 +70,6 @@ ACHMinigun::ACHMinigun()
 	bInfiniteAmmo = true;
 }
 
-void ACHMinigun::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-
-	ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
-	CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
-}
-
-/*void ACHMinigun::NotifyActorBeginOverlap(AActor* Other)
-{
-	Super::NotifyActorBeginOverlap(Other);
-	if(HasAuthority())
-	{
-		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
-		CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
-	}
-}*/
-
 void ACHMinigun::Equip()
 {
 	Super::Equip();
@@ -140,7 +121,7 @@ void ACHMinigun::Equip()
 	}
 	
 	// Set up action bindings
-	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	/*if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{		
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		
@@ -158,7 +139,7 @@ void ACHMinigun::Equip()
 				OwningCharacter->SetbHasMinigunInputBindings(true);
 			}		
 		}
-	}
+	}*/
 }
 
 void ACHMinigun::UnEquip()
@@ -1188,19 +1169,21 @@ void ACHMinigun::Reload()
 void ACHMinigun::SetupWeaponInputComponent()
 {
 	Super::SetupWeaponInputComponent();
-
-	if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+	if(OwningCharacter)
 	{
-		// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 		{
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHMinigun::PullTrigger);	
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHMinigun::CancelPullTrigger);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartAim);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHMinigun::StopAim);
-			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartPrecisionAim);
-			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StopPrecisionAim);
-			// EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHMinigun::Reload);
+			// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
+			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+			{
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHMinigun::PullTrigger);	
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHMinigun::CancelPullTrigger);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartAim);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHMinigun::StopAim);
+				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StartPrecisionAim);
+				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHMinigun::StopPrecisionAim);
+				// EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHMinigun::Reload);
+			}
 		}
 	}
 }

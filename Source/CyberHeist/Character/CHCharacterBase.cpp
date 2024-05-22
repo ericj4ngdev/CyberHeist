@@ -263,7 +263,6 @@ void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewWeapon, bool bEquipWe
 	if(NewWeapon == nullptr) return;
 	Inventory.Weapons.Add(NewWeapon);
 	SetCurrentWeapon(NewWeapon, CurrentWeapon);
-	// ServerEquipWeapon(NewWeapon, CurrentWeapon);		// 서버 RPC쏴주기 나 장착한다아	
 }
 
 void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon)
@@ -278,10 +277,9 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 
 	if (NewWeapon)
 	{
-		// EquipWeapon();
-		// OnRep_CurrentWeapon();		// IMC 추가
 		CurrentWeapon = NewWeapon;
-		CurrentWeapon->SetOwningCharacter(this);
+		EquipWeapon();
+		/*CurrentWeapon->SetOwningCharacter(this);
 		CurrentWeapon->Equip();
 
 		UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
@@ -295,7 +293,7 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 		{
 			UE_LOG(LogTemp, Log, TEXT("Equip3PMontage"));
 			GetThirdPersonMesh()->GetAnimInstance()->Montage_Play(Equip3PMontage);
-		}
+		}*/
 	}
 	else
 	{
@@ -308,26 +306,13 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 
 void ACHCharacterBase::OnRep_CurrentWeapon()
 {
-	CurrentWeapon->SetOwningCharacter(this);
-	CurrentWeapon->Equip();
-	UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
-	if (Equip1PMontage && GetFirstPersonMesh())
-	{
-		GetFirstPersonMesh()->GetAnimInstance()->Montage_Play(Equip1PMontage);
-	}
-
-	UAnimMontage* Equip3PMontage = CurrentWeapon->GetEquip3PMontage();
-	if (Equip3PMontage && GetThirdPersonMesh())
-	{
-		UE_LOG(LogTemp, Log, TEXT("Equip3PMontage"));
-		GetThirdPersonMesh()->GetAnimInstance()->Montage_Play(Equip3PMontage);
-	}
+	EquipWeapon();
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
 		if(Subsystem->HasMappingContext(CurrentWeapon->FireMappingContext))
-		{
-			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
+		{			
+			UE_LOG(LogTemp, Log, TEXT("[%s] Have FireMappingContext"), *CurrentWeapon.GetName());
 		}
 		else
 		{
@@ -335,7 +320,7 @@ void ACHCharacterBase::OnRep_CurrentWeapon()
 			if(!GetbHasRifleInputBindings())
 			{
 				CurrentWeapon->SetupWeaponInputComponent();	
-				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
+				UE_LOG(LogTemp, Log, TEXT("[%s] No FireMappingContext"), *CurrentWeapon.GetName());
 				SetbHasRifleInputBindings(true);				
 			}
 		}
@@ -351,9 +336,23 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 }
 
 
-void ACHCharacterBase::EquipWeapon(ACHGunBase* NewWeapon)
+void ACHCharacterBase::EquipWeapon()
 {
-	SetCurrentWeapon(NewWeapon, CurrentWeapon);
+	CurrentWeapon->SetOwningCharacter(this);
+	CurrentWeapon->Equip();
+
+	UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
+	if (Equip1PMontage && GetFirstPersonMesh())
+	{
+		GetFirstPersonMesh()->GetAnimInstance()->Montage_Play(Equip1PMontage);
+	}
+
+	UAnimMontage* Equip3PMontage = CurrentWeapon->GetEquip3PMontage();
+	if (Equip3PMontage && GetThirdPersonMesh())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Equip3PMontage"));
+		GetThirdPersonMesh()->GetAnimInstance()->Montage_Play(Equip3PMontage);
+	}
 }
 
 void ACHCharacterBase::UnEquipWeapon(ACHGunBase* WeaponToUnEquip)
@@ -397,7 +396,7 @@ void ACHCharacterBase::NextWeapon()
 	}
 	else
 	{
-		EquipWeapon(Inventory.Weapons[IndexOfNextWeapon]);		
+		SetCurrentWeapon(Inventory.Weapons[IndexOfNextWeapon], CurrentWeapon);
 	}
 }
 
@@ -414,33 +413,9 @@ void ACHCharacterBase::PreviousWeapon()
 		CurrentWeapon = nullptr;		
 	}
 	else
-	{		
-		EquipWeapon(Inventory.Weapons[IndexOfPrevWeapon]);
-	}	
-}
-
-
-void ACHCharacterBase::ClientRPCAddIMC_Implementation(ACHGunBase* NewGun, const UInputMappingContext* MappingContext)
-{
-	// 클라이언트 체크까지 해줘야 하는 게 아닐까 고민중.. 
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
-		if(Subsystem->HasMappingContext(MappingContext))
-		{
-			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
-		}
-		else
-		{
-			Subsystem->AddMappingContext(MappingContext, 0);
-			if(!GetbHasRifleInputBindings())
-			{
-				NewGun->SetupWeaponInputComponent();	
-				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
-				SetbHasRifleInputBindings(true);				
-			}
-		}
-	}
+		SetCurrentWeapon(Inventory.Weapons[IndexOfPrevWeapon], CurrentWeapon);		
+	}	
 }
 
 void ACHCharacterBase::MoveActorLocation(const FVector& Destination, float InterpSpeed)

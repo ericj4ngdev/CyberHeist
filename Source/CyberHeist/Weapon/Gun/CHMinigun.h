@@ -16,9 +16,6 @@ class CYBERHEIST_API ACHMinigun : public ACHGunBase
 
 public:
 	ACHMinigun();
-	
-   	virtual void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
-	// virtual void NotifyActorBeginOverlap(class AActor* Other) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")

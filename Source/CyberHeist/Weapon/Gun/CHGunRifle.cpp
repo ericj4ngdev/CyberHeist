@@ -50,61 +50,32 @@ ACHGunRifle::ACHGunRifle()
 void ACHGunRifle::BeginPlay()
 {
 	Super::BeginPlay();
-	if (HasAuthority())
+	/*if (HasAuthority())
 	{
 		// SetOwner();
 		AActor* OwnerActor = GetOwner();
 		if(OwnerActor)
 		{
 			CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), *OwnerActor->GetName())
-
-			CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), GetLocalRole())
 		}
 		else
 		{
 			CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"))
 		}
-	}
+	}*/
 }
 
 void ACHGunRifle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// UE_LOG(LogTemp,Warning,TEXT("[ACHGunRifle::Tick] ScopeCamLoc: [%s]"), *ScopeCamera->GetComponentLocation().ToString())
-	/*if(OwningCharacter)
-	{
-		APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController());
-		UE_LOG(LogTemp,Warning,TEXT("[ACHGunRifle::Tick] PlayerController->GetControlRotation(): [%s]"), *PlayerController->GetControlRotation().ToString())
-		
-	}*/
-}
-void ACHGunRifle::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-
-	ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
-	// CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
 }
 
-/*void ACHGunRifle::NotifyActorBeginOverlap(AActor* Other)
-{
-	Super::NotifyActorBeginOverlap(Other);
-	if(HasAuthority())
-	{
-		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
-		CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
-	}
-}*/
-
-// 캐릭터를 받아올까? 뭐가 문제일까?
 void ACHGunRifle::Equip()
 {
 	Super::Equip();
 
 	if(!bIsEquipped) return;
-	// OwningCharacter->SetHasRifle(true);
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 

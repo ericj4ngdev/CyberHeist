@@ -244,7 +244,7 @@ public:
 	void SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon);
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void EquipWeapon(ACHGunBase* NewWeapon);
+	void EquipWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void UnEquipWeapon(ACHGunBase* WeaponToUnEquip);
@@ -280,10 +280,6 @@ public:
 	void SetbHasRPGInputBindings(uint8 NewBool){bHasRPGInputBindings = NewBool;}
 	void SetbHasRifleInputBindings(uint8 NewBool){bHasRifleInputBindings = NewBool;}
 	void SetbHasMinigunInputBindings(uint8 NewBool){bHasMinigunInputBindings = NewBool;}
-
-	UFUNCTION(Client, Unreliable)
-	void ClientRPCAddIMC(ACHGunBase* NewGun,const UInputMappingContext* MappingContext);
-	
 	
 public:	
 	TObjectPtr<class UCHAnimInstance> CHAnimInstance;

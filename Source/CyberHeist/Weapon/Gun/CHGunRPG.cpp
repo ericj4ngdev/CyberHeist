@@ -61,25 +61,6 @@ ACHGunRPG::ACHGunRPG()
 	Lens->SetVisibility(false);	
 }
 
-void ACHGunRPG::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-
-	ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
-	CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
-}
-
-/*void ACHGunRPG::NotifyActorBeginOverlap(AActor* Other)
-{
-	Super::NotifyActorBeginOverlap(Other);
-	if(HasAuthority())
-	{
-		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
-		CharacterBase->ClientRPCAddIMC(this,FireMappingContext);
-	}
-}*/
-
 void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 {
 	StopAim();
@@ -145,7 +126,7 @@ void ACHGunRPG::Equip()
 	}
 	
 	// Set up action bindings
-	if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+	/*if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 	{
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 				
@@ -166,7 +147,7 @@ void ACHGunRPG::Equip()
 				OwningCharacter->SetbHasRPGInputBindings(true);
 			}			
 		}
-	}
+	}*/
 }
 
 void ACHGunRPG::UnEquip()
@@ -692,18 +673,20 @@ void ACHGunRPG::Reload()
 void ACHGunRPG::SetupWeaponInputComponent()
 {
 	Super::SetupWeaponInputComponent();
-	
-	if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+	if(OwningCharacter)
 	{
-		// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
-		{		
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRPG::PullTrigger);	
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRPG::CancelPullTrigger);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartAim);
-			EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHGunRPG::StopAim);
-			EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
-			EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);			
+		if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		{
+			// 무기를 가진 적이 있는지 확인하고 가지고 있으면 bind는 하지 않는다. 
+			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+			{		
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRPG::PullTrigger);	
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRPG::CancelPullTrigger);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartAim);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHGunRPG::StopAim);
+				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
+				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);			
+			}
 		}
 	}
 }
