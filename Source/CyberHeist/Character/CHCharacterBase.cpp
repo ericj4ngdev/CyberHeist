@@ -15,6 +15,7 @@
 #include "Engine/DamageEvents.h"
 #include "MotionWarpingComponent.h"
 #include "Animation/CHAnimInstance.h"
+#include "Net/UnrealNetwork.h"
 #include "Weapon/Gun/CHGunBase.h"
 
 
@@ -276,8 +277,9 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 
 	if (NewWeapon)
 	{
+		// OnRep_CurrentWeapon();		// IMC 추가
+		NewWeapon->SetOwningCharacter(this);
 		CurrentWeapon = NewWeapon;
-		CurrentWeapon->SetOwningCharacter(this);
 		CurrentWeapon->Equip();
 
 		UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
@@ -368,6 +370,36 @@ void ACHCharacterBase::PreviousWeapon()
 	{		
 		EquipWeapon(Inventory.Weapons[IndexOfPrevWeapon]);
 	}	
+}
+
+void ACHCharacterBase::OnRep_CurrentWeapon()
+{
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
+		if(Subsystem->HasMappingContext(CurrentWeapon->FireMappingContext))
+		{
+			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
+		}
+		else
+		{
+			Subsystem->AddMappingContext(CurrentWeapon->FireMappingContext, 0);
+			if(!GetbHasRifleInputBindings())
+			{
+				CurrentWeapon->SetupWeaponInputComponent();	
+				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
+				SetbHasRifleInputBindings(true);				
+			}
+		}
+	}
+}
+
+void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACHCharacterBase, CurrentWeapon);
+
 }
 
 void ACHCharacterBase::ClientRPCAddIMC_Implementation(ACHGunBase* NewGun, const UInputMappingContext* MappingContext)

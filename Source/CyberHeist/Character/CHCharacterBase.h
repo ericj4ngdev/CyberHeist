@@ -259,8 +259,13 @@ public:
 	virtual void PreviousWeapon();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentWeapon,Category = "Inventory")
 	TObjectPtr<class ACHGunBase> CurrentWeapon;
+
+	UFUNCTION()
+	void OnRep_CurrentWeapon();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 private:
 	// state

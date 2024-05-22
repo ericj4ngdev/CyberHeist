@@ -107,11 +107,14 @@ void ACHGunBase::Tick(float DeltaSeconds)
 void ACHGunBase::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
-	if(CharacterBase)
+	if(HasAuthority())
 	{
-		bIsEquipped = true;
-		CharacterBase->AddWeaponToInventory(this,bIsEquipped);
+		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
+		if(CharacterBase)
+		{
+			bIsEquipped = true;
+			CharacterBase->AddWeaponToInventory(this,bIsEquipped);
+		}
 	}
 }
 
