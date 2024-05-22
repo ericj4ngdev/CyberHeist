@@ -372,6 +372,7 @@ void ACHCharacterBase::PreviousWeapon()
 
 void ACHCharacterBase::ClientRPCAddIMC_Implementation(ACHGunBase* NewGun, const UInputMappingContext* MappingContext)
 {
+	// 클라이언트 체크까지 해줘야 하는 게 아닐까 고민중.. 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
@@ -381,11 +382,11 @@ void ACHCharacterBase::ClientRPCAddIMC_Implementation(ACHGunBase* NewGun, const 
 		}
 		else
 		{
-			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
 			Subsystem->AddMappingContext(MappingContext, 0);
 			if(!GetbHasRifleInputBindings())
 			{
 				NewGun->SetupWeaponInputComponent();	
+				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
 				SetbHasRifleInputBindings(true);				
 			}
 		}
