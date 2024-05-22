@@ -16,6 +16,8 @@ class CYBERHEIST_API ACHGameMode : public AGameModeBase
 	
 public:
 	ACHGameMode();
+
+	virtual void BeginPlay() override; 
 	// GameModeBase.cpp 289줄
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage);
 

@@ -27,8 +27,14 @@ ACHGameMode::ACHGameMode()
 	GameStateClass = ACHGameState::StaticClass();
 }
 
+void ACHGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
 void ACHGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId,
-	FString& ErrorMessage)
+                           FString& ErrorMessage)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("============================================================"));
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))

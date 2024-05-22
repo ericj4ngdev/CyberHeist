@@ -20,6 +20,8 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/CHPlayerController.h"
+#include "CyberHeist.h"
+
 
 ACHGunRifle::ACHGunRifle() 
 {
@@ -48,8 +50,19 @@ ACHGunRifle::ACHGunRifle()
 void ACHGunRifle::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	
+	if (HasAuthority())
+	{
+		// SetOwner();
+		AActor* OwnerActor = GetOwner();
+		if(OwnerActor)
+		{
+			CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), *OwnerActor->GetName())
+		}
+		else
+		{
+			CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"))
+		}
+	}
 }
 
 void ACHGunRifle::Tick(float DeltaSeconds)

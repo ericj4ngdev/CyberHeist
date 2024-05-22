@@ -285,5 +285,20 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Properties|State")
 	uint8 bHoldGun : 1;
 	
-	// virtual void SetWeaponProperties();
+protected:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCAttack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCAttack();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual void OnRep_Owner() override;
+	
+	/*UPROPERTY(ReplicatedUsing = OnRep_CanAttack)
+	uint8 bCanAttack : 1;
+
+	UFUNCTION()
+	void OnRep_CanAttack();*/
 };

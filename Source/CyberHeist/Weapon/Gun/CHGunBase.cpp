@@ -15,7 +15,8 @@
 ACHGunBase::ACHGunBase()
 { 	
 	PrimaryActorTick.bCanEverTick = false;
-
+	bReplicates = true;
+	
 	CollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Root"));
 	CollisionComp->InitCapsuleSize(40.0f, 50.0f);
 	CollisionComp->SetCollisionObjectType(ECC_GameTraceChannel1);
@@ -54,7 +55,8 @@ void ACHGunBase::BeginPlay()
 {
 	Super::BeginPlay();
 	// Effect->AttachToComponent(WeaponMesh3P, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("MuzzleFlashSocket"));
-	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);	
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	
 }
 
 void ACHGunBase::Tick(float DeltaSeconds)
@@ -238,5 +240,28 @@ void ACHGunBase::StopParticleSystem()
 {
 	// Effect->Deactivate();
 	// UE_LOG(LogTemp, Warning, TEXT("StopParticleSystem"));
+}
+
+void ACHGunBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
+
+void ACHGunBase::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+}
+
+void ACHGunBase::MulticastRPCAttack_Implementation()
+{
+}
+
+void ACHGunBase::ServerRPCAttack_Implementation()
+{
+}
+
+bool ACHGunBase::ServerRPCAttack_Validate()
+{
+	return true;
 }
 
