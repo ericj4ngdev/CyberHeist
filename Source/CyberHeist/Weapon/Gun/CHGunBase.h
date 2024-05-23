@@ -246,6 +246,7 @@ public:
 	virtual void Equip();
 	virtual void UnEquip();
 	virtual void Fire();
+	virtual void LocalFire();
 	virtual void PullTriggerByAI(AActor* AttackTarget);
 	virtual void FireByAI(AActor* AttackTarget);
 	virtual void AutoFireByAI(AActor* AttackTarget);

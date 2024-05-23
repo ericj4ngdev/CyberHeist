@@ -82,45 +82,23 @@ void ACHGunBase::Tick(float DeltaSeconds)
 	
 }
 
-/*void ACHGunBase::NotifyActorBeginOverlap(AActor* Other)
-{
-	Super::NotifyActorBeginOverlap(Other);
-
-	if(HasAuthority())
-	{
-		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Other);
-		if(CharacterBase)
-		{
-			bIsEquipped = true;
-			// OnRep_Equipped();
-			CharacterBase->AddWeaponToInventory(this,bIsEquipped);
-		}
-		// 여기서 클라 RPC 쏘기
-		// 총마다 IMC가 달라서 이건 자식에서 해줘야 할거 같은데
-		// 걍 자식한테 총까지 줘버려 ㅋㅋㅋㅋ
-		// 그런데 IMC가 자식에서 구현되어 있어서... 
-		// CharacterBase->ClientRPCAddIMC(FireMappingContext);
-		
-	}
-}*/
-
 void ACHGunBase::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if(HasAuthority())
 	{
-		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
-		if(CharacterBase)
-		{
-			bIsEquipped = true;
-			CharacterBase->AddWeaponToInventory(this,bIsEquipped);
-		}
-	}
-}
-
-UAnimMontage* ACHGunBase::GetEquip1PMontage() const
-{
-	return Equip1PMontage;
+     		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
+     		if(CharacterBase)
+     		{
+     			bIsEquipped = true;
+     			CharacterBase->AddWeaponToInventory(this,bIsEquipped);
+     		}
+     	}
+     }
+     
+     UAnimMontage* ACHGunBase::GetEquip1PMontage() const
+     {
+     	return Equip1PMontage;
 }
 
 UAnimMontage* ACHGunBase::GetEquip3PMontage() const
@@ -162,6 +140,10 @@ void ACHGunBase::UnEquip()
 void ACHGunBase::Fire()
 {
 	
+}
+
+void ACHGunBase::LocalFire()
+{
 }
 
 void ACHGunBase::PullTriggerByAI(AActor* AttackTarget)

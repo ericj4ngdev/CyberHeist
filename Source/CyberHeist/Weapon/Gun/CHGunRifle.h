@@ -25,6 +25,7 @@ public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;
 	virtual void Fire() override;
+	virtual void LocalFire() override;
 	virtual void PullTriggerByAI(AActor* AttackTarget) override;
 	virtual void FireByAI(AActor* AttackTarget) override;
 	virtual void AutoFireByAI(AActor* AttackTarget) override;
@@ -38,7 +39,6 @@ public:
 	virtual void StayPrecisionAim() override;
 	virtual void Reload() override;
 	virtual void SetupWeaponInputComponent() override;
-	void FirstLook(const FInputActionValue& Value);
 
 	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;
 public:
@@ -47,4 +47,11 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<class AActor> AttackTargetActor;
+
+public:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCFire();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCFire();
 };
