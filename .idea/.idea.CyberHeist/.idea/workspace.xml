@@ -10,11 +10,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="973d144e-de77-4949-8d68-1ef304aea923" name="Changes" comment="">
+    <list default="true" id="0349c766-00fe-4ca3-99ff-5f1b2ecfbc7a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterPlayer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Tutorial.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Tutorial.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/CharacterStat/CHCharacterStatComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/CharacterStat/CHCharacterStatComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/CyberHeist.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/CyberHeist.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Game/CHGameMode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Game/CHGameMode.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Game/CHGameMode.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Game/CHGameMode.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Player/CHPlayerController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Player/CHPlayerController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,86 +41,12 @@
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.3/Engine/Source/Developer/GraphColor/Private/appconst.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.3/Engine/Source/Developer/GraphColor/Private/stack.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../Program Files/Epic Games/UE_5.3/Engine/Source/Runtime/Navmesh/Public/Detour/DetourNavMesh.h" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 0
 }</component>
-  <component name="ProjectId" id="2fltamc7Cy2oozGgJxnNg5QRFHP" />
+  <component name="ProjectId" id="2grq7uMjcTloVDTcN0GBIPZKGJs" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -133,7 +63,6 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
   &quot;keyToStringList&quot;: {
@@ -261,51 +190,14 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="973d144e-de77-4949-8d68-1ef304aea923" name="Changes" comment="" />
-      <created>1714387560292</created>
+      <changelist id="0349c766-00fe-4ca3-99ff-5f1b2ecfbc7a" name="Changes" comment="" />
+      <created>1716465880778</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1714387560292</updated>
-      <workItem from="1714387562034" duration="9171000" />
-      <workItem from="1714437004883" duration="8137000" />
-      <workItem from="1714455928623" duration="6320000" />
-      <workItem from="1714472609757" duration="1465000" />
-      <workItem from="1714474604207" duration="1128000" />
-      <workItem from="1714539984076" duration="17234000" />
-      <workItem from="1714568833820" duration="7658000" />
-      <workItem from="1714613557653" duration="4478000" />
-      <workItem from="1714622370736" duration="776000" />
-      <workItem from="1714632028401" duration="6124000" />
-      <workItem from="1714700249486" duration="29255000" />
-      <workItem from="1714744923159" duration="3478000" />
-      <workItem from="1714797093547" duration="18164000" />
-      <workItem from="1714824008559" duration="7493000" />
-      <workItem from="1714834652750" duration="4704000" />
-      <workItem from="1714877407416" duration="2408000" />
-      <workItem from="1714979906024" duration="12377000" />
-      <workItem from="1714997874206" duration="5234000" />
-      <workItem from="1715003150290" duration="11153000" />
-      <workItem from="1715042307089" duration="16533000" />
-      <workItem from="1715063534143" duration="5477000" />
-      <workItem from="1715076654294" duration="11572000" />
-      <workItem from="1715128942699" duration="12838000" />
-      <workItem from="1715212857904" duration="6247000" />
-      <workItem from="1715306003384" duration="2961000" />
-      <workItem from="1715316251713" duration="7570000" />
-      <workItem from="1715354225286" duration="4984000" />
-      <workItem from="1715412425739" duration="7001000" />
-      <workItem from="1715482353452" duration="4706000" />
-      <workItem from="1715499579091" duration="21808000" />
-      <workItem from="1715529137500" duration="850000" />
-      <workItem from="1715556067598" duration="35558000" />
-      <workItem from="1715611834375" duration="6096000" />
-      <workItem from="1715644765486" duration="13696000" />
-      <workItem from="1715761119206" duration="12094000" />
-      <workItem from="1716191548250" duration="1523000" />
-      <workItem from="1716248494762" duration="21856000" />
-      <workItem from="1716335767295" duration="43416000" />
-      <workItem from="1716424692453" duration="4339000" />
-      <workItem from="1716429073109" duration="10516000" />
+      <updated>1716465880778</updated>
+      <workItem from="1716465883637" duration="1606000" />
+      <workItem from="1716468552584" duration="4694000" />
+      <workItem from="1716507420832" duration="420000" />
     </task>
     <servers />
   </component>
@@ -314,22 +206,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <watches-manager>
-      <configuration name="CppProject">
-        <watch expression="GetFirstPersonMesh" />
-        <watch expression="OwningCharacter-&gt;GetFirstPersonMesh()" />
-        <watch expression="CurrentCharacterControlType" />
-        <watch expression="OwningCharacter" />
-        <watch expression="BTComponent" />
-        <watch expression="Target" />
-        <watch expression="AngleDifference" />
-      </configuration>
-    </watches-manager>
-  </component>
-  <component name="XSLT-Support.FileAssociations.UIState">
-    <expand />
-    <select />
   </component>
 </project>

@@ -87,18 +87,18 @@ void ACHGunBase::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 {
 	if(HasAuthority())
 	{
-     		ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
-     		if(CharacterBase)
-     		{
-     			bIsEquipped = true;
-     			CharacterBase->AddWeaponToInventory(this,bIsEquipped);
-     		}
+     	ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OtherActor);
+     	if(CharacterBase)
+     	{
+     		bIsEquipped = true;
+     		CharacterBase->AddWeaponToInventory(this,bIsEquipped);
      	}
-     }
+	}
+}
      
-     UAnimMontage* ACHGunBase::GetEquip1PMontage() const
-     {
-     	return Equip1PMontage;
+UAnimMontage* ACHGunBase::GetEquip1PMontage() const
+{
+	return Equip1PMontage;
 }
 
 UAnimMontage* ACHGunBase::GetEquip3PMontage() const

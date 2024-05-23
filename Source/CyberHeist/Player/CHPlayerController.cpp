@@ -32,12 +32,15 @@ void ACHPlayerController::BeginPlay()
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 	FInputModeGameOnly GameOnlyInputMode;
 	SetInputMode(GameOnlyInputMode);
-	
-	CHHUDWidget = CreateWidget<UCHHUDWidget>(this, CHHUDWidgetClass);
-	if (CHHUDWidget)
+
+	if(IsLocalController())
 	{
-		CHHUDWidget->AddToViewport();
-	}
+		CHHUDWidget = CreateWidget<UCHHUDWidget>(this, CHHUDWidgetClass);
+		if (CHHUDWidget)
+		{
+			CHHUDWidget->AddToViewport();
+		}
+	}	
 }
 
 void ACHPlayerController::PostInitializeComponents()
@@ -55,7 +58,10 @@ void ACHPlayerController::PostNetInit()
 	UNetDriver* NetDriver = GetNetDriver();
 	if (NetDriver)
 	{
-		CH_LOG(LogCHNetwork, Log, TEXT("Server Connection : %s"), *NetDriver->ServerConnection->GetName());
+		if(NetDriver->ServerConnection)
+		{
+			CH_LOG(LogCHNetwork, Log, TEXT("Server Connection : %s"), *NetDriver->ServerConnection->GetName());			
+		}
 	}
 	else
 	{

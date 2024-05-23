@@ -27,11 +27,6 @@ ACHGameMode::ACHGameMode()
 	GameStateClass = ACHGameState::StaticClass();
 }
 
-void ACHGameMode::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
 
 void ACHGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId,
                            FString& ErrorMessage)
@@ -59,15 +54,23 @@ APlayerController* ACHGameMode::Login(UPlayer* NewPlayer, ENetRole InRemoteRole,
 void ACHGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
+	
 	Super::PostLogin(NewPlayer);
 
 	UNetDriver* NetDriver = GetNetDriver();
 	if (NetDriver)
 	{
-		for (const auto& Connection : NetDriver->ClientConnections)
+		if (NetDriver->ClientConnections.Num() == 0)
 		{
-			CH_LOG(LogCHNetwork, Log, TEXT("Client Connections : %s"), *Connection->GetName());
+			CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Client Connection"));
 		}
+		else
+		{
+			for (const auto& Connection : NetDriver->ClientConnections)
+			{
+				CH_LOG(LogCHNetwork, Log, TEXT("Client Connections : %s"), *Connection->GetName());
+			}
+		}		
 	}
 	else
 	{
@@ -80,6 +83,8 @@ void ACHGameMode::PostLogin(APlayerController* NewPlayer)
 void ACHGameMode::StartPlay()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
+	
 	Super::StartPlay();
+	
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 }

@@ -13,11 +13,11 @@ UCHCharacterStatComponent::UCHCharacterStatComponent()
 
 	bWantsInitializeComponent = true;
 
-	SetIsReplicated(true); 
 }
 
 void UCHCharacterStatComponent::InitializeComponent()
 {
+	SetIsReplicated(true); 
 	Super::InitializeComponent();
 
 	SetHp(MaxHp);
