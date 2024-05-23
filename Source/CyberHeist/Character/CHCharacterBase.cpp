@@ -174,9 +174,21 @@ void ACHCharacterBase::SetMappingContextPriority(const UInputMappingContext* Map
 	
 }
 
-void ACHCharacterBase::Aim()
+void ACHCharacterBase::OnRep_Aiming()
 {
-	CHAnimInstance->Montage_Play(AimActionMontage);
+	// 애니메이션 변화? 
+}
+
+void ACHCharacterBase::OnRep_TPAimingCloser()
+{
+	if (IsLocallyControlled())
+	{
+		// bTPAimingCloser
+	}
+}
+
+void ACHCharacterBase::OnRep_FPScopeAiming()
+{
 }
 
 void ACHCharacterBase::PostInitializeComponents()
@@ -240,7 +252,37 @@ uint8 ACHCharacterBase::IsInFirstPersonPerspective() const
 void ACHCharacterBase::SetAiming(uint8 bNewAiming)
 {
 	bAiming = bNewAiming;
+	ServerSetAiming(bAiming);
+	
 	OnCombat.Broadcast(bAiming);		// UI
+}
+
+void ACHCharacterBase::SetTPAimingCloser(uint8 bNewTPAimingCloser)
+{
+	bTPAimingCloser = bNewTPAimingCloser;
+	ServerSetTPAimingCloser(bTPAimingCloser);
+}
+
+void ACHCharacterBase::SetScopeAiming(uint8 bNewFPScopeAiming)
+{
+	bFPScopeAiming = bNewFPScopeAiming;
+	ServerSetFPScopeAiming(bFPScopeAiming);
+}
+
+void ACHCharacterBase::ServerSetFPScopeAiming_Implementation(bool bNewFPScopeAiming)
+{
+	bFPScopeAiming = bNewFPScopeAiming;
+}
+
+void ACHCharacterBase::ServerSetTPAimingCloser_Implementation(bool bNewTPAimingCloser)
+{
+	bTPAimingCloser = bNewTPAimingCloser;
+}
+
+void ACHCharacterBase::ServerSetAiming_Implementation(bool bIsAiming)
+{
+	bAiming = bIsAiming;
+	GetCharacterMovement()->MaxWalkSpeed = bAiming ? SneakSpeed : WalkSpeed;
 }
 
 void ACHCharacterBase::SetCharacterControl(ECharacterControlType NewCharacterControlType)
@@ -332,7 +374,9 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACHCharacterBase, CurrentWeapon);
-
+	DOREPLIFETIME(ACHCharacterBase, bAiming);
+	DOREPLIFETIME(ACHCharacterBase, bTPAimingCloser);	
+	DOREPLIFETIME(ACHCharacterBase, bFPScopeAiming);
 }
 
 

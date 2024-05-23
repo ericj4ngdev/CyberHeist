@@ -96,15 +96,21 @@ public:
 
 	// Aim
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Aim)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Aiming, Category = Aim)
 	uint8 bAiming : 1;
+	UFUNCTION()
+	void OnRep_Aiming();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Aim)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_TPAimingCloser, Category = Aim)
 	uint8 bTPAimingCloser : 1;
+	UFUNCTION()
+	void OnRep_TPAimingCloser();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_FPScopeAiming,Category = Aim)
 	uint8 bFPScopeAiming : 1;
-
+	UFUNCTION()
+	void OnRep_FPScopeAiming();
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
 	float TiltAngle;
 
@@ -112,15 +118,22 @@ protected:
 	TObjectPtr<class UAnimMontage> AimActionMontage;
 
 public:
-	void Aim();
-	
-public:
 	void SetAiming(uint8 bNewAiming);
+	UFUNCTION(Server, Reliable)
+	void ServerSetAiming(bool bIsAiming);	
 	FORCEINLINE uint8 GetAiming() const { return bAiming; }
-	FORCEINLINE void SetTPAimingCloser(uint8 bNewTPAimingCloser){ bTPAimingCloser = bNewTPAimingCloser; }
+	
+	void SetTPAimingCloser(uint8 bNewTPAimingCloser);
+	UFUNCTION(Server, Reliable)
+	void ServerSetTPAimingCloser(bool bNewTPAimingCloser);	
 	FORCEINLINE uint8 GetTPAimingCloser() const { return bTPAimingCloser; }
-	FORCEINLINE void SetScopeAiming(uint8 bNewFPScopeAiming){ bFPScopeAiming = bNewFPScopeAiming; }
+	
+	FORCEINLINE void SetScopeAiming(uint8 bNewFPScopeAiming);
+	UFUNCTION(Server, Reliable)
+	void ServerSetFPScopeAiming(bool bNewFPScopeAiming);	
 	FORCEINLINE uint8 GetScopeAiming() const { return bFPScopeAiming; }
+
+	
 	FORCEINLINE float GetTiltAngle() const { return TiltAngle; }
 	
 	// Cover

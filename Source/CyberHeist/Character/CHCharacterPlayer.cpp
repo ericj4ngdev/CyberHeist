@@ -611,7 +611,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);	
 
 		float speed = bSprint ? RunSpeed : WalkSpeed;
-		if(bAiming) speed = WalkSpeed;
+		// if(bAiming) speed = WalkSpeed;
 		if(bIsCrouched) speed = SneakSpeed;
 		if(CurrentWeapon)
 		{
