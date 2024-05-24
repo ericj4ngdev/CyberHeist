@@ -50,7 +50,7 @@ ACHGunRifle::ACHGunRifle()
 void ACHGunRifle::BeginPlay()
 {
 	Super::BeginPlay();
-	/*if (HasAuthority())
+	if (HasAuthority())
 	{
 		// SetOwner();
 		AActor* OwnerActor = GetOwner();
@@ -62,7 +62,7 @@ void ACHGunRifle::BeginPlay()
 		{
 			CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"))
 		}
-	}*/
+	}
 }
 
 void ACHGunRifle::Tick(float DeltaSeconds)

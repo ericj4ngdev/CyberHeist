@@ -3,6 +3,7 @@
 
 #include "Weapon/Gun/CHGunBase.h"
 
+#include "CyberHeist.h"
 #include "Camera/CameraComponent.h"
 #include "Character/CHCharacterBase.h"
 #include "Components/CapsuleComponent.h"
@@ -227,12 +228,34 @@ void ACHGunBase::SetupWeaponInputComponent()
 
 void ACHGunBase::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"),TEXT("Begin"))
+	AActor* OwnerActor = GetOwner();
+	if(OwnerActor)
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), *OwnerActor->GetName())
+	}
+	else
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"))
+	}
+	
 	OwningCharacter = InOwningCharacter;
+	OwnerActor = OwningCharacter;
 	if (OwningCharacter == nullptr)	return;
 	SetOwner(OwningCharacter);
-	//AttachToComponent(OwningCharacter->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	if(OwnerActor)
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Owner : %s"), *OwnerActor->GetName())
+	}
+	else
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"))
+	}
+	// CH_LOG(LogCHNetwork, Log, TEXT("GetNetOwningPlayer : %s"),*GetNetOwningPlayer()->GetName())
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"),TEXT("End"))
+	
 	/*if (OwningCharacter->GetCurrentWeapon() != this)
 	{
 		WeaponMesh3P->CastShadow = false;
