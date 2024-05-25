@@ -143,7 +143,11 @@ void ACHGunBase::Fire()
 	
 }
 
-void ACHGunBase::LocalFire()
+void ACHGunBase::FireTwoParam(const FVector& HitLocation, const FVector& TraceEnd)
+{
+}
+
+void ACHGunBase::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 {
 }
 

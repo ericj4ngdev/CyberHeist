@@ -246,7 +246,8 @@ public:
 	virtual void Equip();
 	virtual void UnEquip();
 	virtual void Fire();
-	virtual void LocalFire();
+	virtual void FireTwoParam(const FVector& HitLocation,const FVector& TraceEnd);
+	virtual void LocalFire(const FVector& HitLocation,const FVector& TraceEnd);
 	virtual void PullTriggerByAI(AActor* AttackTarget);
 	virtual void FireByAI(AActor* AttackTarget);
 	virtual void AutoFireByAI(AActor* AttackTarget);
