@@ -321,21 +321,6 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 	{
 		CurrentWeapon = NewWeapon;
 		EquipWeapon();
-		/*CurrentWeapon->SetOwningCharacter(this);
-		CurrentWeapon->Equip();
-
-		UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
-		if (Equip1PMontage && GetFirstPersonMesh())
-		{
-			GetFirstPersonMesh()->GetAnimInstance()->Montage_Play(Equip1PMontage);
-		}
-
-		UAnimMontage* Equip3PMontage = CurrentWeapon->GetEquip3PMontage();
-		if (Equip3PMontage && GetThirdPersonMesh())
-		{
-			UE_LOG(LogTemp, Log, TEXT("Equip3PMontage"));
-			GetThirdPersonMesh()->GetAnimInstance()->Montage_Play(Equip3PMontage);
-		}*/
 	}
 	else
 	{
@@ -349,7 +334,7 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 void ACHCharacterBase::OnRep_CurrentWeapon()
 {
 	EquipWeapon();
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+/*if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
 		if(Subsystem->HasMappingContext(CurrentWeapon->FireMappingContext))
@@ -366,7 +351,7 @@ void ACHCharacterBase::OnRep_CurrentWeapon()
 				SetbHasRifleInputBindings(true);				
 			}
 		}
-	}
+	}*/
 }
 
 void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

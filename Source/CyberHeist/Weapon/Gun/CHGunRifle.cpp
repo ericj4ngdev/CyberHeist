@@ -117,31 +117,27 @@ void ACHGunRifle::Equip()
 		}
 	}
 
-	// 오버랩 이벤트를 클라가 받으면 클라에서만 일어나야 함.
-	// 오버랩 끝났을 때? 
-	// 클라 RPC
-	// 액터컴포넌트를 추가시키면 자동 장착
-	// Set up action bindings
-	/*if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-	{		
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
-		if(Subsystem->HasMappingContext(FireMappingContext))
-		{
-			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
-			Subsystem->AddMappingContext(FireMappingContext, 0);
-			if(!OwningCharacter->GetbHasRifleInputBindings())
+	if(OwningCharacter->IsLocallyControlled())
+	{
+		if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+		{		
+			UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
+			if(Subsystem->HasMappingContext(FireMappingContext))
 			{
-				SetupWeaponInputComponent();
-				OwningCharacter->SetbHasRifleInputBindings(true);
+				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Have FireMappingContext"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] No FireMappingContext"));
+				Subsystem->AddMappingContext(FireMappingContext, 0);
+				if(!OwningCharacter->GetbHasRifleInputBindings())
+				{
+					SetupWeaponInputComponent();
+					OwningCharacter->SetbHasRifleInputBindings(true);
+				}
 			}
 		}
-	}*/
-	// 캐릭터 RPC. 총의 소유권이 서버에게 있어서 캐릭터에서 RPC를 받아야 한다.
-	// 인자로 IMC를 받아서 추가하는 함수를 캐릭터에서 호출한다. 
+	}
 }
 
 void ACHGunRifle::UnEquip()
@@ -189,24 +185,12 @@ void ACHGunRifle::Fire()
 	AActor* HitActor = ScreenLaserHit.GetActor();
 	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
 	
-	// 클라이면
-	if(!OwningCharacter->HasAuthority())
-	{
-		LocalFire(HitLocation, TraceEnd);
-	}
+	LocalFire(HitLocation, TraceEnd);	
 	ServerRPCFire(HitLocation, TraceEnd);
 }
 
 void ACHGunRifle::FireTwoParam(const FVector& HitLocation, const FVector& TraceEnd)
 {
-	Super::FireTwoParam(HitLocation, TraceEnd);	
-	// 클라이면
-	if(!OwningCharacter->HasAuthority())
-	{
-		LocalFire(HitLocation, TraceEnd);
-	}
-	ServerRPCFire(HitLocation, TraceEnd);
-	
 }
 
 void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
@@ -245,20 +229,22 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	}
 
 	FTransform SocketTransform;
+	
+	if(OwningCharacter->IsInFirstPersonPerspective())
 	{
-		if(OwningCharacter->IsInFirstPersonPerspective())
-		{
-			const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
-			SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
-			if(MuzzleFlashSocket == nullptr) return; 
-		}
-		else
-		{
-			const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
-			SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
-			if(MuzzleFlashSocket == nullptr) return; 
-		}
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
+		if(MuzzleFlashSocket == nullptr) return;
+		CH_LOG(LogCHNetwork, Log, TEXT("1p : %s"),*SocketTransform.GetLocation().ToString())
 	}
+	else
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
+		if(MuzzleFlashSocket == nullptr) return; 
+		CH_LOG(LogCHNetwork, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
+	}
+	
 	// 클라 1에서 총을 쏜 경우
 	// 클라 2 세상에 있는 클라 1의 총의 multicast를 받아서 이 함수를 실행할 거다.
 	// 하지만 클라 2의 클라 1의 OwningCharacter는 PC가 없다.
@@ -272,7 +258,13 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	
 	// Muzzle LineTrace
 	FHitResult MuzzleLaserHit;
-	FVector MuzzleStart = SocketTransform.GetLocation();
+	// FCollisionQueryParams Params;
+	// Params.AddIgnoredActor(this);
+	// Params.AddIgnoredActor(GetOwner());
+	
+	FVector MuzzleStart = SocketTransform.GetLocation();		// 여기가 이상... 클라 1은 괜찮은데 서버는 이상..
+	// CH_LOG(LogCHNetwork, Log, TEXT("%s"), *MuzzleStart.ToString())
+	
 	FVector MuzzleEnd;
 	{
 		if(HitLocation.Equals(FVector::ZeroVector))
@@ -320,7 +312,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	// 서버
 	if(OwnerController)
 	{
-		if(HasAuthority() && OwnerPawn->IsLocallyControlled())
+		if(HasAuthority())
 		{
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
@@ -340,12 +332,8 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 				UE_LOG(LogTemp, Log, TEXT("HitActor : %s"), *GetNameSafe(HitActor))
 			}
 		}
-		else
-		{
-			
-		}
 	}
-	
+	UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
 	// 궤적
 	{
 		FVector BeamEnd = TraceEnd;
@@ -1194,23 +1182,6 @@ void ACHGunRifle::MulticastRPCFire_Implementation(const FVector& HitLocation, co
 
 	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority()) return;
 	LocalFire(HitLocation, TraceEnd);
-	
-	// Get the animation object for the arms mesh
-	/*UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	if (TPAnimInstance)
-	{
-		TPAnimInstance->Montage_Play(Fire3PMontage, 1);
-		// Fire();
-	}
-	if(OwningCharacter->GetFirstPersonMesh())
-	{
-		UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
-		if (FPAnimInstance)
-		{
-			if(OwningCharacter->GetScopeAiming()) FPAnimInstance->Montage_Play(ScopeFire1PMontage,1);
-			else FPAnimInstance->Montage_Play(Fire1PMontage, 1);
-		}
-	}*/
 }
 
 void ACHGunRifle::ServerRPCFire_Implementation(const FVector& HitLocation, const FVector& TraceEnd)
