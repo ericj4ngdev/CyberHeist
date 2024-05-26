@@ -159,46 +159,12 @@ void ACHGunRifle::UnEquip()
 
 void ACHGunRifle::Fire()
 {
-	Super::Fire();
-
-	AController* OwnerController = OwningCharacter->GetController();		
-	if (OwnerController == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
-		return;
-	}
-	// Viewport LineTrace
-	FHitResult ScreenLaserHit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
-	
-	FVector TraceStart;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
-	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
-	FVector TraceEnd = TraceStart + Rotation.Vector() * MaxRange;
-	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
-	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
-	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
-	FVector HitLocation = ScreenLaserHit.Location;
-	AActor* HitActor = ScreenLaserHit.GetActor();
-	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
-	
-	LocalFire(HitLocation, TraceEnd);	
-	ServerRPCFire(HitLocation, TraceEnd);
-}
-
-void ACHGunRifle::FireTwoParam(const FVector& HitLocation, const FVector& TraceEnd)
-{
+	Super::Fire();	
 }
 
 void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 {
-	Super::LocalFire(HitLocation, TraceEnd);
-	// 쏘는 몽타주가 여기 있다. 총알이 다 차거나 재장전 중일 때 예외처리는 여기서 해야할 듯. 
-	if(!bIsEquipped) return;
-	if(bReloading || CurrentAmmoInClip <= 0) return;
+	Super::LocalFire(HitLocation, TraceEnd);	
 
 	// 예외처리
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
@@ -228,8 +194,8 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 		}
 	}
 
-	FTransform SocketTransform;
-	
+	// Socket
+	FTransform SocketTransform;	
 	if(OwningCharacter->IsInFirstPersonPerspective())
 	{
 		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
@@ -245,16 +211,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 		CH_LOG(LogCHNetwork, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
 	}
 	
-	// 클라 1에서 총을 쏜 경우
-	// 클라 2 세상에 있는 클라 1의 총의 multicast를 받아서 이 함수를 실행할 거다.
-	// 하지만 클라 2의 클라 1의 OwningCharacter는 PC가 없다.
-	// 따라서 if문은 false여서 패스한다. 
 	
-	AController* OwnerController = OwnerPawn->GetController();		
-	if (OwnerController == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
-	}
 	
 	// Muzzle LineTrace
 	FHitResult MuzzleLaserHit;
@@ -307,6 +264,12 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 				MuzzleLaserHit.ImpactNormal.Rotation()
 			);
 		}
+	}
+
+	AController* OwnerController = OwnerPawn->GetController();		
+	if (OwnerController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
 	}
 	
 	// 서버
@@ -1176,21 +1139,4 @@ void ACHGunRifle::StopParticleSystem()
 	Super::StopParticleSystem();
 }
 
-void ACHGunRifle::MulticastRPCFire_Implementation(const FVector& HitLocation, const FVector& TraceEnd)
-{
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
 
-	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority()) return;
-	LocalFire(HitLocation, TraceEnd);
-}
-
-void ACHGunRifle::ServerRPCFire_Implementation(const FVector& HitLocation, const FVector& TraceEnd)
-{
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
-	MulticastRPCFire(HitLocation, TraceEnd);
-}
-
-bool ACHGunRifle::ServerRPCFire_Validate(const FVector& HitLocation, const FVector& TraceEnd)
-{
-	return true;
-}

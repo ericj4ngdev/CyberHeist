@@ -51,6 +51,7 @@ public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;
 	virtual void Fire() override;
+	virtual void LocalFire(const FVector& HitLocation,const FVector& TraceEnd) override;
 	virtual void PullTrigger() override;
 	virtual void CancelPullTrigger() override;
 	virtual void StartAim() override;

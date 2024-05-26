@@ -12,10 +12,15 @@
   <component name="ChangeListManager">
     <list default="true" id="0349c766-00fe-4ca3-99ff-5f1b2ecfbc7a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Tutorial.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Tutorial.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,7 +64,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
-    &quot;C++ Project.CyberHeist.executor&quot;: &quot;Debug&quot;,
+    &quot;C++ Project.CyberHeist.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
@@ -205,7 +210,8 @@
       <workItem from="1716468552584" duration="4694000" />
       <workItem from="1716507420832" duration="9805000" />
       <workItem from="1716629825350" duration="15571000" />
-      <workItem from="1716688501886" duration="11169000" />
+      <workItem from="1716688501886" duration="13319000" />
+      <workItem from="1716709487427" duration="901000" />
     </task>
     <servers />
   </component>

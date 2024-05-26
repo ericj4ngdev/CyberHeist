@@ -126,28 +126,31 @@ void ACHGunRPG::Equip()
 	}
 	
 	// Set up action bindings
-	/*if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+	if(OwningCharacter->IsLocallyControlled())
 	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if (APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
+		{
+			UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 				
-		if(Subsystem->HasMappingContext(FireMappingContext))
-		{
-			UE_LOG(LogTemp, Log, TEXT("[CHRPG] Have FireMappingContext"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Log, TEXT("[CHRPG] No FireMappingContext"));
-			Subsystem->AddMappingContext(FireMappingContext, 0);
-
-			// only once
-			// 캐릭터에게 변수 줘야 함. 총이 캐릭터 변수 가지고 판단하기.
-			if(!OwningCharacter->GetbHasRPGInputBindings())
+			if(Subsystem->HasMappingContext(FireMappingContext))
 			{
-				SetupWeaponInputComponent();
-				OwningCharacter->SetbHasRPGInputBindings(true);
-			}			
+				UE_LOG(LogTemp, Log, TEXT("[CHRPG] Have FireMappingContext"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("[CHRPG] No FireMappingContext"));
+				Subsystem->AddMappingContext(FireMappingContext, 0);
+
+				// only once
+				// 캐릭터에게 변수 줘야 함. 총이 캐릭터 변수 가지고 판단하기.
+				if(!OwningCharacter->GetbHasRPGInputBindings())
+				{
+					SetupWeaponInputComponent();
+					OwningCharacter->SetbHasRPGInputBindings(true);
+				}			
+			}
 		}
-	}*/
+	}
 }
 
 void ACHGunRPG::UnEquip()
@@ -180,9 +183,13 @@ void ACHGunRPG::UnEquip()
 
 void ACHGunRPG::Fire()
 {
-	Super::Fire();
-	if(!bIsEquipped) return;
-	if(bReloading || CurrentAmmoInClip <= 0) return;
+	Super::Fire();	
+}
+
+void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
+{
+	Super::LocalFire(HitLocation, TraceEnd);
+	
 	UE_LOG(LogTemp, Log, TEXT("Fire() 1"));
 	if (OwningCharacter == nullptr || OwningCharacter->GetController() == nullptr)
 	{

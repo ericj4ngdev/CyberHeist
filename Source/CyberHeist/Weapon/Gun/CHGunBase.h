@@ -245,8 +245,7 @@ public:
 	
 	virtual void Equip();
 	virtual void UnEquip();
-	virtual void Fire();
-	virtual void FireTwoParam(const FVector& HitLocation,const FVector& TraceEnd);
+	virtual void Fire();	
 	virtual void LocalFire(const FVector& HitLocation,const FVector& TraceEnd);
 	virtual void PullTriggerByAI(AActor* AttackTarget);
 	virtual void FireByAI(AActor* AttackTarget);
@@ -293,15 +292,16 @@ protected:
 	uint8 bHoldGun : 1;
 	
 protected:
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerRPCAttack();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPCAttack();
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void OnRep_Owner() override;
+
+public:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCFire(const FVector& HitLocation, const FVector& TraceEnd);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCFire(const FVector& HitLocation, const FVector& TraceEnd);
 	
 	/*UPROPERTY(ReplicatedUsing = OnRep_CanAttack)
 	uint8 bCanAttack : 1;
