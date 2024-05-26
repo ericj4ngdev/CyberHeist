@@ -26,28 +26,7 @@ ACHProjectile::ACHProjectile()
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	// CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	// ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	CollisionComp->SetupAttachment(SceneComponent);
-	
-	
-	// CollisionComp->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	// CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	// CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	// CollisionComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-	// CollisionComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
-	// CollisionComp->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
-}
-
-void ACHProjectile::Destroyed()
-{
-	Super::Destroyed();
-	if (ImpactParticles)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-	}
-	if (ImpactSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}
+	CollisionComp->SetupAttachment(SceneComponent);	
 }
 
 void ACHProjectile::Tick(float DeltaSeconds)
@@ -76,10 +55,10 @@ void ACHProjectile::BeginPlay()
 	if(ProjectileMovementComponent) ProjectileMovementComponent->InitialSpeed = InitialSpeed;
 	
 	// CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectile::OnHit);
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHProjectile::OnHit);
-
-	ECollisionEnabled::Type CollisionType = CollisionComp->GetCollisionEnabled();
-	
+	if (HasAuthority())
+	{
+		CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHProjectile::OnHit);
+	}	
 }
 
 void ACHProjectile::StartDestroyTimer()
@@ -116,8 +95,7 @@ void ACHProjectile::SpawnTrailSystem()
 void ACHProjectile::ExplodeDamage()
 {
 	APawn* FiringPawn = GetInstigator();
-	//if (FiringPawn && HasAuthority())
-	if (FiringPawn)
+	if (FiringPawn && HasAuthority())
 	{
 		AController* FiringController = FiringPawn->GetController();
 		if (FiringController)
@@ -141,5 +119,20 @@ void ACHProjectile::ExplodeDamage()
 
 void ACHProjectile::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Destroy();	
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	Destroy();
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+void ACHProjectile::Destroyed()
+{
+	Super::Destroyed();
+	if (ImpactParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+	}
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
 }

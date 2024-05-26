@@ -61,7 +61,6 @@ public:
 	virtual void StayPrecisionAim() override;
 	virtual void Reload() override;
 	virtual void SetupWeaponInputComponent() override;
-	void FirstLook(const FInputActionValue& Value);
 
 	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;
 	

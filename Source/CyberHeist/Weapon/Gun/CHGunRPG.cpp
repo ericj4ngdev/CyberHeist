@@ -4,6 +4,7 @@
 #include "Weapon/Gun/CHGunRPG.h"
 #include "AIController.h"
 #include "CHProjectile.h"
+#include "CyberHeist.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/CHAnimInstance.h"
@@ -188,9 +189,9 @@ void ACHGunRPG::Fire()
 
 void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::LocalFire(HitLocation, TraceEnd);
 	
-	UE_LOG(LogTemp, Log, TEXT("Fire() 1"));
 	if (OwningCharacter == nullptr || OwningCharacter->GetController() == nullptr)
 	{
 		return;
@@ -203,13 +204,12 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		return;
 	}
 	AController* OwnerController = OwnerPawn->GetController();
-	ensure(OwnerController);
 	if (OwnerController == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
-		return;
 	}
-
+	
+	/*
 	FVector Start;
 	FRotator Rotation;
 	OwnerController->GetPlayerViewPoint(Start, Rotation);
@@ -219,33 +219,13 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 	
-	AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
-	if(AIController)
-	{		
-		// Location, Rotation을 총구로 설정하기
-		Rotation = GetOwner()->GetActorRotation();
-		Start = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
-	}
-	
 	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
 	
 	FVector End = Start + Rotation.Vector() * MaxRange;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult,Start,End, ECollisionChannel::ECC_GameTraceChannel1, Params);
-	FVector HitTarget = FVector{};
-
-	// ====================================
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult,Start,End, ECollisionChannel::ECC_GameTraceChannel1, Params);*/
 	
-	// Try and play effect
-	// float Duration = 0.1f;				// Set the duration time in seconds
-	// GetWorldTimerManager().SetTimer(DurationTimerHandle, this, &ACHGunRPG::StopParticleSystem, Duration, false);
-
-	//Set Spawn Collision Handling Override
-	FActorSpawnParameters ActorSpawnParams;
-	ActorSpawnParams.Owner = GetOwner();
+	FVector HitTarget = FVector{};
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
-	ActorSpawnParams.Instigator = InstigatorPawn;
-	ACHProjectile* Projectile = nullptr;
-
 	
 	// Try and fire a projectile
 	if (ProjectileClass  == nullptr)
@@ -254,41 +234,45 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		return;
 	}
 	
-	UWorld* const World = GetWorld();
-	if (World)
+	// 시점에 따른 발사 지점 설정
+	if(OwningCharacter->IsInFirstPersonPerspective())
 	{
-		if(OwningCharacter->IsInFirstPersonPerspective())
-		{
-			const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh1P->GetSocketByName(FName("MuzzleOffset"));
-			const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh1P);
-			
-			HitTarget = HitResult.ImpactPoint;
-			FVector ToTarget = HitTarget - SocketTransform.GetLocation();
-			FRotator TargetRotation = ToTarget.Rotation();
-			
-			SpawnLocation = SocketTransform.GetLocation(); 
-			SpawnRotation = (bHit ? TargetRotation : SocketTransform.GetRotation().Rotator());
-			
-			Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-			if(Projectile) Projectile->SetOwner(OwningCharacter);
-		}
-		else
-		{
-			const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh3P->GetSocketByName(FName("MuzzleOffset"));
-			const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh3P);
+		const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh1P->GetSocketByName(FName("MuzzleOffset"));
+		const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh1P);
+		
+		// HitTarget = HitResult.ImpactPoint;
+		HitTarget = HitLocation;
+		FVector ToTarget = HitTarget - SocketTransform.GetLocation();
+		FRotator TargetRotation = ToTarget.Rotation();
+		
+		SpawnLocation = SocketTransform.GetLocation(); 
+		SpawnRotation = TargetRotation;
+	}
+	else
+	{
+		const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh3P->GetSocketByName(FName("MuzzleOffset"));
+		const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh3P);
 
-			HitTarget = HitResult.ImpactPoint;
-			FVector ToTarget = HitTarget - SocketTransform.GetLocation();
-			FRotator TargetRotation = ToTarget.Rotation();
-						
-			SpawnLocation = SocketTransform.GetLocation(); 
-			SpawnRotation = (bHit ? TargetRotation : SocketTransform.GetRotation().Rotator());
+		HitTarget = HitLocation;
+		FVector ToTarget = HitTarget - SocketTransform.GetLocation();
+		FRotator TargetRotation = ToTarget.Rotation();
+					
+		SpawnLocation = SocketTransform.GetLocation(); 
+		SpawnRotation = TargetRotation;	
+	}
 
-			Projectile = World->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-			if(Projectile) Projectile->SetOwner(OwningCharacter);
-		}
-		// CurrentAmmoInClip--;
-	}	
+	// Set Spawn Collision Handling Override
+	FActorSpawnParameters ActorSpawnParams;
+	ActorSpawnParams.Owner = GetOwner();
+	ActorSpawnParams.Instigator = InstigatorPawn;
+	ACHProjectile* Projectile = nullptr;
+	
+	// 멀티캐스트
+	if(HasAuthority())
+	{
+		Projectile = GetWorld()->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+		if(Projectile) Projectile->SetOwner(OwningCharacter);		
+	}
 
 	// Try and play the sound if specified
 	if (FireSound != nullptr)
@@ -322,19 +306,18 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		}		
 	}	
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
 void ACHGunRPG::PullTrigger()
 {
 	Super::PullTrigger();
 	if(!bIsEquipped) return;
-	UE_LOG(LogTemp, Log, TEXT("PullTrigger() 1"));
 	if(bReloading)
 	{
 		CancelPullTrigger();
 		return;
 	}
-	UE_LOG(LogTemp, Log, TEXT("PullTrigger() 2"));
 	if(CurrentAmmoInClip <= 0)
 	{
 		if(CurrentAmmo <= 0)
@@ -345,7 +328,7 @@ void ACHGunRPG::PullTrigger()
 		Reload();
 		return;
 	}
-	UE_LOG(LogTemp, Log, TEXT("PullTrigger() 3"));
+	
 	// 미사일 메시 비활성화.
 	MissileMesh1P->SetVisibility(false);
 	MissileMesh3P->SetVisibility(false);
@@ -694,45 +677,6 @@ void ACHGunRPG::SetupWeaponInputComponent()
 				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
 				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);			
 			}
-		}
-	}
-}
-
-void ACHGunRPG::FirstLook(const FInputActionValue& Value)
-{
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
-	
-	if(OwningCharacter)
-	{		
-		ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
-		{
-			// WeaponMesh1P->AddRelativeRotation(FRotator(0,0,LookAxisVector.Y));
-			FRotator NewRotation = WeaponMesh1P->GetRelativeRotation() + FRotator(0,0,LookAxisVector.Y);
-
-			// UE_LOG(LogTemp, Log, TEXT("NewRotation P : %f, Y : %f R : %f"), NewRotation.Pitch,NewRotation.Yaw, NewRotation.Roll)
-			
-			/*if(NewRotation.Roll > -10.0f)
-			{
-				NewRotation.Roll = -90.0f;
-			}
-			if(NewRotation.Roll < -170.0f)
-			{
-				NewRotation.Roll = -170.0f;
-			}*/
-			/*if(NewRotation.Roll < -90.0f && NewRotation.Roll > -170.0f)
-			{
-				
-			}*/
-			NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -170.0f, -10.0f);
-			
-
-			// 잘되는 버전			
-			WeaponMesh1P->SetRelativeRotation(NewRotation);
-		}
-		else
-		{
-			WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
 		}
 	}
 }

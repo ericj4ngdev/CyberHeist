@@ -160,14 +160,15 @@ void ACHGunBase::Fire()
 	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
 	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
 	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
-	FVector HitLocation = ScreenLaserHit.Location;
-	AActor* HitActor = ScreenLaserHit.GetActor();
+	
+	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
 	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
-	
-	LocalFire(HitLocation, TraceEnd);
-	ServerRPCFire(HitLocation, TraceEnd);
-	// 이거 자식클래스에 로직이 다 따로인데 가능한가
-	
+
+	if(!OwningCharacter->HasAuthority())
+	{
+		LocalFire(HitLocation, TraceEnd);
+	}
+	ServerRPCFire(HitLocation, TraceEnd);	
 }
 
 void ACHGunBase::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)

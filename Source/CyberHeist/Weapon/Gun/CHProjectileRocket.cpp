@@ -2,6 +2,8 @@
 
 
 #include "Weapon/Gun/CHProjectileRocket.h"
+
+#include "CyberHeist.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "NiagaraComponent.h"
@@ -24,15 +26,13 @@ ACHProjectileRocket::ACHProjectileRocket()
 
 void ACHProjectileRocket::BeginPlay()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::BeginPlay();
-
-	/*if (!HasAuthority())
-	{
-	}*/
-	/*if(CollisionComp->OnComponentHit.IsAlreadyBound(this,&ACHProjectile::OnHit) == false)
-	{
-		CollisionComp->OnComponentHit.AddDynamic(this, &ACHProjectileRocket::OnHit);
-	}*/
+	
+	if(!HasAuthority())
+    {
+		CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHProjectileRocket::OnHit);
+    }
 
 	SpawnTrailSystem();
 
@@ -53,6 +53,7 @@ void ACHProjectileRocket::BeginPlay()
 			false
 		);
 	}
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
 
@@ -63,37 +64,34 @@ void ACHProjectileRocket::Destroyed()
 
 void ACHProjectileRocket::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
-	UE_LOG(LogTemp, Log, TEXT("ACHProjectileRocket::OnHit"));
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	
 	if(OtherActor == nullptr)
 	{
 		UE_LOG(LogTemp,Warning, TEXT("OtherActor = nullptr"));
 		return;
 	}
-	/*if(HitComp == nullptr)
-	{
-		UE_LOG(LogTemp,Warning, TEXT("HitComp = nullptr"));
-		return;
-	}*/
+
 	if(OtherComp == nullptr)
 	{
 		UE_LOG(LogTemp,Warning, TEXT("OtherComp = nullptr"));
 		return;
 	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("FDamageEvent"));
+	/*UE_LOG(LogTemp, Warning, TEXT("FDamageEvent"));
 	UE_LOG(LogTemp, Warning, TEXT("OnHit"));
-	// UE_LOG(LogTemp, Warning, TEXT("HitComp : %s"), SweepResult.ImpactPoint);
 	UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
-	UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());*/
 
+	CH_LOG(LogCHNetwork, Log, TEXT("OtherActor : %s"), *OtherActor->GetName())
+	
 	if (OtherActor == GetOwner())
 	{
 		return;
 	}
+	
 	ExplodeDamage();
-
-	StartDestroyTimer();
+	// StartDestroyTimer();
 
 	if (ImpactParticles)
 	{
@@ -118,7 +116,7 @@ void ACHProjectileRocket::OnHit(UPrimitiveComponent* OverlappedComponent, AActor
 	if (ProjectileLoopComponent && ProjectileLoopComponent->IsPlaying())
 	{
 		ProjectileLoopComponent->Stop();
-	}
-
-	Super::OnHit(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+	}	
+	Destroy();
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
