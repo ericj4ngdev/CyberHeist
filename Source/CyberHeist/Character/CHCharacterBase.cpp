@@ -182,10 +182,6 @@ void ACHCharacterBase::OnRep_Aiming()
 
 void ACHCharacterBase::OnRep_TPAimingCloser()
 {
-	if (IsLocallyControlled())
-	{
-		// bTPAimingCloser
-	}
 }
 
 void ACHCharacterBase::OnRep_FPScopeAiming()
@@ -306,26 +302,44 @@ void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)
 	}
 }
 
+void ACHCharacterBase::OnRep_Inventory()
+{
+	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
+	
+	CH_LOG(LogCHNetwork,Log,TEXT("End"))
+}
+
 void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewWeapon, bool bEquipWeapon)
 {
+	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
 	if(NewWeapon == nullptr) return;
-	Inventory.Weapons.Add(NewWeapon);
-	SetCurrentWeapon(NewWeapon, CurrentWeapon);
+	// 애초에 ACHGunBase::OnSphereBeginOverlap에서 HasAuthority을 한다.
+	// 즉, 이 함수는 서버에서만 실행된다. 
+	if (HasAuthority()) // 서버에서만 인벤토리를 수정
+	{
+		Inventory.Weapons.Add(NewWeapon);
+		// OnRep_Inventory(); // 클라이언트에게 명시적으로 인벤토리가 변경되었음을 알림		
+		SetCurrentWeapon(NewWeapon, CurrentWeapon);
+	}
+	CH_LOG(LogCHNetwork,Log,TEXT("End"))
 }
 
 void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon)
 {
+	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
 	if(NewWeapon == nullptr) return;
 	if(NewWeapon == LastWeapon) return;
 
 	if(LastWeapon)
 	{
-		UnEquipWeapon(LastWeapon);		
+		// UnEquipWeapon(LastWeapon);
+		CurrentWeapon->UnEquip();
 	}
 
 	if (NewWeapon)
 	{
 		CurrentWeapon = NewWeapon;
+		// OnRep_CurrentWeapon();		// 현재 무기 바뀐거 클라에게 알림 
 		EquipWeapon();
 	}
 	else
@@ -334,30 +348,15 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 		UnEquipWeapon(CurrentWeapon);
 		CurrentWeapon = nullptr;
 	}
-	
+	CH_LOG(LogCHNetwork,Log,TEXT("End"))
 }
 
 void ACHCharacterBase::OnRep_CurrentWeapon()
 {
+	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
+	// CurrentWeapon->UnEquip();
 	EquipWeapon();
-/*if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());		
-		if(Subsystem->HasMappingContext(CurrentWeapon->FireMappingContext))
-		{			
-			UE_LOG(LogTemp, Log, TEXT("[%s] Have FireMappingContext"), *CurrentWeapon.GetName());
-		}
-		else
-		{
-			Subsystem->AddMappingContext(CurrentWeapon->FireMappingContext, 0);
-			if(!GetbHasRifleInputBindings())
-			{
-				CurrentWeapon->SetupWeaponInputComponent();	
-				UE_LOG(LogTemp, Log, TEXT("[%s] No FireMappingContext"), *CurrentWeapon.GetName());
-				SetbHasRifleInputBindings(true);				
-			}
-		}
-	}*/
+	CH_LOG(LogCHNetwork,Log,TEXT("End"))
 }
 
 void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -365,6 +364,8 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACHCharacterBase, CurrentWeapon);
+	DOREPLIFETIME(ACHCharacterBase, Inventory);
+	DOREPLIFETIME(ACHCharacterBase, bIsFirstPersonPerspective);	
 	DOREPLIFETIME(ACHCharacterBase, bAiming);
 	DOREPLIFETIME(ACHCharacterBase, bTPAimingCloser);	
 	DOREPLIFETIME(ACHCharacterBase, bFPScopeAiming);
@@ -385,7 +386,6 @@ void ACHCharacterBase::EquipWeapon()
 	UAnimMontage* Equip3PMontage = CurrentWeapon->GetEquip3PMontage();
 	if (Equip3PMontage && GetThirdPersonMesh())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Equip3PMontage"));
 		GetThirdPersonMesh()->GetAnimInstance()->Montage_Play(Equip3PMontage);
 	}
 }

@@ -143,15 +143,17 @@ void ACHGunRifle::Equip()
 void ACHGunRifle::UnEquip()
 {
 	Super::UnEquip();
-
-	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	if(OwningCharacter->IsLocallyControlled())
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 		{
-			if(Subsystem->HasMappingContext(FireMappingContext))
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 			{
-				Subsystem->RemoveMappingContext(FireMappingContext);
-				UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Removed %s"), *FireMappingContext->GetName());				
+				if(Subsystem->HasMappingContext(FireMappingContext))
+				{
+					Subsystem->RemoveMappingContext(FireMappingContext);
+					UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Removed %s"), *FireMappingContext->GetName());				
+				}
 			}
 		}
 	}

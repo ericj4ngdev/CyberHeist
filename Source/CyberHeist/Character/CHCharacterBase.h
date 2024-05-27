@@ -26,21 +26,13 @@ enum class ECharacterControlType : uint8
 	ThirdPrecisionAim,
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct CYBERHEIST_API FCHCharacterInventory
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
 	TArray<ACHGunBase*> Weapons;
-
-	// Consumable items
-
-	// Passive items like armor
-
-	// Door keys
-
-	// Etc
 };
 
 
@@ -244,8 +236,11 @@ protected:
 	
 	// Inventory
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, ReplicatedUsing = OnRep_Inventory, Category = "Inventory")
 	FCHCharacterInventory Inventory;
+
+	UFUNCTION()
+	void OnRep_Inventory();
 	
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Inventory")
 	TArray<TSubclassOf<ACHGunBase>> DefaultInventoryWeaponClasses;
