@@ -318,8 +318,8 @@ void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewWeapon, bool bEquipWe
 	if (HasAuthority()) // 서버에서만 인벤토리를 수정
 	{
 		Inventory.Weapons.Add(NewWeapon);
-		// OnRep_Inventory(); // 클라이언트에게 명시적으로 인벤토리가 변경되었음을 알림		
-		SetCurrentWeapon(NewWeapon, CurrentWeapon);
+		// SetCurrentWeapon(NewWeapon, CurrentWeapon);		// 서버에서 호출이라 
+		MultiCastRPCEquipWeapon(NewWeapon, CurrentWeapon);		// 클라에게 SetCurrentWeapon + OnRep함(해제, 장착)
 	}
 	CH_LOG(LogCHNetwork,Log,TEXT("End"))
 }
@@ -333,13 +333,14 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 	if(LastWeapon)
 	{
 		// UnEquipWeapon(LastWeapon);
-		CurrentWeapon->UnEquip();
+		// LastWeapon->UnEquip();		// 서버에서만 일어남. 클라에서도 일어나야 함.
+		// 멀티 캐스트?
+		MulticastRPCUnEquipWeapon(LastWeapon);
 	}
 
 	if (NewWeapon)
 	{
-		CurrentWeapon = NewWeapon;
-		// OnRep_CurrentWeapon();		// 현재 무기 바뀐거 클라에게 알림 
+		CurrentWeapon = NewWeapon;		
 		EquipWeapon();
 	}
 	else
@@ -354,8 +355,65 @@ void ACHCharacterBase::SetCurrentWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastW
 void ACHCharacterBase::OnRep_CurrentWeapon()
 {
 	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
-	// CurrentWeapon->UnEquip();
-	EquipWeapon();
+	// EquipWeapon();
+	CH_LOG(LogCHNetwork,Log,TEXT("End"))
+}
+
+void ACHCharacterBase::ServerRPCUnEquipWeapon_Implementation(ACHGunBase* LastWeapon)
+{
+	MulticastRPCUnEquipWeapon(LastWeapon);
+}
+
+bool ACHCharacterBase::ServerRPCUnEquipWeapon_Validate(ACHGunBase* LastWeapon)
+{
+	return true;
+}
+
+void ACHCharacterBase::MulticastRPCUnEquipWeapon_Implementation(ACHGunBase* LastWeapon)
+{
+	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
+	if(LastWeapon)
+	{
+		LastWeapon->UnEquip();
+		CurrentWeapon = nullptr;		
+	} 
+	CH_LOG(LogCHNetwork,Log,TEXT("End"))
+}
+
+void ACHCharacterBase::ServerRPCEquipWeapon_Implementation(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon)
+{
+	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
+	MultiCastRPCEquipWeapon(NewWeapon, LastWeapon);
+	CH_LOG(LogCHNetwork,Log,TEXT("End"))
+}
+
+bool ACHCharacterBase::ServerRPCEquipWeapon_Validate(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon)
+{
+	return true;
+}
+
+void ACHCharacterBase::MultiCastRPCEquipWeapon_Implementation(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon)
+{
+	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
+	if(NewWeapon == nullptr) return;
+	if(NewWeapon == LastWeapon) return;
+
+	if(LastWeapon)
+	{
+		UnEquipWeapon(LastWeapon);
+	}
+
+	if (NewWeapon)
+	{
+		CurrentWeapon = NewWeapon;		
+		EquipWeapon();
+	}
+	else
+	{
+		// This will clear HUD, tags etc
+		UnEquipWeapon(CurrentWeapon);
+		CurrentWeapon = nullptr;
+	}
 	CH_LOG(LogCHNetwork,Log,TEXT("End"))
 }
 
@@ -405,12 +463,13 @@ ACHGunBase* ACHCharacterBase::GetCurrentWeapon() const
 
 void ACHCharacterBase::NextWeapon()
 {
+	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
 	// 인벤에 아무것도 없으면 
 	if(Inventory.Weapons.Num() == 0) return;
 	
 	UE_LOG(LogTemp, Log, TEXT("NextWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
-	UnEquipWeapon(CurrentWeapon);
+	// UnEquipWeapon(CurrentWeapon);
 
 	int32 IndexOfNextWeapon = 0;
 	if(Inventory.Weapons.Num() == 1)
@@ -427,12 +486,15 @@ void ACHCharacterBase::NextWeapon()
 	
 	if(IndexOfNextWeapon >= Inventory.Weapons.Num())
 	{
-		CurrentWeapon = nullptr;
+		ServerRPCUnEquipWeapon(CurrentWeapon);		
+		// CurrentWeapon = nullptr;
 	}
 	else
 	{
-		SetCurrentWeapon(Inventory.Weapons[IndexOfNextWeapon], CurrentWeapon);
+		ServerRPCEquipWeapon(Inventory.Weapons[IndexOfNextWeapon], CurrentWeapon);
+		// SetCurrentWeapon(Inventory.Weapons[IndexOfNextWeapon], CurrentWeapon);
 	}
+	CH_LOG(LogCHNetwork,Log,TEXT("End"))
 }
 
 void ACHCharacterBase::PreviousWeapon()
@@ -440,16 +502,18 @@ void ACHCharacterBase::PreviousWeapon()
 	if(Inventory.Weapons.Num() == 0) return;
 	UE_LOG(LogTemp, Log, TEXT("PreviousWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
-	UnEquipWeapon(CurrentWeapon);	
+	// UnEquipWeapon(CurrentWeapon);
 
 	int32 IndexOfPrevWeapon = FMath::Abs(CurrentWeaponIndex - 1 + Inventory.Weapons.Num()) % Inventory.Weapons.Num();
 	if(IndexOfPrevWeapon <= 0)
 	{
-		CurrentWeapon = nullptr;		
+		ServerRPCUnEquipWeapon(CurrentWeapon);
+		// CurrentWeapon = nullptr;
 	}
 	else
 	{
-		SetCurrentWeapon(Inventory.Weapons[IndexOfPrevWeapon], CurrentWeapon);		
+		ServerRPCEquipWeapon(Inventory.Weapons[IndexOfPrevWeapon], CurrentWeapon);
+		// SetCurrentWeapon(Inventory.Weapons[IndexOfPrevWeapon], CurrentWeapon);		
 	}	
 }
 

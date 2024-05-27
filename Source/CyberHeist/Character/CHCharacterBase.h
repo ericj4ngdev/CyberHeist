@@ -276,6 +276,22 @@ protected:
 	UFUNCTION()
 	void OnRep_CurrentWeapon();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCUnEquipWeapon(ACHGunBase* LastWeapon);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCUnEquipWeapon(ACHGunBase* LastWeapon);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCEquipWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiCastRPCEquipWeapon(ACHGunBase* NewWeapon, ACHGunBase* LastWeapon);
+	
+	
+
+	
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 private:
