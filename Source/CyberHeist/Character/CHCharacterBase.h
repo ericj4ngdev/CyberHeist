@@ -188,8 +188,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = Weapon)
 	FName WeaponAttachPoint;
 		
-	UPROPERTY(BlueprintReadOnly, Category = Camera)
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_FirstPersonPerspective, Category = Camera)
 	uint8 bIsFirstPersonPerspective : 1;
+
+	UFUNCTION()
+	void OnRep_FirstPersonPerspective();
 
 	UPROPERTY(BlueprintReadOnly, Category = Camera)
 	FVector StartingThirdPersonMeshLocation;

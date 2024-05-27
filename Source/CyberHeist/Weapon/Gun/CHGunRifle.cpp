@@ -831,12 +831,12 @@ void ACHGunRifle::StartAim()
 {
 	Super::StartAim();
 	if(!bIsEquipped) return;
-	// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] Before bNearWall : %d"),OwningCharacter->GetNearWall());
-	/*if(!OwningCharacter->GetCovered())
+	/*UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] Before bNearWall : %d"),OwningCharacter->GetNearWall());
+	if(!OwningCharacter->GetCovered())
 	{
 		if(OwningCharacter->GetNearWall()) return;		
-	}*/
-	// UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] After bNearWall : %d"),OwningCharacter->GetNearWall());
+	}
+	UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] After bNearWall : %d"),OwningCharacter->GetNearWall());*/
 	if(bReloading)
 	{
 		// cancel aim

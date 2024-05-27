@@ -338,6 +338,8 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
 {
+	// 다른 클라는 PlayerController가 없기 때문
+	// 근데 어차피 자기캐릭 자기가 조종하는건데?
 	if (!IsLocallyControlled())
 	{
 		return;
@@ -379,13 +381,14 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	CurrentCharacterControlType = NewCharacterControlType;
 
 	FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
-	UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), *EnumAsString);
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), *EnumAsString)
 
 	// UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), CurrentCharacterControlType)
 }
 
 void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::SetCharacterControlData(CharacterControlData);
 
 	FirstPersonCamera->bUsePawnControlRotation = CharacterControlData->bFPP_UsePawnControlRotation;
@@ -404,6 +407,7 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
 	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
 	CameraBoom->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
 void ACHCharacterPlayer::SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority)

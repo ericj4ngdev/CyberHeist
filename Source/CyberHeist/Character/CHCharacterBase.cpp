@@ -156,17 +156,18 @@ USkeletalMeshComponent* ACHCharacterBase::GetThirdPersonMesh() const
 
 void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	// Pawn
 	bUseControllerRotationYaw = CharacterControlData->bUseControllerRotationYaw;
 	bUseControllerRotationPitch = CharacterControlData->bUseControllerRotationPitch;
-
-	// CharacteMovement
+	bUseControllerRotationRoll = CharacterControlData->bUseControllerRotationRoll;
+	
+	// CharacterMovement
 	GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;
 	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
 	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
 
-	
-	
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))	
 }
 
 void ACHCharacterBase::SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority)
@@ -247,6 +248,11 @@ FName ACHCharacterBase::GetWeaponAttachPoint() const
 uint8 ACHCharacterBase::IsInFirstPersonPerspective() const
 {
 	return bIsFirstPersonPerspective;
+}
+
+void ACHCharacterBase::OnRep_FirstPersonPerspective()
+{
+	
 }
 
 void ACHCharacterBase::SetAiming(uint8 bNewAiming)
