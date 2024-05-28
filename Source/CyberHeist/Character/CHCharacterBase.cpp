@@ -429,7 +429,6 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ACHCharacterBase, bFPScopeAiming);
 }
 
-
 void ACHCharacterBase::EquipWeapon()
 {
 	CurrentWeapon->SetOwningCharacter(this);

@@ -157,6 +157,11 @@ void ACHCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		EnableInput(PlayerController);
+	}
 	// CharacterHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	// CharacterHalfHeight
 	
@@ -167,7 +172,7 @@ void ACHCharacterPlayer::BeginPlay()
 	// InputVectorDirectionByCamera = 0.f;
 	StartingThirdPersonMeshLocation = GetMesh()->GetRelativeLocation();
 	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
-	SetCharacterControl(CurrentCharacterControlType);
+	// SetCharacterControl(CurrentCharacterControlType);
 	SetPerspective(bIsFirstPersonPerspective);
 
 	// 이벤트 등록
@@ -252,7 +257,12 @@ void ACHCharacterPlayer::PossessedBy(AController* NewController)
 	}
 
 	Super::PossessedBy(NewController);
-
+	if (HasAuthority())
+	{
+		// 왜 여기서 하면 1,3인칭 메시 다 보이고 입력이 안되는걸까?
+		// 서버에서 호출되는지 보자. 
+		SetPerspective(bIsFirstPersonPerspective);
+	}
 	OwnerActor = GetOwner();
 	if (OwnerActor)
 	{
@@ -338,12 +348,14 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	// 다른 클라는 PlayerController가 없기 때문
-	// 근데 어차피 자기캐릭 자기가 조종하는건데?
-	if (!IsLocallyControlled())
-	{
-		return;
-	}
+	// 서버, 클라 본인 (다른 클라는 안됨)
+	// if(HasAuthority() || IsLocallyControlled())
+
+	// if(!IsLocallyControlled() && !HasAuthority())
+	// if(!HasAuthority())
+	// if(!IsLocallyControlled())
 	
 	UCHCharacterControlData* NewCharacterControl = CharacterControlManager[NewCharacterControlType];
 	UCHCharacterControlData* PrevCharacterControl = CharacterControlManager[CurrentCharacterControlType];
@@ -357,15 +369,21 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 
 	SetCharacterControlData(NewCharacterControl);		// ControlData(Camera and Pawn Rotation)
 
+	if(!IsLocallyControlled())
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Other Client"))
+		return;
+	}
+	// ensure(GetController());
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-
-	// Change IMC 
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-	{	
-		UInputMappingContext* PrevMappingContext = PrevCharacterControl->InputMappingContext;
-		UInputMappingContext* NewMappingContext = NewCharacterControl->InputMappingContext;
-		/*if(PrevMappingContext->GetName() != NewMappingContext->GetName())
-		{*/
+	if(PlayerController)
+	{
+		// Change IMC 
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{	
+			UInputMappingContext* PrevMappingContext = PrevCharacterControl->InputMappingContext;
+			UInputMappingContext* NewMappingContext = NewCharacterControl->InputMappingContext;
+			
 			if (PrevMappingContext)
 			{
 				Subsystem->RemoveMappingContext(PrevMappingContext);			
@@ -376,13 +394,20 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 				Subsystem->AddMappingContext(NewMappingContext, 1);
 			
 			}
-		// UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *PrevMappingContext->GetName(), *NewMappingContext->GetName());
+			// UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *PrevMappingContext->GetName(), *NewMappingContext->GetName());
+		}
+		CurrentCharacterControlType = NewCharacterControlType;
+
+		FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
+		CH_LOG(LogCHNetwork, Log, TEXT("%s"), *EnumAsString)
 	}
-	CurrentCharacterControlType = NewCharacterControlType;
+	else
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("No Controller"))
+	}
 
-	FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), *EnumAsString)
-
+	
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	// UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), CurrentCharacterControlType)
 }
 
@@ -450,6 +475,27 @@ void ACHCharacterPlayer::SetMappingContextPriority(const UInputMappingContext* M
 			UE_LOG(LogTemp, Log, TEXT("There is no MappingContext"));
 		}
 	}
+}
+
+void ACHCharacterPlayer::MulticastRPC_SetCharacterControl_Implementation(ECharacterControlType NewCharacterControlType)
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	
+	SetCharacterControl(NewCharacterControlType);		
+	
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+void ACHCharacterPlayer::ServerRPC_SetCharacterControl_Implementation(ECharacterControlType NewCharacterControlType)
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	MulticastRPC_SetCharacterControl(NewCharacterControlType);
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+bool ACHCharacterPlayer::ServerRPC_SetCharacterControl_Validate(ECharacterControlType NewCharacterControlType)
+{
+	return true;
 }
 
 void ACHCharacterPlayer::Jump()
@@ -600,7 +646,8 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 			// Aim이면 조준상태 유지하면서 나오게 하기 위함
 			if(CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 			{
-				SetCharacterControl(ECharacterControlType::Third);
+				// SetCharacterControl(ECharacterControlType::Third);
+				ServerRPC_SetCharacterControl(ECharacterControlType::Third);
 			}			
 			
 			bCovered = false;
@@ -734,7 +781,8 @@ void ACHCharacterPlayer::StartCover()
 			GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
 			
 			// 입력 속성 변경
-			SetCharacterControl(ECharacterControlType::ThirdCover);
+			// SetCharacterControl(ECharacterControlType::ThirdCover);
+			ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
 			
 			UE_LOG(LogTemp, Log, TEXT("High Covered"));
 		}
@@ -771,7 +819,8 @@ void ACHCharacterPlayer::StartCover()
 			
 			// 입력 속성 변경
 			// 1인칭일 때는 무시
-			SetCharacterControl(ECharacterControlType::ThirdCover);
+			// SetCharacterControl(ECharacterControlType::ThirdCover);
+			ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
 			
 			UE_LOG(LogTemp, Log, TEXT("Low Covered"));
 		}			
@@ -803,7 +852,8 @@ void ACHCharacterPlayer::StopCover()
 	// 입력 속성 변경(1인칭일 때는 변경 X)
 	if(!bIsFirstPersonPerspective)
 	{
-		SetCharacterControl(ECharacterControlType::Third);		
+		// SetCharacterControl(ECharacterControlType::Third);
+		ServerRPC_SetCharacterControl(ECharacterControlType::Third);
 	}
 			
 	bCovered = false;
@@ -842,10 +892,6 @@ void ACHCharacterPlayer::StartCrouch()
 	{
 		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) return;
 	}
-	/*if(bCovered)
-	{
-		SetCharacterControl(ECharacterControlType::ThirdCover);
-	}*/
 	Crouch();
 	
 }
@@ -1008,7 +1054,8 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 	if (Is1PPerspective)
 	{
 		// 1인칭
-		SetCharacterControl(ECharacterControlType::First);
+		// SetCharacterControl(ECharacterControlType::First);
+		ServerRPC_SetCharacterControl(ECharacterControlType::First);
 		StopCover();
 		bCovered = false;
 		
@@ -1030,7 +1077,8 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 	{
 		// 3인칭
 		bCovered = false;
-		SetCharacterControl(ECharacterControlType::Third);
+		// SetCharacterControl(ECharacterControlType::Third);
+		ServerRPC_SetCharacterControl(ECharacterControlType::Third);
 		
 		FirstPersonCamera->Deactivate();
 		FirstPersonMesh->SetVisibility(false, true);

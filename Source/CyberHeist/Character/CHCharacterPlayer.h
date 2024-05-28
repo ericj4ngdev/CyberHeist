@@ -40,6 +40,15 @@ public:
 	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType) override;
 	virtual void SetCharacterControlData(const class UCHCharacterControlData* CharacterControlData) override;
 	virtual void SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority) override;
+
+public:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPC_SetCharacterControl(ECharacterControlType NewCharacterControlType);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetCharacterControl(ECharacterControlType NewCharacterControlType);
+	
+	
 // Camera Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))

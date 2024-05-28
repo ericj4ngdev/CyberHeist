@@ -854,7 +854,7 @@ void ACHGunRifle::StartAim()
 	
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 		}
 
 		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
@@ -863,7 +863,7 @@ void ACHGunRifle::StartAim()
 			{
 				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
 			}		
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 			PlayerCharacter->SetCoveredAttackMotion(true);
 		}
 
@@ -873,7 +873,7 @@ void ACHGunRifle::StartAim()
 			// PlayerCharacter->SetAiming(true);  // 근데 이건 밑에 코드에서 해줌
 			if(PlayerCharacter->GetScopeAiming())
 			{
-				PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstScopeAim);
 			
 				if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 				{
@@ -883,7 +883,7 @@ void ACHGunRifle::StartAim()
 			}
 			else
 			{			
-				PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);	
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstAim);	
 			}
 		}
 	}
@@ -909,24 +909,24 @@ void ACHGunRifle::StopAim()
 		{
 			if(PlayerCharacter->GetCovered())
 			{
-				PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
 				PlayerCharacter->ReturnCover();
 				PlayerCharacter->SetCoveredAttackMotion(false);	
 			}
 			else
 			{
-				PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);			
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::Third);			
 			}
 		}
 
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::First);
 		}
 	
 		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::First);
 			if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 			{
 				UE_LOG(LogTemp, Log, TEXT("SetViewTargetWithBlend"));
@@ -961,13 +961,13 @@ void ACHGunRifle::StartPrecisionAim()
 			// 조준경 bool 변수 -> 애니메이션에 전달
 			PlayerCharacter->SetTPAimingCloser(true);
 			// 카메라 위치 수정
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdPrecisionAim);
 		}
 
 		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 		{
 			PlayerCharacter->SetScopeAiming(true);
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstScopeAim);
 			if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(OwningCharacter->GetController()))
 			{			
 				PlayerController->SetViewTargetWithBlend(this,0.2);
@@ -989,7 +989,7 @@ void ACHGunRifle::StopPrecisionAim()
 		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 		{
 			PlayerCharacter->SetTPAimingCloser(false);
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);		
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);		
 		}
 	
 		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
@@ -1001,7 +1001,7 @@ void ACHGunRifle::StopPrecisionAim()
 				PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);
 			}
 			if(OwningCharacter->GetNearWall()) return;
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstAim);
 		}
 	}
 }
@@ -1041,24 +1041,28 @@ void ACHGunRifle::Reload()
 
 	// Reload
 	bReloading = true;
-
-	// 조준 중이라면 해제
-	if(OwningCharacter->IsInFirstPersonPerspective())
+	
+	if(ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter))
 	{
-		OwningCharacter->SetCharacterControl(ECharacterControlType::First);
-	}
-	else
-	{
-		// 엄폐는 유지
-		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+		// 조준 중이라면 해제
+		if(PlayerCharacter->IsInFirstPersonPerspective())
 		{
-			OwningCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);			
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::First);
 		}
 		else
 		{
-			OwningCharacter->SetCharacterControl(ECharacterControlType::Third);			
+			// 엄폐는 유지
+			if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+			{
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);			
+			}
+			else
+			{
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::Third);			
+			}
 		}
 	}
+	
 	
 	// if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 	
