@@ -195,10 +195,10 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 			OwnerPawn->AddControllerPitchInput(RPitch);
 		}
 	}
-
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	// Socket
 	FTransform SocketTransform;	
-	if(OwningCharacter->IsInFirstPersonPerspective())
+	if(PlayerCharacter->IsInFirstPersonPerspective())
 	{
 		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());

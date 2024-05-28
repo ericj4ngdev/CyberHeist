@@ -725,7 +725,7 @@ void ACHGun::Reload()
 	bReloading = true;
 
 	// 조준 중이라면 해제
-	if(OwningCharacter->IsInFirstPersonPerspective())
+	/*if(OwningCharacter->bIsFirstPersonPerspective)
 	{
 		OwningCharacter->SetCharacterControl(ECharacterControlType::First);
 	}
@@ -740,7 +740,7 @@ void ACHGun::Reload()
 		{
 			OwningCharacter->SetCharacterControl(ECharacterControlType::Third);			
 		}
-	}
+	}*/
 	
 	// if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 	

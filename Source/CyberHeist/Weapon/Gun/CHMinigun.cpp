@@ -198,10 +198,10 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		OwnerPawn->AddControllerYawInput(RYaw);
 		OwnerPawn->AddControllerPitchInput(RPitch);
 	}
-
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	// Socket
 	FTransform SocketTransform;
-	if(OwningCharacter->IsInFirstPersonPerspective())
+	if(PlayerCharacter->IsInFirstPersonPerspective())
 	{
 		const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh1P->GetSocketByName("Muzzle_1");
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh1P);

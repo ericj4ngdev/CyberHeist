@@ -233,9 +233,9 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		UE_LOG(LogTemp, Log, TEXT("ProjectileClass is null"));
 		return;
 	}
-	
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	// 시점에 따른 발사 지점 설정
-	if(OwningCharacter->IsInFirstPersonPerspective())
+	if(PlayerCharacter->IsInFirstPersonPerspective())
 	{
 		const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh1P->GetSocketByName(FName("MuzzleOffset"));
 		const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh1P);

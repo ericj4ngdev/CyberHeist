@@ -321,6 +321,7 @@ void ACHGunBase::MulticastRPCFire_Implementation(const FVector& HitLocation, con
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
 
+	// 클라 && 서버 X => 클라 본인 제외 
 	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority()) return;
 	LocalFire(HitLocation, TraceEnd);
 }

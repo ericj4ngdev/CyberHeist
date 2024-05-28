@@ -242,16 +242,6 @@ FName ACHCharacterBase::GetWeaponAttachPoint() const
 	return WeaponAttachPoint;
 }
 
-uint8 ACHCharacterBase::IsInFirstPersonPerspective() const
-{
-	return bIsFirstPersonPerspective;
-}
-
-void ACHCharacterBase::OnRep_FirstPersonPerspective()
-{
-	
-}
-
 void ACHCharacterBase::SetAiming(uint8 bNewAiming)
 {
 	bAiming = bNewAiming;
@@ -424,7 +414,6 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(ACHCharacterBase, CurrentWeapon);
 	DOREPLIFETIME(ACHCharacterBase, Inventory);
-	DOREPLIFETIME(ACHCharacterBase, bIsFirstPersonPerspective);	
 	DOREPLIFETIME(ACHCharacterBase, bAiming);
 	DOREPLIFETIME(ACHCharacterBase, bTPAimingCloser);	
 	DOREPLIFETIME(ACHCharacterBase, bFPScopeAiming);

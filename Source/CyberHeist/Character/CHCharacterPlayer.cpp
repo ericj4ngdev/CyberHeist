@@ -19,6 +19,7 @@
 #include "Player/CHPlayerController.h"
 #include "UI/UCHCrossHairWidget.h"
 #include "CyberHeist.h"
+#include "Net/UnrealNetwork.h"
 
 ACHCharacterPlayer::ACHCharacterPlayer()
 {
@@ -174,9 +175,12 @@ void ACHCharacterPlayer::BeginPlay()
 	StartingThirdPersonMeshLocation = GetMesh()->GetRelativeLocation();
 	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
 	// SetCharacterControl(CurrentCharacterControlType);
+
+	// 클라만
 	if (!HasAuthority())
 	{
-		SetPerspective(bIsFirstPersonPerspective);		
+		// SetPerspective(bIsFirstPersonPerspective);
+		ServerRPC_SetPerspective(bIsFirstPersonPerspective);
 	}
 
 	// 이벤트 등록
@@ -200,7 +204,7 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	if (IsInFirstPersonPerspective())
+	if (bIsFirstPersonPerspective)
 	{
 		TiltingLeftTimeline.TickTimeline(DeltaTime);
 		TiltingRightTimeline.TickTimeline(DeltaTime);
@@ -309,6 +313,13 @@ void ACHCharacterPlayer::OnRep_Owner()
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 }
 
+void ACHCharacterPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ACHCharacterPlayer, bIsFirstPersonPerspective);	
+}
+
 void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -360,7 +371,43 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	}
 	check(NewCharacterControl);
 
-	SetCharacterControlData(NewCharacterControl);		// ControlData(Camera and Pawn Rotation)
+	// 클라만 바뀌게 하기
+	// 시작이 3인칭
+
+	// 클라가 3->1일 떄, 서버는 SetCharacterControlData 안하고 두 가지 속성 켜주기
+	// 클라 본인은 SetCharacterControlData하기
+
+	// 클라가 1->3일 때, 서버는 두가지 속성 꺼주기
+	// 클라 본인은 SetCharacterControlData하기
+
+	// 서버는 계속 3인칭이라 이걸로 구분 X
+	// 클라만 구분하기
+	// 서버는 CCD를 못바꾸게 막는다는 표현이 맞겠다.	
+	
+	if(IsLocallyControlled() && !HasAuthority())
+	{
+		// 클라만 CCD 변경
+		SetCharacterControlData(NewCharacterControl);			
+	}
+	else
+	{
+		// 클라가 아닌 다른 세상에서는
+		// 클라가 3->1일 떄, 서버는 SetCharacterControlData 안하고 두 가지 속성 켜주기
+		if(bIsFirstPersonPerspective)
+		{
+			CH_LOG(LogCHNetwork, Log, TEXT("1pp"))
+			bUseControllerRotationYaw = true;
+			bUseControllerRotationPitch = true;
+		}
+		else
+		{
+			CH_LOG(LogCHNetwork, Log, TEXT("3pp"))
+			// 클라가 1->3일 때, 서버는 두가지 속성 꺼주기
+			bUseControllerRotationYaw = false;
+			bUseControllerRotationPitch = false;
+		}
+	}
+	
 
 	// if(!HasAuthority())
 	// if(!IsLocallyControlled())
@@ -686,7 +733,7 @@ void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
 void ACHCharacterPlayer::TakeCover()
 {
 	// 1인칭일 때는 비활성화
-	if(IsInFirstPersonPerspective())
+	if(bIsFirstPersonPerspective)
 	{
 		return;
 	}
@@ -956,7 +1003,7 @@ void ACHCharacterPlayer::SetTiltingLeftValue(const float Value)
 
 void ACHCharacterPlayer::TiltRight()
 {
-	if (IsInFirstPersonPerspective())
+	if (bIsFirstPersonPerspective)
 	{
 		// UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltRight()"));
 		bTiltReleaseLeft = false;
@@ -975,7 +1022,7 @@ void ACHCharacterPlayer::TiltRight()
 
 void ACHCharacterPlayer::TiltRightRelease()
 {
-	if (IsInFirstPersonPerspective())
+	if (bIsFirstPersonPerspective)
 	{
 		bTiltReleaseLeft = true;
 		bTiltReleaseRight = true;
@@ -993,7 +1040,7 @@ void ACHCharacterPlayer::TiltRightRelease()
 
 void ACHCharacterPlayer::TiltLeft()
 {
-	if (IsInFirstPersonPerspective())
+	if (bIsFirstPersonPerspective)
 	{
 		// UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltLeft()"));
 		bTiltReleaseLeft = false;
@@ -1019,7 +1066,7 @@ void ACHCharacterPlayer::TiltLeft()
 
 void ACHCharacterPlayer::TiltLeftRelease()
 {
-	if (IsInFirstPersonPerspective())
+	if (bIsFirstPersonPerspective)
 	{
 		bTiltReleaseLeft = true;
 		bTiltReleaseRight = true;
@@ -1037,8 +1084,29 @@ void ACHCharacterPlayer::TiltLeftRelease()
 
 void ACHCharacterPlayer::TogglePerspective()
 {
+	// 서버 RPC 날리기
 	bIsFirstPersonPerspective = !bIsFirstPersonPerspective;
-	SetPerspective(bIsFirstPersonPerspective);
+	// SetPerspective(bIsFirstPersonPerspective);
+	ServerRPC_SetPerspective(bIsFirstPersonPerspective);
+}
+
+void ACHCharacterPlayer::ServerRPC_SetPerspective_Implementation(bool Is1PPerspective)
+{
+	bIsFirstPersonPerspective = Is1PPerspective;
+	// OnRep_FirstPersonPerspective();
+	MulticastRPC_SetPerspective(bIsFirstPersonPerspective);	
+}
+
+bool ACHCharacterPlayer::ServerRPC_SetPerspective_Validate(bool Is1PPerspective)
+{
+	return true;
+}
+
+void ACHCharacterPlayer::MulticastRPC_SetPerspective_Implementation(bool Is1PPerspective)
+{
+	// 클라 && 서버 X => 클라 본인 제외 
+	// if(IsLocallyControlled() && !HasAuthority()) return;
+	SetPerspective(Is1PPerspective);
 }
 
 void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
@@ -1051,34 +1119,40 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 	if (Is1PPerspective)
 	{
 		// 1인칭
-		// SetCharacterControl(ECharacterControlType::First);
-		ServerRPC_SetCharacterControl(ECharacterControlType::First);
+		SetCharacterControl(ECharacterControlType::First);
+		// ServerRPC_SetCharacterControl(ECharacterControlType::First);
+		
 		StopCover();
 		bCovered = false;
-		
-		ThirdPersonCamera->Deactivate();
-		GetMesh()->SetVisibility(false, true);
-		GetMesh()->CastShadow = true;
-		GetMesh()->bCastHiddenShadow = true;
 
-		FirstPersonCamera->Activate();
-		FirstPersonMesh->SetVisibility(true);
-		if(CurrentWeapon)
+		// 이하 동기화 X
+		if(IsLocallyControlled())
 		{
-			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
-			CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
-			CurrentWeapon->SetWeaponMeshVisibility(false);
-		}
+			ThirdPersonCamera->Deactivate();
+			GetMesh()->SetVisibility(false, true);
+			GetMesh()->CastShadow = true;
+			GetMesh()->bCastHiddenShadow = true;
+
+			FirstPersonCamera->Activate();
+			FirstPersonMesh->SetVisibility(true);
+			if(CurrentWeapon)
+			{
+				UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
+				CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
+				CurrentWeapon->SetWeaponMeshVisibility(false);
+			}
+		}		
 	}
 	else
 	{
 		// 3인칭
 		bCovered = false;
-		// SetCharacterControl(ECharacterControlType::Third);
-		ServerRPC_SetCharacterControl(ECharacterControlType::Third);
+		SetCharacterControl(ECharacterControlType::Third);
+		// ServerRPC_SetCharacterControl(ECharacterControlType::Third);
 		
 		FirstPersonCamera->Deactivate();
 		FirstPersonMesh->SetVisibility(false, true);
+		CH_LOG(LogCHNetwork, Log, TEXT("FirstPersonCamera->Deactivate();"))
 
 		ThirdPersonCamera->Activate();
 		GetMesh()->SetVisibility(true);
@@ -1091,6 +1165,65 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true, true);
 		}
 	}
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+void ACHCharacterPlayer::OnRep_FirstPersonPerspective()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	/*if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
+	|| CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
+	|| CurrentCharacterControlType == ECharacterControlType::FirstAim
+	|| CurrentCharacterControlType == ECharacterControlType::FirstScopeAim) return;
+	if (bIsFirstPersonPerspective)
+	{
+		// 1인칭
+		SetCharacterControl(ECharacterControlType::First);
+		// ServerRPC_SetCharacterControl(ECharacterControlType::First);
+		
+		StopCover();
+		bCovered = false;
+
+		// 이하 동기화 X
+		if(IsLocallyControlled())
+		{
+			ThirdPersonCamera->Deactivate();
+			GetMesh()->SetVisibility(false, true);
+			GetMesh()->CastShadow = true;
+			GetMesh()->bCastHiddenShadow = true;
+
+			FirstPersonCamera->Activate();
+			FirstPersonMesh->SetVisibility(true);
+			if(CurrentWeapon)
+			{
+				UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
+				CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
+				CurrentWeapon->SetWeaponMeshVisibility(false);
+			}
+		}		
+	}
+	else
+	{
+		// 3인칭
+		bCovered = false;
+		SetCharacterControl(ECharacterControlType::Third);
+		// ServerRPC_SetCharacterControl(ECharacterControlType::Third);
+		
+		FirstPersonCamera->Deactivate();
+		FirstPersonMesh->SetVisibility(false, true);
+		CH_LOG(LogCHNetwork, Log, TEXT("FirstPersonCamera->Deactivate();"))
+
+		ThirdPersonCamera->Activate();
+		GetMesh()->SetVisibility(true);
+		GetMesh()->CastShadow = true;
+		GetMesh()->bCastHiddenShadow = true;
+		
+		if(CurrentWeapon)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
+			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true, true);
+		}
+	}*/
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 

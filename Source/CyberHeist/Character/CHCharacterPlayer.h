@@ -33,6 +33,8 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void PostNetInit() override;
 	virtual void OnRep_Owner() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 public:	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -165,9 +167,22 @@ protected:
 	// Toggles between perspectives
 	void TogglePerspective();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPC_SetPerspective(bool Is1PPerspective);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetPerspective(bool Is1PPerspective);
+
 	// Sets the perspective
 	void SetPerspective(uint8 Is1PPerspective);
-	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_FirstPersonPerspective, Category = Camera)
+	uint8 bIsFirstPersonPerspective : 1;
+
+	UFUNCTION()
+	void OnRep_FirstPersonPerspective();
+
+public:
+	uint8 IsInFirstPersonPerspective() const{return bIsFirstPersonPerspective;}
 	// Cover System
 public:	
 	void SetCoveredAttackMotion(uint8 bAim);
