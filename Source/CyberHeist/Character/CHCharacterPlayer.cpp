@@ -401,11 +401,16 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 		}
 		else
 		{
+			SetCharacterControlData(NewCharacterControl);
+		}
+		
+		/*else if(NewCharacterControl == CharacterControlManager[ECharacterControlType::Third])
+		{
 			CH_LOG(LogCHNetwork, Log, TEXT("3pp"))
 			// 클라가 1->3일 때, 서버는 두가지 속성 꺼주기
 			bUseControllerRotationYaw = false;
 			bUseControllerRotationPitch = false;
-		}
+		}*/
 	}
 	
 
@@ -1084,6 +1089,10 @@ void ACHCharacterPlayer::TiltLeftRelease()
 
 void ACHCharacterPlayer::TogglePerspective()
 {
+	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
+	|| CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
+	|| CurrentCharacterControlType == ECharacterControlType::FirstAim
+	|| CurrentCharacterControlType == ECharacterControlType::FirstScopeAim) return;
 	// 서버 RPC 날리기
 	bIsFirstPersonPerspective = !bIsFirstPersonPerspective;
 	// SetPerspective(bIsFirstPersonPerspective);
@@ -1112,10 +1121,7 @@ void ACHCharacterPlayer::MulticastRPC_SetPerspective_Implementation(bool Is1PPer
 void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
-	|| CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
-	|| CurrentCharacterControlType == ECharacterControlType::FirstAim
-	|| CurrentCharacterControlType == ECharacterControlType::FirstScopeAim) return;
+	
 	if (Is1PPerspective)
 	{
 		// 1인칭
