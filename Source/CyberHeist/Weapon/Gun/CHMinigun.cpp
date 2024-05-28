@@ -940,7 +940,7 @@ void ACHMinigun::StartAim()
 	{
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 		{
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 		}
 
 		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
@@ -949,7 +949,7 @@ void ACHMinigun::StartAim()
 			{
 				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
 			}		
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdAim);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 			PlayerCharacter->SetCoveredAttackMotion(true);
 		}
 
@@ -960,9 +960,9 @@ void ACHMinigun::StartAim()
 			if(PlayerCharacter->GetScopeAiming())
 			{
 				PlayerCharacter->SetScopeAiming(false);
-				// PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstScopeAim);
+				// PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstScopeAim);
 			}
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstAim);
 			
 		}
 
@@ -1029,18 +1029,18 @@ void ACHMinigun::StopAim()
 		{
 			if(PlayerCharacter->GetCovered())
 			{
-				PlayerCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
 				PlayerCharacter->SetCoveredAttackMotion(false);			
 			}
 			else
 			{
-				PlayerCharacter->SetCharacterControl(ECharacterControlType::Third);			
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::Third);			
 			}
 		}
 		
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 		{		
-			PlayerCharacter->SetCharacterControl(ECharacterControlType::First);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::First);
 			// 상태만 바꾸는 것 같지만 조준 변수는 밑에서 조정
 		}
 	}
@@ -1094,24 +1094,26 @@ void ACHMinigun::Reload()
 	// Reload
 	bReloading = true;
 
-	// 조준 중이라면 해제
-	if(OwningCharacter->IsInFirstPersonPerspective())
+	if(ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter))
 	{
-		OwningCharacter->SetCharacterControl(ECharacterControlType::First);
-	}
-	else
-	{
-		// 엄폐는 유지
-		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+		// 조준 중이라면 해제
+		if(PlayerCharacter->IsInFirstPersonPerspective())
 		{
-			OwningCharacter->SetCharacterControl(ECharacterControlType::ThirdCover);			
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::First);
 		}
 		else
 		{
-			OwningCharacter->SetCharacterControl(ECharacterControlType::Third);			
+			// 엄폐는 유지
+			if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+			{
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);			
+			}
+			else
+			{
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::Third);			
+			}
 		}
 	}
-	
 	// if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 	
 	// 총 재장전 Animation Montage
