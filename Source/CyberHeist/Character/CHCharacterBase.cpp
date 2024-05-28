@@ -119,6 +119,7 @@ ACHCharacterBase::ACHCharacterBase()
 	// Motion
 	MotionWarpComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarping"));
 
+	bReplicates = true;
 	bNearWall = false;
 	CurrentCharacterControlType = ECharacterControlType::Third;
 }

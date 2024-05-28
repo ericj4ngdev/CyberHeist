@@ -155,6 +155,7 @@ ACHCharacterPlayer::ACHCharacterPlayer()
 
 void ACHCharacterPlayer::BeginPlay()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::BeginPlay();
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -173,7 +174,10 @@ void ACHCharacterPlayer::BeginPlay()
 	StartingThirdPersonMeshLocation = GetMesh()->GetRelativeLocation();
 	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
 	// SetCharacterControl(CurrentCharacterControlType);
-	SetPerspective(bIsFirstPersonPerspective);
+	if (!HasAuthority())
+	{
+		SetPerspective(bIsFirstPersonPerspective);		
+	}
 
 	// 이벤트 등록
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHCharacterPlayer::OnNearWall);
@@ -188,7 +192,7 @@ void ACHCharacterPlayer::BeginPlay()
 		TiltingLeftTimeline.AddInterpFloat(TiltingCurveFloat, TiltLeftTimelineProgress);
 		TiltingRightTimeline.AddInterpFloat(TiltingCurveFloat, TiltRightTimelineProgress);
 	}
-	
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
 void ACHCharacterPlayer::Tick(float DeltaTime)
@@ -257,12 +261,6 @@ void ACHCharacterPlayer::PossessedBy(AController* NewController)
 	}
 
 	Super::PossessedBy(NewController);
-	if (HasAuthority())
-	{
-		// 왜 여기서 하면 1,3인칭 메시 다 보이고 입력이 안되는걸까?
-		// 서버에서 호출되는지 보자. 
-		SetPerspective(bIsFirstPersonPerspective);
-	}
 	OwnerActor = GetOwner();
 	if (OwnerActor)
 	{
@@ -352,11 +350,6 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	// 다른 클라는 PlayerController가 없기 때문
 	// 서버, 클라 본인 (다른 클라는 안됨)
 	// if(HasAuthority() || IsLocallyControlled())
-
-	// if(!IsLocallyControlled() && !HasAuthority())
-	// if(!HasAuthority())
-	// if(!IsLocallyControlled())
-	
 	UCHCharacterControlData* NewCharacterControl = CharacterControlManager[NewCharacterControlType];
 	UCHCharacterControlData* PrevCharacterControl = CharacterControlManager[CurrentCharacterControlType];
 
@@ -369,15 +362,18 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 
 	SetCharacterControlData(NewCharacterControl);		// ControlData(Camera and Pawn Rotation)
 
-	if(!IsLocallyControlled())
+	// if(!HasAuthority())
+	// if(!IsLocallyControlled())
+	// if(!IsLocallyControlled())
+	if(!IsLocallyControlled() && !HasAuthority())
 	{
 		CH_LOG(LogCHNetwork, Log, TEXT("Other Client"))
 		return;
 	}
 	// ensure(GetController());
-	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-	if(PlayerController)
+	if(GetOwner())
 	{
+		APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
 		// Change IMC 
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{	
@@ -1047,6 +1043,7 @@ void ACHCharacterPlayer::TogglePerspective()
 
 void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
 	|| CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
 	|| CurrentCharacterControlType == ECharacterControlType::FirstAim
@@ -1093,7 +1090,8 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
 			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true, true);
 		}
-	}	
+	}
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
 void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
