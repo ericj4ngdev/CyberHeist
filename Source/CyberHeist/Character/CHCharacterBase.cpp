@@ -147,6 +147,33 @@ void ACHCharacterBase::Tick(float DeltaSeconds)
 	// Super::Tick(DeltaSeconds);	
 }
 
+void ACHCharacterBase::ServerSetCoverState_Implementation(uint8 bNewHighCovered, uint8 bNewLowCovered)
+{
+	CH_LOG(LogCHTemp, Log, TEXT("Begin"))
+	bHighCovered = bNewHighCovered;
+	bLowCovered = bNewLowCovered;
+	// OnCoverState.Broadcast(bHighCovered, bLowCovered);
+	CH_LOG(LogCHTemp, Log, TEXT("End"))	
+}
+
+bool ACHCharacterBase::ServerSetCoverState_Validate(uint8 bNewHighCovered, uint8 bNewLowCovered)
+{
+	return true;
+}
+
+void ACHCharacterBase::ServerSetCoverMoveRight_Implementation(uint8 bNewCoverMoveRight)
+{
+	CH_LOG(LogCHTemp, Log, TEXT("Begin"))
+	bCoverMoveRight = bNewCoverMoveRight;
+	// CHAnimInstance->SetCoveredDirection(bCoverMoveRight);
+	CH_LOG(LogCHTemp, Log, TEXT("End"))	
+}
+
+bool ACHCharacterBase::ServerSetCoverMoveRight_Validate(uint8 bNewCoverMoveRight)
+{
+	return true;
+}
+
 USkeletalMeshComponent* ACHCharacterBase::GetFirstPersonMesh() const
 {
 	return FirstPersonMesh;	
@@ -332,11 +359,6 @@ void ACHCharacterBase::OnRep_Sprint()
 	// GetCharacterMovement()->MaxWalkSpeed = bSprint ? RunSpeed : WalkSpeed;
 }
 
-void ACHCharacterBase::OnRep_Cover()
-{
-	// GetCharacterMovement()->MaxWalkSpeed = bCovered ? SneakSpeed : WalkSpeed;
-}
-
 void ACHCharacterBase::OnRep_Aiming()
 {
 	// GetCharacterMovement()->MaxWalkSpeed = bAiming ? SneakSpeed : WalkSpeed;
@@ -485,10 +507,14 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ACHCharacterBase, CurrentWeapon);
 	DOREPLIFETIME(ACHCharacterBase, bSprint);
 	DOREPLIFETIME(ACHCharacterBase, bCovered);
+	DOREPLIFETIME(ACHCharacterBase, bHighCovered);
+	DOREPLIFETIME(ACHCharacterBase, bLowCovered);
+	DOREPLIFETIME(ACHCharacterBase, bCoverMoveRight);
 	DOREPLIFETIME(ACHCharacterBase, Inventory);
 	DOREPLIFETIME(ACHCharacterBase, bAiming);
 	DOREPLIFETIME(ACHCharacterBase, bTPAimingCloser);	
 	DOREPLIFETIME(ACHCharacterBase, bFPScopeAiming);
+	
 }
 
 void ACHCharacterBase::EquipWeapon()

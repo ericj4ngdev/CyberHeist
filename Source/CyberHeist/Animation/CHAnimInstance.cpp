@@ -64,6 +64,11 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bPrecisionAiming = OwnerActor->GetTPAimingCloser();
 		bWithholdWeapon = OwnerActor->GetNearWall();
 		bScopeAiming = OwnerActor->GetScopeAiming();
+
+		bTakeHighCover = OwnerActor->GetHighCovered();
+		bTakeLowCover = OwnerActor->GetLowCovered();
+		bCoverMoveRight = OwnerActor->GetCoverMoveRight();
+		
 		TiltAngle = OwnerActor->GetTiltAngle();
 		
 		if(OwnerActor->GetCurrentWeapon())
@@ -74,6 +79,19 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		{
 			CurrentWeapon = ECHWeaponType::UnArmed;
 		}
+	}
+
+	if(bTakeHighCover && bTakeLowCover)
+	{
+		CurrentCoverState = ECoverState::High;
+	}
+	else if(bTakeHighCover == false && bTakeLowCover)
+	{
+		CurrentCoverState = ECoverState::Low;
+	}
+	else
+	{
+		CurrentCoverState = ECoverState::None;
 	}
 	
 	// 1인칭 전용.. 이건 총마다 달라서 바꿔야 함.. 

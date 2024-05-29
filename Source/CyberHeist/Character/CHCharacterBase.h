@@ -57,12 +57,42 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UCapsuleComponent> CollisionComp;
+
+
+	// Cover
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Cover")
+	uint8 bCovered : 1;	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Cover")
+	uint8 bHighCovered : 1;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Cover")
+	uint8 bLowCovered : 1;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Cover")
+	uint8 bCoverMoveRight : 1;
 	
 public:
 	FOnHighCoverSignature OnHighCover;
 	FOnLowCoverSignature OnLowCover;
 	FOnCoverStateSignature OnCoverState;
+	
+	FORCEINLINE uint8 GetCovered() const { return bCovered;}
+	FORCEINLINE uint8 GetHighCovered() const { return bHighCovered; }
+	FORCEINLINE uint8 GetLowCovered() const { return bLowCovered; }
+	FORCEINLINE uint8 GetCoverMoveRight() const { return bCoverMoveRight; }
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetCoverState(uint8 bNewHighCovered, uint8 bNewLowCovered);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetCoverMoveRight(uint8 bNewCoverMoveRight);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> TakeCoverMontage;
+
+public:	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USkeletalMeshComponent> FirstPersonMesh;
 	
@@ -129,20 +159,7 @@ public:
 	
 	FORCEINLINE float GetTiltAngle() const { return TiltAngle; }
 	
-	// Cover
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Cover, Category = Animation)
-	uint8 bCovered : 1;	
 
-	UFUNCTION()
-	void OnRep_Cover();
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
-	TObjectPtr<class UAnimMontage> TakeCoverMontage;
-
-public:
-	FORCEINLINE uint8 GetCovered() const { return bCovered;}
-	// float CurrentDistanceFromWall;
 	
 public:
 	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType);

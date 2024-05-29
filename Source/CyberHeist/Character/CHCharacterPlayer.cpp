@@ -397,15 +397,19 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	{
 		// 클라가 아닌 다른 세상에서는
 		// 클라가 3->1일 떄, 서버는 SetCharacterControlData 안하고 두 가지 속성 켜주기
+		// 3인칭 엄폐->1일때는 왜 문제지?
 		if(bIsFirstPersonPerspective)
 		{
 			CH_LOG(LogCHNetwork, Log, TEXT("1pp"))
+			// 서버 CCD는 3인칭 엄폐.. 인가??
 			bUseControllerRotationYaw = true;
 			bUseControllerRotationPitch = true;
 		}
 		else
 		{
 			SetCharacterControlData(NewCharacterControl);
+			GetCharacterMovement()->bOrientRotationToMovement = true;
+			GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		}
 		
 		/*else if(NewCharacterControl == CharacterControlManager[ECharacterControlType::Third])
@@ -680,8 +684,13 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		// 40 degree ~ 180 degree = can cover
 		// Degree Uproperty 
 		if(AngleForCoveredMove >= -1.0f && AngleForCoveredMove <= FMath::Cos(RadianForEscapeCover))
-		{
-			CHAnimInstance->SetCoveredDirection(AngleForDirection > 0);
+		{			
+			bCoverMoveRight = AngleForDirection > 0;
+			// if(!HasAuthority())
+			// CHAnimInstance->SetCoveredDirection(bCoverMoveRight);
+			ServerSetCoverMoveRight(bCoverMoveRight);
+			// CHAnimInstance->SetCoveredDirection(bCoverMoveRight);
+			// CHAnimInstance->SetCoveredDirection(AngleForDirection > 0);
 			// bool IsRight = (AngleForDirection > 0) ? true : false; 
 			MoveDirection = WallParallel * AngleForDirection;
 			
@@ -692,8 +701,13 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		}
 		else
 		{
+			bHighCovered = false;
+			bLowCovered = false;
+			// if(!HasAuthority()) OnCoverState.Broadcast(bHighCovered, bLowCovered);
+			ServerSetCoverState(bHighCovered, bLowCovered);
+			
 			// Cancel Cover Anim Montage
-			OnCoverState.Broadcast(false, false);
+			// OnCoverState.Broadcast(false, false);
 			// UnCrouch();
 			// 입력 속성 변경
 
@@ -756,7 +770,7 @@ void ACHCharacterPlayer::TakeCover()
 	// 1인칭일 때는 비활성화
 	if(bIsFirstPersonPerspective)
 	{
-		// 틸팅
+		// 왼쪽 틸팅. TiltAngle 부여 
 		return;
 	}
 	
@@ -812,7 +826,11 @@ void ACHCharacterPlayer::StartCover()
 		FVector ActorForward = GetActorForwardVector();
 
 		float Result = FVector::DotProduct(WallParallel, ActorForward);
-		CHAnimInstance->SetCoveredDirection(Result > 0);			
+		bCoverMoveRight = Result > 0;
+		// if(!HasAuthority())
+		// CHAnimInstance->SetCoveredDirection(bCoverMoveRight);
+		ServerSetCoverMoveRight(bCoverMoveRight);
+		// CHAnimInstance->SetCoveredDirection(Result > 0);			
 		
 		if(HitHighCoverDetected)
 		{
@@ -840,7 +858,11 @@ void ACHCharacterPlayer::StartCover()
 			// 도착하면 모션 멈추기...				
 			// Crouch();
 			// 엄폐 애니메이션
-			OnCoverState.Broadcast(true,true);
+			bHighCovered = HitHighCoverDetected;
+			bLowCovered = HitLowCoverDetected;
+			// if(!HasAuthority()) OnCoverState.Broadcast(bHighCovered, bLowCovered);
+			ServerSetCoverState(bHighCovered, bLowCovered);
+			// OnCoverState.Broadcast(true,true);
 			
 			// 움직임 속도 제한
 			UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
@@ -882,7 +904,11 @@ void ACHCharacterPlayer::StartCover()
 			}
 			
 			// 엄폐 애니메이션
-			OnCoverState.Broadcast(false, true);
+			bHighCovered = HitHighCoverDetected;
+			bLowCovered = HitLowCoverDetected;
+			// if(!HasAuthority()) OnCoverState.Broadcast(bHighCovered, bLowCovered);
+			ServerSetCoverState(bHighCovered, bLowCovered);
+			// OnCoverState.Broadcast(false, true);
 			Crouch();
 			// 움직임 속도 제한
 			UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
@@ -922,7 +948,12 @@ void ACHCharacterPlayer::StartCover()
 void ACHCharacterPlayer::StopCover()
 {
 	// Cancel Cover Anim Montage
-	OnCoverState.Broadcast(false,false);
+	bHighCovered = false;
+	bLowCovered = false;
+	// if(!HasAuthority())
+	// OnCoverState.Broadcast(bHighCovered, bLowCovered);
+	ServerSetCoverState(bHighCovered, bLowCovered);
+	// OnCoverState.Broadcast(false,false);
 
 	// 입력 속성 변경(1인칭일 때는 변경 X)
 	if(!bIsFirstPersonPerspective)
@@ -930,7 +961,7 @@ void ACHCharacterPlayer::StopCover()
 		// SetCharacterControl(ECharacterControlType::Third);
 		ServerRPC_SetCharacterControl(ECharacterControlType::Third);
 	}
-			
+	
 	bCovered = false;
 	UE_LOG(LogTemp, Log, TEXT("UnCovered"));
 }
