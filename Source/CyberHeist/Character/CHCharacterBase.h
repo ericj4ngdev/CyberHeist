@@ -110,7 +110,7 @@ protected:
 	TMap<ECharacterControlType, class UCHCharacterControlData*> CharacterControlManager;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	ECharacterControlType CurrentCharacterControlType;
 	TMap<ECharacterControlType, class UCHCharacterControlData*> GetCharacterControlManager() {return CharacterControlManager;}
 	FORCEINLINE ECharacterControlType GetCurrentCharacterControlType() { return CurrentCharacterControlType; }
@@ -339,7 +339,7 @@ public:
 
 	void MoveActorLocation(const FVector& Destination, float InterpSpeed);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite)
 	uint8 bNearWall : 1;
 
 	FORCEINLINE void SetNearWall(uint8 bNewNearWall){ bNearWall = bNewNearWall; }

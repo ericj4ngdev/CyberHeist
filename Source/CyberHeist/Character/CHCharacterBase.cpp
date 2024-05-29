@@ -514,7 +514,8 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ACHCharacterBase, bAiming);
 	DOREPLIFETIME(ACHCharacterBase, bTPAimingCloser);	
 	DOREPLIFETIME(ACHCharacterBase, bFPScopeAiming);
-	
+	DOREPLIFETIME(ACHCharacterBase, bNearWall);
+	DOREPLIFETIME(ACHCharacterBase, CurrentCharacterControlType);	// ?	
 }
 
 void ACHCharacterBase::EquipWeapon()

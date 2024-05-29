@@ -813,7 +813,10 @@ void ACHGunRifle::CancelPullTrigger()
 	if(!bIsEquipped) return;
 	// AttackTargetActor = nullptr;
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
-		OwningCharacter->bUseControllerRotationYaw = false; 
+	{
+		OwningCharacter->bUseControllerRotationYaw = false;
+		// 리플리 하기
+	}
 
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First
