@@ -3,6 +3,7 @@
 
 #include "Character/CHCharacterBase.h"
 
+#include "CHCharacterMovementComponent.h"
 #include "CyberHeist.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/CapsuleComponent.h"
@@ -21,7 +22,8 @@
 
 
 // Sets default values
-ACHCharacterBase::ACHCharacterBase()
+ACHCharacterBase::ACHCharacterBase(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// Pawn
 	bUseControllerRotationPitch = false;
@@ -232,7 +234,12 @@ FName ACHCharacterBase::GetWeaponAttachPoint() const
 
 void ACHCharacterBase::SetAiming(uint8 bNewAiming)
 {
-	bAiming = bNewAiming;
+	UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
+	if(CHMovement)
+	{
+		bAiming = bNewAiming;
+		CHMovement->SetAimingCommand(bAiming);
+	}	
 	ServerSetAiming(bAiming);
 	
 	OnCombat.Broadcast(bAiming);		// UI
@@ -272,19 +279,31 @@ void ACHCharacterBase::SetCharacterControl(ECharacterControlType NewCharacterCon
 
 void ACHCharacterBase::StartSprint() 
 {
-	if(bAiming || GetCharacterMovement()->IsFalling())
+	UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
+	if(CHMovement)
 	{
-		bSprint = false;		
-		return;
-	}
+		if(bAiming || CHMovement->IsFalling())
+		{
+			bSprint = false;
+			CHMovement->SetSprintCommand(bSprint);
+			return;
+		}
 	
-	UE_LOG(LogTemp, Log, TEXT("StartSprint"));
-	bSprint = true;	
+		UE_LOG(LogTemp, Log, TEXT("StartSprint"));
+		
+		bSprint = true;
+		CHMovement->SetSprintCommand(bSprint);
+	}
 }
 
 void ACHCharacterBase::StopSprint()
 {
-	bSprint = false; 
+	UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
+	if(CHMovement)
+	{
+		bSprint = false;
+		CHMovement->SetSprintCommand(bSprint);
+	}
 	UE_LOG(LogTemp, Log, TEXT("bSprint is %s"), bSprint ? TEXT("true") : TEXT("false"));
 }
 
@@ -476,6 +495,18 @@ void ACHCharacterBase::EquipWeapon()
 {
 	CurrentWeapon->SetOwningCharacter(this);
 	CurrentWeapon->Equip();
+	UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
+	if(CHMovement)
+	{
+		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun)
+		{
+			CHMovement->SetCurrentGun(true);
+		}
+		else
+		{
+			CHMovement->SetCurrentGun(false);
+		}
+	}
 
 	UAnimMontage* Equip1PMontage = CurrentWeapon->GetEquip1PMontage();
 	if (Equip1PMontage && GetFirstPersonMesh())

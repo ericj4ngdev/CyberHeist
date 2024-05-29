@@ -20,8 +20,11 @@
 #include "UI/UCHCrossHairWidget.h"
 #include "CyberHeist.h"
 #include "Net/UnrealNetwork.h"
+#include "CHCharacterMovementComponent.h"
 
-ACHCharacterPlayer::ACHCharacterPlayer()
+
+ACHCharacterPlayer::ACHCharacterPlayer(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCHCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// ThirdPersonCamera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -201,7 +204,7 @@ void ACHCharacterPlayer::BeginPlay()
 
 void ACHCharacterPlayer::Tick(float DeltaTime)
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::Tick(DeltaTime);
 
 
@@ -248,7 +251,7 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 		// Debug 캡슐 그리기
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 	}
-	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	
 }
 
@@ -578,12 +581,16 @@ void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
 	if(bAiming) speed = SneakSpeed;
 	if(CurrentWeapon)
 	{
-		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = SneakSpeed;
+		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun)
+		{
+			speed = SneakSpeed;
+		}		
 	}
+	
 	AddMovementInput(ForwardDirection, MovementVector.Y * speed);
 	AddMovementInput(RightDirection, MovementVector.X * speed);
-
-	GetCharacterMovement()->MaxWalkSpeed = speed;
+	
+	// GetCharacterMovement()->MaxWalkSpeed = speed;
 
 	// UE_LOG(LogTemp, Log, TEXT("bSprint : %d	WalkSpeed : %f	RunSpeed : %f	speed : %f"), bSprint, WalkSpeed, RunSpeed, speed);
 }
@@ -655,9 +662,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 			// AngleForDirection > 0     // 방향
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
 			CameraBoom->SocketOffset = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y * InputVectorDirectionByCamera,NewCharacterControl->SocketOffset.Z);
-			// UE_LOG(LogTemp, Log, TEXT("NewCharacterControl->CameraPosition.Y : %f"), NewCharacterControl->CameraPosition.Y);
-
-				
+			// UE_LOG(LogTemp, Log, TEXT("NewCharacterControl->CameraPosition.Y : %f"), NewCharacterControl->CameraPosition.Y);			
 			return;
 		}
 		// 입력 벡터 
@@ -680,7 +685,7 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 			// bool IsRight = (AngleForDirection > 0) ? true : false; 
 			MoveDirection = WallParallel * AngleForDirection;
 			
-			SetActorRotation((-HitResult.ImpactNormal).Rotation());
+			SetActorRotation((-HitResult.ImpactNormal).Rotation());			
 			AddMovementInput(MoveDirection, SneakSpeed);
 			// Want to = 법선 벡터 
 			// current = 현재 내 액터의 rotation
@@ -700,6 +705,11 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 			}			
 			
 			bCovered = false;
+			UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
+			if(CHMovement)
+			{
+				CHMovement->SetCovered(bCovered);
+			}
 			UE_LOG(LogTemp, Log, TEXT("UnCovered"));
 		}		
 	}
@@ -711,11 +721,15 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);	
 
 		float speed = bSprint ? RunSpeed : WalkSpeed;
-		// if(bAiming) speed = WalkSpeed;
+		if(bAiming) speed = WalkSpeed;
 		if(bIsCrouched) speed = SneakSpeed;
+		UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
 		if(CurrentWeapon)
 		{
-			if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = SneakSpeed;
+			if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun)
+			{
+				speed = SneakSpeed;
+			}		
 		}
 	
 		// DrawDebugDirectionalArrow(GetWorld(),GetActorLocation(), GetActorLocation() + ForwardDirection * 100.0f, 10.0f, FColor::Cyan, false, -1, 0 ,5.0f);
@@ -723,8 +737,9 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 	
 		AddMovementInput(ForwardDirection, MovementVector.Y * speed);
 		AddMovementInput(RightDirection, MovementVector.X * speed);
-		GetCharacterMovement()->MaxWalkSpeed = speed;
-		// UE_LOG(LogTemp, Log, TEXT("bSprint : %d	WalkSpeed : %f	RunSpeed : %f	speed : %f"), bSprint, WalkSpeed, RunSpeed, speed);		
+		//GetCharacterMovement()->MaxWalkSpeed = speed;
+		// CH_LOG(LogCHNetwork, Log, TEXT("bSprint : %d MaxWalkSpeed : %f	speed : %f"), bSprint, GetCharacterMovement()->MaxWalkSpeed, speed)		
+		// CH_LOG(LogCHNetwork, Log, TEXT("bSprint : %d	WalkSpeed : %f	RunSpeed : %f	speed : %f"), bSprint, WalkSpeed, RunSpeed, speed);		
 	}	
 }
 
@@ -828,7 +843,12 @@ void ACHCharacterPlayer::StartCover()
 			OnCoverState.Broadcast(true,true);
 			
 			// 움직임 속도 제한
-			GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
+			UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
+			if(CHMovement)
+			{
+				CHMovement->SetCovered(bCovered);
+			}
+			// GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
 			
 			// 입력 속성 변경
 			// SetCharacterControl(ECharacterControlType::ThirdCover);
@@ -865,7 +885,12 @@ void ACHCharacterPlayer::StartCover()
 			OnCoverState.Broadcast(false, true);
 			Crouch();
 			// 움직임 속도 제한
-			GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
+			UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
+			if(CHMovement)
+			{
+				CHMovement->SetCovered(bCovered);
+			}
+			// GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
 			
 			// 입력 속성 변경
 			// 1인칭일 때는 무시
@@ -1232,8 +1257,8 @@ void ACHCharacterPlayer::PressSprint()
 
 void ACHCharacterPlayer::ReleaseSprint()
 {
-	StopSprint();
-	ServerRPC_StopSprint();
+	StopSprint();	// 로컬
+	ServerRPC_StopSprint();	// 서버 바꾸기
 }
 
 void ACHCharacterPlayer::StartSprint()

@@ -10,7 +10,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-ACHCharacterNonPlayer::ACHCharacterNonPlayer()
+ACHCharacterNonPlayer::ACHCharacterNonPlayer(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// GetMesh()->SetHiddenInGame(true);
 

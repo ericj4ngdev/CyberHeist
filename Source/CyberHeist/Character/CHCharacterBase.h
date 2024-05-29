@@ -43,7 +43,7 @@ class CYBERHEIST_API ACHCharacterBase : public ACharacter, public ICHCharacterWi
 
 public:
 	// Sets default values for this character's properties
-	ACHCharacterBase();
+	ACHCharacterBase(const FObjectInitializer& ObjectInitializer);
 
 	virtual void PostInitializeComponents() override;
 protected:

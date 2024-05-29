@@ -17,7 +17,7 @@ class CYBERHEIST_API ACHCharacterNonPlayer : public ACHCharacterBase, public ICH
 	GENERATED_BODY()
 	
 public:
-	ACHCharacterNonPlayer();
+	ACHCharacterNonPlayer(const FObjectInitializer& ObjectInitializer);
 
 	virtual void Tick(float DeltaSeconds) override;
 public:

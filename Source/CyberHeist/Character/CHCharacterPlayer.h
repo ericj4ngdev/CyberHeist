@@ -25,7 +25,7 @@ class CYBERHEIST_API ACHCharacterPlayer : public ACHCharacterBase, public ICHCha
 	GENERATED_BODY()
 	
 public:
-	ACHCharacterPlayer();
+	ACHCharacterPlayer(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	virtual void BeginPlay() override;
@@ -213,6 +213,8 @@ public:
 	void ReleaseSprint();
 	virtual void StartSprint() override;
 	virtual void StopSprint() override;
+
+	
 
 	UFUNCTION()
 	void OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

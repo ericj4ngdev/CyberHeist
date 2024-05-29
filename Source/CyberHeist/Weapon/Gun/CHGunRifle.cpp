@@ -1084,7 +1084,6 @@ void ACHGunRifle::Reload()
 	}
 
 	// 탄창 증가
-
 	// 총알이 있다면
 	if(CurrentAmmo > 0)
 	{
@@ -1101,6 +1100,7 @@ void ACHGunRifle::Reload()
 			CurrentAmmo = 0;
 		}		
 	}
+	
 	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, [this]()
 	{
 		bReloading = false;		
