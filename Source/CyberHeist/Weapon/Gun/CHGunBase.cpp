@@ -306,6 +306,10 @@ void ACHGunBase::OnRep_Equipped()
 	
 }
 
+void ACHGunBase::OnRep_Trigger()
+{
+}
+
 void ACHGunBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

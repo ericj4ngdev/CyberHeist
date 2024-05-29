@@ -176,18 +176,6 @@ void ACHCharacterBase::SetMappingContextPriority(const UInputMappingContext* Map
 	
 }
 
-void ACHCharacterBase::OnRep_Aiming()
-{
-	// 애니메이션 변화? 
-}
-
-void ACHCharacterBase::OnRep_TPAimingCloser()
-{
-}
-
-void ACHCharacterBase::OnRep_FPScopeAiming()
-{
-}
 
 void ACHCharacterBase::PostInitializeComponents()
 {
@@ -275,11 +263,74 @@ void ACHCharacterBase::ServerSetTPAimingCloser_Implementation(bool bNewTPAimingC
 void ACHCharacterBase::ServerSetAiming_Implementation(bool bIsAiming)
 {
 	bAiming = bIsAiming;
-	GetCharacterMovement()->MaxWalkSpeed = bAiming ? SneakSpeed : WalkSpeed;
 }
 
 void ACHCharacterBase::SetCharacterControl(ECharacterControlType NewCharacterControlType)
 {
+	
+}
+
+void ACHCharacterBase::StartSprint() 
+{
+	if(bAiming || GetCharacterMovement()->IsFalling())
+	{
+		bSprint = false;		
+		return;
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("StartSprint"));
+	bSprint = true;	
+}
+
+void ACHCharacterBase::StopSprint()
+{
+	bSprint = false; 
+	UE_LOG(LogTemp, Log, TEXT("bSprint is %s"), bSprint ? TEXT("true") : TEXT("false"));
+}
+
+void ACHCharacterBase::ServerRPC_StartSprint_Implementation()
+{
+	StartSprint();
+}
+
+bool ACHCharacterBase::ServerRPC_StartSprint_Validate()
+{
+	return true;
+}
+
+void ACHCharacterBase::ServerRPC_StopSprint_Implementation()
+{
+	StopSprint();
+}
+
+bool ACHCharacterBase::ServerRPC_StopSprint_Validate()
+{
+	return true;
+}
+
+void ACHCharacterBase::OnRep_Sprint()
+{
+	// GetCharacterMovement()->MaxWalkSpeed = bSprint ? RunSpeed : WalkSpeed;
+}
+
+void ACHCharacterBase::OnRep_Cover()
+{
+	// GetCharacterMovement()->MaxWalkSpeed = bCovered ? SneakSpeed : WalkSpeed;
+}
+
+void ACHCharacterBase::OnRep_Aiming()
+{
+	// GetCharacterMovement()->MaxWalkSpeed = bAiming ? SneakSpeed : WalkSpeed;
+}
+
+void ACHCharacterBase::OnRep_TPAimingCloser()
+{
+	
+}
+
+void ACHCharacterBase::OnRep_FPScopeAiming()
+{
+	
 }
 
 void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)
@@ -413,6 +464,8 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACHCharacterBase, CurrentWeapon);
+	DOREPLIFETIME(ACHCharacterBase, bSprint);
+	DOREPLIFETIME(ACHCharacterBase, bCovered);
 	DOREPLIFETIME(ACHCharacterBase, Inventory);
 	DOREPLIFETIME(ACHCharacterBase, bAiming);
 	DOREPLIFETIME(ACHCharacterBase, bTPAimingCloser);	

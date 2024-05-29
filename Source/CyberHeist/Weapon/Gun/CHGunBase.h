@@ -279,9 +279,13 @@ protected:
 	UFUNCTION()
 	void OnRep_Equipped();
 	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Properties|State")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, ReplicatedUsing = OnRep_Trigger,Category = "Properties|State")
 	uint8 bTrigger : 1;
 
+	UFUNCTION()
+	void OnRep_Trigger();
+	
+	
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Properties|State")
 	uint8 bReloading : 1;
 

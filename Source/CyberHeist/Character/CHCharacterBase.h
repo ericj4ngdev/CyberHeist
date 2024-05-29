@@ -111,6 +111,7 @@ protected:
 
 public:
 	void SetAiming(uint8 bNewAiming);
+	
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(bool bIsAiming);	
 	FORCEINLINE uint8 GetAiming() const { return bAiming; }
@@ -130,9 +131,12 @@ public:
 	
 	// Cover
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Cover, Category = Animation)
 	uint8 bCovered : 1;	
 
+	UFUNCTION()
+	void OnRep_Cover();
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> TakeCoverMontage;
 
@@ -142,7 +146,7 @@ public:
 	
 public:
 	virtual void SetCharacterControl(ECharacterControlType NewCharacterControlType);
-
+	
 	// Dead
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
@@ -202,11 +206,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SneakSpeed;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Sprint, Category = "Movement")
 	uint8 bSprint : 1;
 
-	// UFUNCTION(Blueprintable)
-	// void FootStepSound();
+	virtual void StartSprint();
+	virtual void StopSprint();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPC_StartSprint();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPC_StopSprint();
+	
+	/*UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_Sprint(uint8 NewSprint);*/
+	
+	UFUNCTION()
+	void OnRep_Sprint();
 
 	
 public:

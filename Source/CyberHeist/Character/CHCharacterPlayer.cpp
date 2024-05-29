@@ -179,8 +179,8 @@ void ACHCharacterPlayer::BeginPlay()
 	// 클라만
 	if (!HasAuthority())
 	{
-		// SetPerspective(bIsFirstPersonPerspective);
-		ServerRPC_SetPerspective(bIsFirstPersonPerspective);
+		SetPerspective(bIsFirstPersonPerspective);
+		// ServerRPC_SetPerspective(bIsFirstPersonPerspective);
 	}
 
 	// 이벤트 등록
@@ -201,6 +201,7 @@ void ACHCharacterPlayer::BeginPlay()
 
 void ACHCharacterPlayer::Tick(float DeltaTime)
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::Tick(DeltaTime);
 
 
@@ -247,7 +248,7 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 		// Debug 캡슐 그리기
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 	}
-
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	
 }
 
@@ -328,7 +329,7 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-	EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::TogglePerspective);
+	EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::PressV);
 	// EnhancedInputComponent->BindAction(ChangePerspectiveControlAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ChangePerspectiveControlData);
 
 	
@@ -339,8 +340,8 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	// EnhancedInputComponent->BindAction(ThirdCoveredMoveAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdCoveredMove);
 	EnhancedInputComponent->BindAction(ThirdLookAction, ETriggerEvent::Triggered, this, &ACHCharacterPlayer::ThirdLook);
 
-	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::StartSprint);
-	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::StopSprint);
+	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACHCharacterPlayer::PressSprint);
+	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACHCharacterPlayer::ReleaseSprint);
 
 	EnhancedInputComponent->BindAction(ChangeNextWeaponAction, ETriggerEvent::Triggered, this, &ACHCharacterBase::NextWeapon);
 	EnhancedInputComponent->BindAction(ChangePrevWeaponAction, ETriggerEvent::Triggered, this, &ACHCharacterBase::PreviousWeapon);
@@ -574,7 +575,7 @@ void ACHCharacterPlayer::FirstMove(const FInputActionValue& Value)
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 	float speed = bSprint ? RunSpeed : WalkSpeed;
-	if(bAiming) speed = WalkSpeed;
+	if(bAiming) speed = SneakSpeed;
 	if(CurrentWeapon)
 	{
 		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) speed = SneakSpeed;
@@ -740,6 +741,7 @@ void ACHCharacterPlayer::TakeCover()
 	// 1인칭일 때는 비활성화
 	if(bIsFirstPersonPerspective)
 	{
+		// 틸팅
 		return;
 	}
 	
@@ -1086,24 +1088,29 @@ void ACHCharacterPlayer::TiltLeftRelease()
 		TiltingLeftTimeline.PlayFromStart();
 	}
 }
+void ACHCharacterPlayer::PressV()
+{
+	TogglePerspective();
+	ServerRPC_SetPerspective(bIsFirstPersonPerspective);
+}
 
 void ACHCharacterPlayer::TogglePerspective()
 {
 	if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
-	|| CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
-	|| CurrentCharacterControlType == ECharacterControlType::FirstAim
-	|| CurrentCharacterControlType == ECharacterControlType::FirstScopeAim) return;
+		|| CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
+		|| CurrentCharacterControlType == ECharacterControlType::FirstAim
+		|| CurrentCharacterControlType == ECharacterControlType::FirstScopeAim) return;	
 	// 서버 RPC 날리기
 	bIsFirstPersonPerspective = !bIsFirstPersonPerspective;
-	// SetPerspective(bIsFirstPersonPerspective);
-	ServerRPC_SetPerspective(bIsFirstPersonPerspective);
+	SetPerspective(bIsFirstPersonPerspective);
 }
 
 void ACHCharacterPlayer::ServerRPC_SetPerspective_Implementation(bool Is1PPerspective)
 {
-	bIsFirstPersonPerspective = Is1PPerspective;
+	TogglePerspective();
+	// bIsFirstPersonPerspective = Is1PPerspective;
 	// OnRep_FirstPersonPerspective();
-	MulticastRPC_SetPerspective(bIsFirstPersonPerspective);	
+	// MulticastRPC_SetPerspective(bIsFirstPersonPerspective);	
 }
 
 bool ACHCharacterPlayer::ServerRPC_SetPerspective_Validate(bool Is1PPerspective)
@@ -1111,12 +1118,12 @@ bool ACHCharacterPlayer::ServerRPC_SetPerspective_Validate(bool Is1PPerspective)
 	return true;
 }
 
-void ACHCharacterPlayer::MulticastRPC_SetPerspective_Implementation(bool Is1PPerspective)
+/*void ACHCharacterPlayer::MulticastRPC_SetPerspective_Implementation(bool Is1PPerspective)
 {
 	// 클라 && 서버 X => 클라 본인 제외 
 	// if(IsLocallyControlled() && !HasAuthority()) return;
 	SetPerspective(Is1PPerspective);
-}
+}*/
 
 void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 {
@@ -1177,59 +1184,6 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 void ACHCharacterPlayer::OnRep_FirstPersonPerspective()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	/*if (CurrentCharacterControlType == ECharacterControlType::ThirdAim
-	|| CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
-	|| CurrentCharacterControlType == ECharacterControlType::FirstAim
-	|| CurrentCharacterControlType == ECharacterControlType::FirstScopeAim) return;
-	if (bIsFirstPersonPerspective)
-	{
-		// 1인칭
-		SetCharacterControl(ECharacterControlType::First);
-		// ServerRPC_SetCharacterControl(ECharacterControlType::First);
-		
-		StopCover();
-		bCovered = false;
-
-		// 이하 동기화 X
-		if(IsLocallyControlled())
-		{
-			ThirdPersonCamera->Deactivate();
-			GetMesh()->SetVisibility(false, true);
-			GetMesh()->CastShadow = true;
-			GetMesh()->bCastHiddenShadow = true;
-
-			FirstPersonCamera->Activate();
-			FirstPersonMesh->SetVisibility(true);
-			if(CurrentWeapon)
-			{
-				UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
-				CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
-				CurrentWeapon->SetWeaponMeshVisibility(false);
-			}
-		}		
-	}
-	else
-	{
-		// 3인칭
-		bCovered = false;
-		SetCharacterControl(ECharacterControlType::Third);
-		// ServerRPC_SetCharacterControl(ECharacterControlType::Third);
-		
-		FirstPersonCamera->Deactivate();
-		FirstPersonMesh->SetVisibility(false, true);
-		CH_LOG(LogCHNetwork, Log, TEXT("FirstPersonCamera->Deactivate();"))
-
-		ThirdPersonCamera->Activate();
-		GetMesh()->SetVisibility(true);
-		GetMesh()->CastShadow = true;
-		GetMesh()->bCastHiddenShadow = true;
-		
-		if(CurrentWeapon)
-		{
-			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
-			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true, true);
-		}
-	}*/
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
@@ -1270,26 +1224,30 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 		
 }
 
-void ACHCharacterPlayer::StartSprint() 
-{	
-	if(bAiming || GetCharacterMovement()->IsFalling())
-	{
-		bSprint = false;		
-		return;
-	}
-	// if() return;
-	UE_LOG(LogTemp, Log, TEXT("StartSprint"));
-	bSprint = true;
+void ACHCharacterPlayer::PressSprint()
+{
+	StartSprint();
+	ServerRPC_StartSprint();
+}
+
+void ACHCharacterPlayer::ReleaseSprint()
+{
+	StopSprint();
+	ServerRPC_StopSprint();
+}
+
+void ACHCharacterPlayer::StartSprint()
+{
+	Super::StartSprint();
 }
 
 void ACHCharacterPlayer::StopSprint()
-{ 
-	bSprint = false; 
-	UE_LOG(LogTemp, Log, TEXT("bSprint is %s"), bSprint ? TEXT("true") : TEXT("false"));
+{
+	Super::StopSprint();
 }
 
 void ACHCharacterPlayer::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// if(bCovered) return;
 

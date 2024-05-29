@@ -145,6 +145,7 @@ protected:
 	void TiltRightRelease();
 	void TiltLeft();
 	void TiltLeftRelease();
+	void PressV();
 	// void StopTilt(const float Value);
 
 	UPROPERTY(EditAnywhere) // Timeline 생성
@@ -170,8 +171,8 @@ protected:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRPC_SetPerspective(bool Is1PPerspective);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPC_SetPerspective(bool Is1PPerspective);
+	/*UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetPerspective(bool Is1PPerspective);*/
 
 	// Sets the perspective
 	void SetPerspective(uint8 Is1PPerspective);
@@ -208,8 +209,10 @@ public:
 
 	
 public:
-	void StartSprint();
-	void StopSprint();
+	void PressSprint();
+	void ReleaseSprint();
+	virtual void StartSprint() override;
+	virtual void StopSprint() override;
 
 	UFUNCTION()
 	void OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
