@@ -45,6 +45,11 @@ ACHGunBase::ACHGunBase()
 	ScopeCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ScopeCamera"));
 	ScopeCamera->SetupAttachment(WeaponMesh1P);	
 	ScopeCamera->bUsePawnControlRotation = true;	
+
+	MuzzleCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("MuzzleCollision"));
+	// MuzzleCollision->SetRelativeLocation()
+	MuzzleCollision->SetupAttachment(CollisionComp);	
+	// MuzzleCollision->InitCapsuleSize(40.0f, 50.0f);	
 	
 	bReloading = false;	
 	bInputBindingsSetup = false;
@@ -58,6 +63,9 @@ void ACHGunBase::BeginPlay()
 	// Effect->AttachToComponent(WeaponMesh3P, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("MuzzleFlashSocket"));
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHGunBase::OnSphereBeginOverlap);
+
+	MuzzleCollision->OnComponentBeginOverlap.AddDynamic(this, &ACHGunBase::OnNearWall);
+	MuzzleCollision->OnComponentEndOverlap.AddDynamic(this,&ACHGunBase::OnFarFromWall);
 }
 
 void ACHGunBase::Tick(float DeltaSeconds)
@@ -80,7 +88,34 @@ void ACHGunBase::Tick(float DeltaSeconds)
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
 		if(MuzzleFlashSocket == nullptr) return; 
 	}*/
-	
+	if(HasAuthority())
+	{
+		if (MuzzleCollision)
+		{
+			// 캡슐의 위치와 방향 설정
+			FVector CapsuleLocation = MuzzleCollision->GetComponentLocation();
+			FRotator CapsuleRotation = MuzzleCollision->GetComponentRotation();
+
+			// 캡슐의 반지름과 높이 설정
+			float CapsuleRadius = MuzzleCollision->GetScaledCapsuleRadius();
+			float CapsuleHalfHeight = MuzzleCollision->GetScaledCapsuleHalfHeight();
+
+			// Trace 시작점과 끝점 설정
+			FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
+			FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
+		
+			FHitResult HitResult;
+			FCollisionQueryParams TraceParams(FName(TEXT("Coveace")), true, this);
+			// Params.AddIgnoredActor(this);
+			// TraceParams.AddIgnoredActor(GetOwner());
+			// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
+			bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), TraceParams);
+		
+			FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+			// Debug 캡슐 그리기
+			DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+		}
+	}
 }
 
 void ACHGunBase::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -105,6 +140,40 @@ UAnimMontage* ACHGunBase::GetEquip1PMontage() const
 UAnimMontage* ACHGunBase::GetEquip3PMontage() const
 {
 	return Equip3PMontage;
+}
+
+void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(HasAuthority())
+	{
+		// 리플리로 총 내리기
+		// 변수 하나 동기화해서 총 못쏘게 하기 
+		OwningCharacter->SetNearWall(true);
+		
+		// 총 내리기
+		StopPrecisionAim();
+		CancelPullTrigger();
+
+		GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);		
+		// SetAiming(false);
+	}
+	CH_LOG(LogCHNetwork, Log, TEXT("[OnNearWall] %d"), OwningCharacter->GetNearWall());
+}
+
+void ACHGunBase::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if(HasAuthority())
+	{
+		OwningCharacter->SetNearWall(false);
+		StayPrecisionAim();
+	}
+	
+	// 기존에 확대 조준 중이었으면 다시 확대 조준으로 돌아가기
+	
+	CH_LOG(LogCHNetwork,Log, TEXT("[OnFarFromWall] %d"), OwningCharacter->GetNearWall());
 }
 
 void ACHGunBase::Equip()

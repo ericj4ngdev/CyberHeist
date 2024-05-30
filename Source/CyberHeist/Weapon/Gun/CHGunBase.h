@@ -136,7 +136,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Properties|Effect")
 	TObjectPtr<class UParticleSystem> ImpactEffect;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Effect")
 	FVector MuzzleOffset;
 
@@ -146,6 +146,29 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Audio")
 	TObjectPtr<class USoundBase> HitSound;
 
+	// 총신 길이(총구 - 손잡이)
+	// 각 총기 BeginPlay에서 계산	
+	float BarrelLength;
+	// 구체 위치 처음엔 총구. 
+	// 구체는 장착하고서 위치시키기
+	// bEquipped로 구분
+	// 카메라 바라보는 방향을 어캐 가져오지...
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<class UCapsuleComponent> MuzzleCollision;
+
+	UPROPERTY()
+	TObjectPtr<const class USkeletalMeshSocket> HandleSocket_1P;
+
+	UPROPERTY()
+	TObjectPtr<const class USkeletalMeshSocket> HandleSocket_3P;
+
+	UFUNCTION()
+	void OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
 	// properties
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Weapon")

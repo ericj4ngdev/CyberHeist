@@ -226,7 +226,7 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 	FVector End_ = GetActorForwardVector() * 50.0f + Start_;
 	DrawDebugDirectionalArrow(GetWorld(),Start_, End_, 10.0f, FColor::Red, false, -1, 0 ,10.0f);*/
 
-	if(HasAuthority())
+	/*if(HasAuthority())
 	{
 		if (CollisionComp)
 		{
@@ -253,7 +253,7 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 			// Debug 캡슐 그리기
 			DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 		}
-	}
+	}*/
 	
 	// CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	
@@ -415,14 +415,6 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 			GetCharacterMovement()->bOrientRotationToMovement = true;
 			GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		}
-		
-		/*else if(NewCharacterControl == CharacterControlManager[ECharacterControlType::Third])
-		{
-			CH_LOG(LogCHNetwork, Log, TEXT("3pp"))
-			// 클라가 1->3일 때, 서버는 두가지 속성 꺼주기
-			bUseControllerRotationYaw = false;
-			bUseControllerRotationPitch = false;
-		}*/
 	}
 	
 
@@ -1309,7 +1301,7 @@ void ACHCharacterPlayer::StopSprint()
 void ACHCharacterPlayer::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// if(bCovered) return;
+	/*// if(bCovered) return;
 	if(HasAuthority())
 	{
 		// 리플리로 총 내리기
@@ -1326,14 +1318,14 @@ void ACHCharacterPlayer::OnNearWall(UPrimitiveComponent* OverlappedComponent, AA
 		}
 		// SetAiming(false);
 	}
-	UE_LOG(LogTemp,Log, TEXT("[OnNearWall] %d"), GetNearWall());
+	UE_LOG(LogTemp,Log, TEXT("[OnNearWall] %d"), GetNearWall());*/
 }
 
 void ACHCharacterPlayer::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	// 충돌 탈출 시, false로 전환.
-	if(HasAuthority())
+	/*if(HasAuthority())
 	{
 		SetNearWall(false);
 		if(CurrentWeapon)
@@ -1346,13 +1338,13 @@ void ACHCharacterPlayer::OnFarFromWall(UPrimitiveComponent* OverlappedComponent,
 					PlayerController->SetViewTargetWithBlend(CurrentWeapon,0.2);
 					GetFirstPersonMesh()->SetVisibility(false);
 				}
-			}*/
+			}#1#
 		}
 	}
 	
 	// 기존에 확대 조준 중이었으면 다시 확대 조준으로 돌아가기
 	
-	CH_LOG(LogCHNetwork,Log, TEXT("[OnFarFromWall] %d"), GetNearWall());
+	CH_LOG(LogCHNetwork,Log, TEXT("[OnFarFromWall] %d"), GetNearWall());*/
 	// UE_LOG(LogTemp,Log, TEXT("[OnFarFromWall] %d"), GetNearWall());
 }
 

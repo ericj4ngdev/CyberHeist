@@ -45,11 +45,37 @@ ACHGunRifle::ACHGunRifle()
 	CurrentAmmo = 180;
 	MaxAmmoCapacity = 999;
 	bInfiniteAmmo = false;
+
+	MuzzleCollision->SetRelativeLocation(FVector(0,80,10));
+	MuzzleCollision->InitCapsuleSize(5.0f, 5.0f);
 }
 
 void ACHGunRifle::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	// ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	FTransform MuzzleSocketTransform_1P;
+	FTransform HandleSocketTransform_1P;
+	const USkeletalMeshSocket* MuzzleFlashSocket_1P = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
+	// const USkeletalMeshSocket* HandleSocket_1P = GetWeaponMesh1P()->GetSocketByName("Handle");
+	if(MuzzleFlashSocket_1P == nullptr) return;
+	HandleSocket_1P = GetWeaponMesh1P()->GetSocketByName("Handle");
+	MuzzleSocketTransform_1P = MuzzleFlashSocket_1P->GetSocketTransform(GetWeaponMesh1P());
+	HandleSocketTransform_1P = HandleSocket_1P->GetSocketTransform(GetWeaponMesh1P());
+
+	BarrelLength = FVector::Distance(MuzzleSocketTransform_1P.GetLocation(),HandleSocketTransform_1P.GetLocation()); 
+	// CH_LOG(LogCHNetwork, Log, TEXT("1p : %s"),*SocketTransform.GetLocation().ToString())
+
+	// FTransform MuzzleSocketTransform_3P;	
+	// const USkeletalMeshSocket* MuzzleFlashSocket_3P = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+	// MuzzleSocketTransform_3P = MuzzleFlashSocket_3P->GetSocketTransform(GetWeaponMesh3P());
+	HandleSocket_3P = GetWeaponMesh3P()->GetSocketByName("Handle");
+	// if(MuzzleFlashSocket_3P == nullptr) return; 
+	// CH_LOG(LogCHNetwork, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
+
+	CH_LOG(LogCHTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
+	
 	if (HasAuthority())
 	{
 		// SetOwner();
@@ -117,6 +143,30 @@ void ACHGunRifle::Equip()
 		}
 	}
 
+	// 로컬
+	if(!HasAuthority())
+	{
+		AController* OwnerController = OwningCharacter->GetController();		
+		if (OwnerController == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+			return;
+		}
+		// Viewport LineTrace	
+		FVector TraceStart;
+		FRotator Rotation;
+		OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
+		DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
+		FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
+	
+		// 손잡이 위치 
+		FVector Direction = HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) - TraceEnd;
+		// CH_LOG(LogTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
+		MuzzleCollision->SetRelativeLocation(HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) + BarrelLength * TraceEnd);
+		// MuzzleCollision->SetWorldLocation()
+	}
+	
+	
 	if(OwningCharacter->IsLocallyControlled())
 	{
 		if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
@@ -851,6 +901,22 @@ void ACHGunRifle::StartAim()
 	bHoldGun = false;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
+	AController* OwnerController = OwningCharacter->GetController();		
+	if (OwnerController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+		return;
+	}
+	// Viewport LineTrace	
+	FVector TraceStart;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
+	DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
+	FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
+
+	FVector Direction = HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) - TraceEnd;
+	DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
+	DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh1P()),TraceEnd,FColor::Magenta,false,2);
 	if(PlayerCharacter)
 	{
 		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);

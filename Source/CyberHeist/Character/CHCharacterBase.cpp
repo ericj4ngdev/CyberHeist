@@ -149,11 +149,9 @@ void ACHCharacterBase::Tick(float DeltaSeconds)
 
 void ACHCharacterBase::ServerSetCoverState_Implementation(uint8 bNewHighCovered, uint8 bNewLowCovered)
 {
-	CH_LOG(LogCHTemp, Log, TEXT("Begin"))
 	bHighCovered = bNewHighCovered;
 	bLowCovered = bNewLowCovered;
 	// OnCoverState.Broadcast(bHighCovered, bLowCovered);
-	CH_LOG(LogCHTemp, Log, TEXT("End"))	
 }
 
 bool ACHCharacterBase::ServerSetCoverState_Validate(uint8 bNewHighCovered, uint8 bNewLowCovered)
