@@ -134,6 +134,7 @@ void ACHMinigun::Equip()
 			CannonMesh3P->SetVisibility(true, true);
 		}
 	}
+
 	
 	// Set up action bindings
 	if(OwningCharacter->IsLocallyControlled())
@@ -182,12 +183,56 @@ void ACHMinigun::UnEquip()
 void ACHMinigun::Fire()
 {
 	Super::Fire();
+
+	AController* OwnerController = OwningCharacter->GetController();		
+	if (OwnerController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+		return;
+	}
+	// Viewport LineTrace
+	FHitResult ScreenLaserHit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
 	
+	FVector TraceStart;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
+	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
+	FVector TraceEnd = TraceStart + Rotation.Vector() * MaxRange;
+	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
+	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
+	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+	
+	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
+	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
+
+	// 시작지점(총구)
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	FTransform SocketTransform;
+	if(PlayerCharacter->IsInFirstPersonPerspective())
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh1P->GetSocketByName("Muzzle_1");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh1P);
+		if(MuzzleFlashSocket == nullptr) return; 
+	}
+	else
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh3P->GetSocketByName("Muzzle_1");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh3P);
+		if(MuzzleFlashSocket == nullptr) return; 
+	}
+	if(!OwningCharacter->HasAuthority())
+	{
+		LocalFire(HitLocation, SocketTransform);		// 이펙트만. 
+	}
+	ServerRPCFire(HitLocation, SocketTransform);
 }
 
-void ACHMinigun::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
+void ACHMinigun::LocalFire(const FVector& HitLocation, const FTransform& MuzzleTransform)
 {
-	Super::LocalFire(HitLocation, TraceEnd);
+	Super::LocalFire(HitLocation, MuzzleTransform);
 
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr)
@@ -213,30 +258,7 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		OwnerPawn->AddControllerYawInput(RYaw);
 		OwnerPawn->AddControllerPitchInput(RPitch);
 	}
-	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	// Socket
-	FTransform SocketTransform;
-	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority())
-	{
-		if(PlayerCharacter->IsInFirstPersonPerspective())
-		{
-			const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh1P->GetSocketByName("Muzzle_1");
-			SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh1P);
-			if(MuzzleFlashSocket == nullptr) return; 
-		}
-		else
-		{
-			const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh3P->GetSocketByName("Muzzle_1");
-			SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh3P);
-			if(MuzzleFlashSocket == nullptr) return; 
-		}
-	}
-	else
-	{
-		const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh3P->GetSocketByName("Muzzle_1");
-		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh3P);
-		if(MuzzleFlashSocket == nullptr) return; 
-	}
+	
 
 	// Muzzle LineTrace
 	FHitResult MuzzleLaserHit;
@@ -244,23 +266,48 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 
-	FVector MuzzleStart = SocketTransform.GetLocation();
+	FVector MuzzleStart = MuzzleTransform.GetLocation();
 	FVector MuzzleEnd;
-	if(HitLocation.Equals(FVector::ZeroVector))
-	{
-		MuzzleEnd = TraceEnd;
-	}
-	else
-	{
-		MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f; 
-	}
-	UE_LOG(LogTemp, Log, TEXT("HitLocation.Equals(FVector::ZeroVector) : %d "), HitLocation.Equals(FVector::ZeroVector));
+	MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;	
+	
 	
 	// 총구에서 레이저
 	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
-	DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
-	DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	if(PlayerCharacter->HasAuthority())
+	{
+		DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
+		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);
+	}
 	
+	AController* OwnerController = OwnerPawn->GetController();
+	if (OwnerController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController"))
+	}
+	
+	if(OwnerController)
+	{
+		if(OwningCharacter->HasAuthority())
+		{
+			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+			UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
+			AActor* HitActor = MuzzleLaserHit.GetActor();
+			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
+			if (CharacterBase)
+			{
+				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
+				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+			}
+			else
+			{
+				UGameplayStatics::ApplyDamage(HitActor,DamageToCause,OwnerController,this,UDamageType::StaticClass());
+				UE_LOG(LogTemp, Log, TEXT("HitActor : %s"), *GetNameSafe(HitActor))
+			}
+		}
+	}
+
+
 	// 위치가 같다면 정중앙 효과
 	// 다르면 총구 레이저 효과
 	if(ImpactEffect)
@@ -290,35 +337,8 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		}
 	}
 	
-	AController* OwnerController = OwnerPawn->GetController();
-	if (OwnerController == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerController"))
-	}
-	
-	if(OwnerController)
-	{
-		if(HasAuthority())
-		{
-			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
-			UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
-			AActor* HitActor = MuzzleLaserHit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
-			if (CharacterBase)
-			{
-				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
-				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
-			}
-			else
-			{
-				UGameplayStatics::ApplyDamage(HitActor,DamageToCause,OwnerController,this,UDamageType::StaticClass());
-				UE_LOG(LogTemp, Log, TEXT("HitActor : %s"), *GetNameSafe(HitActor))
-			}
-		}
-	}
-	
 	// 궤적
-	FVector BeamEnd = TraceEnd;
+	FVector BeamEnd = HitLocation;
 	if (MuzzleLaserHit.bBlockingHit)
 	{
 		// BeamEnd = Hit.ImpactPoint;
@@ -326,7 +346,7 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 	}
 	else
 	{
-		MuzzleLaserHit.Location = TraceEnd;
+		MuzzleLaserHit.Location = HitLocation;
 	}
 	
 	if (TraceParticles)
@@ -368,7 +388,7 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		UGameplayStatics::SpawnEmitterAtLocation(
 			GetWorld(),
 			MuzzleFlash,
-			SocketTransform
+			MuzzleTransform
 		);
 	}
 
@@ -804,9 +824,8 @@ void ACHMinigun::PullTrigger()
 	UAnimInstance* Cannon3pAnimInstance = CannonMesh3P->GetAnimInstance();
 	if(!Cannon3pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
 	{
-		Cannon3pAnimInstance->Montage_Play(CannonRotateMontage, 1.f);				
-	}
-	
+		Cannon3pAnimInstance->Montage_Play(CannonRotateMontage, 1.f);			
+	}	
 	
 	// not aiming mode
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim

@@ -10,7 +10,10 @@
 
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Character/CHCharacterPlayer.h"
 #include "Net/UnrealNetwork.h"
+#include "Engine/SkeletalMeshSocket.h"
+
 
 // Sets default values
 ACHGunBase::ACHGunBase()
@@ -254,38 +257,10 @@ void ACHGunBase::UnEquip()
 
 void ACHGunBase::Fire()
 {
-	AController* OwnerController = OwningCharacter->GetController();		
-	if (OwnerController == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
-		return;
-	}
-	// Viewport LineTrace
-	FHitResult ScreenLaserHit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
 	
-	FVector TraceStart;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
-	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
-	FVector TraceEnd = TraceStart + Rotation.Vector() * MaxRange;
-	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
-	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
-	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
-	
-	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
-	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
-
-	if(!OwningCharacter->HasAuthority())
-	{
-		LocalFire(HitLocation, TraceEnd);
-	}
-	ServerRPCFire(HitLocation, TraceEnd);	
 }
 
-void ACHGunBase::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
+void ACHGunBase::LocalFire(const FVector& HitLocation, const FTransform& MuzzleTransform)
 {
 	// 쏘는 몽타주가 여기 있다. 총알이 다 차거나 재장전 중일 때 예외처리는 여기서 해야할 듯. 
 	if(!bIsEquipped) return;
@@ -429,22 +404,25 @@ void ACHGunBase::OnRep_Owner()
 	Super::OnRep_Owner();
 }
 
-void ACHGunBase::MulticastRPCFire_Implementation(const FVector& HitLocation, const FVector& TraceEnd)
+void ACHGunBase::MulticastRPCFire_Implementation(const FVector& HitLocation, const FTransform& MuzzleTransform)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
 
 	// 클라 && 서버 X => 클라 본인 제외 
 	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority()) return;
-	LocalFire(HitLocation, TraceEnd);
+	LocalFire(HitLocation, MuzzleTransform);
 }
 
-void ACHGunBase::ServerRPCFire_Implementation(const FVector& HitLocation, const FVector& TraceEnd)
+void ACHGunBase::ServerRPCFire_Implementation(const FVector& HitLocation, const FTransform& MuzzleTransform)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
-	MulticastRPCFire(HitLocation, TraceEnd);
+	// Muzzle에서 ray쏘기
+	// 데미지
+	
+	MulticastRPCFire(HitLocation, MuzzleTransform);		// 
 }
 
-bool ACHGunBase::ServerRPCFire_Validate(const FVector& HitLocation, const FVector& TraceEnd)
+bool ACHGunBase::ServerRPCFire_Validate(const FVector& HitLocation, const FTransform& MuzzleTransform)
 {
 	return true;
 }

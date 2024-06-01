@@ -200,13 +200,58 @@ void ACHGunRPG::UnEquip()
 
 void ACHGunRPG::Fire()
 {
-	Super::Fire();	
+	Super::Fire();
+		AController* OwnerController = OwningCharacter->GetController();		
+	if (OwnerController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+		return;
+	}
+	// Viewport LineTrace
+	FHitResult ScreenLaserHit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+	
+	FVector TraceStart;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
+	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
+	FVector TraceEnd = TraceStart + Rotation.Vector() * MaxRange;
+	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
+	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
+	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+	
+	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
+	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
+
+	// 시작지점(총구)
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	FTransform SocketTransform;
+	// 시점에 따른 발사 지점 설정
+	if(PlayerCharacter->IsInFirstPersonPerspective())
+	{
+		const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh1P->GetSocketByName(FName("MuzzleOffset"));
+		SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh1P);
+	}
+	else
+	{
+		const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh3P->GetSocketByName(FName("MuzzleOffset"));
+		SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh3P);
+	}
+	
+	
+	if(!OwningCharacter->HasAuthority())
+	{
+		LocalFire(HitLocation, SocketTransform);		// 이펙트만. 
+	}
+	ServerRPCFire(HitLocation, SocketTransform);
 }
 
-void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
+void ACHGunRPG::LocalFire(const FVector& HitLocation, const FTransform& MuzzleTransform)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	Super::LocalFire(HitLocation, TraceEnd);
+	Super::LocalFire(HitLocation, MuzzleTransform);
 	
 	if (OwningCharacter == nullptr || OwningCharacter->GetController() == nullptr)
 	{
@@ -225,22 +270,6 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
 	}
 	
-	/*
-	FVector Start;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(Start, Rotation);
-	
-	FHitResult HitResult;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
-	
-	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
-	
-	FVector End = Start + Rotation.Vector() * MaxRange;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult,Start,End, ECollisionChannel::ECC_GameTraceChannel1, Params);*/
-	
-	FVector HitTarget = FVector{};
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 	
 	// Try and fire a projectile
@@ -249,55 +278,17 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 		UE_LOG(LogTemp, Log, TEXT("ProjectileClass is null"));
 		return;
 	}
-	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	// 시점에 따른 발사 지점 설정
-
-	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority())
-	{
-		if(PlayerCharacter->IsInFirstPersonPerspective())
-		{
-			const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh1P->GetSocketByName(FName("MuzzleOffset"));
-			const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh1P);
-		
-			// HitTarget = HitResult.ImpactPoint;
-			HitTarget = HitLocation;
-			FVector ToTarget = HitTarget - SocketTransform.GetLocation();
-			FRotator TargetRotation = ToTarget.Rotation();
-		
-			SpawnLocation = SocketTransform.GetLocation(); 
-			SpawnRotation = TargetRotation;
-		}
-		else
-		{
-			const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh3P->GetSocketByName(FName("MuzzleOffset"));
-			const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh3P);
-
-			HitTarget = HitLocation;
-			FVector ToTarget = HitTarget - SocketTransform.GetLocation();
-			FRotator TargetRotation = ToTarget.Rotation();
-					
-			SpawnLocation = SocketTransform.GetLocation(); 
-			SpawnRotation = TargetRotation;	
-		}
-	}
-	else
-	{
-		const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh3P->GetSocketByName(FName("MuzzleOffset"));
-		const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh3P);
-
-		HitTarget = HitLocation;
-		FVector ToTarget = HitTarget - SocketTransform.GetLocation();
-		FRotator TargetRotation = ToTarget.Rotation();
-					
-		SpawnLocation = SocketTransform.GetLocation(); 
-		SpawnRotation = TargetRotation;	
-	}
+	
+	FVector SpawnLocation = MuzzleTransform.GetLocation(); 
 
 	// Set Spawn Collision Handling Override
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.Owner = GetOwner();
 	ActorSpawnParams.Instigator = InstigatorPawn;
 	ACHProjectile* Projectile = nullptr;
+
+	FVector ToTarget = HitLocation - MuzzleTransform.GetLocation();	
+	SpawnRotation = ToTarget.Rotation();
 	
 	// 멀티캐스트
 	if(HasAuthority())
@@ -314,7 +305,7 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 
 	// Get the animation object for the arms mesh
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();	
+	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();
 
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &ACHGunRPG::FireActionEnd);

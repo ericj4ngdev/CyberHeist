@@ -72,7 +72,7 @@ void ACHGunRifle::BeginPlay()
 	FTransform MuzzleSocketTransform_3P;
 	FTransform HandleSocketTransform_3P;
 	const USkeletalMeshSocket* MuzzleFlashSocket_3P = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
-	CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
+	
 	if(MuzzleFlashSocket_3P == nullptr) return; 
 	HandleSocket_3P = GetWeaponMesh3P()->GetSocketByName("Handle");
 	MuzzleSocketTransform_3P = MuzzleFlashSocket_3P->GetSocketTransform(GetWeaponMesh3P());
@@ -99,7 +99,7 @@ void ACHGunRifle::BeginPlay()
 void ACHGunRifle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
+	// CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 }
 
 void ACHGunRifle::Equip()
@@ -114,6 +114,7 @@ void ACHGunRifle::Equip()
 	if(HandSocket)
 	{
 		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
+		CH_LOG(LogCHTemp, Log, TEXT("HandSocket: %s"), *HandSocket->GetSocketLocation(OwningCharacter->GetMesh()).ToString())
 	}
 
 	// 자기 세상에서만 장착. 서버는 그럼??
@@ -144,9 +145,7 @@ void ACHGunRifle::Equip()
 	
 	if (WeaponMesh3P)
 	{
-		CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
-		CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 		
 		WeaponMesh3P->CastShadow = true;
 		WeaponMesh3P->bCastHiddenShadow = true;
@@ -272,12 +271,61 @@ void ACHGunRifle::UnEquip()
 
 void ACHGunRifle::Fire()
 {
-	Super::Fire();	
+	Super::Fire();
+	AController* OwnerController = OwningCharacter->GetController();		
+	if (OwnerController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+		return;
+	}
+	// Viewport LineTrace
+	FHitResult ScreenLaserHit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+	
+	FVector TraceStart;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
+	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
+	FVector TraceEnd = TraceStart + Rotation.Vector() * MaxRange;
+	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
+	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
+	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+	
+	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
+	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
+
+	// 시작지점(총구)
+	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	FTransform SocketTransform;
+
+	// 본인
+	if(PlayerCharacter->IsInFirstPersonPerspective())
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
+		if(MuzzleFlashSocket == nullptr) return;
+		CH_LOG(LogCHTemp, Log, TEXT("1p : %s"),*SocketTransform.GetLocation().ToString())
+	}
+	else
+	{
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
+		if(MuzzleFlashSocket == nullptr) return; 
+		CH_LOG(LogCHTemp, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
+	}	
+	
+	if(!OwningCharacter->HasAuthority())
+	{
+		LocalFire(HitLocation, SocketTransform);		// 이펙트만. 
+	}
+	ServerRPCFire(HitLocation, SocketTransform);
 }
 
-void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
+void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& MuzzleTransform)
 {
-	Super::LocalFire(HitLocation, TraceEnd);	
+	Super::LocalFire(HitLocation, MuzzleTransform);
 
 	// 예외처리
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
@@ -316,60 +364,21 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	// 이야.. 이거 진짜 부조린뎈ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
 	// 그럼 GasShooter는 어캐함?? ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
 	// Socket
-	FTransform SocketTransform;
-
-	// 본인
-	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority())
-	{
-		if(PlayerCharacter->IsInFirstPersonPerspective())
-		{
-			const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
-			SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
-			if(MuzzleFlashSocket == nullptr) return;
-			CH_LOG(LogCHTemp, Log, TEXT("1p : %s"),*SocketTransform.GetLocation().ToString())
-		}
-		else
-		{
-			const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
-			SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
-			if(MuzzleFlashSocket == nullptr) return; 
-			CH_LOG(LogCHTemp, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
-		}
-	}
-	else
-	{
-		// 서버, 다른 클라 (총 쏘는 거 구경꾼)
-		// 3인칭 메시가 분명 있을 거다. 
-		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
-		// CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
-		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
-		if(MuzzleFlashSocket == nullptr) return; 
-		CH_LOG(LogCHTemp, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
-	}
+	
 	
 	// Muzzle LineTrace
 	FHitResult MuzzleLaserHit;
-	// FCollisionQueryParams Params;
-	// Params.AddIgnoredActor(this);
-	// Params.AddIgnoredActor(GetOwner());
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
 	
-	FVector MuzzleStart = SocketTransform.GetLocation();		// 여기가 이상... 클라 1은 괜찮은데 서버는 이상..
+	FVector MuzzleStart = MuzzleTransform.GetLocation();
 	CH_LOG(LogCHTemp, Log, TEXT("MuzzleStart : %s"), *MuzzleStart.ToString())
 	
 	FVector MuzzleEnd;
-	
-	if(HitLocation.Equals(FVector::ZeroVector))
-	{
-		MuzzleEnd = TraceEnd;
-		CH_LOG(LogCHNetwork, Log, TEXT("HitLocation.Equals(FVector::ZeroVector) : %d "), HitLocation.Equals(FVector::ZeroVector));
-	}
-	else
-	{
-		// 서버는 여기로 간다.
-		MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;
-		CH_LOG(LogCHNetwork, Log, TEXT("1.25f"))
-	}
+	MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;	
 	CH_LOG(LogCHTemp, Log, TEXT("MuzzleEnd : %s"), *MuzzleEnd.ToString())
+	
 	// 총구에서 레이저
 	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
 	// if(!PlayerCharacter->IsLocallyControlled() && !PlayerCharacter->HasAuthority())
@@ -377,33 +386,6 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	{
 		DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
 		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);			
-	}
-	
-	
-	// 위치가 같다면 정중앙 효과
-	// 다르면 총구 레이저 효과
-	if(ImpactEffect)
-	{
-		if(MuzzleLaserHit.Location.Equals(HitLocation))
-		{
-			UGameplayStatics::SpawnEmitterAtLocation
-			(
-				GetWorld(),
-				ImpactEffect,
-				HitLocation, 
-				MuzzleLaserHit.ImpactNormal.Rotation()
-			);
-		}
-		else
-		{		
-			UGameplayStatics::SpawnEmitterAtLocation
-			(
-				GetWorld(),
-				ImpactEffect,
-				MuzzleLaserHit.Location, 
-				MuzzleLaserHit.ImpactNormal.Rotation()
-			);
-		}
 	}
 
 	AController* OwnerController = OwnerPawn->GetController();		
@@ -419,9 +401,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 		{
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
-			// UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s , ScreenLaserHit : %s"), *GetNameSafe(MuzzleLaserHit.GetActor()),*GetNameSafe(MuzzleLaserHit.GetActor()));
-			// if(MuzzleLaserHit.GetActor() == HitActor)		
-			// {
+			
 			AActor* HitActor = MuzzleLaserHit.GetActor();
 			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
 			if (CharacterBase)
@@ -437,17 +417,44 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 		}
 	}
 	UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
-	// 궤적
+
+	// VFX
 	{
-		FVector BeamEnd = TraceEnd;
+		// 위치가 같다면 정중앙 효과
+		// 다르면 총구 레이저 효과
+		if(ImpactEffect)
+		{
+			if(MuzzleLaserHit.Location.Equals(HitLocation))
+			{
+				UGameplayStatics::SpawnEmitterAtLocation
+				(
+					GetWorld(),
+					ImpactEffect,
+					HitLocation, 
+					MuzzleLaserHit.ImpactNormal.Rotation()
+				);
+			}
+			else
+			{		
+				UGameplayStatics::SpawnEmitterAtLocation
+				(
+					GetWorld(),
+					ImpactEffect,
+					MuzzleLaserHit.Location, 
+					MuzzleLaserHit.ImpactNormal.Rotation()
+				);
+			}
+		}
+		
+		FVector BeamEnd = HitLocation;
 		if (MuzzleLaserHit.bBlockingHit)
 		{
 			// BeamEnd = Hit.ImpactPoint;
-			BeamEnd = HitLocation;
+			BeamEnd = MuzzleLaserHit.Location;
 		}
 		else
 		{
-			MuzzleLaserHit.Location = TraceEnd;
+			MuzzleLaserHit.Location = HitLocation;
 		}
 	
 		if (TraceParticles)
@@ -489,7 +496,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 			UGameplayStatics::SpawnEmitterAtLocation(
 				GetWorld(),
 				MuzzleFlash,
-				SocketTransform
+				MuzzleTransform
 			);
 		}
 

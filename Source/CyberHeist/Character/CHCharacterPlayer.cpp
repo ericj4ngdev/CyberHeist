@@ -733,7 +733,6 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 		float speed = bSprint ? RunSpeed : WalkSpeed;
 		if(bAiming) speed = WalkSpeed;
 		if(bIsCrouched) speed = SneakSpeed;
-		UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
 		if(CurrentWeapon)
 		{
 			if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun)
@@ -763,11 +762,21 @@ void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
 
 void ACHCharacterPlayer::TakeCover()
 {
-	// 1인칭일 때는 비활성화
-	if(bIsFirstPersonPerspective)
+	// 1인칭일 때는 틸팅
+	if (bIsFirstPersonPerspective)
 	{
 		// 왼쪽 틸팅. TiltAngle 부여 
-		return;
+		bTiltReleaseLeft = false;
+		bTiltReleaseRight = false;
+		if (TiltingLeftTimeline.IsPlaying())
+		{
+			TiltingLeftTimeline.Stop();
+		}
+		if (TiltingRightTimeline.IsPlaying())
+		{
+			TiltingRightTimeline.Stop();
+		}
+		TiltingRightTimeline.PlayFromStart();
 	}
 	
 	if(CurrentWeapon)
@@ -1076,6 +1085,12 @@ void ACHCharacterPlayer::TiltRight()
 			TiltingRightTimeline.Stop();
 		}
 		TiltingRightTimeline.PlayFromStart();
+	}
+	else
+	{
+		// 3인칭 몸체 이동
+		
+		
 	}
 }
 

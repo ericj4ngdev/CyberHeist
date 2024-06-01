@@ -278,7 +278,7 @@ public:
 	virtual void Equip();
 	virtual void UnEquip();
 	virtual void Fire();	
-	virtual void LocalFire(const FVector& HitLocation,const FVector& TraceEnd);
+	virtual void LocalFire(const FVector& HitLocation,const FTransform& MuzzleTransform);
 	virtual void PullTriggerByAI(AActor* AttackTarget);
 	virtual void FireByAI(AActor* AttackTarget);
 	virtual void AutoFireByAI(AActor* AttackTarget);
@@ -324,10 +324,10 @@ protected:
 
 public:
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerRPCFire(const FVector& HitLocation, const FVector& TraceEnd);
+	void ServerRPCFire(const FVector& HitLocation, const FTransform& MuzzleTransform);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPCFire(const FVector& HitLocation, const FVector& TraceEnd);
+	void MulticastRPCFire(const FVector& HitLocation, const FTransform& MuzzleTransform);
 	
 	/*UPROPERTY(ReplicatedUsing = OnRep_CanAttack)
 	uint8 bCanAttack : 1;

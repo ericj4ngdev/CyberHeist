@@ -39,11 +39,7 @@ protected:
 	TObjectPtr<UStaticMeshComponent> Lens;
 	
 private:
-	FVector SpawnLocation; 
 	FRotator SpawnRotation;
-public:
-	FORCEINLINE FVector GetSpawnLocation() const {return SpawnLocation;}
-	// 캐릭터 로테이션 
 
 private:
 	void FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded);
@@ -51,7 +47,7 @@ public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;
 	virtual void Fire() override;
-	virtual void LocalFire(const FVector& HitLocation,const FVector& TraceEnd) override;
+	virtual void LocalFire(const FVector& HitLocation,const FTransform& MuzzleTransform) override;
 	virtual void PullTrigger() override;
 	virtual void CancelPullTrigger() override;
 	virtual void StartAim() override;

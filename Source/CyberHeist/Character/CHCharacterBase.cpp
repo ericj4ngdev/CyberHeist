@@ -453,10 +453,14 @@ bool ACHCharacterBase::ServerRPCUnEquipWeapon_Validate(ACHGunBase* LastWeapon)
 void ACHCharacterBase::MulticastRPCUnEquipWeapon_Implementation(ACHGunBase* LastWeapon)
 {
 	CH_LOG(LogCHNetwork,Log,TEXT("Begin"))
+	UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
+	if(CHMovement)
+	{
+		CHMovement->SetCurrentGun(false);		
+	}
 	if(LastWeapon)
 	{
-		LastWeapon->UnEquip();
-		CurrentWeapon = nullptr;		
+		UnEquipWeapon(LastWeapon);
 	} 
 	CH_LOG(LogCHNetwork,Log,TEXT("End"))
 }
@@ -482,6 +486,7 @@ void ACHCharacterBase::MultiCastRPCEquipWeapon_Implementation(ACHGunBase* NewWea
 	if(LastWeapon)
 	{
 		UnEquipWeapon(LastWeapon);
+		CurrentWeapon = nullptr;
 	}
 
 	if (NewWeapon)
@@ -549,8 +554,9 @@ void ACHCharacterBase::EquipWeapon()
 void ACHCharacterBase::UnEquipWeapon(ACHGunBase* WeaponToUnEquip)
 {
 	if (WeaponToUnEquip)
-	{		
+	{
 		WeaponToUnEquip->UnEquip();
+		CurrentWeapon = nullptr;
 	}
 }
 
@@ -584,8 +590,7 @@ void ACHCharacterBase::NextWeapon()
 	
 	if(IndexOfNextWeapon >= Inventory.Weapons.Num())
 	{
-		ServerRPCUnEquipWeapon(CurrentWeapon);		
-		// CurrentWeapon = nullptr;
+		ServerRPCUnEquipWeapon(CurrentWeapon);
 	}
 	else
 	{
