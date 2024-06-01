@@ -46,10 +46,13 @@ ACHGunBase::ACHGunBase()
 	ScopeCamera->SetupAttachment(WeaponMesh1P);	
 	ScopeCamera->bUsePawnControlRotation = true;	
 
-	MuzzleCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("MuzzleCollision"));
+	MuzzleCollision3P = CreateDefaultSubobject<UCapsuleComponent>(TEXT("MuzzleCollision3P"));
 	// MuzzleCollision->SetRelativeLocation()
-	MuzzleCollision->SetupAttachment(CollisionComp);	
-	// MuzzleCollision->InitCapsuleSize(40.0f, 50.0f);	
+	MuzzleCollision3P->SetupAttachment(WeaponMesh3P);	
+	// MuzzleCollision->InitCapsuleSize(40.0f, 50.0f);
+
+	MuzzleCollision1P= CreateDefaultSubobject<UCapsuleComponent>(TEXT("MuzzleCollision1P"));
+	MuzzleCollision1P->SetupAttachment(WeaponMesh1P);
 	
 	bReloading = false;	
 	bInputBindingsSetup = false;
@@ -64,8 +67,8 @@ void ACHGunBase::BeginPlay()
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHGunBase::OnSphereBeginOverlap);
 
-	MuzzleCollision->OnComponentBeginOverlap.AddDynamic(this, &ACHGunBase::OnNearWall);
-	MuzzleCollision->OnComponentEndOverlap.AddDynamic(this,&ACHGunBase::OnFarFromWall);
+	MuzzleCollision3P->OnComponentBeginOverlap.AddDynamic(this, &ACHGunBase::OnNearWall);
+	MuzzleCollision3P->OnComponentEndOverlap.AddDynamic(this,&ACHGunBase::OnFarFromWall);
 }
 
 void ACHGunBase::Tick(float DeltaSeconds)
@@ -90,15 +93,15 @@ void ACHGunBase::Tick(float DeltaSeconds)
 	}*/
 	if(!HasAuthority())
 	{
-		if (MuzzleCollision)
+		if (MuzzleCollision3P)
 		{
 			// 캡슐의 위치와 방향 설정
-			FVector CapsuleLocation = MuzzleCollision->GetComponentLocation();
-			FRotator CapsuleRotation = MuzzleCollision->GetComponentRotation();
+			FVector CapsuleLocation = MuzzleCollision3P->GetComponentLocation();
+			FRotator CapsuleRotation = MuzzleCollision3P->GetComponentRotation();
 
 			// 캡슐의 반지름과 높이 설정
-			float CapsuleRadius = MuzzleCollision->GetScaledCapsuleRadius();
-			float CapsuleHalfHeight = MuzzleCollision->GetScaledCapsuleHalfHeight();
+			float CapsuleRadius = MuzzleCollision3P->GetScaledCapsuleRadius();
+			float CapsuleHalfHeight = MuzzleCollision3P->GetScaledCapsuleHalfHeight();
 
 			// Trace 시작점과 끝점 설정
 			FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);

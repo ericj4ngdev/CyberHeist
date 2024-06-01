@@ -46,8 +46,8 @@ ACHGunRifle::ACHGunRifle()
 	MaxAmmoCapacity = 999;
 	bInfiniteAmmo = false;
 
-	MuzzleCollision->SetRelativeLocation(FVector(0,80,10));
-	MuzzleCollision->InitCapsuleSize(5.0f, 5.0f);
+	MuzzleCollision3P->SetRelativeLocation(FVector(0,80,10));
+	MuzzleCollision3P->InitCapsuleSize(5.0f, 5.0f);
 }
 
 void ACHGunRifle::BeginPlay()
@@ -152,7 +152,7 @@ void ACHGunRifle::Equip()
 		return;
 	}
 	// Viewport LineTrace	
-	/*FVector TraceStart;
+	/*/*FVector TraceStart;
 	FRotator Rotation;
 	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
 	DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
@@ -161,7 +161,7 @@ void ACHGunRifle::Equip()
 	// 손잡이 위치 
 	FVector Direction = HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) - TraceEnd;
 	// CH_LOG(LogTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
-	MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + BarrelLength * TraceEnd);*/
+	MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + BarrelLength * TraceEnd);#1#
 	// MuzzleCollision->SetWorldLocation()
 
 		/*FVector TraceStart;
@@ -176,7 +176,7 @@ void ACHGunRifle::Equip()
 		DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
 		// 3인칭 메시 기준 
 		DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
-		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength * 2);*/
+		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength * 2);#1#
 
 	FVector TraceStart;
 	FRotator Rotation;
@@ -189,7 +189,7 @@ void ACHGunRifle::Equip()
 	// 내분점	
 	DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
 	// 3인칭 메시 기준 
-	DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
+	DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);*/
 	
 	// MuzzleCollision->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, ShoulderPoint1P);
 

@@ -155,7 +155,10 @@ protected:
 	// 카메라 바라보는 방향을 어캐 가져오지...
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	TObjectPtr<class UCapsuleComponent> MuzzleCollision;
+	TObjectPtr<class UCapsuleComponent> MuzzleCollision1P;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<class UCapsuleComponent> MuzzleCollision3P;
 
 	UPROPERTY()
 	TObjectPtr<const class USkeletalMeshSocket> HandleSocket_1P;
