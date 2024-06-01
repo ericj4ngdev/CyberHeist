@@ -151,6 +151,11 @@ void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 		// 변수 하나 동기화해서 총 못쏘게 하기
 		if(OwningCharacter)
 		{
+			if(OtherActor == OwningCharacter)
+			{
+				return;
+			}
+			
 			OwningCharacter->SetNearWall(true);
 
 			// 총 내리기
@@ -159,10 +164,12 @@ void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 
 			UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
 			UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
-
-			FCollisionQueryParams Params;
+			
+			/*FCollisionQueryParams Params;
 			Params.AddIgnoredActor(this);
 			Params.AddIgnoredActor(GetOwner());
+			bool bSuccess = GetWorld()->LineTraceSingleByChannel(FHitResult, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+			SweepResult*/
 			
 			
 			GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
@@ -181,6 +188,10 @@ void ACHGunBase::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor*
 	{
 		if(OwningCharacter)
 		{
+			if(OtherActor == OwningCharacter)
+			{
+				return;
+			}
 			OwningCharacter->SetNearWall(false);
 			StayPrecisionAim();
 		
