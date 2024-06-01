@@ -46,8 +46,11 @@ ACHGunRifle::ACHGunRifle()
 	MaxAmmoCapacity = 999;
 	bInfiniteAmmo = false;
 
-	MuzzleCollision3P->SetRelativeLocation(FVector(0,80,10));
-	MuzzleCollision3P->InitCapsuleSize(5.0f, 5.0f);
+	MuzzleCollision1P->SetRelativeLocation(FVector(0,50,10));
+	MuzzleCollision1P->InitCapsuleSize(5.0f, 40.0f);
+
+	MuzzleCollision1P->SetRelativeLocation(FVector(0,50,10));
+	MuzzleCollision1P->InitCapsuleSize(5.0f, 40.0f);
 }
 
 void ACHGunRifle::BeginPlay()
@@ -106,23 +109,34 @@ void ACHGunRifle::Equip()
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 
-	const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
+	/*const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
 	if(HandSocket)
 	{
 		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
-	}
-	
+	}*/
+
+	// 자기 세상에서만 장착. 서버는 그럼??
+	// 서버는 무조건 3인칭 총으로 발사하게 한다.
+	// 그.. 발사 로직은 어디있지??
+
 	if (WeaponMesh1P)
 	{
 		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		// 여기 npc가 총 들떄, 분명 null이라 에러 뜰텐데 
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
-		
-		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
 		{
-			WeaponMesh1P->SetVisibility(true);
+			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+			{
+				WeaponMesh1P->SetVisibility(true);
+			}
+			else
+			{
+				WeaponMesh1P->SetVisibility(false);
+			}			
 		}
 		else
 		{
+			// 시점에 관계없이 남이 볼때는 1인칭 총은 무조건 안보이게 한다. 
 			WeaponMesh1P->SetVisibility(false);
 		}
 	}
@@ -132,16 +146,28 @@ void ACHGunRifle::Equip()
 		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
 		WeaponMesh3P->CastShadow = true;
 		WeaponMesh3P->bCastHiddenShadow = true;
-
-		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
 		{
-			// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
-			WeaponMesh3P->SetVisibility(false);
+			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+			{
+				if(!HasAuthority())
+				{
+					// 1인칭 상태로 총을 먹으면 로컬에선 정상장착
+					WeaponMesh3P->SetVisibility(false);				
+				}
+				else
+				{
+					// 1인칭 상태로 총을 먹으면 서버에선 3인칭 총 보이기
+					WeaponMesh3P->SetVisibility(true);				
+				}
+				// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
+			}
 		}
 		else
 		{
+			// 서버는 무조건 3인칭 총 활성화
 			WeaponMesh3P->SetVisibility(true);
-		}
+		}		
 	}
 
 
@@ -152,7 +178,7 @@ void ACHGunRifle::Equip()
 		return;
 	}
 	// Viewport LineTrace	
-	/*/*FVector TraceStart;
+	/*FVector TraceStart;
 	FRotator Rotation;
 	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
 	DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
@@ -161,7 +187,7 @@ void ACHGunRifle::Equip()
 	// 손잡이 위치 
 	FVector Direction = HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) - TraceEnd;
 	// CH_LOG(LogTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
-	MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + BarrelLength * TraceEnd);#1#
+	MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + BarrelLength * TraceEnd);*/
 	// MuzzleCollision->SetWorldLocation()
 
 		/*FVector TraceStart;
@@ -176,7 +202,7 @@ void ACHGunRifle::Equip()
 		DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
 		// 3인칭 메시 기준 
 		DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
-		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength * 2);#1#
+		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength * 2);*/
 
 	FVector TraceStart;
 	FRotator Rotation;
@@ -189,10 +215,13 @@ void ACHGunRifle::Equip()
 	// 내분점	
 	DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
 	// 3인칭 메시 기준 
-	DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);*/
+	DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
 	
-	// MuzzleCollision->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, ShoulderPoint1P);
-
+	ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
+	MuzzleCollision1P->AttachToComponent(CHPlayer->GetFirstPersonCamera(),AttachmentRules);
+	// MuzzleCollision1P->SetWorldLocation(CHPlayer->GetFirstPersonCamera()->GetForwardVector() * BarrelLength); // GetActorForwardVector() * BarrelLength);
+	MuzzleCollision3P->AttachToComponent(CHPlayer->GetThirdPersonCamera(), AttachmentRules);
+	// MuzzleCollision3P->SetWorldLocation(CHPlayer->GetThirdPersonCamera()->GetForwardVector() * BarrelLength);
 	// 일단 부착만 해보자.
 	// 위치 설정은 나중에
 	
@@ -283,24 +312,46 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 		}
 	}
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+
+	// 여기가 문제네...
+	// 부조리함은 어쩔 수 없을 거 같다.
+	// 서버는 항상 3인칭으로 보여야 해서 1인칭 메시에 대해서는 항상 if(!HasAuthority() && OwningCharacter->IsLocallyControlled()) 를 붙혀야 할거 같다.
+	// 즉, 로컬만 SocketTransform을 시점에 맞게 쏘게 하고 1인칭 소켓으로
+	// 서버는 클라가 1인칭이어도 3인칭 총구에서 나가 쏜걸로 계산, 판정한다.
+	// ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ 진짜 부조리네 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
+	// 그럼 서버는 총구 시작은 3인칭 총구. 끝은 클라가 보는 화면 중심으로 계산.	
+	// 이야.. 이거 진짜 부조린뎈ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
+	// 그럼 GasShooter는 어캐함?? ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
 	// Socket
-	FTransform SocketTransform;	
-	if(PlayerCharacter->IsInFirstPersonPerspective())
+	FTransform SocketTransform;
+
+	// 본인
+	if(OwningCharacter->IsLocallyControlled() && !HasAuthority())
 	{
-		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
-		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
-		if(MuzzleFlashSocket == nullptr) return;
-		CH_LOG(LogCHNetwork, Log, TEXT("1p : %s"),*SocketTransform.GetLocation().ToString())
+		if(PlayerCharacter->IsInFirstPersonPerspective())
+		{
+			const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
+			SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
+			if(MuzzleFlashSocket == nullptr) return;
+			CH_LOG(LogCHTemp, Log, TEXT("1p : %s"),*SocketTransform.GetLocation().ToString())
+		}
+		else
+		{
+			const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+			SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
+			if(MuzzleFlashSocket == nullptr) return; 
+			CH_LOG(LogCHTemp, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
+		}
 	}
 	else
 	{
+		// 서버, 다른 클라 (총 쏘는 거 구경꾼)
 		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
 		if(MuzzleFlashSocket == nullptr) return; 
-		CH_LOG(LogCHNetwork, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
+		CH_LOG(LogCHTemp, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
+		CH_LOG(LogCHTemp, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
 	}
-	
-	
 	
 	// Muzzle LineTrace
 	FHitResult MuzzleLaserHit;
@@ -309,7 +360,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	// Params.AddIgnoredActor(GetOwner());
 	
 	FVector MuzzleStart = SocketTransform.GetLocation();		// 여기가 이상... 클라 1은 괜찮은데 서버는 이상..
-	// CH_LOG(LogCHNetwork, Log, TEXT("%s"), *MuzzleStart.ToString())
+	CH_LOG(LogCHTemp, Log, TEXT("%s"), *MuzzleStart.ToString())
 	
 	FVector MuzzleEnd;
 	{

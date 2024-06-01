@@ -67,7 +67,10 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float DefaultCameraDistance;
-		
+
+public:
+	UCameraComponent* GetThirdPersonCamera() const{ return ThirdPersonCamera;}
+	UCameraComponent* GetFirstPersonCamera() const{ return FirstPersonCamera;}
 	// Input Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))

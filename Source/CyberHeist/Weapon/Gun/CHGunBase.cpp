@@ -91,8 +91,8 @@ void ACHGunBase::Tick(float DeltaSeconds)
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
 		if(MuzzleFlashSocket == nullptr) return; 
 	}*/
-	if(!HasAuthority())
-	{
+	/*if(!HasAuthority())
+	{*/
 		if (MuzzleCollision3P)
 		{
 			// 캡슐의 위치와 방향 설정
@@ -118,6 +118,30 @@ void ACHGunBase::Tick(float DeltaSeconds)
 			// Debug 캡슐 그리기
 			DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 		}
+	if (MuzzleCollision1P)
+	{
+		// 캡슐의 위치와 방향 설정
+		FVector CapsuleLocation = MuzzleCollision1P->GetComponentLocation();
+		FRotator CapsuleRotation = MuzzleCollision1P->GetComponentRotation();
+
+		// 캡슐의 반지름과 높이 설정
+		float CapsuleRadius = MuzzleCollision1P->GetScaledCapsuleRadius();
+		float CapsuleHalfHeight = MuzzleCollision1P->GetScaledCapsuleHalfHeight();
+
+		// Trace 시작점과 끝점 설정
+		FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
+		FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
+		
+		FHitResult HitResult;
+		FCollisionQueryParams TraceParams(FName(TEXT("Coveace")), true, this);
+		// Params.AddIgnoredActor(this);
+		// TraceParams.AddIgnoredActor(GetOwner());
+		// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
+		bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), TraceParams);
+		
+		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+		// Debug 캡슐 그리기
+		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 	}
 }
 
@@ -148,7 +172,7 @@ UAnimMontage* ACHGunBase::GetEquip3PMontage() const
 void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if(!HasAuthority())
+	if(HasAuthority())
 	{
 		// 리플리로 총 내리기
 		// 변수 하나 동기화해서 총 못쏘게 하기
@@ -179,7 +203,7 @@ void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 void ACHGunBase::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if(!HasAuthority())
+	if(HasAuthority())
 	{
 		if(OwningCharacter)
 		{
