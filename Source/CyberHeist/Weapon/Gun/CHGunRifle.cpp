@@ -58,7 +58,6 @@ void ACHGunRifle::BeginPlay()
 	FTransform MuzzleSocketTransform_1P;
 	FTransform HandleSocketTransform_1P;
 	const USkeletalMeshSocket* MuzzleFlashSocket_1P = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
-	// const USkeletalMeshSocket* HandleSocket_1P = GetWeaponMesh1P()->GetSocketByName("Handle");
 	if(MuzzleFlashSocket_1P == nullptr) return;
 	HandleSocket_1P = GetWeaponMesh1P()->GetSocketByName("Handle");
 	MuzzleSocketTransform_1P = MuzzleFlashSocket_1P->GetSocketTransform(GetWeaponMesh1P());
@@ -67,11 +66,13 @@ void ACHGunRifle::BeginPlay()
 	BarrelLength = FVector::Distance(MuzzleSocketTransform_1P.GetLocation(),HandleSocketTransform_1P.GetLocation()); 
 	// CH_LOG(LogCHNetwork, Log, TEXT("1p : %s"),*SocketTransform.GetLocation().ToString())
 
-	// FTransform MuzzleSocketTransform_3P;	
-	// const USkeletalMeshSocket* MuzzleFlashSocket_3P = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
-	// MuzzleSocketTransform_3P = MuzzleFlashSocket_3P->GetSocketTransform(GetWeaponMesh3P());
+	FTransform MuzzleSocketTransform_3P;
+	FTransform HandleSocketTransform_3P;
+	const USkeletalMeshSocket* MuzzleFlashSocket_3P = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+	if(MuzzleFlashSocket_3P == nullptr) return; 
 	HandleSocket_3P = GetWeaponMesh3P()->GetSocketByName("Handle");
-	// if(MuzzleFlashSocket_3P == nullptr) return; 
+	MuzzleSocketTransform_3P = MuzzleFlashSocket_3P->GetSocketTransform(GetWeaponMesh3P());
+	HandleSocketTransform_3P = HandleSocket_3P->GetSocketTransform(GetWeaponMesh3P());
 	// CH_LOG(LogCHNetwork, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
 
 	CH_LOG(LogCHTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
@@ -153,7 +154,7 @@ void ACHGunRifle::Equip()
 			return;
 		}
 		// Viewport LineTrace	
-		FVector TraceStart;
+		/*FVector TraceStart;
 		FRotator Rotation;
 		OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
 		DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
@@ -162,8 +163,22 @@ void ACHGunRifle::Equip()
 		// 손잡이 위치 
 		FVector Direction = HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) - TraceEnd;
 		// CH_LOG(LogTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
-		MuzzleCollision->SetRelativeLocation(HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) + BarrelLength * TraceEnd);
+		MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + BarrelLength * TraceEnd);*/
 		// MuzzleCollision->SetWorldLocation()
+
+		FVector TraceStart;
+		FRotator Rotation;
+		OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
+		DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
+		FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
+
+		FVector Direction = HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) - TraceEnd;
+		// 내분점
+	
+		DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
+		// 3인칭 메시 기준 
+		DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
+		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength * 2);
 	}
 	
 	
@@ -907,16 +922,30 @@ void ACHGunRifle::StartAim()
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
 		return;
 	}
-	// Viewport LineTrace	
-	FVector TraceStart;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
-	DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
-	FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
 
-	FVector Direction = HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) - TraceEnd;
-	DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
-	DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh1P()),TraceEnd,FColor::Magenta,false,2);
+	if(!HasAuthority())
+	{
+		// Viewport LineTrace	
+		FVector TraceStart;
+		FRotator Rotation;
+		OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
+		DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
+		FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
+
+		FVector Direction = TraceEnd -  HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P());
+
+		// 내분점	
+		DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
+		// 3인칭 메시 기준 
+		DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
+		// MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength);
+		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength);
+		FRotator MuzzleRotation = Direction.Rotation();
+		MuzzleRotation.Pitch += 90.0f;
+		MuzzleCollision->SetWorldRotation(MuzzleRotation);
+		// Direction.GetSafeNormal()
+	}
+	
 	if(PlayerCharacter)
 	{
 		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);

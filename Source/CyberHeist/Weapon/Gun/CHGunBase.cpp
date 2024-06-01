@@ -88,7 +88,7 @@ void ACHGunBase::Tick(float DeltaSeconds)
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
 		if(MuzzleFlashSocket == nullptr) return; 
 	}*/
-	if(HasAuthority())
+	if(!HasAuthority())
 	{
 		if (MuzzleCollision)
 		{
@@ -145,35 +145,51 @@ UAnimMontage* ACHGunBase::GetEquip3PMontage() const
 void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if(HasAuthority())
+	if(!HasAuthority())
 	{
 		// 리플리로 총 내리기
-		// 변수 하나 동기화해서 총 못쏘게 하기 
-		OwningCharacter->SetNearWall(true);
-		
-		// 총 내리기
-		StopPrecisionAim();
-		CancelPullTrigger();
+		// 변수 하나 동기화해서 총 못쏘게 하기
+		if(OwningCharacter)
+		{
+			OwningCharacter->SetNearWall(true);
 
-		GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
-		GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);		
-		// SetAiming(false);
+			// 총 내리기
+			StopPrecisionAim();
+			CancelPullTrigger();
+
+			UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
+
+			FCollisionQueryParams Params;
+			Params.AddIgnoredActor(this);
+			Params.AddIgnoredActor(GetOwner());
+			
+			
+			GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
+			GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);		
+			// SetAiming(false);
+			
+			CH_LOG(LogCHNetwork, Log, TEXT("[OnNearWall] %d"), OwningCharacter->GetNearWall());
+		}
 	}
-	CH_LOG(LogCHNetwork, Log, TEXT("[OnNearWall] %d"), OwningCharacter->GetNearWall());
 }
 
 void ACHGunBase::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if(HasAuthority())
+	if(!HasAuthority())
 	{
-		OwningCharacter->SetNearWall(false);
-		StayPrecisionAim();
+		if(OwningCharacter)
+		{
+			OwningCharacter->SetNearWall(false);
+			StayPrecisionAim();
+		
+			CH_LOG(LogCHNetwork,Log, TEXT("[OnFarFromWall] %d"), OwningCharacter->GetNearWall());
+		}
 	}
 	
 	// 기존에 확대 조준 중이었으면 다시 확대 조준으로 돌아가기
 	
-	CH_LOG(LogCHNetwork,Log, TEXT("[OnFarFromWall] %d"), OwningCharacter->GetNearWall());
 }
 
 void ACHGunBase::Equip()
