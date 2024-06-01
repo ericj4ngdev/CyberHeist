@@ -164,17 +164,9 @@ void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 
 			UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
 			UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
-			
-			/*FCollisionQueryParams Params;
-			Params.AddIgnoredActor(this);
-			Params.AddIgnoredActor(GetOwner());
-			bool bSuccess = GetWorld()->LineTraceSingleByChannel(FHitResult, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
-			SweepResult*/
-			
-			
+						
 			GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
-			GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);		
-			// SetAiming(false);
+			GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
 			
 			CH_LOG(LogCHNetwork, Log, TEXT("[OnNearWall] %d"), OwningCharacter->GetNearWall());
 		}

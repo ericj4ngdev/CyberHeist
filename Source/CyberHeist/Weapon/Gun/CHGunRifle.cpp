@@ -114,7 +114,7 @@ void ACHGunRifle::Equip()
 	
 	if (WeaponMesh1P)
 	{
-		AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		// 여기 npc가 총 들떄, 분명 null이라 에러 뜰텐데 
+		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		// 여기 npc가 총 들떄, 분명 null이라 에러 뜰텐데 
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
 		
 		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
@@ -144,29 +144,27 @@ void ACHGunRifle::Equip()
 		}
 	}
 
-	// 로컬
-	if(!HasAuthority())
-	{
-		AController* OwnerController = OwningCharacter->GetController();		
-		if (OwnerController == nullptr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
-			return;
-		}
-		// Viewport LineTrace	
-		/*FVector TraceStart;
-		FRotator Rotation;
-		OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
-		DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
-		FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
-	
-		// 손잡이 위치 
-		FVector Direction = HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) - TraceEnd;
-		// CH_LOG(LogTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
-		MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + BarrelLength * TraceEnd);*/
-		// MuzzleCollision->SetWorldLocation()
 
-		FVector TraceStart;
+	AController* OwnerController = OwningCharacter->GetController();		
+	if (OwnerController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
+		return;
+	}
+	// Viewport LineTrace	
+	/*FVector TraceStart;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
+	DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
+	FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
+	
+	// 손잡이 위치 
+	FVector Direction = HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) - TraceEnd;
+	// CH_LOG(LogTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
+	MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + BarrelLength * TraceEnd);*/
+	// MuzzleCollision->SetWorldLocation()
+
+		/*FVector TraceStart;
 		FRotator Rotation;
 		OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
 		DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
@@ -178,9 +176,33 @@ void ACHGunRifle::Equip()
 		DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
 		// 3인칭 메시 기준 
 		DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
-		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength * 2);
-	}
+		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength * 2);*/
+
+	FVector TraceStart;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
+	DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
+	FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
+
+	FVector Direction = TraceEnd -  HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P());
+
+	// 내분점	
+	DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
+	// 3인칭 메시 기준 
+	DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
 	
+	// MuzzleCollision->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, ShoulderPoint1P);
+
+	// 일단 부착만 해보자.
+	// 위치 설정은 나중에
+	
+	// MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength);
+	// MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength);
+	// FRotator MuzzleRotation = Direction.Rotation();
+	// MuzzleRotation.Pitch += 90.0f;
+	// MuzzleCollision->SetWorldRotation(MuzzleRotation);
+	// Direction.GetSafeNormal()
+	// OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P
 	
 	if(OwningCharacter->IsLocallyControlled())
 	{
@@ -923,7 +945,13 @@ void ACHGunRifle::StartAim()
 		return;
 	}
 
-	if(!HasAuthority())
+	// void SetMuzzleCapsuleTransform()
+	// 서버 RPC 호출
+	// 서버 RPC 안에서 SetMuzzleCapsuleTransform() 호출
+	// 그럼 서버에서 위치 갱신
+	// 차라리 처음 총 장착했을 때, 뷰포트 따라다니게 딱 정할 수 없나?
+	// 조준했을 때가 아니라 
+	/*if(!HasAuthority())
 	{
 		// Viewport LineTrace	
 		FVector TraceStart;
@@ -944,7 +972,7 @@ void ACHGunRifle::StartAim()
 		MuzzleRotation.Pitch += 90.0f;
 		MuzzleCollision->SetWorldRotation(MuzzleRotation);
 		// Direction.GetSafeNormal()
-	}
+	}*/
 	
 	if(PlayerCharacter)
 	{

@@ -216,6 +216,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Weapon")
 	FName AttachPoint3P;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Weapon")
+	FName ShoulderPoint1P;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Properties|Weapon")
+	FName ShoulderPoint3P;
+	
 	// How much ammo in the clip the gun starts with
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
 	int32 CurrentAmmoInClip;
