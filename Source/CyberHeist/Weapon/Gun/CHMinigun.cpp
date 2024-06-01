@@ -86,11 +86,19 @@ void ACHMinigun::Equip()
 	{
 		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
-	
-		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
 		{
-			WeaponMesh1P->SetVisibility(true, true);
-			CannonMesh1P->SetVisibility(true, true);
+			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+			{
+				WeaponMesh1P->SetVisibility(true, true);
+				CannonMesh1P->SetVisibility(true, true);
+			}
+			else
+			{
+				WeaponMesh1P->SetVisibility(false, true);
+				CannonMesh1P->SetVisibility(false, true);
+			}
 		}
 		else
 		{
@@ -106,12 +114,19 @@ void ACHMinigun::Equip()
 		WeaponMesh3P->bCastHiddenShadow = true;
 		CannonMesh3P->CastShadow = true;
 		CannonMesh3P->bCastHiddenShadow = true;
-		
-		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
 		{
-			// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
-			WeaponMesh3P->SetVisibility(false, true);
-			CannonMesh3P->SetVisibility(false, true);
+			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+			{
+				// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
+				WeaponMesh3P->SetVisibility(false, true);
+				CannonMesh3P->SetVisibility(false, true);
+			}
+			else
+			{
+				WeaponMesh3P->SetVisibility(true, true);
+				CannonMesh3P->SetVisibility(true, true);
+			}
 		}
 		else
 		{
@@ -201,11 +216,20 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	// Socket
 	FTransform SocketTransform;
-	if(PlayerCharacter->IsInFirstPersonPerspective())
+	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority())
 	{
-		const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh1P->GetSocketByName("Muzzle_1");
-		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh1P);
-		if(MuzzleFlashSocket == nullptr) return; 
+		if(PlayerCharacter->IsInFirstPersonPerspective())
+		{
+			const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh1P->GetSocketByName("Muzzle_1");
+			SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh1P);
+			if(MuzzleFlashSocket == nullptr) return; 
+		}
+		else
+		{
+			const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh3P->GetSocketByName("Muzzle_1");
+			SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh3P);
+			if(MuzzleFlashSocket == nullptr) return; 
+		}
 	}
 	else
 	{

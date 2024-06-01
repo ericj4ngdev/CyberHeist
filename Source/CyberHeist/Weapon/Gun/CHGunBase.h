@@ -305,26 +305,16 @@ public:
 
 	// state
 protected:
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, ReplicatedUsing = OnRep_Equipped, Category = "Properties|State")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Replicated, Category = "Properties|State")
 	uint8 bIsEquipped : 1;
-
-	UFUNCTION()
-	void OnRep_Equipped();
 	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, ReplicatedUsing = OnRep_Trigger,Category = "Properties|State")
-	uint8 bTrigger : 1;
-
-	UFUNCTION()
-	void OnRep_Trigger();
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Replicated,Category = "Properties|State")
+	uint8 bTrigger : 1;	
 	
-	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Properties|State")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Replicated, Category = "Properties|State")
 	uint8 bReloading : 1;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Properties|State")
-	uint8 bInputBindingsSetup : 1;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Properties|State")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Replicated, Category = "Properties|State")
 	uint8 bHoldGun : 1;
 	
 protected:

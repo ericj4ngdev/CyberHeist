@@ -84,21 +84,29 @@ void ACHGunRPG::Equip()
 	{
 		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
-	
-		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
 		{
-			WeaponMesh1P->SetVisibility(true, true);
-			ScopeMesh1P->SetVisibility(true, true);
-			MissileMesh1P->SetVisibility(true, true);		
+			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+			{
+				WeaponMesh1P->SetVisibility(true, true);
+				ScopeMesh1P->SetVisibility(true, true);
+				MissileMesh1P->SetVisibility(true, true);		
+			}
+			else
+			{
+				WeaponMesh1P->SetVisibility(false, true);			
+				ScopeMesh1P->SetVisibility(false, true);
+				MissileMesh1P->SetVisibility(false, true);		
+			}
+			Lens->SetVisibility(false);
 		}
 		else
 		{
 			WeaponMesh1P->SetVisibility(false, true);			
 			ScopeMesh1P->SetVisibility(false, true);
-			MissileMesh1P->SetVisibility(false, true);		
+			MissileMesh1P->SetVisibility(false, true);
 		}
 		
-		Lens->SetVisibility(false);
 	}
 	
 	if (WeaponMesh3P)
@@ -110,13 +118,21 @@ void ACHGunRPG::Equip()
 		ScopeMesh3P->bCastHiddenShadow = true;
 		MissileMesh3P->CastShadow = true;
 		MissileMesh3P->bCastHiddenShadow = true;
-		
-		if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
 		{
-			// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
-			WeaponMesh3P->SetVisibility(false, true);
-			ScopeMesh3P->SetVisibility(false, true);
-			MissileMesh3P->SetVisibility(false, true);
+			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+			{
+				// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
+				WeaponMesh3P->SetVisibility(false, true);
+				ScopeMesh3P->SetVisibility(false, true);
+				MissileMesh3P->SetVisibility(false, true);
+			}
+			else
+			{
+				WeaponMesh3P->SetVisibility(true, true);
+				ScopeMesh3P->SetVisibility(true, true);
+				MissileMesh3P->SetVisibility(true, true);
+			}
 		}
 		else
 		{
@@ -235,18 +251,34 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FVector& TraceEnd)
 	}
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	// 시점에 따른 발사 지점 설정
-	if(PlayerCharacter->IsInFirstPersonPerspective())
+
+	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority())
 	{
-		const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh1P->GetSocketByName(FName("MuzzleOffset"));
-		const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh1P);
+		if(PlayerCharacter->IsInFirstPersonPerspective())
+		{
+			const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh1P->GetSocketByName(FName("MuzzleOffset"));
+			const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh1P);
 		
-		// HitTarget = HitResult.ImpactPoint;
-		HitTarget = HitLocation;
-		FVector ToTarget = HitTarget - SocketTransform.GetLocation();
-		FRotator TargetRotation = ToTarget.Rotation();
+			// HitTarget = HitResult.ImpactPoint;
+			HitTarget = HitLocation;
+			FVector ToTarget = HitTarget - SocketTransform.GetLocation();
+			FRotator TargetRotation = ToTarget.Rotation();
 		
-		SpawnLocation = SocketTransform.GetLocation(); 
-		SpawnRotation = TargetRotation;
+			SpawnLocation = SocketTransform.GetLocation(); 
+			SpawnRotation = TargetRotation;
+		}
+		else
+		{
+			const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh3P->GetSocketByName(FName("MuzzleOffset"));
+			const FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh3P);
+
+			HitTarget = HitLocation;
+			FVector ToTarget = HitTarget - SocketTransform.GetLocation();
+			FRotator TargetRotation = ToTarget.Rotation();
+					
+			SpawnLocation = SocketTransform.GetLocation(); 
+			SpawnRotation = TargetRotation;	
+		}
 	}
 	else
 	{

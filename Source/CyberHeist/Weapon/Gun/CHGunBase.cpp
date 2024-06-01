@@ -55,7 +55,6 @@ ACHGunBase::ACHGunBase()
 	MuzzleCollision1P->SetupAttachment(WeaponMesh1P);
 	
 	bReloading = false;	
-	bInputBindingsSetup = false;
 	bHoldGun = true;
 }
 
@@ -416,19 +415,13 @@ void ACHGunBase::StopParticleSystem()
 	// UE_LOG(LogTemp, Warning, TEXT("StopParticleSystem"));
 }
 
-void ACHGunBase::OnRep_Equipped()
-{
-	
-}
-
-void ACHGunBase::OnRep_Trigger()
-{
-}
-
 void ACHGunBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ACHGunBase, bIsEquipped);	
+	DOREPLIFETIME(ACHGunBase, bIsEquipped);
+	DOREPLIFETIME(ACHGunBase, bTrigger);
+	DOREPLIFETIME(ACHGunBase, bReloading);
+	DOREPLIFETIME(ACHGunBase, bHoldGun);	
 }
 
 void ACHGunBase::OnRep_Owner()

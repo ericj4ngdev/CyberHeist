@@ -72,6 +72,7 @@ void ACHGunRifle::BeginPlay()
 	FTransform MuzzleSocketTransform_3P;
 	FTransform HandleSocketTransform_3P;
 	const USkeletalMeshSocket* MuzzleFlashSocket_3P = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+	CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 	if(MuzzleFlashSocket_3P == nullptr) return; 
 	HandleSocket_3P = GetWeaponMesh3P()->GetSocketByName("Handle");
 	MuzzleSocketTransform_3P = MuzzleFlashSocket_3P->GetSocketTransform(GetWeaponMesh3P());
@@ -109,11 +110,11 @@ void ACHGunRifle::Equip()
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 
-	/*const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
+	const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
 	if(HandSocket)
 	{
 		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
-	}*/
+	}
 
 	// 자기 세상에서만 장착. 서버는 그럼??
 	// 서버는 무조건 3인칭 총으로 발사하게 한다.
@@ -142,25 +143,22 @@ void ACHGunRifle::Equip()
 	}
 	
 	if (WeaponMesh3P)
-	{		
+	{
+		CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 		WeaponMesh3P->AttachToComponent(OwningCharacter->GetMesh(), AttachmentRules, AttachPoint3P);
+		CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
+		
 		WeaponMesh3P->CastShadow = true;
 		WeaponMesh3P->bCastHiddenShadow = true;
 		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
 		{
 			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 			{
-				if(!HasAuthority())
-				{
-					// 1인칭 상태로 총을 먹으면 로컬에선 정상장착
-					WeaponMesh3P->SetVisibility(false);				
-				}
-				else
-				{
-					// 1인칭 상태로 총을 먹으면 서버에선 3인칭 총 보이기
-					WeaponMesh3P->SetVisibility(true);				
-				}
-				// WeaponMesh3P->SetVisibility(true, true); // Without this, the weapon's 3p shadow doesn't show
+				WeaponMesh3P->SetVisibility(false);	
+			}
+			else
+			{
+				WeaponMesh3P->SetVisibility(true);
 			}
 		}
 		else
@@ -169,8 +167,6 @@ void ACHGunRifle::Equip()
 			WeaponMesh3P->SetVisibility(true);
 		}		
 	}
-
-
 	AController* OwnerController = OwningCharacter->GetController();		
 	if (OwnerController == nullptr)
 	{
@@ -189,8 +185,7 @@ void ACHGunRifle::Equip()
 	// CH_LOG(LogTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
 	MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + BarrelLength * TraceEnd);*/
 	// MuzzleCollision->SetWorldLocation()
-
-		/*FVector TraceStart;
+	/*FVector TraceStart;
 		FRotator Rotation;
 		OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
 		DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
@@ -292,29 +287,27 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 		return;
 	}
 
-	// Recoil
+	// Recoil	
+	if(bHoldGun)
 	{
-		if(bHoldGun)
-		{
-			UE_LOG(LogTemp, Log, TEXT("Not Aim"));
-			float RYaw = UKismetMathLibrary::RandomFloatInRange(-RecoilYaw, RecoilYaw);
-			float RPitch = UKismetMathLibrary::RandomFloatInRange(-RecoilPitch,0.0f);
-			OwnerPawn->AddControllerYawInput(RYaw);
-			OwnerPawn->AddControllerPitchInput(RPitch);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Log, TEXT("Aim"));
-			float RYaw = UKismetMathLibrary::RandomFloatInRange(-AimedRecoilYaw, AimedRecoilYaw);
-			float RPitch = UKismetMathLibrary::RandomFloatInRange(-AimedRecoilPitch,0.0f);
-			OwnerPawn->AddControllerYawInput(RYaw);
-			OwnerPawn->AddControllerPitchInput(RPitch);
-		}
+		UE_LOG(LogTemp, Log, TEXT("Not Aim"));
+		float RYaw = UKismetMathLibrary::RandomFloatInRange(-RecoilYaw, RecoilYaw);
+		float RPitch = UKismetMathLibrary::RandomFloatInRange(-RecoilPitch,0.0f);
+		OwnerPawn->AddControllerYawInput(RYaw);
+		OwnerPawn->AddControllerPitchInput(RPitch);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Aim"));
+		float RYaw = UKismetMathLibrary::RandomFloatInRange(-AimedRecoilYaw, AimedRecoilYaw);
+		float RPitch = UKismetMathLibrary::RandomFloatInRange(-AimedRecoilPitch,0.0f);
+		OwnerPawn->AddControllerYawInput(RYaw);
+		OwnerPawn->AddControllerPitchInput(RPitch);
+	}
+	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
 	// 여기가 문제네...
-	// 부조리함은 어쩔 수 없을 거 같다.
 	// 서버는 항상 3인칭으로 보여야 해서 1인칭 메시에 대해서는 항상 if(!HasAuthority() && OwningCharacter->IsLocallyControlled()) 를 붙혀야 할거 같다.
 	// 즉, 로컬만 SocketTransform을 시점에 맞게 쏘게 하고 1인칭 소켓으로
 	// 서버는 클라가 1인칭이어도 3인칭 총구에서 나가 쏜걸로 계산, 판정한다.
@@ -326,7 +319,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	FTransform SocketTransform;
 
 	// 본인
-	if(OwningCharacter->IsLocallyControlled() && !HasAuthority())
+	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority())
 	{
 		if(PlayerCharacter->IsInFirstPersonPerspective())
 		{
@@ -346,10 +339,11 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	else
 	{
 		// 서버, 다른 클라 (총 쏘는 거 구경꾼)
+		// 3인칭 메시가 분명 있을 거다. 
 		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+		// CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
 		if(MuzzleFlashSocket == nullptr) return; 
-		CH_LOG(LogCHTemp, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
 		CH_LOG(LogCHTemp, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
 	}
 	
@@ -360,25 +354,31 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	// Params.AddIgnoredActor(GetOwner());
 	
 	FVector MuzzleStart = SocketTransform.GetLocation();		// 여기가 이상... 클라 1은 괜찮은데 서버는 이상..
-	CH_LOG(LogCHTemp, Log, TEXT("%s"), *MuzzleStart.ToString())
+	CH_LOG(LogCHTemp, Log, TEXT("MuzzleStart : %s"), *MuzzleStart.ToString())
 	
 	FVector MuzzleEnd;
-	{
-		if(HitLocation.Equals(FVector::ZeroVector))
-		{
-			MuzzleEnd = TraceEnd;
-		}
-		else
-		{
-			MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f; 
-		}
-		UE_LOG(LogTemp, Log, TEXT("HitLocation.Equals(FVector::ZeroVector) : %d "), HitLocation.Equals(FVector::ZeroVector));
 	
-		// 총구에서 레이저
-		GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
-		DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
-		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);
+	if(HitLocation.Equals(FVector::ZeroVector))
+	{
+		MuzzleEnd = TraceEnd;
+		CH_LOG(LogCHNetwork, Log, TEXT("HitLocation.Equals(FVector::ZeroVector) : %d "), HitLocation.Equals(FVector::ZeroVector));
 	}
+	else
+	{
+		// 서버는 여기로 간다.
+		MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;
+		CH_LOG(LogCHNetwork, Log, TEXT("1.25f"))
+	}
+	CH_LOG(LogCHTemp, Log, TEXT("MuzzleEnd : %s"), *MuzzleEnd.ToString())
+	// 총구에서 레이저
+	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
+	// if(!PlayerCharacter->IsLocallyControlled() && !PlayerCharacter->HasAuthority())
+	if(PlayerCharacter->HasAuthority())
+	{
+		DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
+		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);			
+	}
+	
 	
 	// 위치가 같다면 정중앙 효과
 	// 다르면 총구 레이저 효과
@@ -415,7 +415,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation,const FVector& TraceEnd)
 	// 서버
 	if(OwnerController)
 	{
-		if(HasAuthority())
+		if(OwningCharacter->HasAuthority())
 		{
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
@@ -972,6 +972,7 @@ void ACHGunRifle::CancelPullTrigger()
 
 void ACHGunRifle::StartAim()
 {
+	CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation Start : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 	Super::StartAim();
 	if(!bIsEquipped) return;
 	/*UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] Before bNearWall : %d"),OwningCharacter->GetNearWall());
@@ -1064,6 +1065,7 @@ void ACHGunRifle::StartAim()
 			}
 		}
 	}
+	CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation End : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 	// if Pull Triggering, pass
 	if(OwningCharacter->GetNearWall()) return;
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
