@@ -45,7 +45,7 @@ protected:
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 public:
 	void SetHighCover(uint8 TakeHighCover);
 	void SetLowCover(uint8 TakeLowCover);
@@ -77,13 +77,13 @@ protected:
 	uint8 bIsCrouching : 1;
 
 	// Cover
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CoverSystem)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = CoverSystem)
 	uint8 bTakeHighCover : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CoverSystem)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = CoverSystem)
 	uint8 bTakeLowCover : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CoverSystem)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = CoverSystem)
 	uint8 bCoverMoveRight : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CoverSystem)
@@ -126,7 +126,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
 	FTransform RecoilTemp;*/
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoverSystem)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = CoverSystem)
 	ECoverState CurrentCoverState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)

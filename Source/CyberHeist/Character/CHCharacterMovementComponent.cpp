@@ -69,11 +69,6 @@ void UCHCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 	}
 }
 
-void UCHCharacterMovementComponent::CHSprint()
-{
-	
-}
-
 void UCHCharacterMovementComponent::SetSpeed()
 {
 	MaxWalkSpeed = bPressedSprint ? RunSpeed : WalkSpeed;

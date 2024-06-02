@@ -56,7 +56,6 @@ protected:
 	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 	
-	virtual void CHSprint();
 	void SetSpeed();
 
 public:

@@ -49,8 +49,8 @@ ACHGunRifle::ACHGunRifle()
 	MuzzleCollision1P->SetRelativeLocation(FVector(0,50,10));
 	MuzzleCollision1P->InitCapsuleSize(5.0f, 40.0f);
 
-	MuzzleCollision1P->SetRelativeLocation(FVector(0,50,10));
-	MuzzleCollision1P->InitCapsuleSize(5.0f, 40.0f);
+	MuzzleCollision3P->SetRelativeLocation(FVector(0,50,10));
+	MuzzleCollision3P->InitCapsuleSize(5.0f, 40.0f);
 }
 
 void ACHGunRifle::BeginPlay()
@@ -1050,7 +1050,8 @@ void ACHGunRifle::StartAim()
 				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
 			}		
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
-			PlayerCharacter->SetCoveredAttackMotion(true);
+			PlayerCharacter->ServerSetCoveredAttackMotion(true);
+			// PlayerCharacter->SetCoveredAttackMotion(true);
 		}
 
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
@@ -1097,8 +1098,10 @@ void ACHGunRifle::StopAim()
 			if(PlayerCharacter->GetCovered())
 			{
 				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
-				PlayerCharacter->ReturnCover();
-				PlayerCharacter->SetCoveredAttackMotion(false);	
+				// PlayerCharacter->ReturnCover();			// 이것도 동기화.
+				
+				PlayerCharacter->ServerSetCoveredAttackMotion(false);
+				// PlayerCharacter->SetCoveredAttackMotion(false);	
 			}
 			else
 			{

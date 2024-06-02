@@ -7,22 +7,12 @@
 #include "Kismet/KismetMathLibrary.h"	
 #include "Character/CHCharacterBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 
 UCHAnimInstance::UCHAnimInstance()
 {
-	// 1인칭은 기준이 0도
-	// 3인칭은 기준이 90도
-	// 그래서 1인칭은 3인칭 - 90 하기 
-	// TiltAngle = 90.f;
-
-	// 3인칭
-	// 왼쪽 틸팅 70
-	// 오른쪽 틸팅 110
 	
-	// 1인칭
-	// 왼쪽 틸팅 -20
-	// 오른쪽 틸팅 20
 }
 
 void UCHAnimInstance::NativeInitializeAnimation()
@@ -133,6 +123,15 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		CurrentWeaponState = EWeaponState::Fist;
 	}
+}
+
+void UCHAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UCHAnimInstance, CurrentCoverState);
+	DOREPLIFETIME(UCHAnimInstance, bTakeHighCover);	
+	DOREPLIFETIME(UCHAnimInstance, bTakeLowCover);	
+	DOREPLIFETIME(UCHAnimInstance, bCoverMoveRight);
 }
 
 void UCHAnimInstance::SetHighCover(uint8 TakeHighCover)

@@ -131,8 +131,12 @@ protected:
 	void TakeCrouch();
 	void StartCrouch();
 	void StopCrouch();
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	FRotator LastCoveredRotation;
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetCoveredRotation(FRotator NewCoveredRotation);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -172,7 +176,7 @@ protected:
 	void TogglePerspective();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerRPC_SetPerspective(bool Is1PPerspective);
+	void ServerRPC_SetPerspective(uint8 Is1PPerspective);
 
 	/*UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetPerspective(bool Is1PPerspective);*/
@@ -190,12 +194,24 @@ public:
 	// Cover System
 public:	
 	void SetCoveredAttackMotion(uint8 bAim);
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetCoveredAttackMotion(uint8 bAim);
 
-	uint8 bEdge;
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSetCoveredAttackMotion(uint8 bAim);
+
 	float InputVectorDirectionByCamera;
 
 	// 벽 기준 입력값에 따른 좌우 이동방향
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	FVector MoveDirection;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetMoveDirection(FVector NewMoveDirection);	
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetActorRotation(FRotator NewRotator);
 	
 	float AngleForDirection;
 	
