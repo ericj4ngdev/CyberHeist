@@ -104,6 +104,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
 	float TiltAngle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	FVector TiltLocation;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Variable)
 	uint8 bShouldMove : 1;

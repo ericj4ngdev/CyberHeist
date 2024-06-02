@@ -763,7 +763,7 @@ void ACHCharacterPlayer::ThirdLook(const FInputActionValue& Value)
 void ACHCharacterPlayer::TakeCover()
 {
 	// 1인칭일 때는 틸팅
-	if (bIsFirstPersonPerspective)
+	/*if (bIsFirstPersonPerspective)
 	{
 		// 왼쪽 틸팅. TiltAngle 부여 
 		bTiltReleaseLeft = false;
@@ -777,7 +777,7 @@ void ACHCharacterPlayer::TakeCover()
 			TiltingRightTimeline.Stop();
 		}
 		TiltingRightTimeline.PlayFromStart();
-	}
+	}*/
 	
 	if(CurrentWeapon)
 	{
@@ -1024,6 +1024,11 @@ void ACHCharacterPlayer::SetTiltingRightValue(const float Value)
 		CameraDesiredPosition = FVector(0,0,60);
 		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
 		CameraDesiredRotation = FRotator::ZeroRotator;
+		
+		CurrentTiltAngle = TiltAngle;
+		DesiredTiltAngle = 0;
+		CurrentTiltLocation = TiltLocation;
+		DesiredTiltLocation = FVector(0,0,0);;		
 	}
 	else
 	{
@@ -1031,6 +1036,11 @@ void ACHCharacterPlayer::SetTiltingRightValue(const float Value)
 		CameraDesiredPosition = FVector(0,50,60);
 		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
 		CameraDesiredRotation = FRotator(0, 0, 20);
+		
+		CurrentTiltAngle = TiltAngle;
+		DesiredTiltAngle = 30;
+		CurrentTiltLocation = TiltLocation;
+		DesiredTiltLocation = FVector(-10,0,0);;
 	}
 	// UE_LOG(LogTemp, Log, TEXT("[SetTiltingRightValue] bTiltReleaseRight : %d"), bTiltReleaseRight)
 
@@ -1040,6 +1050,15 @@ void ACHCharacterPlayer::SetTiltingRightValue(const float Value)
 	const FTransform TLerp = UKismetMathLibrary::MakeTransform(VLerp, RLerp);
 	// 해당 트랜스폼 할당
 	FirstPersonCamera->SetRelativeTransform(TLerp);
+
+	// 애님에게 값 전달.
+	const float TiltValue = UKismetMathLibrary::Lerp(CurrentTiltAngle, DesiredTiltAngle,Value);
+	TiltAngle = TiltValue;
+	ServerSetTiltAngle(TiltAngle);
+
+	const FVector TiltLocationValue = UKismetMathLibrary::VLerp(CurrentTiltLocation, DesiredTiltLocation,Value);
+	TiltLocation = TiltLocationValue;
+	ServerSetTiltLocation(TiltLocation);
 }
 
 void ACHCharacterPlayer::SetTiltingLeftValue(const float Value)
@@ -1051,6 +1070,11 @@ void ACHCharacterPlayer::SetTiltingLeftValue(const float Value)
 		CameraDesiredPosition = FVector(0,0,60);
 		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
 		CameraDesiredRotation = FRotator::ZeroRotator;
+
+		CurrentTiltAngle = TiltAngle;
+		DesiredTiltAngle = 0;
+		CurrentTiltLocation = TiltLocation;
+		DesiredTiltLocation =  FVector(0,0,0);
 	}
 	else
 	{
@@ -1060,6 +1084,11 @@ void ACHCharacterPlayer::SetTiltingLeftValue(const float Value)
 		CameraDesiredPosition = FVector(0,-50,60);
 		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
 		CameraDesiredRotation = FRotator(0, 0, -20);
+
+		CurrentTiltAngle = TiltAngle;
+		DesiredTiltAngle = -30;
+		CurrentTiltLocation = TiltLocation;
+		DesiredTiltLocation = FVector(10,0,0);
 	}
 	// RLerp와 TimeLine Value 값을 통한 자연스러운 기울이기
 	const FRotator RLerp = UKismetMathLibrary::RLerp(CameraCurrentRotation, CameraDesiredRotation, Value, true);
@@ -1067,6 +1096,15 @@ void ACHCharacterPlayer::SetTiltingLeftValue(const float Value)
 	const FTransform TLerp = UKismetMathLibrary::MakeTransform(VLerp, RLerp);
 	// 해당 트랜스폼 할당
 	FirstPersonCamera->SetRelativeTransform(TLerp);
+	
+	// 애님에게 값 전달.
+	const float TiltValue = UKismetMathLibrary::Lerp(CurrentTiltAngle, DesiredTiltAngle,Value);
+	TiltAngle = TiltValue;
+	ServerSetTiltAngle(TiltAngle);
+
+	const FVector TiltLocationValue = UKismetMathLibrary::VLerp(CurrentTiltLocation, DesiredTiltLocation,Value);
+	TiltLocation = TiltLocationValue;
+	ServerSetTiltLocation(TiltLocation);
 }
 
 void ACHCharacterPlayer::TiltRight()
@@ -1086,12 +1124,12 @@ void ACHCharacterPlayer::TiltRight()
 		}
 		TiltingRightTimeline.PlayFromStart();
 	}
-	else
-	{
-		// 3인칭 몸체 이동
+
+	// 3인칭 몸체 이동
+	// 애니메이션도 타임라인으로 어떻게 안되나??
+	// TiltAngle		
 		
-		
-	}
+	
 }
 
 void ACHCharacterPlayer::TiltRightRelease()

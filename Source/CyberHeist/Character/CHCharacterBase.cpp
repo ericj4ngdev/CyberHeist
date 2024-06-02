@@ -372,6 +372,26 @@ void ACHCharacterBase::OnRep_FPScopeAiming()
 	
 }
 
+void ACHCharacterBase::ServerSetTiltLocation_Implementation(FVector NewTiltLocation)
+{
+	TiltLocation = NewTiltLocation;
+}
+
+bool ACHCharacterBase::ServerSetTiltLocation_Validate(FVector NewTiltLocation)
+{
+	return true;
+}
+
+void ACHCharacterBase::ServerSetTiltAngle_Implementation(float NewTiltAngle)
+{
+	TiltAngle = NewTiltAngle;
+}
+
+bool ACHCharacterBase::ServerSetTiltAngle_Validate(float NewTiltAngle)
+{
+	return true;
+}
+
 void ACHCharacterBase::SetupCharacterWidget(UCHUserWidget* InUserWidget)
 {
 	UCHHpBarWidget* HpBarWidget = Cast<UCHHpBarWidget>(InUserWidget);
@@ -518,6 +538,8 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ACHCharacterBase, bTPAimingCloser);	
 	DOREPLIFETIME(ACHCharacterBase, bFPScopeAiming);
 	DOREPLIFETIME(ACHCharacterBase, bNearWall);
+	DOREPLIFETIME(ACHCharacterBase, TiltAngle);
+	DOREPLIFETIME(ACHCharacterBase, TiltLocation);	
 	DOREPLIFETIME(ACHCharacterBase, CurrentCharacterControlType);	// ?	
 }
 

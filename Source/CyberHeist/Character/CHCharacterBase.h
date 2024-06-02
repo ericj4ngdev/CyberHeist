@@ -133,9 +133,23 @@ protected:
 	UFUNCTION()
 	void OnRep_FPScopeAiming();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Aim)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = Aim)
 	float TiltAngle;
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetTiltAngle(float NewTiltAngle);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = Aim)
+	FVector TiltLocation;
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetTiltLocation(FVector NewTiltLocation);
+	
+	float CurrentTiltAngle;
+	float DesiredTiltAngle;
+	FVector CurrentTiltLocation;
+	FVector DesiredTiltLocation;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> AimActionMontage;
 
@@ -156,9 +170,8 @@ public:
 	void ServerSetFPScopeAiming(bool bNewFPScopeAiming);	
 	FORCEINLINE uint8 GetScopeAiming() const { return bFPScopeAiming; }
 
-	
 	FORCEINLINE float GetTiltAngle() const { return TiltAngle; }
-	
+	FORCEINLINE FVector GetTiltLocation() const { return TiltLocation; }
 
 	
 public:

@@ -14,7 +14,7 @@ UCHAnimInstance::UCHAnimInstance()
 	// 1인칭은 기준이 0도
 	// 3인칭은 기준이 90도
 	// 그래서 1인칭은 3인칭 - 90 하기 
-	TiltAngle = 90.f;
+	// TiltAngle = 90.f;
 
 	// 3인칭
 	// 왼쪽 틸팅 70
@@ -70,6 +70,7 @@ void UCHAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bCoverMoveRight = OwnerActor->GetCoverMoveRight();
 		
 		TiltAngle = OwnerActor->GetTiltAngle();
+		TiltLocation = OwnerActor->GetTiltLocation();
 		
 		if(OwnerActor->GetCurrentWeapon())
 		{

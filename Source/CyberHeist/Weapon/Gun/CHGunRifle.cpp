@@ -306,20 +306,21 @@ void ACHGunRifle::Fire()
 		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName("MuzzleFlash");
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
 		if(MuzzleFlashSocket == nullptr) return;
-		CH_LOG(LogCHTemp, Log, TEXT("1p : %s"),*SocketTransform.GetLocation().ToString())
 	}
 	else
 	{
 		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
 		if(MuzzleFlashSocket == nullptr) return; 
-		CH_LOG(LogCHTemp, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
 	}	
 	
 	if(!OwningCharacter->HasAuthority())
 	{
 		LocalFire(HitLocation, SocketTransform);		// 이펙트만. 
 	}
+	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+	SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
+	if(MuzzleFlashSocket == nullptr) return; 
 	ServerRPCFire(HitLocation, SocketTransform);
 }
 
@@ -979,7 +980,7 @@ void ACHGunRifle::CancelPullTrigger()
 
 void ACHGunRifle::StartAim()
 {
-	CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation Start : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
+	// CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation Start : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 	Super::StartAim();
 	if(!bIsEquipped) return;
 	/*UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] Before bNearWall : %d"),OwningCharacter->GetNearWall());
@@ -1072,7 +1073,7 @@ void ACHGunRifle::StartAim()
 			}
 		}
 	}
-	CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation End : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
+	// CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation End : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 	// if Pull Triggering, pass
 	if(OwningCharacter->GetNearWall()) return;
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
