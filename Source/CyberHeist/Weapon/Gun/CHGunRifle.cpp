@@ -1050,8 +1050,8 @@ void ACHGunRifle::StartAim()
 				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
 			}		
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
+			PlayerCharacter->SetCoveredAttackMotion(true);
 			PlayerCharacter->ServerSetCoveredAttackMotion(true);
-			// PlayerCharacter->SetCoveredAttackMotion(true);
 		}
 
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
@@ -1099,9 +1099,10 @@ void ACHGunRifle::StopAim()
 			{
 				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
 				// PlayerCharacter->ReturnCover();			// 이것도 동기화.
-				
-				PlayerCharacter->ServerSetCoveredAttackMotion(false);
-				// PlayerCharacter->SetCoveredAttackMotion(false);	
+				// PlayerCharacter->ServerSetActorRotation
+				PlayerCharacter->ServerSetCoveredAttackMotion(false);	// 서버에서 return
+				// 이 후 LastCoveredRotation는 동기화됨
+				PlayerCharacter->SetCoveredAttackMotion(false);		
 			}
 			else
 			{

@@ -123,6 +123,8 @@ protected:
 	void FirstLook(const FInputActionValue& Value);
 	void ThirdMove(const FInputActionValue& Value);
 	void ThirdLook(const FInputActionValue& Value);
+
+	void LocalCoveredMove(const FInputActionValue& Value);
 	
 	void TakeCover();
 	void StartCover();
