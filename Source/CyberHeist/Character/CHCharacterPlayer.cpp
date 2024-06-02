@@ -731,7 +731,7 @@ void ACHCharacterPlayer::LocalCoveredMove(const FInputActionValue& Value)
 		ServerSetMoveDirection(MoveDirection);
 		CH_LOG(LogCHNetwork, Log, TEXT("MoveDirection : %s AngleForDirection : %f"), *MoveDirection.ToString(), AngleForDirection)
 		SetActorRotation((-HitResult.ImpactNormal).Rotation());
-		ServerSetActorRotation((-HitResult.ImpactNormal).Rotation());
+		ServerSetActorRotation((-HitResult.ImpactNormal).Rotation());		// 여기서 LastCoveredRotation 갱신
 		
 		AddMovementInput(MoveDirection, SneakSpeed);
 		
@@ -833,6 +833,8 @@ void ACHCharacterPlayer::StartCover()
 			FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
 			LastCoveredRotation = TargetRotation;
 			ServerSetCoveredRotation(LastCoveredRotation);
+			// 여기서 LastCoveredRotation을 갱신한다.
+			// 그리고 LocalCoveredMove에서 움직일 때, LastCoveredRotation를 ServerSetActorRotation((-HitResult.ImpactNormal).Rotation()); 로 갱신
 			// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
 
 			float Distance = FVector::Distance(TargetLocation,GetActorLocation());
@@ -849,12 +851,12 @@ void ACHCharacterPlayer::StartCover()
 				
 				CHAnimInstance->StopAllMontages(0.0f);
 				CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
-			}
+			}/*
 			else
 			{
 				SetActorRotation(LastCoveredRotation);
 				ServerSetActorRotation(LastCoveredRotation);
-			}
+			}*/
 			// 도착하면 모션 멈추기...				
 			// Crouch();
 			// 엄폐 애니메이션
@@ -902,12 +904,12 @@ void ACHCharacterPlayer::StartCover()
 				
 				CHAnimInstance->StopAllMontages(0.0f);
 				CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
-			}
+			}/*
 			else
 			{
 				SetActorRotation(LastCoveredRotation);
 				ServerSetActorRotation(LastCoveredRotation);
-			}
+			}*/
 			
 			// 엄폐 애니메이션
 			bHighCovered = HitHighCoverDetected;
@@ -974,9 +976,12 @@ void ACHCharacterPlayer::StopCover()
 
 void ACHCharacterPlayer::ReturnCover()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("LastCoveredLocation : %s , LastCoveredRotation : %s"), *LastCoveredLocation.ToString(), *LastCoveredRotation.ToString());
+	CH_LOG(LogCHTemp, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
 	
+	CH_LOG(LogCHTemp, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
 	SetActorRotation(LastCoveredRotation);
+	CH_LOG(LogCHTemp, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())
+	
 }
 
 void ACHCharacterPlayer::TakeCrouch()
@@ -1339,17 +1344,16 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
 			CameraBoom->SocketOffset = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y * InputVectorDirectionByCamera,NewCharacterControl->SocketOffset.Z);
 			float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
-			CH_LOG(LogCHNetwork, Log, TEXT("MoveDirection : %s Radius : %f"), *MoveDirection.ToString(), Radius)
+			// CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s "), *LastCoveredRotation.ToString())
 			// AddMovementInput(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
 			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
-			if(HasAuthority())
-			{
-				ServerSetActorRotation(LastCoveredRotation);
-			}
-			else
-			{
-				ReturnCover();				
-			}
+			
+			CH_LOG(LogCHTemp, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
+			CH_LOG(LogCHTemp, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
+			SetActorRotation(LastCoveredRotation);
+			CH_LOG(LogCHTemp, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())
+
+			
 			CH_LOG(LogCHNetwork, Log, TEXT("UnAimed Location : %s"), *GetActorLocation().ToString())
 		}
 		break;
@@ -1389,9 +1393,9 @@ void ACHCharacterPlayer::MulticastSetCoveredAttackMotion_Implementation(uint8 bA
 
 void ACHCharacterPlayer::ServerSetCoveredAttackMotion_Implementation(uint8 bAim)
 {
-	// MulticastSetCoveredAttackMotion(bAim);
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	SetCoveredAttackMotion(bAim);
+	// SetCoveredAttackMotion(bAim);
+	MulticastSetCoveredAttackMotion(bAim);
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 

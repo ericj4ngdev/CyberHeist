@@ -1101,8 +1101,8 @@ void ACHGunRifle::StopAim()
 				// PlayerCharacter->ReturnCover();			// 이것도 동기화.
 				// PlayerCharacter->ServerSetActorRotation
 				PlayerCharacter->ServerSetCoveredAttackMotion(false);	// 서버에서 return
+				// PlayerCharacter->SetCoveredAttackMotion(false);			// 얘가 가장 먼저 실행됨... 해서 클라만 먼저 돈다. 그런데 제대로 못돈다... 
 				// 이 후 LastCoveredRotation는 동기화됨
-				PlayerCharacter->SetCoveredAttackMotion(false);		
 			}
 			else
 			{
