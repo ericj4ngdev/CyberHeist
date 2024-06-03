@@ -256,13 +256,102 @@ void ACHGunBase::EndShoot()
 
 void ACHGunBase::PullTrigger()
 {
-	
+	ServerPullTrigger();
 }
 
 void ACHGunBase::CancelPullTrigger()
 {
-	
+	ServerCancelPullTrigger();
 }
+
+void ACHGunBase::ServerStartAim_Implementation()
+{
+	MulticastStartAim();
+}
+
+bool ACHGunBase::ServerStartAim_Validate()
+{
+	return true;
+}
+
+void ACHGunBase::MulticastStartAim_Implementation()
+{
+	OnStartAim();
+}
+
+void ACHGunBase::ServerStopAim_Implementation()
+{
+	MulticastStopAim();
+}
+
+bool ACHGunBase::ServerStopAim_Validate()
+{
+	return true;
+}
+
+void ACHGunBase::MulticastStopAim_Implementation()
+{
+	OnStopAim();
+}
+
+void ACHGunBase::ServerPullTrigger_Implementation()
+{
+	MulticastPullTrigger();
+}
+
+bool ACHGunBase::ServerPullTrigger_Validate()
+{
+	return true;
+}
+
+void ACHGunBase::MulticastPullTrigger_Implementation()
+{
+	OnPullTrigger();
+}
+
+void ACHGunBase::OnStartAim()
+{
+	if(OwningCharacter == nullptr) return;
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
+		OwningCharacter->bUseControllerRotationYaw = true; 
+}
+
+void ACHGunBase::OnStopAim()
+{
+	if(OwningCharacter == nullptr) return;
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
+		OwningCharacter->bUseControllerRotationYaw = false; 
+}
+
+void ACHGunBase::OnPullTrigger()
+{
+	if(OwningCharacter == nullptr) return;
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
+		OwningCharacter->bUseControllerRotationYaw = true; 
+}
+
+void ACHGunBase::OnCancelPullTrigger()
+{
+	if(OwningCharacter == nullptr) return;
+	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
+		OwningCharacter->bUseControllerRotationYaw = false; 
+}
+
+void ACHGunBase::ServerCancelPullTrigger_Implementation()
+{
+	MulticastCancelPullTrigger();
+}
+
+bool ACHGunBase::ServerCancelPullTrigger_Validate()
+{
+	return true;
+}
+
+void ACHGunBase::MulticastCancelPullTrigger_Implementation()
+{
+	OnCancelPullTrigger();
+}
+
 
 void ACHGunBase::SetWeaponMeshVisibility(uint8 bVisible)
 {
@@ -276,11 +365,12 @@ void ACHGunBase::StartAim()
 		// 총기 접은 몽타주 재생
 		return;
 	}
+	ServerStartAim();
 }
 
 void ACHGunBase::StopAim()
 {
-	// 총의 IMC를 기존 플레이어 IMC 보다 낮게 하기 
+	ServerStopAim();
 }
 
 void ACHGunBase::StartPrecisionAim()
@@ -367,10 +457,10 @@ void ACHGunBase::OnRep_Owner()
 void ACHGunBase::MulticastRPCFire_Implementation(const FVector& HitLocation, const FTransform& MuzzleTransform)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
-
+	// OwningCharacter->bUseControllerRotationYaw = true;
 	// 클라 && 서버 X => 클라 본인 제외 
 	if(OwningCharacter->IsLocallyControlled() && !OwningCharacter->HasAuthority()) return;
-	LocalFire(HitLocation, MuzzleTransform);
+	LocalFire(HitLocation, MuzzleTransform);		
 }
 
 void ACHGunBase::ServerRPCFire_Implementation(const FVector& HitLocation, const FTransform& MuzzleTransform)

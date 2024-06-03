@@ -58,6 +58,13 @@ public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
 	virtual void StopParticleSystem() override;
 
+	virtual void OnStartAim() override;
+	virtual void OnStopAim() override;
+	virtual void OnPullTrigger() override;
+	virtual void OnCancelPullTrigger() override;
+	void StartRotateCannon();
+	void StopRotateCannon();
+	
 private:
 	uint8 bAiming;
 	uint8 bShooting;

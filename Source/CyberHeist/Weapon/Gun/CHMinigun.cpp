@@ -289,8 +289,8 @@ void ACHMinigun::UnEquip()
 void ACHMinigun::Fire()
 {
 	Super::Fire();
-
 	AController* OwnerController = OwningCharacter->GetController();		
+	
 	if (OwnerController == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
@@ -902,9 +902,10 @@ void ACHMinigun::PullTrigger()
 	
 	bShooting = true;	
 	OwningCharacter->SetIsAttacking(bShooting);
-	OwningCharacter->bUseControllerRotationYaw = true;
+	// OwningCharacter->bUseControllerRotationYaw = true;
 
 	// 총 발사 Animation Montage
+	// 여기 ServerRotateCannon()
 	if(CannonRotateMontage == nullptr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("CannonRotateMontage is null"));
@@ -971,56 +972,15 @@ void ACHMinigun::PullTrigger()
 
 void ACHMinigun::CancelPullTrigger()
 {
-	Super::CancelPullTrigger();
 	if(!bIsEquipped) return;
+	Super::CancelPullTrigger();			// 서버 RPC보내기
 
 	bShooting = false;
 	OwningCharacter->SetIsAttacking(bShooting);
 	
-	UAnimInstance* Weapon1pAnimInstance = WeaponMesh1P->GetAnimInstance();
-	UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
-	if(WeaponMeshFireMontage)
-	{
-		Weapon1pAnimInstance->Montage_Stop(2.0f,WeaponMeshFireMontage);
-		Weapon3pAnimInstance->Montage_Stop(2.0f,WeaponMeshFireMontage);
-	}
-	
-	if(bAiming == false)
-	{
-		// 총 발사 Animation Montage
-		if(CannonRotateMontage == nullptr)
-		{
-			UE_LOG(LogTemp, Log, TEXT("CannonRotateMontage is null"));
-			return;
-		}
-		
-		if(CannonMesh1P == nullptr)
-		{
-			UE_LOG(LogTemp, Log, TEXT("CannonMesh1P is null"));
-			return;
-		}
-	
-		if(CannonMesh3P == nullptr)
-		{
-			UE_LOG(LogTemp, Log, TEXT("CannonMesh3P is null"));
-			return;
-		}
-		
-		UAnimInstance* Cannon1pAnimInstance = CannonMesh1P->GetAnimInstance();
-		if(Cannon1pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
-		{
-			Cannon1pAnimInstance->Montage_Stop(1.f, CannonRotateMontage);				
-		}
-
-		UAnimInstance* Cannon3pAnimInstance = CannonMesh3P->GetAnimInstance();
-		if(Cannon3pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
-		{
-			Cannon3pAnimInstance->Montage_Stop(1.f, CannonRotateMontage);				
-		}
-	}
-	
-	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
-		OwningCharacter->bUseControllerRotationYaw = false; 
+	// 서버에서 동기화가 안됨... 
+	// if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
+	// 		OwningCharacter->bUseControllerRotationYaw = false;	
 
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::Third
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First
@@ -1038,7 +998,6 @@ void ACHMinigun::CancelPullTrigger()
 
 void ACHMinigun::StartAim()
 {
-	Super::StartAim();
 	if(!bIsEquipped) return;
 	if(bReloading)
 	{
@@ -1046,20 +1005,14 @@ void ACHMinigun::StartAim()
 		StopAim();
 		return;
 	}
+	Super::StartAim();
 	bHoldGun = false;
 	// bAiming = true;
 
-	if (CannonRotateSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(
-			this,
-			CannonRotateSound,
-			GetActorLocation()
-		);
-	}
+	
 	
 	// 총 발사 Animation Montage
-	if(CannonRotateMontage == nullptr)
+	/*if(CannonRotateMontage == nullptr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("CannonRotateMontage is null"));
 		return;
@@ -1087,7 +1040,7 @@ void ACHMinigun::StartAim()
 	if(!Cannon3pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
 	{
 		Cannon3pAnimInstance->Montage_Play(CannonRotateMontage);				
-	}
+	}*/
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
@@ -1131,10 +1084,9 @@ void ACHMinigun::StartAim()
 
 void ACHMinigun::StopAim()
 {
-	Super::StopAim();
-
 	if(!bIsEquipped) return;
 	// if(bReloading) return;
+	Super::StopAim();
 
 	bHoldGun = true;
 	// bAiming = false;
@@ -1329,8 +1281,7 @@ void ACHMinigun::SetupWeaponInputComponent()
 
 void ACHMinigun::SetWeaponMeshVisibility(uint8 bVisible)
 {
-	Super::SetWeaponMeshVisibility(bVisible);
-	
+	Super::SetWeaponMeshVisibility(bVisible);	
 }
 
 void ACHMinigun::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
@@ -1341,4 +1292,114 @@ void ACHMinigun::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 void ACHMinigun::StopParticleSystem()
 {
 	Super::StopParticleSystem();
+}
+
+void ACHMinigun::OnStartAim()
+{
+	Super::OnStartAim();
+	StartRotateCannon();
+	if (CannonRotateSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			CannonRotateSound,
+			GetActorLocation()
+		);
+	}
+}
+
+void ACHMinigun::OnStopAim()
+{
+	Super::OnStopAim();
+	StopRotateCannon();
+}
+
+void ACHMinigun::OnPullTrigger()
+{
+	Super::OnPullTrigger();
+	StartRotateCannon();
+}
+
+void ACHMinigun::OnCancelPullTrigger()
+{
+	Super::OnCancelPullTrigger();
+	StopRotateCannon();
+}
+
+void ACHMinigun::StartRotateCannon()
+{
+	if(CannonRotateMontage == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CannonRotateMontage is null"));
+		return;
+	}
+		
+	if(CannonMesh1P == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CannonMesh1P is null"));
+		return;
+	}
+	
+	if(CannonMesh3P == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CannonMesh3P is null"));
+		return;
+	}
+		
+	UAnimInstance* Cannon1pAnimInstance = CannonMesh1P->GetAnimInstance();
+	if(!Cannon1pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+	{
+		Cannon1pAnimInstance->Montage_Play(CannonRotateMontage);
+	}
+
+	UAnimInstance* Cannon3pAnimInstance = CannonMesh3P->GetAnimInstance();
+	if(!Cannon3pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+	{
+		Cannon3pAnimInstance->Montage_Play(CannonRotateMontage);				
+	}
+}
+
+void ACHMinigun::StopRotateCannon()
+{
+	UAnimInstance* Weapon1pAnimInstance = WeaponMesh1P->GetAnimInstance();
+	UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+	if(WeaponMeshFireMontage)
+	{
+		Weapon1pAnimInstance->Montage_Stop(2.0f,WeaponMeshFireMontage);
+		Weapon3pAnimInstance->Montage_Stop(2.0f,WeaponMeshFireMontage);
+	}
+	
+	if(bAiming == false)
+	{
+		// 총 발사 Animation Montage
+		if(CannonRotateMontage == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CannonRotateMontage is null"));
+			return;
+		}
+		
+		if(CannonMesh1P == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CannonMesh1P is null"));
+			return;
+		}
+	
+		if(CannonMesh3P == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("CannonMesh3P is null"));
+			return;
+		}
+		
+		UAnimInstance* Cannon1pAnimInstance = CannonMesh1P->GetAnimInstance();
+		if(Cannon1pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+		{
+			Cannon1pAnimInstance->Montage_Stop(1.f, CannonRotateMontage);				
+		}
+
+		UAnimInstance* Cannon3pAnimInstance = CannonMesh3P->GetAnimInstance();
+		if(Cannon3pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
+		{
+			Cannon3pAnimInstance->Montage_Stop(1.f, CannonRotateMontage);			
+		}
+	}
 }

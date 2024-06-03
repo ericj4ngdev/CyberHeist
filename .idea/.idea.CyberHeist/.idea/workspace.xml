@@ -11,12 +11,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="47f3ba0c-b549-4d76-a4b3-3c37ce4cdc81" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHMinigun.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHMinigun.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRpg.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/Gun/BP_CHRpg.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunBase.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRPG.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHGunRifle.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Weapon/Gun/CHMinigun.h" afterDir="false" />
     </list>

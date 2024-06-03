@@ -517,9 +517,8 @@ void ACHGunRPG::StartAim()
 
 void ACHGunRPG::StopAim()
 {
-	Super::StopAim();
-
 	if(!bIsEquipped) return;
+	Super::StopAim();
 	// if(bReloading) return;
 	bHoldGun = true;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);

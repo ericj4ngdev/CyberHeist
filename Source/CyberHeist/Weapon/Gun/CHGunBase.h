@@ -286,6 +286,36 @@ public:
 	virtual void PullTrigger();
 	virtual void CancelPullTrigger();
 
+	UFUNCTION(Server, unreliable, WithValidation)
+	void ServerStartAim();
+
+	UFUNCTION(NetMulticast, unreliable)
+	void MulticastStartAim();
+
+	UFUNCTION(Server, unreliable, WithValidation)
+	void ServerStopAim();
+
+	UFUNCTION(NetMulticast, unreliable)
+	void MulticastStopAim();
+
+	UFUNCTION(Server, unreliable, WithValidation)
+	void ServerCancelPullTrigger();
+
+	UFUNCTION(NetMulticast, unreliable)
+	void MulticastCancelPullTrigger();
+	
+	UFUNCTION(Server, unreliable, WithValidation)
+	void ServerPullTrigger();
+
+	UFUNCTION(NetMulticast, unreliable)
+	void MulticastPullTrigger();
+	
+	virtual void OnStartAim();
+	virtual void OnStopAim();
+	virtual void OnPullTrigger();
+	virtual void OnCancelPullTrigger();
+	
+	
 	virtual void SetWeaponMeshVisibility(uint8 bVisible);
 	
 	UFUNCTION(BlueprintCallable)
