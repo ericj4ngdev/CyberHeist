@@ -161,10 +161,10 @@ bool ACHCharacterBase::ServerSetCoverState_Validate(uint8 bNewHighCovered, uint8
 
 void ACHCharacterBase::ServerSetCoverMoveRight_Implementation(uint8 bNewCoverMoveRight)
 {
-	CH_LOG(LogCHTemp, Log, TEXT("Begin"))
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	bCoverMoveRight = bNewCoverMoveRight;
 	// CHAnimInstance->SetCoveredDirection(bCoverMoveRight);
-	CH_LOG(LogCHTemp, Log, TEXT("End"))	
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))	
 }
 
 bool ACHCharacterBase::ServerSetCoverMoveRight_Validate(uint8 bNewCoverMoveRight)

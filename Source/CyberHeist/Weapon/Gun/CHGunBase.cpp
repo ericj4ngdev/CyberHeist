@@ -86,9 +86,9 @@ void ACHGunBase::Tick(float DeltaSeconds)
 	{
 		ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
 		if(CHPlayer == nullptr) return;
-		// 서버, 클라 모두 그리기
-		if(CHPlayer->IsInFirstPersonPerspective())
-		{
+		// 클라만 그리기
+		if(OwningCharacter->HasAuthority()) return;
+		
 			if (MuzzleCollision1P)
 			{
 				// 캡슐의 위치와 방향 설정
@@ -111,15 +111,12 @@ void ACHGunBase::Tick(float DeltaSeconds)
 				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
 				/*if(HitDetected)
 				{
-					CH_LOG(LogCHTemp, Log, TEXT("HitResult.GetActor() : %s"), *HitResult.GetActor()->GetName())					
+					CH_LOG(LogCHNetwork, Log, TEXT("HitResult.GetActor() : %s"), *HitResult.GetActor()->GetName())					
 				}*/
-				FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+				FColor DrawColor = HitDetected ? FColor::Green : FColor::Blue;
 				// Debug 캡슐 그리기
 				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 			}
-		}
-		else
-		{
 			if (MuzzleCollision3P)
 			{
 				// 캡슐의 위치와 방향 설정
@@ -142,13 +139,13 @@ void ACHGunBase::Tick(float DeltaSeconds)
 				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
 				if(HitDetected)
 				{
-					CH_LOG(LogCHTemp, Log, TEXT("HitResult.GetActor() : %s"), *HitResult.GetActor()->GetName())					
+					CH_LOG(LogCHNetwork, Log, TEXT("HitResult.GetActor() : %s"), *HitResult.GetActor()->GetName())					
 				}
 				FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
 				// Debug 캡슐 그리기
 				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 			}
-		}	
+		
 	}
 	
 }
@@ -195,8 +192,8 @@ void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 		StopPrecisionAim();
 		CancelPullTrigger();
 		
-		CH_LOG(LogCHTemp, Log, TEXT("OtherActor : %s"), *OtherActor->GetName())
-		CH_LOG(LogCHTemp, Log, TEXT("OtherComp : %s"), *OtherComp->GetName())		// DetectWall?? 
+		CH_LOG(LogCHNetwork, Log, TEXT("OtherActor : %s"), *OtherActor->GetName())
+		CH_LOG(LogCHNetwork, Log, TEXT("OtherComp : %s"), *OtherComp->GetName())		// DetectWall?? 
 					
 		GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
 		GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
@@ -208,6 +205,12 @@ void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 void ACHGunBase::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	// ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
+	
+	/*if(CHPlayer->IsInFirstPersonPerspective())
+	{
+		// 1인칭 머즐..만 작동해야 하는데... 어캐 하지.. 이벤트를 풀었다가 할수는 없고... 
+	}*/
 	if(OwningCharacter && !OwningCharacter->HasAuthority() && OwningCharacter->IsLocallyControlled())
 	{	
 		if(OtherActor == OwningCharacter || OtherActor == this)
@@ -230,19 +233,23 @@ void ACHGunBase::Equip()
 		return;
 	}
 
+	CH_LOG(LogCHTemp, Log, TEXT("Begin"))
 	ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
 	
 	if(CHPlayer->IsInFirstPersonPerspective())
 	{
 		MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		CH_LOG(LogCHTemp, Log, TEXT("1pp collision On"))
 	}
 	else
 	{
 		MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		CH_LOG(LogCHTemp, Log, TEXT("3pp collision On"))
 	}
 	
+	CH_LOG(LogCHTemp, Log, TEXT("End"))
 	bIsEquipped = true;
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

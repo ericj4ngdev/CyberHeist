@@ -80,7 +80,7 @@ void ACHGunRifle::BeginPlay()
 	HandleSocketTransform_3P = HandleSocket_3P->GetSocketTransform(GetWeaponMesh3P());
 	// CH_LOG(LogCHNetwork, Log, TEXT("3p : %s"), *SocketTransform.GetLocation().ToString())
 
-	CH_LOG(LogCHTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
+	CH_LOG(LogCHNetwork, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
 	
 	if (HasAuthority())
 	{
@@ -114,7 +114,7 @@ void ACHGunRifle::Equip()
 	if(HandSocket)
 	{
 		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
-		CH_LOG(LogCHTemp, Log, TEXT("HandSocket: %s"), *HandSocket->GetSocketLocation(OwningCharacter->GetMesh()).ToString())
+		CH_LOG(LogCHNetwork, Log, TEXT("HandSocket: %s"), *HandSocket->GetSocketLocation(OwningCharacter->GetMesh()).ToString())
 	}
 
 	// 자기 세상에서만 장착. 서버는 그럼??
@@ -190,7 +190,7 @@ void ACHGunRifle::Equip()
 
 	CH_LOG(LogCHNetwork, Log, TEXT("AttachToComponent"))
 	ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
-	MuzzleCollision1P->AttachToComponent(CHPlayer->GetFirstPersonCamera(),AttachmentRules);
+	MuzzleCollision1P->AttachToComponent(CHPlayer->GetFirstPersonCamera(),AttachmentRules);		// 1인칭을 들어오면 어태치가 안되는 건 아닌데... 
 	MuzzleCollision3P->AttachToComponent(CHPlayer->GetThirdPersonCamera(), AttachmentRules);
 
 	// GetThirdPersonCamera의 위치와 회전을 가져옵니다.
@@ -377,11 +377,11 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 	Params.AddIgnoredActor(GetOwner());
 	
 	FVector MuzzleStart = MuzzleTransform.GetLocation();
-	CH_LOG(LogCHTemp, Log, TEXT("MuzzleStart : %s"), *MuzzleStart.ToString())
+	CH_LOG(LogCHNetwork, Log, TEXT("MuzzleStart : %s"), *MuzzleStart.ToString())
 	
 	FVector MuzzleEnd;
 	MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;	
-	CH_LOG(LogCHTemp, Log, TEXT("MuzzleEnd : %s"), *MuzzleEnd.ToString())
+	CH_LOG(LogCHNetwork, Log, TEXT("MuzzleEnd : %s"), *MuzzleEnd.ToString())
 	
 	// 총구에서 레이저
 	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);

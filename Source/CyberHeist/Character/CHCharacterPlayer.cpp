@@ -938,11 +938,11 @@ void ACHCharacterPlayer::StopCover()
 
 void ACHCharacterPlayer::ReturnCover()
 {
-	CH_LOG(LogCHTemp, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
+	CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
 	
-	CH_LOG(LogCHTemp, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
+	CH_LOG(LogCHNetwork, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
 	SetActorRotation(LastCoveredRotation);
-	CH_LOG(LogCHTemp, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())
+	CH_LOG(LogCHNetwork, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())
 	
 }
 
@@ -1220,7 +1220,7 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		
 		StopCover();
 		bCovered = false;
-
+		
 		// 이하 동기화 X
 		if(IsLocallyControlled())
 		{
@@ -1237,14 +1237,19 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 				CurrentWeapon->GetWeaponMesh1P()->SetVisibility(true, true);
 				CurrentWeapon->SetWeaponMeshVisibility(false);
 			}
-		}		
+		}
+		if(CurrentWeapon)
+		{
+			CurrentWeapon->MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			CurrentWeapon->MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			CH_LOG(LogCHTemp, Log, TEXT("1pp collision On"))
+		}
 	}
 	else
 	{
 		// 3인칭
 		bCovered = false;
-		SetCharacterControl(ECharacterControlType::Third);
-		// ServerRPC_SetCharacterControl(ECharacterControlType::Third);
+		SetCharacterControl(ECharacterControlType::Third);		
 		
 		FirstPersonCamera->Deactivate();
 		FirstPersonMesh->SetVisibility(false, true);
@@ -1259,6 +1264,9 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		{
 			UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %d"), CurrentWeapon->WeaponType);
 			CurrentWeapon->GetWeaponMesh3P()->SetVisibility(true, true);
+			CurrentWeapon->MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			CurrentWeapon->MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			CH_LOG(LogCHTemp, Log, TEXT("3pp collision On"))
 		}
 	}
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
@@ -1267,22 +1275,21 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 void ACHCharacterPlayer::OnRep_FirstPersonPerspective()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	if(CurrentWeapon)
+	/*if(CurrentWeapon)
 	{
 		if(bIsFirstPersonPerspective)
 		{
 			CurrentWeapon->MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-			CurrentWeapon->MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::NoCollision);			
+			CurrentWeapon->MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			CH_LOG(LogCHTemp, Log, TEXT("1pp collision On"))
 		}
 		else
 		{
 			CurrentWeapon->MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			CurrentWeapon->MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			CH_LOG(LogCHTemp, Log, TEXT("3pp collision On"))
 		}
-	}
-	
-	
-	
+	}*/
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
@@ -1326,10 +1333,10 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 			// AddMovementInput(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
 			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
 			
-			CH_LOG(LogCHTemp, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
-			CH_LOG(LogCHTemp, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
+			CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
+			CH_LOG(LogCHNetwork, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
 			SetActorRotation(LastCoveredRotation);
-			CH_LOG(LogCHTemp, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())
+			CH_LOG(LogCHNetwork, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())
 
 			
 			CH_LOG(LogCHNetwork, Log, TEXT("UnAimed Location : %s"), *GetActorLocation().ToString())
