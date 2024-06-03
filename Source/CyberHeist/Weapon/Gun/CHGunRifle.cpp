@@ -194,24 +194,24 @@ void ACHGunRifle::Equip()
 	MuzzleCollision3P->AttachToComponent(CHPlayer->GetThirdPersonCamera(), AttachmentRules);
 
 	// GetThirdPersonCamera의 위치와 회전을 가져옵니다.
-	FVector CameraLocation1P = CHPlayer->GetFirstPersonCamera()->GetComponentLocation();
-	FRotator CameraRotation1P = CHPlayer->GetFirstPersonCamera()->GetComponentRotation();
-	FVector CameraLocation3P = CHPlayer->GetThirdPersonCamera()->GetComponentLocation();
-	FRotator CameraRotation3P = CHPlayer->GetThirdPersonCamera()->GetComponentRotation();
+	const FVector CameraLocation1P = CHPlayer->GetFirstPersonCamera()->GetComponentLocation();
+	const FRotator CameraRotation1P = CHPlayer->GetFirstPersonCamera()->GetComponentRotation();
+	const FVector CameraLocation3P = CHPlayer->GetThirdPersonCamera()->GetComponentLocation();
+	const FRotator CameraRotation3P = CHPlayer->GetThirdPersonCamera()->GetComponentRotation();
 
 	// 카메라의 방향 벡터를 계산합니다.
-	FVector CameraForwardVector1P = CameraRotation1P.Vector();
-	FVector CameraForwardVector3P = CameraRotation3P.Vector();
+	const FVector CameraForwardVector1P = CameraRotation1P.Vector();
+	const FVector CameraForwardVector3P = CameraRotation3P.Vector();
 
 	// 새로운 위치를 계산합니다.
-	FVector MuzzleCapsuleLocation1P = CameraLocation1P + (CameraForwardVector1P * 150);
-	FVector MuzzleCapsuleLocation3P = CameraLocation3P + (CameraForwardVector3P * 150);
+	const FVector MuzzleCapsuleLocation1P = CameraLocation1P + (CameraForwardVector1P * 120);
+	const FVector MuzzleCapsuleLocation3P = CameraLocation3P + (CameraForwardVector3P * 120);
 	MuzzleCollision1P->SetWorldLocation(MuzzleCapsuleLocation1P);
 	MuzzleCollision3P->SetWorldLocation(MuzzleCapsuleLocation3P);
 
 	// 카메라의 회전에 90도 회전 (예: Y축 기준) 추가
-	FRotator MuzzleCapsuleRotation1P = CameraRotation1P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
-	FRotator MuzzleCapsuleRotation3P = CameraRotation3P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+	const FRotator MuzzleCapsuleRotation1P = CameraRotation1P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+	const FRotator MuzzleCapsuleRotation3P = CameraRotation3P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
 
 	// 캡슐의 회전을 조정된 회전으로 설정합니다.
 	MuzzleCollision1P->SetWorldRotation(MuzzleCapsuleRotation1P);
