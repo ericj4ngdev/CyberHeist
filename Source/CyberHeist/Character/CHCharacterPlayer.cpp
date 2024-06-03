@@ -652,7 +652,7 @@ void ACHCharacterPlayer::LocalCoveredMove(const FInputActionValue& Value)
 	
 	FHitResult HitResult;
 	FCollisionQueryParams TraceParams(FName(TEXT("CoverTrace")), true, this);
-	bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(Radius), TraceParams);
+	bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel5, FCollisionShape::MakeSphere(Radius), TraceParams);
 	// WallNormal = HitResult.ImpactNormal;
 	
 #if ENABLE_DRAW_DEBUG
@@ -770,9 +770,9 @@ void ACHCharacterPlayer::StartCover()
 	FCollisionQueryParams LowTraceParams(FName(TEXT("LowCoverTrace")), true, this);
 	
 	bool HitHighCoverDetected = GetWorld()->SweepSingleByChannel(HitHighCoverResult, HighStart, HighEnd,
-		FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CheckCoverSphereRadius), HighTraceParams);
+		FQuat::Identity, ECC_GameTraceChannel5, FCollisionShape::MakeSphere(CheckCoverSphereRadius), HighTraceParams);
 	bool HitLowCoverDetected = GetWorld()->SweepSingleByChannel(HitLowCoverResult, LowerStart, LowerEnd,
-		FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CheckCoverSphereRadius), LowTraceParams);
+		FQuat::Identity, ECC_GameTraceChannel5, FCollisionShape::MakeSphere(CheckCoverSphereRadius), LowTraceParams);
 	
 	// 감지
 	if (HitLowCoverDetected)
