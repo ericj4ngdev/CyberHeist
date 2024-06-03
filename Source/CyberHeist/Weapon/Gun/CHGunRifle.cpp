@@ -3,7 +3,6 @@
 
 #include "Weapon/Gun/CHGunRifle.h"
 #include "AIController.h"
-#include "CHProjectile.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/CHAnimInstance.h"
@@ -21,7 +20,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/CHPlayerController.h"
 #include "CyberHeist.h"
-#include "GameFramework/SpringArmComponent.h"
 
 
 ACHGunRifle::ACHGunRifle() 
@@ -100,6 +98,8 @@ void ACHGunRifle::BeginPlay()
 void ACHGunRifle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	
 }
 
 void ACHGunRifle::Equip()
@@ -116,10 +116,6 @@ void ACHGunRifle::Equip()
 		HandSocket->AttachActor(this,OwningCharacter->GetMesh());
 		CH_LOG(LogCHNetwork, Log, TEXT("HandSocket: %s"), *HandSocket->GetSocketLocation(OwningCharacter->GetMesh()).ToString())
 	}
-
-	// 자기 세상에서만 장착. 서버는 그럼??
-	// 서버는 무조건 3인칭 총으로 발사하게 한다.
-	// 그.. 발사 로직은 어디있지??
 
 	if (WeaponMesh1P)
 	{
@@ -196,11 +192,6 @@ void ACHGunRifle::Equip()
 		// 캡슐의 회전을 조정된 회전으로 설정합니다.
 		MuzzleCollision1P->SetWorldRotation(MuzzleCapsuleRotation1P);
 		MuzzleCollision3P->SetWorldRotation(MuzzleCapsuleRotation3P);
-	}
-	else
-	{
-		// NPC일 경우 처리 (필요시 추가 로직)
-		CH_LOG(LogCHTemp, Log, TEXT("OwningCharacter is not a player"))
 	}
 	
 	if(OwningCharacter->IsLocallyControlled())
@@ -956,15 +947,8 @@ void ACHGunRifle::CancelPullTrigger()
 
 void ACHGunRifle::StartAim()
 {
-	// CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation Start : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 	Super::StartAim();
 	if(!bIsEquipped) return;
-	/*UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] Before bNearWall : %d"),OwningCharacter->GetNearWall());
-	if(!OwningCharacter->GetCovered())
-	{
-		if(OwningCharacter->GetNearWall()) return;		
-	}
-	UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle::StartAim()] After bNearWall : %d"),OwningCharacter->GetNearWall());*/
 	if(bReloading)
 	{
 		// cancel aim
@@ -974,42 +958,6 @@ void ACHGunRifle::StartAim()
 	bHoldGun = false;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
-	AController* OwnerController = OwningCharacter->GetController();		
-	if (OwnerController == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
-		return;
-	}
-
-	// void SetMuzzleCapsuleTransform()
-	// 서버 RPC 호출
-	// 서버 RPC 안에서 SetMuzzleCapsuleTransform() 호출
-	// 그럼 서버에서 위치 갱신
-	// 차라리 처음 총 장착했을 때, 뷰포트 따라다니게 딱 정할 수 없나?
-	// 조준했을 때가 아니라 
-	/*if(!HasAuthority())
-	{
-		// Viewport LineTrace	
-		FVector TraceStart;
-		FRotator Rotation;
-		OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
-		DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
-		FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
-
-		FVector Direction = TraceEnd -  HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P());
-
-		// 내분점	
-		DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
-		// 3인칭 메시 기준 
-		DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
-		// MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength);
-		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength);
-		FRotator MuzzleRotation = Direction.Rotation();
-		MuzzleRotation.Pitch += 90.0f;
-		MuzzleCollision->SetWorldRotation(MuzzleRotation);
-		// Direction.GetSafeNormal()
-	}*/
-	
 	if(PlayerCharacter)
 	{
 		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
@@ -1149,7 +1097,6 @@ void ACHGunRifle::StopPrecisionAim()
 	Super::StopPrecisionAim();
 	// 휠 내리면 호출되는 함수
 	if(!bIsEquipped) return;
-	// if(OwningCharacter->GetNearWall()) return;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if(PlayerCharacter)
 	{

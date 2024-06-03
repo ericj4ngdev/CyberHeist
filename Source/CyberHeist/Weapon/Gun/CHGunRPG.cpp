@@ -2,7 +2,6 @@
 
 
 #include "Weapon/Gun/CHGunRPG.h"
-#include "AIController.h"
 #include "CHProjectile.h"
 #include "CyberHeist.h"
 #include "EnhancedInputComponent.h"
@@ -11,8 +10,6 @@
 #include "Character/CHCharacterBase.h"
 #include "Character/CHCharacterPlayer.h"
 #include "KisMet/GameplayStatics.h"
-#include "Particles/ParticleSystemComponent.h"
-#include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
 #include "InputMappingContext.h"
 #include "GameFramework/PlayerController.h"
@@ -23,8 +20,13 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 
+#include "Camera/CameraComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
+
 ACHGunRPG::ACHGunRPG()
 {
+	PrimaryActorTick.bCanEverTick = true;
 	DefaultFireMode = ECHFireMode::SemiAuto;
 
 	ScopeMesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(FName("ScopeMesh1P"));
@@ -62,6 +64,16 @@ ACHGunRPG::ACHGunRPG()
 	Lens->SetVisibility(false);	
 }
 
+void ACHGunRPG::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void ACHGunRPG::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+}
+
 void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 {
 	StopAim();
@@ -71,7 +83,9 @@ void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 void ACHGunRPG::Equip()
 {
 	Super::Equip();
-	
+
+	if(!bIsEquipped) return;
+
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 
 	const USkeletalMeshSocket* HandSocket = OwningCharacter->GetMesh()->GetSocketByName(AttachPoint3P);
@@ -141,6 +155,36 @@ void ACHGunRPG::Equip()
 			MissileMesh3P->SetVisibility(true, true);
 		}
 	}
+
+	if(ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter))
+	{
+		MuzzleCollision1P->AttachToComponent(CHPlayer->GetFirstPersonCamera(),AttachmentRules);
+		MuzzleCollision3P->AttachToComponent(CHPlayer->GetThirdPersonCamera(), AttachmentRules);
+
+		// GetThirdPersonCamera의 위치와 회전을 가져옵니다.
+		const FVector CameraLocation1P = CHPlayer->GetFirstPersonCamera()->GetComponentLocation();
+		const FRotator CameraRotation1P = CHPlayer->GetFirstPersonCamera()->GetComponentRotation();
+		const FVector CameraLocation3P = CHPlayer->GetThirdPersonCamera()->GetComponentLocation();
+		const FRotator CameraRotation3P = CHPlayer->GetThirdPersonCamera()->GetComponentRotation();
+
+		// 카메라의 방향 벡터를 계산합니다.
+		const FVector CameraForwardVector1P = CameraRotation1P.Vector();
+		const FVector CameraForwardVector3P = CameraRotation3P.Vector();
+
+		// 새로운 위치를 계산합니다.
+		const FVector MuzzleCapsuleLocation1P = CameraLocation1P + (CameraForwardVector1P * 120);
+		const FVector MuzzleCapsuleLocation3P = CameraLocation3P + (CameraForwardVector3P * 120);
+		MuzzleCollision1P->SetWorldLocation(MuzzleCapsuleLocation1P);
+		MuzzleCollision3P->SetWorldLocation(MuzzleCapsuleLocation3P);
+
+		// 카메라의 회전에 90도 회전 (예: Y축 기준) 추가
+		const FRotator MuzzleCapsuleRotation1P = CameraRotation1P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+		const FRotator MuzzleCapsuleRotation3P = CameraRotation3P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+
+		// 캡슐의 회전을 조정된 회전으로 설정합니다.
+		MuzzleCollision1P->SetWorldRotation(MuzzleCapsuleRotation1P);
+		MuzzleCollision3P->SetWorldRotation(MuzzleCapsuleRotation3P);
+	}
 	
 	// Set up action bindings
 	if(OwningCharacter->IsLocallyControlled())
@@ -192,8 +236,7 @@ void ACHGunRPG::UnEquip()
 			{
 				Subsystem->RemoveMappingContext(FireMappingContext);
 				UE_LOG(LogTemp, Log, TEXT("[ACHGunRPG] Removed %s"), *FireMappingContext->GetName());
-			}
-			
+			}			
 		}
 	}
 }
@@ -568,25 +611,28 @@ void ACHGunRPG::StopPrecisionAim()
 	if(!bIsEquipped) return;
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
+	if(PlayerCharacter)
 	{
-		PlayerCharacter->SetTPAimingCloser(false);
-		PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);		
-	}
-	
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
-	{
-		// PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
-		PlayerCharacter->SetScopeAiming(false);
-		Lens->SetVisibility(false);		
-		OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);
-		if(ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(OwningCharacter->GetController()))
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 		{
-			PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);	
+			PlayerCharacter->SetTPAimingCloser(false);
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);		
 		}
-		if(OwningCharacter->GetNearWall()) return;
-		PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstAim);
-	}	
+	
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
+		{
+			// PlayerCharacter->SetCharacterControl(ECharacterControlType::FirstAim);
+			PlayerCharacter->SetScopeAiming(false);
+			Lens->SetVisibility(false);		
+			OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);
+			if(ACHPlayerController* PlayerController = CastChecked<ACHPlayerController>(OwningCharacter->GetController()))
+			{
+				PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2);	
+			}
+			if(OwningCharacter->GetNearWall()) return;
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstAim);
+		}
+	}		
 }
 
 void ACHGunRPG::StayPrecisionAim()

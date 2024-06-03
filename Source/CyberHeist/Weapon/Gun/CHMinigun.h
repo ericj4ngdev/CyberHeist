@@ -16,7 +16,9 @@ class CYBERHEIST_API ACHMinigun : public ACHGunBase
 
 public:
 	ACHMinigun();
-
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class USkeletalMeshComponent> CannonMesh1P;

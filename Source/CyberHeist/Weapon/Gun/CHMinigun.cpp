@@ -3,7 +3,6 @@
 
 #include "Weapon/Gun/CHMinigun.h"
 #include "AIController.h"
-#include "CHProjectile.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/CHAnimInstance.h"
@@ -19,8 +18,14 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/KismetMathLibrary.h"
 
+#include "Camera/CameraComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Components/CapsuleComponent.h"
+
 ACHMinigun::ACHMinigun()
 {
+	PrimaryActorTick.bCanEverTick = true;
 	DefaultFireMode = ECHFireMode::FullAuto;
 	
 	CannonMesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(FName("CannonMesh1P"));
@@ -68,6 +73,78 @@ ACHMinigun::ACHMinigun()
 	CurrentAmmo = 1000;
 	MaxAmmoCapacity = 9999;
 	bInfiniteAmmo = true;
+
+}
+
+void ACHMinigun::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void ACHMinigun::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(OwningCharacter)
+	{
+		if(ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter))
+		{
+			// if(CHPlayer == nullptr) return;
+			// 클라만 그리기
+			if(OwningCharacter->HasAuthority()) return;
+		
+			if (MuzzleCollision1P)
+			{
+				// 캡슐의 위치와 방향 설정
+				FVector CapsuleLocation = MuzzleCollision1P->GetComponentLocation();
+				FRotator CapsuleRotation = MuzzleCollision1P->GetComponentRotation();
+
+				// 캡슐의 반지름과 높이 설정
+				float CapsuleRadius = MuzzleCollision1P->GetScaledCapsuleRadius();
+				float CapsuleHalfHeight = MuzzleCollision1P->GetScaledCapsuleHalfHeight();
+
+				// Trace 시작점과 끝점 설정
+				FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
+				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
+		
+				FHitResult HitResult;
+				FCollisionQueryParams Params(FName(TEXT("Cover")), true, this);
+				Params.AddIgnoredActor(this);
+				Params.AddIgnoredActor(GetOwner());
+
+				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
+				
+				FColor DrawColor = HitDetected ? FColor::Green : FColor::Blue;
+				// Debug 캡슐 그리기
+				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+			}
+			if (MuzzleCollision3P)
+			{
+				// 캡슐의 위치와 방향 설정
+				FVector CapsuleLocation = MuzzleCollision3P->GetComponentLocation();
+				FRotator CapsuleRotation = MuzzleCollision3P->GetComponentRotation();
+
+				// 캡슐의 반지름과 높이 설정
+				float CapsuleRadius = MuzzleCollision3P->GetScaledCapsuleRadius();
+				float CapsuleHalfHeight = MuzzleCollision3P->GetScaledCapsuleHalfHeight();
+
+				// Trace 시작점과 끝점 설정
+				FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
+				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
+		
+				FHitResult HitResult;
+				FCollisionQueryParams Params(FName(TEXT("Cover")), true, this);
+				Params.AddIgnoredActor(this);
+				Params.AddIgnoredActor(GetOwner());
+				
+				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
+				
+				FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+				// Debug 캡슐 그리기
+				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+			}
+		}
+	}
 }
 
 void ACHMinigun::Equip()
@@ -135,6 +212,35 @@ void ACHMinigun::Equip()
 		}
 	}
 
+	if(ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter))
+	{
+		MuzzleCollision1P->AttachToComponent(CHPlayer->GetFirstPersonCamera(),AttachmentRules);
+		MuzzleCollision3P->AttachToComponent(CHPlayer->GetThirdPersonCamera(), AttachmentRules);
+
+		// GetThirdPersonCamera의 위치와 회전을 가져옵니다.
+		const FVector CameraLocation1P = CHPlayer->GetFirstPersonCamera()->GetComponentLocation();
+		const FRotator CameraRotation1P = CHPlayer->GetFirstPersonCamera()->GetComponentRotation();
+		const FVector CameraLocation3P = CHPlayer->GetThirdPersonCamera()->GetComponentLocation();
+		const FRotator CameraRotation3P = CHPlayer->GetThirdPersonCamera()->GetComponentRotation();
+
+		// 카메라의 방향 벡터를 계산합니다.
+		const FVector CameraForwardVector1P = CameraRotation1P.Vector();
+		const FVector CameraForwardVector3P = CameraRotation3P.Vector();
+
+		// 새로운 위치를 계산합니다.
+		const FVector MuzzleCapsuleLocation1P = CameraLocation1P + (CameraForwardVector1P * 120);
+		const FVector MuzzleCapsuleLocation3P = CameraLocation3P + (CameraForwardVector3P * 120);
+		MuzzleCollision1P->SetWorldLocation(MuzzleCapsuleLocation1P);
+		MuzzleCollision3P->SetWorldLocation(MuzzleCapsuleLocation3P);
+
+		// 카메라의 회전에 90도 회전 (예: Y축 기준) 추가
+		const FRotator MuzzleCapsuleRotation1P = CameraRotation1P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+		const FRotator MuzzleCapsuleRotation3P = CameraRotation3P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+
+		// 캡슐의 회전을 조정된 회전으로 설정합니다.
+		MuzzleCollision1P->SetWorldRotation(MuzzleCapsuleRotation1P);
+		MuzzleCollision3P->SetWorldRotation(MuzzleCapsuleRotation3P);
+	}
 	
 	// Set up action bindings
 	if(OwningCharacter->IsLocallyControlled())
@@ -792,6 +898,8 @@ void ACHMinigun::PullTrigger()
 		return;
 	}
 
+	if(OwningCharacter->GetNearWall()) return;
+	
 	bShooting = true;	
 	OwningCharacter->SetIsAttacking(bShooting);
 	OwningCharacter->bUseControllerRotationYaw = true;
@@ -818,7 +926,7 @@ void ACHMinigun::PullTrigger()
 	UAnimInstance* Cannon1pAnimInstance = CannonMesh1P->GetAnimInstance();
 	if(!Cannon1pAnimInstance->Montage_IsPlaying(CannonRotateMontage))
 	{
-		Cannon1pAnimInstance->Montage_Play(CannonRotateMontage, 1.f);				
+		Cannon1pAnimInstance->Montage_Play(CannonRotateMontage, 1.f);
 	}
 
 	UAnimInstance* Cannon3pAnimInstance = CannonMesh3P->GetAnimInstance();
@@ -835,8 +943,7 @@ void ACHMinigun::PullTrigger()
 		OwningCharacter->SetAiming(true);
 
 		// play rotating cannon animation 
-		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHMinigun::Fire, FireInterval, true);
-		
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHMinigun::Fire, FireInterval, true);	
 	}
 
 	// 아직 조준하지 않은 상태. 
@@ -844,6 +951,11 @@ void ACHMinigun::PullTrigger()
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 	{
+		if(OwningCharacter->GetNearWall())
+		{
+			CancelPullTrigger();
+			return;
+		}
 		// hold a gun
 		OwningCharacter->SetAiming(true);
 
@@ -935,7 +1047,7 @@ void ACHMinigun::StartAim()
 		return;
 	}
 	bHoldGun = false;
-	bAiming = true;
+	// bAiming = true;
 
 	if (CannonRotateSound)
 	{
@@ -994,6 +1106,7 @@ void ACHMinigun::StartAim()
 			}		
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 			PlayerCharacter->SetCoveredAttackMotion(true);
+			PlayerCharacter->ServerSetCoveredAttackMotion(true);
 		}
 
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
@@ -1002,17 +1115,17 @@ void ACHMinigun::StartAim()
 			// PlayerCharacter->SetAiming(true);  // 근데 이건 밑에 코드에서 해줌
 			if(PlayerCharacter->GetScopeAiming())
 			{
+				// 미니건은 불가
 				PlayerCharacter->SetScopeAiming(false);
-				// PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstScopeAim);
 			}
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstAim);
 			
 		}
-
 		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
 	}
 	
 	// if Pull Triggering, pass
+	if(OwningCharacter->GetNearWall()) return;
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
 }
 
@@ -1090,10 +1203,6 @@ void ACHMinigun::StopAim()
 	if(!bTrigger)
 	{
 		OwningCharacter->SetAiming(false); // if PullTriggering, pass
-	}
-	else
-	{
-		OwningCharacter->bUseControllerRotationYaw = true;		
 	}
 }
 

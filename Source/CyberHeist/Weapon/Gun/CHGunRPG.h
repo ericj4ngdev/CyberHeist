@@ -18,6 +18,9 @@ class CYBERHEIST_API ACHGunRPG : public ACHGunBase
 public:
 	ACHGunRPG();
 	
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<class USkeletalMeshComponent> ScopeMesh1P;
