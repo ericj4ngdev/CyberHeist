@@ -84,10 +84,11 @@ void ACHGunBase::Tick(float DeltaSeconds)
 	// 서버 말고 다른 사람에게만 보이기 
 	if(OwningCharacter)
 	{
-		ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
-		if(CHPlayer == nullptr) return;
-		// 클라만 그리기
-		if(OwningCharacter->HasAuthority()) return;
+		if(ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter))
+		{
+			// if(CHPlayer == nullptr) return;
+			// 클라만 그리기
+			if(OwningCharacter->HasAuthority()) return;
 		
 			if (MuzzleCollision1P)
 			{
@@ -104,15 +105,12 @@ void ACHGunBase::Tick(float DeltaSeconds)
 				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
 		
 				FHitResult HitResult;
-				FCollisionQueryParams Params(FName(TEXT("Coveace")), true, this);
+				FCollisionQueryParams Params(FName(TEXT("Cover")), true, this);
 				Params.AddIgnoredActor(this);
 				Params.AddIgnoredActor(GetOwner());
-				// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
+
 				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
-				/*if(HitDetected)
-				{
-					CH_LOG(LogCHNetwork, Log, TEXT("HitResult.GetActor() : %s"), *HitResult.GetActor()->GetName())					
-				}*/
+				
 				FColor DrawColor = HitDetected ? FColor::Green : FColor::Blue;
 				// Debug 캡슐 그리기
 				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
@@ -132,20 +130,17 @@ void ACHGunBase::Tick(float DeltaSeconds)
 				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
 		
 				FHitResult HitResult;
-				FCollisionQueryParams Params(FName(TEXT("Coveace")), true, this);
+				FCollisionQueryParams Params(FName(TEXT("Cover")), true, this);
 				Params.AddIgnoredActor(this);
 				Params.AddIgnoredActor(GetOwner());
-				// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
+				
 				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
-				if(HitDetected)
-				{
-					CH_LOG(LogCHNetwork, Log, TEXT("HitResult.GetActor() : %s"), *HitResult.GetActor()->GetName())					
-				}
+				
 				FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
 				// Debug 캡슐 그리기
 				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 			}
-		
+		}
 	}
 	
 }
@@ -234,19 +229,27 @@ void ACHGunBase::Equip()
 	}
 
 	CH_LOG(LogCHTemp, Log, TEXT("Begin"))
-	ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
-	
-	if(CHPlayer->IsInFirstPersonPerspective())
+
+	// NPC는 무시
+	if(ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter))
 	{
-		MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		CH_LOG(LogCHTemp, Log, TEXT("1pp collision On"))
+		if(CHPlayer->IsInFirstPersonPerspective())
+		{
+			MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			CH_LOG(LogCHTemp, Log, TEXT("1pp collision On"))
+		}
+		else
+		{
+			MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			CH_LOG(LogCHTemp, Log, TEXT("3pp collision On"))
+		}
 	}
 	else
 	{
-		MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		CH_LOG(LogCHTemp, Log, TEXT("3pp collision On"))
+		// NPC일 경우 처리 (필요시 추가 로직)
+		CH_LOG(LogCHTemp, Log, TEXT("OwningCharacter is not a player"))
 	}
 	
 	CH_LOG(LogCHTemp, Log, TEXT("End"))

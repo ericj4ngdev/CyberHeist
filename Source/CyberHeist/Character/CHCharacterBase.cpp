@@ -23,7 +23,7 @@
 
 // Sets default values
 ACHCharacterBase::ACHCharacterBase(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCHCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Pawn
 	bUseControllerRotationPitch = false;
@@ -259,15 +259,18 @@ FName ACHCharacterBase::GetWeaponAttachPoint() const
 
 void ACHCharacterBase::SetAiming(uint8 bNewAiming)
 {
+	CH_LOG(LogCHAI, Log, TEXT("Begin"))
 	UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
 	if(CHMovement)
 	{
 		bAiming = bNewAiming;
+		CH_LOG(LogCHAI, Log, TEXT("bAiming : %d"), bAiming)
 		CHMovement->SetAimingCommand(bAiming);
 	}	
 	ServerSetAiming(bAiming);
 	
 	OnCombat.Broadcast(bAiming);		// UI
+	CH_LOG(LogCHAI, Log, TEXT("End"))
 }
 
 void ACHCharacterBase::SetTPAimingCloser(uint8 bNewTPAimingCloser)

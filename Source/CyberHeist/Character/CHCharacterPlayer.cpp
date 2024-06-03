@@ -24,7 +24,7 @@
 
 
 ACHCharacterPlayer::ACHCharacterPlayer(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCHCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+	: Super(ObjectInitializer)
 {
 	// ThirdPersonCamera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -1269,27 +1269,6 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 			CH_LOG(LogCHTemp, Log, TEXT("3pp collision On"))
 		}
 	}
-	CH_LOG(LogCHNetwork, Log, TEXT("End"))
-}
-
-void ACHCharacterPlayer::OnRep_FirstPersonPerspective()
-{
-	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	/*if(CurrentWeapon)
-	{
-		if(bIsFirstPersonPerspective)
-		{
-			CurrentWeapon->MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-			CurrentWeapon->MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			CH_LOG(LogCHTemp, Log, TEXT("1pp collision On"))
-		}
-		else
-		{
-			CurrentWeapon->MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			CurrentWeapon->MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-			CH_LOG(LogCHTemp, Log, TEXT("3pp collision On"))
-		}
-	}*/
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 

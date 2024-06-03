@@ -167,68 +167,41 @@ void ACHGunRifle::Equip()
 		}		
 	}
 	
-
-	/*
-	AController* OwnerController = OwningCharacter->GetController();		
-	if (OwnerController == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
-		return;
-	}
-	FVector TraceStart;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
-	DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
-	FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
-
-	FVector Direction = TraceEnd -  HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P());*/
-
-	// 내분점	
-	// DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
-	// 3인칭 메시 기준 
-	// DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
-
 	CH_LOG(LogCHNetwork, Log, TEXT("AttachToComponent"))
-	ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
-	MuzzleCollision1P->AttachToComponent(CHPlayer->GetFirstPersonCamera(),AttachmentRules);		// 1인칭을 들어오면 어태치가 안되는 건 아닌데... 
-	MuzzleCollision3P->AttachToComponent(CHPlayer->GetThirdPersonCamera(), AttachmentRules);
+	if(ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter))
+	{
+		MuzzleCollision1P->AttachToComponent(CHPlayer->GetFirstPersonCamera(),AttachmentRules);		// 1인칭을 들어오면 어태치가 안되는 건 아닌데... 
+		MuzzleCollision3P->AttachToComponent(CHPlayer->GetThirdPersonCamera(), AttachmentRules);
 
-	// GetThirdPersonCamera의 위치와 회전을 가져옵니다.
-	const FVector CameraLocation1P = CHPlayer->GetFirstPersonCamera()->GetComponentLocation();
-	const FRotator CameraRotation1P = CHPlayer->GetFirstPersonCamera()->GetComponentRotation();
-	const FVector CameraLocation3P = CHPlayer->GetThirdPersonCamera()->GetComponentLocation();
-	const FRotator CameraRotation3P = CHPlayer->GetThirdPersonCamera()->GetComponentRotation();
+		// GetThirdPersonCamera의 위치와 회전을 가져옵니다.
+		const FVector CameraLocation1P = CHPlayer->GetFirstPersonCamera()->GetComponentLocation();
+		const FRotator CameraRotation1P = CHPlayer->GetFirstPersonCamera()->GetComponentRotation();
+		const FVector CameraLocation3P = CHPlayer->GetThirdPersonCamera()->GetComponentLocation();
+		const FRotator CameraRotation3P = CHPlayer->GetThirdPersonCamera()->GetComponentRotation();
 
-	// 카메라의 방향 벡터를 계산합니다.
-	const FVector CameraForwardVector1P = CameraRotation1P.Vector();
-	const FVector CameraForwardVector3P = CameraRotation3P.Vector();
+		// 카메라의 방향 벡터를 계산합니다.
+		const FVector CameraForwardVector1P = CameraRotation1P.Vector();
+		const FVector CameraForwardVector3P = CameraRotation3P.Vector();
 
-	// 새로운 위치를 계산합니다.
-	const FVector MuzzleCapsuleLocation1P = CameraLocation1P + (CameraForwardVector1P * 120);
-	const FVector MuzzleCapsuleLocation3P = CameraLocation3P + (CameraForwardVector3P * 120);
-	MuzzleCollision1P->SetWorldLocation(MuzzleCapsuleLocation1P);
-	MuzzleCollision3P->SetWorldLocation(MuzzleCapsuleLocation3P);
+		// 새로운 위치를 계산합니다.
+		const FVector MuzzleCapsuleLocation1P = CameraLocation1P + (CameraForwardVector1P * 120);
+		const FVector MuzzleCapsuleLocation3P = CameraLocation3P + (CameraForwardVector3P * 120);
+		MuzzleCollision1P->SetWorldLocation(MuzzleCapsuleLocation1P);
+		MuzzleCollision3P->SetWorldLocation(MuzzleCapsuleLocation3P);
 
-	// 카메라의 회전에 90도 회전 (예: Y축 기준) 추가
-	const FRotator MuzzleCapsuleRotation1P = CameraRotation1P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
-	const FRotator MuzzleCapsuleRotation3P = CameraRotation3P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+		// 카메라의 회전에 90도 회전 (예: Y축 기준) 추가
+		const FRotator MuzzleCapsuleRotation1P = CameraRotation1P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+		const FRotator MuzzleCapsuleRotation3P = CameraRotation3P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
 
-	// 캡슐의 회전을 조정된 회전으로 설정합니다.
-	MuzzleCollision1P->SetWorldRotation(MuzzleCapsuleRotation1P);
-	MuzzleCollision3P->SetWorldRotation(MuzzleCapsuleRotation3P);
-	// 필요한 경우, MuzzleCollision3P의 회전을 카메라의 회전과 일치시킵니다.
-	// MuzzleCollision3P->SetWorldRotation(CameraRotation);
-	
-	// 일단 부착만 해보자.
-	// 위치 설정은 나중에
-	
-	// MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength);
-	// MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength);
-	// FRotator MuzzleRotation = Direction.Rotation();
-	// MuzzleRotation.Pitch += 90.0f;
-	// MuzzleCollision->SetWorldRotation(MuzzleRotation);
-	// Direction.GetSafeNormal()
-	// OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P
+		// 캡슐의 회전을 조정된 회전으로 설정합니다.
+		MuzzleCollision1P->SetWorldRotation(MuzzleCapsuleRotation1P);
+		MuzzleCollision3P->SetWorldRotation(MuzzleCapsuleRotation3P);
+	}
+	else
+	{
+		// NPC일 경우 처리 (필요시 추가 로직)
+		CH_LOG(LogCHTemp, Log, TEXT("OwningCharacter is not a player"))
+	}
 	
 	if(OwningCharacter->IsLocallyControlled())
 	{

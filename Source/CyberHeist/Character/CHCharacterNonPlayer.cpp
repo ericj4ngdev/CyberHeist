@@ -4,6 +4,8 @@
 #include "Character/CHCharacterNonPlayer.h"
 
 #include "BrainComponent.h"
+#include "CHCharacterMovementComponent.h"
+#include "CyberHeist.h"
 #include "AI/CHAIController.h"
 #include "AI/CHAI.h"
 #include "Animation/CHAnimInstance.h"
@@ -136,8 +138,10 @@ void ACHCharacterNonPlayer::StartAimWeapon()
 {
 	if(GetCurrentWeapon())
 	{
+		CH_LOG(LogCHAI, Log, TEXT("Begin"))
 		GetCurrentWeapon()->StartAim();
 		SetAiming(true);
+		CH_LOG(LogCHAI, Log, TEXT("End"))
 	}
 }
 

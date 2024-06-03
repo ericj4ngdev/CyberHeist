@@ -186,11 +186,9 @@ protected:
 
 	// Sets the perspective
 	void SetPerspective(uint8 Is1PPerspective);
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_FirstPersonPerspective, Category = Camera)
+	
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = Camera)
 	uint8 bIsFirstPersonPerspective : 1;
-
-	UFUNCTION()
-	void OnRep_FirstPersonPerspective();
 
 public:
 	uint8 IsInFirstPersonPerspective() const{return bIsFirstPersonPerspective;}
