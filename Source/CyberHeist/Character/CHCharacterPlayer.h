@@ -71,6 +71,7 @@ protected:
 public:
 	UCameraComponent* GetThirdPersonCamera() const{ return ThirdPersonCamera;}
 	UCameraComponent* GetFirstPersonCamera() const{ return FirstPersonCamera;}
+	USpringArmComponent* GetSpringArm() const {return CameraBoom;}
 	// Input Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
@@ -234,15 +235,6 @@ public:
 	void ReleaseSprint();
 	virtual void StartSprint() override;
 	virtual void StopSprint() override;
-
-	
-
-	UFUNCTION()
-	void OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	
-	UFUNCTION()
-	void OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	
 
 	// UI Section
 protected:

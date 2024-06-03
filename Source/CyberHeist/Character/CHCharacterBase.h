@@ -54,10 +54,6 @@ protected:
 public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class USceneComponent> SceneComponent;
-	
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UCapsuleComponent> CollisionComp;
-
 
 	// Cover
 protected:

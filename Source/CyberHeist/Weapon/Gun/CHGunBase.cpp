@@ -50,9 +50,7 @@ ACHGunBase::ACHGunBase()
 	ScopeCamera->bUsePawnControlRotation = true;	
 
 	MuzzleCollision3P = CreateDefaultSubobject<UCapsuleComponent>(TEXT("MuzzleCollision3P"));
-	// MuzzleCollision->SetRelativeLocation()
 	MuzzleCollision3P->SetupAttachment(WeaponMesh3P);	
-	// MuzzleCollision->InitCapsuleSize(40.0f, 50.0f);
 
 	MuzzleCollision1P= CreateDefaultSubobject<UCapsuleComponent>(TEXT("MuzzleCollision1P"));
 	MuzzleCollision1P->SetupAttachment(WeaponMesh1P);
@@ -69,6 +67,9 @@ void ACHGunBase::BeginPlay()
 	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHGunBase::OnSphereBeginOverlap);
 
+	MuzzleCollision1P->OnComponentBeginOverlap.AddDynamic(this, &ACHGunBase::OnNearWall);
+	MuzzleCollision1P->OnComponentEndOverlap.AddDynamic(this,&ACHGunBase::OnFarFromWall);
+	
 	MuzzleCollision3P->OnComponentBeginOverlap.AddDynamic(this, &ACHGunBase::OnNearWall);
 	MuzzleCollision3P->OnComponentEndOverlap.AddDynamic(this,&ACHGunBase::OnFarFromWall);
 }
@@ -78,73 +79,78 @@ void ACHGunBase::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	// 총구에서 레이저를 쏜다
-	// 총구 앞에 Hit가 되면 몽타주 재생
-	
-	/*FTransform SocketTransform;
-	if(OwningCharacter->IsInFirstPersonPerspective())
+
+	// if(OwningCharacter && !OwningCharacter->HasAuthority() && OwningCharacter->IsLocallyControlled())
+	// 서버 말고 다른 사람에게만 보이기 
+	if(OwningCharacter)
 	{
-		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh1P()->GetSocketByName();
-		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh1P());
-		if(MuzzleFlashSocket == nullptr) return; 
-	}
-	else
-	{
-		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
-		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
-		if(MuzzleFlashSocket == nullptr) return; 
-	}*/
-	/*if(!HasAuthority())
-	{*/
-		if (MuzzleCollision3P)
+		ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
+		if(CHPlayer == nullptr) return;
+		// 서버, 클라 모두 그리기
+		if(CHPlayer->IsInFirstPersonPerspective())
 		{
-			// 캡슐의 위치와 방향 설정
-			FVector CapsuleLocation = MuzzleCollision3P->GetComponentLocation();
-			FRotator CapsuleRotation = MuzzleCollision3P->GetComponentRotation();
+			if (MuzzleCollision1P)
+			{
+				// 캡슐의 위치와 방향 설정
+				FVector CapsuleLocation = MuzzleCollision1P->GetComponentLocation();
+				FRotator CapsuleRotation = MuzzleCollision1P->GetComponentRotation();
 
-			// 캡슐의 반지름과 높이 설정
-			float CapsuleRadius = MuzzleCollision3P->GetScaledCapsuleRadius();
-			float CapsuleHalfHeight = MuzzleCollision3P->GetScaledCapsuleHalfHeight();
+				// 캡슐의 반지름과 높이 설정
+				float CapsuleRadius = MuzzleCollision1P->GetScaledCapsuleRadius();
+				float CapsuleHalfHeight = MuzzleCollision1P->GetScaledCapsuleHalfHeight();
 
-			// Trace 시작점과 끝점 설정
-			FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
-			FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
+				// Trace 시작점과 끝점 설정
+				FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
+				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
 		
-			FHitResult HitResult;
-			FCollisionQueryParams TraceParams(FName(TEXT("Coveace")), true, this);
-			// Params.AddIgnoredActor(this);
-			// TraceParams.AddIgnoredActor(GetOwner());
-			// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
-			bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), TraceParams);
-		
-			FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-			// Debug 캡슐 그리기
-			DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+				FHitResult HitResult;
+				FCollisionQueryParams Params(FName(TEXT("Coveace")), true, this);
+				Params.AddIgnoredActor(this);
+				Params.AddIgnoredActor(GetOwner());
+				// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
+				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
+				/*if(HitDetected)
+				{
+					CH_LOG(LogCHTemp, Log, TEXT("HitResult.GetActor() : %s"), *HitResult.GetActor()->GetName())					
+				}*/
+				FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+				// Debug 캡슐 그리기
+				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+			}
 		}
-	if (MuzzleCollision1P)
-	{
-		// 캡슐의 위치와 방향 설정
-		FVector CapsuleLocation = MuzzleCollision1P->GetComponentLocation();
-		FRotator CapsuleRotation = MuzzleCollision1P->GetComponentRotation();
+		else
+		{
+			if (MuzzleCollision3P)
+			{
+				// 캡슐의 위치와 방향 설정
+				FVector CapsuleLocation = MuzzleCollision3P->GetComponentLocation();
+				FRotator CapsuleRotation = MuzzleCollision3P->GetComponentRotation();
 
-		// 캡슐의 반지름과 높이 설정
-		float CapsuleRadius = MuzzleCollision1P->GetScaledCapsuleRadius();
-		float CapsuleHalfHeight = MuzzleCollision1P->GetScaledCapsuleHalfHeight();
+				// 캡슐의 반지름과 높이 설정
+				float CapsuleRadius = MuzzleCollision3P->GetScaledCapsuleRadius();
+				float CapsuleHalfHeight = MuzzleCollision3P->GetScaledCapsuleHalfHeight();
 
-		// Trace 시작점과 끝점 설정
-		FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
-		FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
+				// Trace 시작점과 끝점 설정
+				FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
+				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
 		
-		FHitResult HitResult;
-		FCollisionQueryParams TraceParams(FName(TEXT("Coveace")), true, this);
-		// Params.AddIgnoredActor(this);
-		// TraceParams.AddIgnoredActor(GetOwner());
-		// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
-		bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), TraceParams);
-		
-		FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-		// Debug 캡슐 그리기
-		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+				FHitResult HitResult;
+				FCollisionQueryParams Params(FName(TEXT("Coveace")), true, this);
+				Params.AddIgnoredActor(this);
+				Params.AddIgnoredActor(GetOwner());
+				// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
+				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
+				if(HitDetected)
+				{
+					CH_LOG(LogCHTemp, Log, TEXT("HitResult.GetActor() : %s"), *HitResult.GetActor()->GetName())					
+				}
+				FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+				// Debug 캡슐 그리기
+				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+			}
+		}	
 	}
+	
 }
 
 void ACHGunBase::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -174,54 +180,46 @@ UAnimMontage* ACHGunBase::GetEquip3PMontage() const
 void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if(HasAuthority())
-	{
+	if(OwningCharacter && !OwningCharacter->HasAuthority() && OwningCharacter->IsLocallyControlled())
+	{		
 		// 리플리로 총 내리기
 		// 변수 하나 동기화해서 총 못쏘게 하기
-		if(OwningCharacter)
+		if(OtherActor == OwningCharacter || OtherActor == this)
 		{
-			if(OtherActor == OwningCharacter)
-			{
-				return;
-			}
-			
-			OwningCharacter->SetNearWall(true);
-
-			// 총 내리기
-			StopPrecisionAim();
-			CancelPullTrigger();
-
-			UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
-			UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());
-						
-			GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
-			GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
-			
-			CH_LOG(LogCHNetwork, Log, TEXT("[OnNearWall] %d"), OwningCharacter->GetNearWall());
+			return;
 		}
+		
+		OwningCharacter->SetNearWall(true);
+
+		// 총 내리기
+		StopPrecisionAim();
+		CancelPullTrigger();
+		
+		CH_LOG(LogCHTemp, Log, TEXT("OtherActor : %s"), *OtherActor->GetName())
+		CH_LOG(LogCHTemp, Log, TEXT("OtherComp : %s"), *OtherComp->GetName())		// DetectWall?? 
+					
+		GetWorld()->GetTimerManager().ClearTimer(ShootTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+		
+		CH_LOG(LogCHNetwork, Log, TEXT("[OnNearWall] %d"), OwningCharacter->GetNearWall());		
 	}
 }
 
 void ACHGunBase::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if(HasAuthority())
-	{
-		if(OwningCharacter)
+	if(OwningCharacter && !OwningCharacter->HasAuthority() && OwningCharacter->IsLocallyControlled())
+	{	
+		if(OtherActor == OwningCharacter || OtherActor == this)
 		{
-			if(OtherActor == OwningCharacter)
-			{
-				return;
-			}
-			OwningCharacter->SetNearWall(false);
-			StayPrecisionAim();
-		
-			CH_LOG(LogCHNetwork,Log, TEXT("[OnFarFromWall] %d"), OwningCharacter->GetNearWall());
+			return;
 		}
-	}
-	
+		OwningCharacter->SetNearWall(false);
+		StayPrecisionAim();
+		
+		CH_LOG(LogCHNetwork,Log, TEXT("[OnFarFromWall] %d"), OwningCharacter->GetNearWall());
+	}	
 	// 기존에 확대 조준 중이었으면 다시 확대 조준으로 돌아가기
-	
 }
 
 void ACHGunBase::Equip()
@@ -230,6 +228,19 @@ void ACHGunBase::Equip()
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s %s OwningCharacter is nullptr"), *FString(__FUNCTION__), *GetName());
 		return;
+	}
+
+	ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
+	
+	if(CHPlayer->IsInFirstPersonPerspective())
+	{
+		MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else
+	{
+		MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 	
 	bIsEquipped = true;

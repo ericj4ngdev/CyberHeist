@@ -21,6 +21,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/CHPlayerController.h"
 #include "CyberHeist.h"
+#include "GameFramework/SpringArmComponent.h"
 
 
 ACHGunRifle::ACHGunRifle() 
@@ -99,7 +100,6 @@ void ACHGunRifle::BeginPlay()
 void ACHGunRifle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	// CH_LOG(LogCHTemp, Log, TEXT("3p GetComponentLocation : %s"), *WeaponMesh3P->GetComponentLocation().ToString())
 }
 
 void ACHGunRifle::Equip()
@@ -166,56 +166,59 @@ void ACHGunRifle::Equip()
 			WeaponMesh3P->SetVisibility(true);
 		}		
 	}
+	
+
+	/*
 	AController* OwnerController = OwningCharacter->GetController();		
 	if (OwnerController == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController"));
 		return;
 	}
-	// Viewport LineTrace	
-	/*FVector TraceStart;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
-	DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
-	FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
-	
-	// 손잡이 위치 
-	FVector Direction = HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()) - TraceEnd;
-	// CH_LOG(LogTemp, Log, TEXT("Hand : %s Barrel : %f"), *HandleSocket_1P->GetSocketLocation(GetWeaponMesh1P()).ToString(), BarrelLength)
-	MuzzleCollision->SetRelativeLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + BarrelLength * TraceEnd);*/
-	// MuzzleCollision->SetWorldLocation()
-	/*FVector TraceStart;
-		FRotator Rotation;
-		OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
-		DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
-		FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
-
-		FVector Direction = HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) - TraceEnd;
-		// 내분점
-	
-		DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
-		// 3인칭 메시 기준 
-		DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
-		MuzzleCollision->SetWorldLocation(HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()) + Direction.GetSafeNormal() * BarrelLength * 2);*/
-
 	FVector TraceStart;
 	FRotator Rotation;
 	OwnerController->GetPlayerViewPoint(TraceStart, Rotation);
 	DrawDebugCamera(GetWorld(), TraceStart, Rotation, 90, 2, FColor::Red, false,2);
 	FVector TraceEnd = TraceStart + Rotation.Vector() * 1000.f;
 
-	FVector Direction = TraceEnd -  HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P());
+	FVector Direction = TraceEnd -  HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P());*/
 
 	// 내분점	
-	DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
+	// DrawDebugPoint(GetWorld(),TraceEnd,10.0f,FColor::Magenta,false,2);
 	// 3인칭 메시 기준 
-	DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
-	
+	// DrawDebugLine(GetWorld(),HandleSocket_3P->GetSocketLocation(GetWeaponMesh3P()),TraceEnd,FColor::Magenta,false,2);
+
+	CH_LOG(LogCHNetwork, Log, TEXT("AttachToComponent"))
 	ACHCharacterPlayer* CHPlayer = CastChecked<ACHCharacterPlayer>(OwningCharacter);
 	MuzzleCollision1P->AttachToComponent(CHPlayer->GetFirstPersonCamera(),AttachmentRules);
-	// MuzzleCollision1P->SetWorldLocation(CHPlayer->GetFirstPersonCamera()->GetForwardVector() * BarrelLength); // GetActorForwardVector() * BarrelLength);
 	MuzzleCollision3P->AttachToComponent(CHPlayer->GetThirdPersonCamera(), AttachmentRules);
-	// MuzzleCollision3P->SetWorldLocation(CHPlayer->GetThirdPersonCamera()->GetForwardVector() * BarrelLength);
+
+	// GetThirdPersonCamera의 위치와 회전을 가져옵니다.
+	FVector CameraLocation1P = CHPlayer->GetFirstPersonCamera()->GetComponentLocation();
+	FRotator CameraRotation1P = CHPlayer->GetFirstPersonCamera()->GetComponentRotation();
+	FVector CameraLocation3P = CHPlayer->GetThirdPersonCamera()->GetComponentLocation();
+	FRotator CameraRotation3P = CHPlayer->GetThirdPersonCamera()->GetComponentRotation();
+
+	// 카메라의 방향 벡터를 계산합니다.
+	FVector CameraForwardVector1P = CameraRotation1P.Vector();
+	FVector CameraForwardVector3P = CameraRotation3P.Vector();
+
+	// 새로운 위치를 계산합니다.
+	FVector MuzzleCapsuleLocation1P = CameraLocation1P + (CameraForwardVector1P * 150);
+	FVector MuzzleCapsuleLocation3P = CameraLocation3P + (CameraForwardVector3P * 150);
+	MuzzleCollision1P->SetWorldLocation(MuzzleCapsuleLocation1P);
+	MuzzleCollision3P->SetWorldLocation(MuzzleCapsuleLocation3P);
+
+	// 카메라의 회전에 90도 회전 (예: Y축 기준) 추가
+	FRotator MuzzleCapsuleRotation1P = CameraRotation1P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+	FRotator MuzzleCapsuleRotation3P = CameraRotation3P + FRotator(90.0f, 0.0f, 0.0f); // Y축을 기준으로 90도 회전
+
+	// 캡슐의 회전을 조정된 회전으로 설정합니다.
+	MuzzleCollision1P->SetWorldRotation(MuzzleCapsuleRotation1P);
+	MuzzleCollision3P->SetWorldRotation(MuzzleCapsuleRotation3P);
+	// 필요한 경우, MuzzleCollision3P의 회전을 카메라의 회전과 일치시킵니다.
+	// MuzzleCollision3P->SetWorldRotation(CameraRotation);
+	
 	// 일단 부착만 해보자.
 	// 위치 설정은 나중에
 	

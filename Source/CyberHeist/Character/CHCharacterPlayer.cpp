@@ -59,13 +59,6 @@ ACHCharacterPlayer::ACHCharacterPlayer(const FObjectInitializer& ObjectInitializ
 
 	GetMesh()->bCastHiddenShadow = true;
 
-
-	CollisionComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("DetectWall"));
-	CollisionComp->SetupAttachment(FirstPersonCamera);
-
-	// CollisionComp->InitCapsuleSize(10.f, 50.0f);
-	// CollisionComp->Draw
-	// CapsuleComponent->SetRelativeRotation()
 	
 	// Input
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputChangeActionControlRef(TEXT("/Script/EnhancedInput.InputAction'/Game/CyberHeist/Input/Actions/IA_ChangeControl.IA_ChangeControl'"));
@@ -186,9 +179,6 @@ void ACHCharacterPlayer::BeginPlay()
 		// ServerRPC_SetPerspective(bIsFirstPersonPerspective);
 	}
 
-	// 이벤트 등록
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHCharacterPlayer::OnNearWall);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this,&ACHCharacterPlayer::OnFarFromWall);
 	// Tilting Timeline Binding
 	if (TiltingCurveFloat)
 	{		
@@ -228,34 +218,6 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 		FVector End_ = GetActorForwardVector() * 50.0f + Start_;
 		DrawDebugDirectionalArrow(GetWorld(),Start_, End_, 10.0f, FColor::Red, false, -1, 0 ,10.0f);
 	}
-	/*if(HasAuthority())
-	{
-		if (CollisionComp)
-		{
-			// 캡슐의 위치와 방향 설정
-			FVector CapsuleLocation = CollisionComp->GetComponentLocation();
-			FRotator CapsuleRotation = CollisionComp->GetComponentRotation();
-
-			// 캡슐의 반지름과 높이 설정
-			float CapsuleRadius = CollisionComp->GetScaledCapsuleRadius();
-			float CapsuleHalfHeight = CollisionComp->GetScaledCapsuleHalfHeight();
-
-			// Trace 시작점과 끝점 설정
-			FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
-			FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
-		
-			FHitResult HitResult;
-			FCollisionQueryParams TraceParams(FName(TEXT("Coveace")), true, this);
-			// Params.AddIgnoredActor(this);
-			// TraceParams.AddIgnoredActor(GetOwner());
-			// bool HitDetected = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel1, Params);
-			bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), TraceParams);
-		
-			FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-			// Debug 캡슐 그리기
-			DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
-		}
-	}*/
 	
 	// CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	
@@ -1305,6 +1267,22 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 void ACHCharacterPlayer::OnRep_FirstPersonPerspective()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	if(CurrentWeapon)
+	{
+		if(bIsFirstPersonPerspective)
+		{
+			CurrentWeapon->MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			CurrentWeapon->MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::NoCollision);			
+		}
+		else
+		{
+			CurrentWeapon->MuzzleCollision1P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			CurrentWeapon->MuzzleCollision3P->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+	}
+	
+	
+	
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
@@ -1424,56 +1402,6 @@ void ACHCharacterPlayer::StartSprint()
 void ACHCharacterPlayer::StopSprint()
 {
 	Super::StopSprint();
-}
-
-void ACHCharacterPlayer::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	/*// if(bCovered) return;
-	if(HasAuthority())
-	{
-		// 리플리로 총 내리기
-		// 변수 하나 동기화해서 총 못쏘게 하기 
-		SetNearWall(true);
-		if(CurrentWeapon)
-		{		
-			// 총 내리기
-			CurrentWeapon->StopPrecisionAim();
-			CurrentWeapon->CancelPullTrigger();
-
-			GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->ShootTimerHandle);
-			GetWorld()->GetTimerManager().ClearTimer(CurrentWeapon->FireTimerHandle);
-		}
-		// SetAiming(false);
-	}
-	UE_LOG(LogTemp,Log, TEXT("[OnNearWall] %d"), GetNearWall());*/
-}
-
-void ACHCharacterPlayer::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	// 충돌 탈출 시, false로 전환.
-	/*if(HasAuthority())
-	{
-		SetNearWall(false);
-		if(CurrentWeapon)
-		{
-			CurrentWeapon->StayPrecisionAim();
-			/*if(CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
-			{
-				if(ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller))
-				{			
-					PlayerController->SetViewTargetWithBlend(CurrentWeapon,0.2);
-					GetFirstPersonMesh()->SetVisibility(false);
-				}
-			}#1#
-		}
-	}
-	
-	// 기존에 확대 조준 중이었으면 다시 확대 조준으로 돌아가기
-	
-	CH_LOG(LogCHNetwork,Log, TEXT("[OnFarFromWall] %d"), GetNearWall());*/
-	// UE_LOG(LogTemp,Log, TEXT("[OnFarFromWall] %d"), GetNearWall());
 }
 
 void ACHCharacterPlayer::SetupHUDWidget(UCHHUDWidget* InHUDWidget)
