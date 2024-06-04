@@ -264,6 +264,16 @@ void ACHGunBase::CancelPullTrigger()
 	ServerCancelPullTrigger();
 }
 
+void ACHGunBase::PlayFireVFX(const FTransform& HitTransform, const FTransform& MuzzleTransform)
+{
+}
+
+void ACHGunBase::MulticastPlayFireVFX_Implementation(const FTransform& HitTransform, const FTransform& MuzzleTransform)
+{
+	if(HasAuthority()) return;
+	PlayFireVFX(HitTransform, MuzzleTransform);
+}
+
 void ACHGunBase::ServerStartAim_Implementation()
 {
 	MulticastStartAim();
@@ -446,7 +456,8 @@ void ACHGunBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(ACHGunBase, bIsEquipped);
 	DOREPLIFETIME(ACHGunBase, bTrigger);
 	DOREPLIFETIME(ACHGunBase, bReloading);
-	DOREPLIFETIME(ACHGunBase, bHoldGun);	
+	DOREPLIFETIME(ACHGunBase, bHoldGun);
+	DOREPLIFETIME(ACHGunBase, OwningCharacter);	
 }
 
 void ACHGunBase::OnRep_Owner()

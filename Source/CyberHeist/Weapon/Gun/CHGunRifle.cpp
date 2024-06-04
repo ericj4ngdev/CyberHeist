@@ -484,6 +484,8 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 			}
 		}
 	}
+
+	
 	if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 }
 
@@ -590,7 +592,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 			const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			// 맞은 부위 효과
-			if(ImpactEffect)
+			/*if(ImpactEffect)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation
 				(
@@ -599,7 +601,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 					Hit.Location, 
 					Hit.ImpactNormal.Rotation()
 				);			
-			}
+			}*/
 	
 			// AActor* HitActor = Hit.GetActor();
 			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
@@ -610,7 +612,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 			}
 		}
 		// 궤적
-		FVector BeamEnd = End;
+		/*FVector BeamEnd = End;
 		if (Hit.bBlockingHit)
 		{
 			// BeamEnd = Hit.ImpactPoint;
@@ -675,7 +677,9 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		if (TPAnimInstance)
 		{
 			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
-		}		
+		}		*/
+
+		MulticastPlayFireVFX(AttackTarget->GetTransform(), SocketTransform);
 		
 		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
  			
@@ -749,7 +753,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 			const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			// 맞은 부위 효과
-			if(ImpactEffect)
+			/*if(ImpactEffect)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation
 				(
@@ -758,7 +762,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 					Hit.Location, 
 					Hit.ImpactNormal.Rotation()
 				);			
-			}
+			}*/
 	
 			// AActor* HitActor = Hit.GetActor();
 			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
@@ -768,7 +772,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 			}
 		}
-		// 궤적
+		/*// 궤적
 		FVector BeamEnd = End;
 		if (Hit.bBlockingHit)
 		{
@@ -821,9 +825,11 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 				MuzzleFlash,
 				SocketTransform
 			);
-		}
-	
-		UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+		}*/
+
+		MulticastPlayFireVFX(AttackTarget->GetTransform(), SocketTransform);
+		
+		/*UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
 		if(WeaponMeshFireMontage)
 		{
 			Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
@@ -834,7 +840,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 		if (TPAnimInstance)
 		{
 			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
-		}		
+		}	*/	
 		
 		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 	}	
@@ -1257,6 +1263,91 @@ void ACHGunRifle::SetOwningCharacter(ACHCharacterBase* InOwningCharacter)
 void ACHGunRifle::StopParticleSystem()
 {
 	Super::StopParticleSystem();
+}
+
+void ACHGunRifle::PlayFireVFX(const FTransform& HitTransform, const FTransform& MuzzleTransform)
+{
+	Super::PlayFireVFX(HitTransform, MuzzleTransform);
+
+	if(ImpactEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation
+		(
+			GetWorld(),
+			ImpactEffect,
+			HitTransform			
+			// Hit.Location, 
+			//Hit.ImpactNormal.Rotation()			
+		);			
+	}
+
+	// 궤적
+	FVector BeamEnd = HitTransform.GetLocation();
+	/*if (Hit.bBlockingHit)
+	{
+		// BeamEnd = Hit.ImpactPoint;
+		BeamEnd = Hit.Location;
+	}
+	else
+	{
+		Hit.Location = End;
+	}*/
+		
+	if (TraceParticles)
+	{
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			TraceParticles,
+			MuzzleTransform.GetLocation(),
+			FRotator::ZeroRotator,
+			true
+		);
+		if (Beam)
+		{
+			// Target은 그냥 임의로 지은 것.
+			Beam->SetVectorParameter(FName("Target"), BeamEnd);
+		}
+	}
+		
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			HitSound,
+			HitTransform.GetLocation()
+		);
+	}
+		
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			FireSound,
+			GetActorLocation()
+		);
+	}
+	
+	if (MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			MuzzleFlash,
+			MuzzleTransform
+		);
+	}
+
+	UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+	if(WeaponMeshFireMontage)
+	{
+		Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
+	}
+		
+	// Get the animation object for the arms mesh
+	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	if (TPAnimInstance)
+	{
+		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
+	}		
 }
 
 

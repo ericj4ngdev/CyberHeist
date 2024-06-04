@@ -51,7 +51,7 @@ protected:
 	virtual void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 	TObjectPtr<class ACHCharacterBase> OwningCharacter;
 	
 protected:
@@ -285,6 +285,11 @@ public:
 	virtual void EndShoot();
 	virtual void PullTrigger();
 	virtual void CancelPullTrigger();
+	virtual void PlayFireVFX(const FTransform& HitTransform, const FTransform& MuzzleTransform);
+
+public:
+	UFUNCTION(NetMulticast, unreliable)
+	void MulticastPlayFireVFX(const FTransform& HitTransform, const FTransform& MuzzleTransform);
 
 	UFUNCTION(Server, unreliable, WithValidation)
 	void ServerStartAim();

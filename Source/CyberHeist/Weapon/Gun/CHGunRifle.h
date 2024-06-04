@@ -44,7 +44,8 @@ public:
 public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
 	virtual void StopParticleSystem() override;
-
+	virtual void PlayFireVFX(const FTransform& HitTransform, const FTransform& MuzzleTransform) override;
+	
 	UPROPERTY()
 	TObjectPtr<class AActor> AttackTargetActor;
 };

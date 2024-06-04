@@ -1403,3 +1403,8 @@ void ACHMinigun::StopRotateCannon()
 		}
 	}
 }
+
+/*void ACHMinigun::PlayFireVFX(FHitResult Hit, const FTransform& MuzzleTransform)
+{
+	Super::PlayFireVFX(Hit, MuzzleTransform);
+}*/
