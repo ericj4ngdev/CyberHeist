@@ -44,8 +44,8 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		}
 	);
 
-	AIPawn->SetAIAttackDelegate(OnAttackFinished);	// npc에게 델리 전달.	
-	AIPawn->AttackByAI(AttackActor);			// 공격 후 막줄에 NotifyComboActionEnd로
+	AIPawn->SetAIAttackDelegate(OnAttackFinished);		// npc에게 델리 전달.	
+	AIPawn->AttackByAI(AttackActor);					// 공격 후 막줄에 NotifyComboActionEnd로
 
 	// 3초 후에 ISATTACKING = false로 만들고 공격 멈추기
 	/*OwnerComp.GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, &OwnerComp]()

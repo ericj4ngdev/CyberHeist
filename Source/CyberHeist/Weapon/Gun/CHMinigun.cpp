@@ -695,8 +695,9 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 		Params.AddIgnoredActor(GetOwner());
 			
 		FTransform SocketTransform;
-		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
-		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
+		// const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh3P->GetSocketByName("MuzzleFlash");
+		const USkeletalMeshSocket* MuzzleFlashSocket = CannonMesh3P->GetSocketByName("Muzzle_1");
+		SocketTransform = MuzzleFlashSocket->GetSocketTransform(CannonMesh3P);
 		if(MuzzleFlashSocket == nullptr) return; 
 				
 		FVector TraceStart = SocketTransform.GetLocation();
@@ -1284,9 +1285,7 @@ void ACHMinigun::PlayFireVFX(const FTransform& HitTransform, const FTransform& M
 		(
 			GetWorld(),
 			ImpactEffect,
-			HitTransform			
-			// Hit.Location, 
-			//Hit.ImpactNormal.Rotation()			
+			HitTransform
 		);			
 	}
 
