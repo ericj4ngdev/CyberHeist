@@ -64,7 +64,7 @@ public:
 	virtual void OnCancelPullTrigger() override;
 	void StartRotateCannon();
 	void StopRotateCannon();
-	// virtual void PlayFireVFX(const FTransform& HitTransform, const FTransform& MuzzleTransform) override;
+	virtual void PlayFireVFX(const FTransform& HitTransform, const FTransform& MuzzleTransform) override;
 	
 private:
 	uint8 bAiming;

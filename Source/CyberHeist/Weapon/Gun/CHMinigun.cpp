@@ -601,7 +601,7 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
 		}
 			
 		// LineTrace
-		FHitResult Hit;
+		FHitResult MuzzleLaserHit;
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
 		Params.AddIgnoredActor(GetOwner());
@@ -615,104 +615,33 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
 		//FVector End = Location + Rotation.Vector() * MaxRange;
 		FVector End = AttackTarget->GetActorLocation();
 		//FVector HitTarget = Hit.ImpactPoint;
+		
 		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
-		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
-		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(Hit.GetActor()));
+		bool bSuccess = GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(MuzzleLaserHit.GetActor()));
 	
 		if (bSuccess)
 		{
 			// FVector ShotDirection = -Rotation.Vector();
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-			DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
-			const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
-			
-			// 맞은 부위 효과
-			if(ImpactEffect)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation
-				(
-					GetWorld(),
-					ImpactEffect,
-					Hit.Location, 
-					Hit.ImpactNormal.Rotation()
-				);			
-			}
-	
+			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+				
 			// AActor* HitActor = Hit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
+			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
 			if (CharacterBase)
 			{
-				FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
+				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
 				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 			}
 		}
-		// 궤적
-		FVector BeamEnd = End;
-		if (Hit.bBlockingHit)
-		{
-			// BeamEnd = Hit.ImpactPoint;
-			BeamEnd = Hit.Location;
-		}
-		else
-		{
-			Hit.Location = End;
-		}
+
+		FTransform HitTransform;
+		HitTransform.SetLocation(MuzzleLaserHit.Location);
+		FVector ToTarget = MuzzleLaserHit.Location - SocketTransform.GetLocation();		
+		HitTransform.SetRotation(ToTarget.Rotation().Quaternion());
 		
-		if (TraceParticles)
-		{
-			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
-				GetWorld(),
-				TraceParticles,
-				TraceStart,
-				FRotator::ZeroRotator,
-				true
-			);
-			if (Beam)
-			{
-				// Target은 그냥 임의로 지은 것.
-				Beam->SetVectorParameter(FName("Target"), BeamEnd);
-			}
-		}
-		
-		if (HitSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				HitSound,
-				Hit.ImpactPoint
-			);
-		}
-		
-		if (FireSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				FireSound,
-				GetActorLocation()
-			);
-		}
-	
-		if (MuzzleFlash)
-		{
-			UGameplayStatics::SpawnEmitterAtLocation(
-				GetWorld(),
-				MuzzleFlash,
-				SocketTransform
-			);
-		}
-	
-		UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
-		if(WeaponMeshFireMontage)
-		{
-			Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
-		}
-		
-		// Get the animation object for the arms mesh
-		UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-		if (TPAnimInstance)
-		{
-			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
-		}		
+		MulticastPlayFireVFX(HitTransform, SocketTransform);
 		
 		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
  			
@@ -760,7 +689,7 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 		}
 			
 		// LineTrace
-		FHitResult Hit;
+		FHitResult MuzzleLaserHit;
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
 		Params.AddIgnoredActor(GetOwner());
@@ -775,92 +704,33 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 		FVector End = AttackTarget->GetActorLocation();
 		//FVector HitTarget = Hit.ImpactPoint;
 		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
-		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
-		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(Hit.GetActor()));
+		bool bSuccess = GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, TraceStart, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(MuzzleLaserHit.GetActor()));
 	
 		if (bSuccess)
 		{
 			// FVector ShotDirection = -Rotation.Vector();
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-			DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
-			const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
-			
-			// 맞은 부위 효과
-			if(ImpactEffect)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation
-				(
-					GetWorld(),
-					ImpactEffect,
-					Hit.Location, 
-					Hit.ImpactNormal.Rotation()
-				);			
-			}
-	
+			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+				
 			// AActor* HitActor = Hit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
+			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
 			if (CharacterBase)
 			{
-				FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
+				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
 				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 			}
 		}
-		// 궤적
-		FVector BeamEnd = End;
-		if (Hit.bBlockingHit)
-		{
-			// BeamEnd = Hit.ImpactPoint;
-			BeamEnd = Hit.Location;
-		}
-		else
-		{
-			Hit.Location = End;
-		}
+
+		FTransform HitTransform;
+		HitTransform.SetLocation(MuzzleLaserHit.Location);
+		FVector ToTarget = MuzzleLaserHit.Location - SocketTransform.GetLocation();		
+		HitTransform.SetRotation(ToTarget.Rotation().Quaternion());
+
+		MulticastPlayFireVFX(HitTransform, SocketTransform);
 		
-		if (TraceParticles)
-		{
-			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
-				GetWorld(),
-				TraceParticles,
-				TraceStart,
-				FRotator::ZeroRotator,
-				true
-			);
-			if (Beam)
-			{
-				// Target은 그냥 임의로 지은 것.
-				Beam->SetVectorParameter(FName("Target"), BeamEnd);
-			}
-		}
-		
-		if (HitSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				HitSound,
-				Hit.ImpactPoint
-			);
-		}
-		
-		if (FireSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				FireSound,
-				GetActorLocation()
-			);
-		}
-	
-		if (MuzzleFlash)
-		{
-			UGameplayStatics::SpawnEmitterAtLocation(
-				GetWorld(),
-				MuzzleFlash,
-				SocketTransform
-			);
-		}
-	
-		UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+		/*UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
 		if(WeaponMeshFireMontage)
 		{
 			Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
@@ -871,10 +741,10 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 		if (TPAnimInstance)
 		{
 			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
-		}		
+		}*/		
 		
 		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
-	}	
+	}
 }
 
 void ACHMinigun::EndShoot()
@@ -1404,7 +1274,78 @@ void ACHMinigun::StopRotateCannon()
 	}
 }
 
-/*void ACHMinigun::PlayFireVFX(FHitResult Hit, const FTransform& MuzzleTransform)
+void ACHMinigun::PlayFireVFX(const FTransform& HitTransform, const FTransform& MuzzleTransform)
 {
-	Super::PlayFireVFX(Hit, MuzzleTransform);
-}*/
+	Super::PlayFireVFX(HitTransform, MuzzleTransform);
+	
+	if(ImpactEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation
+		(
+			GetWorld(),
+			ImpactEffect,
+			HitTransform			
+			// Hit.Location, 
+			//Hit.ImpactNormal.Rotation()			
+		);			
+	}
+
+	// 궤적
+	FVector BeamEnd = HitTransform.GetLocation();
+		
+	if (TraceParticles)
+	{
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			TraceParticles,
+			MuzzleTransform.GetLocation(),
+			FRotator::ZeroRotator,
+			true
+		);
+		if (Beam)
+		{
+			// Target은 그냥 임의로 지은 것.
+			Beam->SetVectorParameter(FName("Target"), BeamEnd);
+		}
+	}
+		
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			HitSound,
+			HitTransform.GetLocation()
+		);
+	}
+		
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			FireSound,
+			GetActorLocation()
+		);
+	}
+	
+	if (MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			MuzzleFlash,
+			MuzzleTransform
+		);
+	}
+
+	UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+	if(WeaponMeshFireMontage)
+	{
+		Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
+	}
+		
+	// Get the animation object for the arms mesh
+	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	if (TPAnimInstance)
+	{
+		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
+	}	
+}

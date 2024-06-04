@@ -196,8 +196,7 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 {
 	// CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::Tick(DeltaTime);
-
-
+	
 	if (bIsFirstPersonPerspective)
 	{
 		TiltingLeftTimeline.TickTimeline(DeltaTime);
@@ -219,8 +218,7 @@ void ACHCharacterPlayer::Tick(float DeltaTime)
 		DrawDebugDirectionalArrow(GetWorld(),Start_, End_, 10.0f, FColor::Red, false, -1, 0 ,10.0f);
 	}
 	
-	// CH_LOG(LogCHNetwork, Log, TEXT("End"))
-	
+	// CH_LOG(LogCHNetwork, Log, TEXT("End"))	
 }
 
 void ACHCharacterPlayer::PossessedBy(AController* NewController)

@@ -566,7 +566,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		}
 			
 		// LineTrace
-		FHitResult Hit;
+		FHitResult MuzzleLaserHit;
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
 		Params.AddIgnoredActor(GetOwner());
@@ -581,15 +581,15 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		FVector End = AttackTarget->GetActorLocation();
 		//FVector HitTarget = Hit.ImpactPoint;
 		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
-		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
-		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(Hit.GetActor()));
+		bool bSuccess = GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, TraceStart, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(MuzzleLaserHit.GetActor()));
 	
 		if (bSuccess)
 		{
 			// FVector ShotDirection = -Rotation.Vector();
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-			DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
-			const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			// 맞은 부위 효과
 			/*if(ImpactEffect)
@@ -604,10 +604,10 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 			}*/
 	
 			// AActor* HitActor = Hit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
+			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
 			if (CharacterBase)
 			{
-				FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
+				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
 				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 			}
 		}
@@ -679,7 +679,13 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
 		}		*/
 
-		MulticastPlayFireVFX(AttackTarget->GetTransform(), SocketTransform);
+		FTransform HitTransform;
+		HitTransform.SetLocation(MuzzleLaserHit.Location);
+		FVector ToTarget = MuzzleLaserHit.Location - SocketTransform.GetLocation();		
+		HitTransform.SetRotation(ToTarget.Rotation().Quaternion());
+		
+		// 레이 쏘고 맞은 위치
+		MulticastPlayFireVFX(HitTransform, SocketTransform);
 		
 		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
  			
@@ -727,7 +733,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 		}
 			
 		// LineTrace
-		FHitResult Hit;
+		FHitResult MuzzleLaserHit;
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
 		Params.AddIgnoredActor(GetOwner());
@@ -740,17 +746,19 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 		FVector TraceStart = SocketTransform.GetLocation();
 		//FVector End = Location + Rotation.Vector() * MaxRange;
 		FVector End = AttackTarget->GetActorLocation();
-		//FVector HitTarget = Hit.ImpactPoint;
+		// 맞는 곳이 End이다.
+		
+		// FVector HitTarget = Hit.ImpactPoint;
 		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
-		bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
-		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(Hit.GetActor()));
+		bool bSuccess = GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, TraceStart, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
+		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(MuzzleLaserHit.GetActor()));
 	
 		if (bSuccess)
 		{
 			// FVector ShotDirection = -Rotation.Vector();
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-			DrawDebugPoint(GetWorld(), Hit.Location, 10, FColor::Red, true);
-			const float DamageToCause = Hit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
+			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			// 맞은 부위 효과
 			/*if(ImpactEffect)
@@ -765,10 +773,10 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 			}*/
 	
 			// AActor* HitActor = Hit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(Hit.GetActor());
+			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
 			if (CharacterBase)
 			{
-				FPointDamageEvent DamageEvent(DamageToCause, Hit, Hit.ImpactNormal, nullptr);
+				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
 				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 			}
 		}
@@ -827,9 +835,17 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 			);
 		}*/
 
-		MulticastPlayFireVFX(AttackTarget->GetTransform(), SocketTransform);
+		FTransform HitTransform;
+		HitTransform.SetLocation(MuzzleLaserHit.Location);
+		FVector ToTarget = MuzzleLaserHit.Location - SocketTransform.GetLocation();		
+		HitTransform.SetRotation(ToTarget.Rotation().Quaternion());
 		
-		/*UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
+		// 레이 쏘고 맞은 위치
+		MulticastPlayFireVFX(HitTransform, SocketTransform);
+		// 이거 서버는 애니메이션이 없어서 총이 그냥 바닥에 있는 듯..  
+		
+		/*
+		UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
 		if(WeaponMeshFireMontage)
 		{
 			Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
@@ -840,7 +856,8 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 		if (TPAnimInstance)
 		{
 			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
-		}	*/	
+		}
+		*/	
 		
 		if(!bInfiniteAmmo) CurrentAmmoInClip -= 1;	
 	}	
