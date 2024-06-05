@@ -47,49 +47,9 @@ void UBTS_StayCovered::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8
 			{
 				AIPawn->StopAimWeapon();
 				AIPawn->TakeCover(Cover);
-				/*if(Cover.Data.bLeftCoverStanding)
-				{
-					// 왼쪽 커버 재생
-					UE_LOG(LogTemp, Log, TEXT("bLeftCoverStanding"));
-					AIPawn->StopAimWeapon();
-					AIPawn->Cover(true, false);
-					// AIPawn->TakeCover(Cover);
-					//StopAim
-					return;
-				}
-
-				if(Cover.Data.bRightCoverStanding)
-				{
-					// 오른쪽 커버 재생
-					UE_LOG(LogTemp, Log, TEXT("bRightCoverStanding"));
-					AIPawn->StopAimWeapon();
-					AIPawn->Cover(true, true);
-					return;
-				}
-			
-				if(Cover.Data.bLeftCoverCrouched)
-				{
-					AIPawn->StopAimWeapon();
-					AIPawn->Cover(false, false);
-					return;
-				}
-				if(Cover.Data.bRightCoverCrouched)
-				{
-					AIPawn->StopAimWeapon();
-					AIPawn->Cover(false,true);
-					return;
-				}
-				if(Cover.Data.bFrontCoverCrouched)
-				{
-					AIPawn->StopAimWeapon();
-					AIPawn->Cover(false, true);
-					return;
-				}*/
 			}			
 		}
-	}
-
-	
+	}	
 }
 
 void UBTS_StayCovered::OnCeaseRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

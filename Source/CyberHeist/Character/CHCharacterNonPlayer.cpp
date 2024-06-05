@@ -173,63 +173,91 @@ void ACHCharacterNonPlayer::Cover(bool High, bool Right)
 		UE_LOG(LogTemp, Log, TEXT("AI Low Covered"));
 		bCovered = true;
 	}
-
-	/*CHAnimInstance->SetCoveredDirection(Right);
-	OnCoverState.Broadcast(High,true);
-	bCovered = true;
-	if(!High)
-	{
-		// OnCoverState.Broadcast(High, true);		
-		Crouch();
-		UE_LOG(LogTemp, Log, TEXT("AI Low Covered"));
-	}	*/
 }
 
 void ACHCharacterNonPlayer::TakeCover(FCover Cover)
 {
-	// Cover.Data.Location;
-	// Cover.Data.DirectionToWall;
+	// MulticastTakeCover(Cover);
+	OnTakeCover(Cover);
+}
+
+void ACHCharacterNonPlayer::OnTakeCover(FCover Cover)
+{
+	CH_LOG(LogCHAI, Log, TEXT("Begin"))
 	SetActorLocation(Cover.Data.Location);
 	SetActorRotation(Cover.Data.Rotation);
 	bCovered = true;
 	
 	if(Cover.Data.bLeftCoverStanding)
 	{
-		CHAnimInstance->SetCoveredDirection(false);
-		OnCoverState.Broadcast(true,true);
+		bCoverMoveRight = false;
+		bHighCovered = true;
+		bLowCovered = true;
+		// CHAnimInstance->SetCoveredDirection(false);
+		// OnCoverState.Broadcast(true,true);
+		CH_LOG(LogCHAI, Log, TEXT("bLeftCoverStanding"))
 		return;
 	}
+	
 	if(Cover.Data.bRightCoverStanding)
 	{
-		CHAnimInstance->SetCoveredDirection(true);
-		OnCoverState.Broadcast(true,true);
+		bCoverMoveRight = true;
+		bHighCovered = true;
+		bLowCovered = true;
+		// CHAnimInstance->SetCoveredDirection(true);
+		// OnCoverState.Broadcast(true,true);
+		CH_LOG(LogCHAI, Log, TEXT("bRightCoverStanding"))
 		return;
 	}
 
 	if(Cover.Data.bLeftCoverCrouched)
 	{
-		CHAnimInstance->SetCoveredDirection(false);
-		OnCoverState.Broadcast(false,true);
+        bCoverMoveRight = false;
+		bHighCovered = false;
+        bLowCovered = true;
+		// CHAnimInstance->SetCoveredDirection(false);
+		// OnCoverState.Broadcast(false,true);
 		Crouch();
+		CH_LOG(LogCHAI, Log, TEXT("bLeftCoverCrouched"))
 		return;
-	}
-	if(Cover.Data.bRightCoverCrouched)
-	{
-		CHAnimInstance->SetCoveredDirection(true);
-		OnCoverState.Broadcast(false,true);
-		Crouch();
-		return;
-	}
-	if(Cover.Data.bFrontCoverCrouched)
-	{
-		CHAnimInstance->SetCoveredDirection(false);
-		OnCoverState.Broadcast(false,true);
-		Crouch();
 	}
 	
+	if(Cover.Data.bRightCoverCrouched)
+	{
+		bCoverMoveRight = true;
+		bHighCovered = false;
+		bLowCovered = true;
+		// CHAnimInstance->SetCoveredDirection(true);
+		// OnCoverState.Broadcast(false,true);
+		Crouch();
+		CH_LOG(LogCHAI, Log, TEXT("bRightCoverCrouched"))
+		return;
+	}
+	
+	if(Cover.Data.bFrontCoverCrouched)
+	{
+		bCoverMoveRight = false;
+		bHighCovered = false;
+		bLowCovered = true;
+		// CHAnimInstance->SetCoveredDirection(false);
+		// OnCoverState.Broadcast(false,true);
+		Crouch();
+		CH_LOG(LogCHAI, Log, TEXT("bFrontCoverCrouched"))
+	}
+}
+
+void ACHCharacterNonPlayer::MulticastTakeCover_Implementation(FCover Cover)
+{
+	OnTakeCover(Cover);
 }
 
 void ACHCharacterNonPlayer::UnCoverAim(FCover Cover)
+{
+	// MulticastUnCoverAim(Cover);
+	OnUnCoverAim(Cover);
+}
+
+void ACHCharacterNonPlayer::OnUnCoverAim(FCover Cover)
 {
 	// 이미 uncrouch함.
 	UE_LOG(LogTemp,Log,TEXT("ACHCharacterNonPlayer::UnCoverAim"));
@@ -238,36 +266,20 @@ void ACHCharacterNonPlayer::UnCoverAim(FCover Cover)
 	if(Cover.Data.bLeftCoverStanding)
 	{
 		// 얼마나 나올지를 플레이어와의 거리로 계산 가능?
-		SetActorLocation(GetActorLocation() - GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius()*2);
-		// MoveActorLocation(GetActorLocation() - GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius()*2, 0.2);
+		SetActorLocation(GetActorLocation() - GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
+		CH_LOG(LogCHAI, Log, TEXT("bLeftCoverStanding"))
 	}
 	else if (Cover.Data.bRightCoverStanding)
 	{
 		SetActorLocation(GetActorLocation() + GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius()*2);
-		// MoveActorLocation(GetActorLocation() + GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius()*2, 0.2);
+		CH_LOG(LogCHAI, Log, TEXT("bRightCoverStanding"))
 	}
 	// 낮은 경우는 그냥 일어나면 되어서 패스.
-	
-	/*switch (CHAnimInstance->GetCurrentCoverState())
-	{
-	case ECoverState::Low:
-		UnCrouch();
-		break;
-	case ECoverState::High:
-		// float Distance;
-		if(Cover.Data.bLeftCoverStanding)
-		{
-			// 얼마나 나올지를 플레이어와의 거리로 계산 가능?
-			MoveActorLocation(GetActorLocation() - GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius(), 10);
-		}
-		else if (Cover.Data.bRightCoverStanding)
-		{
-			MoveActorLocation(GetActorLocation() + GetActorRightVector() * GetCapsuleComponent()->GetScaledCapsuleRadius(), 10);
-		}
-		break;
-	case ECoverState::None:
-		break;
-	}*/
+}
+
+void ACHCharacterNonPlayer::MulticastUnCoverAim_Implementation(FCover Cover)
+{
+	OnUnCoverAim(Cover);
 }
 
 void ACHCharacterNonPlayer::UnCover()

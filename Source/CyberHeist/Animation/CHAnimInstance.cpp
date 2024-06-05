@@ -2,6 +2,8 @@
 
 
 #include "Animation/CHAnimInstance.h"
+
+#include "CyberHeist.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"	
@@ -146,6 +148,8 @@ void UCHAnimInstance::SetLowCover(uint8 TakeLowCover)
 
 void UCHAnimInstance::SetCoverState(uint8 TakeHighCover, uint8 TakeLowCover)
 {
+	// CH_SUBLOG(LogCHAI, Log, TEXT("Begin"))
+	UE_LOG(LogTemp, Warning, TEXT("UCHAnimInstance::SetCoverState"))
 	bTakeHighCover = TakeHighCover;
 	bTakeLowCover = TakeLowCover;
 

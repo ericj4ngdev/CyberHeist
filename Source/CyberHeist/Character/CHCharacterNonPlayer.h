@@ -54,6 +54,18 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void TakeCover(FCover Cover) override;
+
+	UFUNCTION()
+	void OnTakeCover(FCover Cover);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastTakeCover(FCover Cover);
+
+	UFUNCTION()
+	void OnUnCoverAim(FCover Cover);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastUnCoverAim(FCover Cover);
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void UnCover() override;
