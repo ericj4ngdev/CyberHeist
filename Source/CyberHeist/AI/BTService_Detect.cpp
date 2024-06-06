@@ -7,24 +7,25 @@
 #include "Interface/CHCharacterAIInterface.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Character/CHCharacterPlayer.h"
 
 UBTService_Detect::UBTService_Detect()
 {
-	NodeName = TEXT("Detect");
-	Interval = 1.0f;
+	NodeName = TEXT("Stop Fire If Target IsDead");	
 }
 
 void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
-{
-	
+{	
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	
+	// FVector Center = ControllingPawn->GetActorLocation();
+	
 	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
 	if (nullptr == ControllingPawn)
 	{
 		return;
 	}
-
-	FVector Center = ControllingPawn->GetActorLocation();
+	
 	UWorld* World = ControllingPawn->GetWorld();
 	if (nullptr == World)
 	{
@@ -36,8 +37,21 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	{
 		return;
 	}
+	
+	UObject* TargetActor = OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGETACTOR);
+	ACHCharacterPlayer* Player = Cast<ACHCharacterPlayer>(TargetActor);
+	
+	if(Player && Player->GetIsDead())
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBKEY_TARGETACTOR, nullptr);	
+	}
+	else
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBKEY_TARGETACTOR, TargetActor);	
+	}
 
-	float DetectRadius = AIPawn->GetAIDetectRange();
+	
+	/*float DetectRadius = AIPawn->GetAIDetectRange();
 
 	TArray<FOverlapResult> OverlapResults;
 	FCollisionQueryParams CollisionQueryParam(SCENE_QUERY_STAT(Detect), false, ControllingPawn);
@@ -68,8 +82,8 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 				return;
 			}
 		}
-	}
+	}*/
 	// 플레이어를 못찾거나 없으면 Target은 null값. NPC위치에 빨간 구 
-	OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBKEY_TARGETACTOR, nullptr);
-	DrawDebugSphere(World, Center, DetectRadius, 16, FColor::Red, false, 0.2f);
+	// OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBKEY_TARGETACTOR, nullptr);
+	// DrawDebugSphere(World, Center, DetectRadius, 16, FColor::Red, false, 0.2f);
 }
