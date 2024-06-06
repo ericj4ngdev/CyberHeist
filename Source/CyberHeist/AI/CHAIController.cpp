@@ -11,28 +11,17 @@
 #include "CHAI.h"
 #include "Character/CHCharacterBase.h"
 #include "Character/CHCharacterPlayer.h"
-#include "GameFramework/Character.h"
-#include "KisMet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+
+#include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-ACHAIController::ACHAIController()
+ACHAIController::ACHAIController(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
 {
-	/*static ConstructorHelpers::FObjectFinder<UBlackboardData> BBAssetRef(TEXT("/Script/AIModule.BlackboardData'/Game/CyberHeist/AI/BB_CHCharacter.BB_CHCharacter'"));
-	if (nullptr != BBAssetRef.Object)
-	{
-		BBAsset = BBAssetRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BTAssetRef(TEXT("/Script/AIModule.BehaviorTree'/Game/CyberHeist/AI/BT_CHCharacter.BT_CHCharacter'"));
-	if (nullptr != BTAssetRef.Object)
-	{
-		BTAsset = BTAssetRef.Object;
-	}*/
-
 	// Create AIPerceptionComponent
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
 	if (AIPerception)
@@ -55,10 +44,6 @@ ACHAIController::ACHAIController()
 
 		// Setup DamageConfig
 		UAISenseConfig_Damage* DamageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("DamageConfig"));
-		// DamageConfig->HearingRange = 1000.0f; // Set hearing range as desired
-		// DamageConfig->DetectionByAffiliation.bDetectEnemies = true;
-		// DamageConfig->DetectionByAffiliation.bDetectNeutrals = true;
-		// DamageConfig->DetectionByAffiliation.bDetectFriendlies = true;
 		AIPerception->ConfigureSense(*DamageConfig);
 		
 		// Set the dominant sense

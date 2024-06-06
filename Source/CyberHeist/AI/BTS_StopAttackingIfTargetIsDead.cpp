@@ -17,18 +17,6 @@ UBTS_StopAttackingIfTargetIsDead::UBTS_StopAttackingIfTargetIsDead()
 	bNotifyBecomeRelevant = true; // OnBecomeRelevant 호출을 위해 필요
 }
 
-void UBTS_StopAttackingIfTargetIsDead::InitializeFromAsset(UBehaviorTree& Asset)
-{
-	Super::InitializeFromAsset(Asset);
-	// 파일 열 떄 호출. 실행해서 호출? 
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *FString(__FUNCTION__))
-	// 여기서 적들 가져온다.
-	/*if (UWorld* World = GetWorld())
-	{
-		InitializeRecognizedPlayers(World);
-	}*/
-}
-
 void UBTS_StopAttackingIfTargetIsDead::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
@@ -68,11 +56,8 @@ void UBTS_StopAttackingIfTargetIsDead::TickNode(UBehaviorTreeComponent& OwnerCom
 		return;
 	}
 
-	FindNearestAlivePlayer(OwnerComp);
-	
+	FindNearestAlivePlayer(OwnerComp);	
 }
-
-
 
 void UBTS_StopAttackingIfTargetIsDead::InitializeRecognizedPlayers(UWorld* World)
 {

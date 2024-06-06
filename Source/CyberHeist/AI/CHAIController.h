@@ -17,7 +17,7 @@ class CYBERHEIST_API ACHAIController : public AAIController
 	GENERATED_BODY()
 
 public:
-	ACHAIController();
+	ACHAIController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 public:
 	void RunAI();
