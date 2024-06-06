@@ -178,8 +178,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> DeadMontage;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bIsDead;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	uint8 bIsDead;
 	
 	// 죽는 함수
 	virtual void SetDead();
@@ -195,7 +195,7 @@ protected:
 
 	
 public:
-	bool GetIsDead();
+	uint8 GetIsDead();
 	virtual void SetIsAttacking(uint8 IsAttack);
 	uint8 GetIsAttacking();
 	

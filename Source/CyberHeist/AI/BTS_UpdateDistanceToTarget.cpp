@@ -12,12 +12,15 @@
 
 UBTS_UpdateDistanceToTarget::UBTS_UpdateDistanceToTarget()
 {
+	Interval = 0.5f;
 }
 
 void UBTS_UpdateDistanceToTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *FString(__FUNCTION__))
+	
 	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
 	if (nullptr == ControllingPawn)
 	{
@@ -38,11 +41,16 @@ void UBTS_UpdateDistanceToTarget::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	
 	UObject* Temp = BlackboardComp->GetValueAsObject(AttackTargetKey.SelectedKeyName);
-	AActor* Target = Cast<AActor>(Temp);
+	// 플레이어가 죽어서 없는 경우 
+	if(Temp == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s LockedActor is null"), *FString(__FUNCTION__))
+		return;
+	}
 	
-	// AActor* Target = UBTFunctionLibrary::GetBlackboardValueAsActor(this,AttackTargetKey);
-
-	float Distance = FVector::Distance(Target->GetActorLocation(),AIOwner->GetPawn()->GetActorLocation());
+	AActor* Target = Cast<AActor>(Temp);
+	float Distance = FVector::Distance(Target->GetActorLocation(),ControllingPawn->GetActorLocation());
+	UE_LOG(LogTemp,Log,TEXT("Distance : %f"), Distance)
+	
 	BlackboardComp->SetValueAsFloat(DistanceToTargetKey.SelectedKeyName,Distance);
-	// UBTFunctionLibrary::SetBlackboardValueAsFloat(this,DistanceToTargetKey,Distance);	
 }

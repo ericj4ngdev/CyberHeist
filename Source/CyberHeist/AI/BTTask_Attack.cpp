@@ -16,18 +16,22 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 {
 	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
 
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+	
+	UObject* Temp = BlackboardComp->GetValueAsObject(AttackTarget.SelectedKeyName);
+	if(Temp == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s LockedActor is null"), *FString(__FUNCTION__))
+		return EBTNodeResult::Failed;
+	}
+	// TargetActor is Set
+	AActor* AttackActor = Cast<AActor>(Temp);
+	
 	APawn* ControllingPawn = Cast<APawn>(OwnerComp.GetAIOwner()->GetPawn());
 	if (nullptr == ControllingPawn)
 	{
 		return EBTNodeResult::Failed;
 	}
-
-	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-	
-	UObject* Temp = BlackboardComp->GetValueAsObject(AttackTarget.SelectedKeyName);
-	// TargetActor is Set
-	AActor* AttackActor = Cast<AActor>(Temp);
-	
 	
 	ICHCharacterAIInterface* AIPawn = Cast<ICHCharacterAIInterface>(ControllingPawn);
 	if (nullptr == AIPawn)

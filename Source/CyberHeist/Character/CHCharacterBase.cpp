@@ -543,7 +543,8 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ACHCharacterBase, bNearWall);
 	DOREPLIFETIME(ACHCharacterBase, TiltAngle);
 	DOREPLIFETIME(ACHCharacterBase, TiltLocation);	
-	DOREPLIFETIME(ACHCharacterBase, CurrentCharacterControlType);	// ?	
+	DOREPLIFETIME(ACHCharacterBase, bIsDead);
+	DOREPLIFETIME(ACHCharacterBase, CurrentCharacterControlType);	// ?
 }
 
 void ACHCharacterBase::EquipWeapon()
@@ -690,7 +691,7 @@ void ACHCharacterBase::SetIsAttacking(uint8 IsAttack)
 	bIsAttacking = IsAttack;
 }
 
-bool ACHCharacterBase::GetIsDead()
+uint8 ACHCharacterBase::GetIsDead()
 {
 	return bIsDead;
 }

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/Services/BTService_BlueprintBase.h"
+#include "BehaviorTree/BTService.h"
 #include "BTS_UpdateDistanceToTarget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERHEIST_API UBTS_UpdateDistanceToTarget : public UBTService_BlueprintBase
+class CYBERHEIST_API UBTS_UpdateDistanceToTarget : public UBTService
 {
 	GENERATED_BODY()
 

@@ -107,14 +107,13 @@ void ACHAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
 	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>()) return;
 
 	// Handle sight stimulus
-	// ACharacter* Character = Cast<ACharacter>(Actor);
-	// APawn* ControllingPawn = SetPawn();
+	// 플레이어가 아니면 제외
 	ACHCharacterPlayer* CharacterActor = Cast<ACHCharacterPlayer>(Actor);
 	if(CharacterActor == nullptr) return;
-	// if(Character != UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)) return;
-		
+	
 	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
 	UObject* TargetActor = UKismetMathLibrary::SelectObject(CharacterActor, nullptr, Stimulus.WasSuccessfullySensed());
+	
 	BlackboardPtr->SetValueAsObject(BBKEY_TARGETACTOR, TargetActor);
 	if(Stimulus.WasSuccessfullySensed())
 	{
