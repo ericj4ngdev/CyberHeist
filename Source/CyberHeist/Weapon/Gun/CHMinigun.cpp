@@ -626,13 +626,12 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
 			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
-				
-			// AActor* HitActor = Hit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
-			if (CharacterBase)
+			
+			ACHCharacterPlayer* CharacterPlayer = Cast<ACHCharacterPlayer>(MuzzleLaserHit.GetActor());
+			if (CharacterPlayer)
 			{
 				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
-				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+				CharacterPlayer->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 			}
 		}
 
@@ -714,13 +713,12 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
 			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
-				
-			// AActor* HitActor = Hit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
-			if (CharacterBase)
+
+			ACHCharacterPlayer* CharacterPlayer = Cast<ACHCharacterPlayer>(MuzzleLaserHit.GetActor());
+			if (CharacterPlayer)
 			{
 				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
-				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+				CharacterPlayer->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 			}
 		}
 

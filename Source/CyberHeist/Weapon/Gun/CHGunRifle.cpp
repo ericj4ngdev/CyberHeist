@@ -592,92 +592,13 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			// 맞은 부위 효과
-			/*if(ImpactEffect)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation
-				(
-					GetWorld(),
-					ImpactEffect,
-					Hit.Location, 
-					Hit.ImpactNormal.Rotation()
-				);			
-			}*/
-	
-			// AActor* HitActor = Hit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
-			if (CharacterBase)
+			ACHCharacterPlayer* CharacterPlayer = Cast<ACHCharacterPlayer>(MuzzleLaserHit.GetActor());
+			if (CharacterPlayer)
 			{
 				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
-				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+				CharacterPlayer->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 			}
 		}
-		// 궤적
-		/*FVector BeamEnd = End;
-		if (Hit.bBlockingHit)
-		{
-			// BeamEnd = Hit.ImpactPoint;
-			BeamEnd = Hit.Location;
-		}
-		else
-		{
-			Hit.Location = End;
-		}
-		
-		if (TraceParticles)
-		{
-			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
-				GetWorld(),
-				TraceParticles,
-				TraceStart,
-				FRotator::ZeroRotator,
-				true
-			);
-			if (Beam)
-			{
-				// Target은 그냥 임의로 지은 것.
-				Beam->SetVectorParameter(FName("Target"), BeamEnd);
-			}
-		}
-		
-		if (HitSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				HitSound,
-				Hit.ImpactPoint
-			);
-		}
-		
-		if (FireSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				FireSound,
-				GetActorLocation()
-			);
-		}
-	
-		if (MuzzleFlash)
-		{
-			UGameplayStatics::SpawnEmitterAtLocation(
-				GetWorld(),
-				MuzzleFlash,
-				SocketTransform
-			);
-		}
-	
-		UAnimInstance* Weapon3pAnimInstance = WeaponMesh3P->GetAnimInstance();
-		if(WeaponMeshFireMontage)
-		{
-			Weapon3pAnimInstance->Montage_Play(WeaponMeshFireMontage);
-		}
-		
-		// Get the animation object for the arms mesh
-		UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-		if (TPAnimInstance)
-		{
-			TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
-		}		*/
 
 		FTransform HitTransform;
 		HitTransform.SetLocation(MuzzleLaserHit.Location);
@@ -755,8 +676,6 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 	
 		if (bSuccess)
 		{
-			// FVector ShotDirection = -Rotation.Vector();
-			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
 			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
@@ -772,12 +691,11 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 				);			
 			}*/
 	
-			// AActor* HitActor = Hit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
-			if (CharacterBase)
+			ACHCharacterPlayer* CharacterPlayer = Cast<ACHCharacterPlayer>(MuzzleLaserHit.GetActor());
+			if (CharacterPlayer)
 			{
 				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
-				CharacterBase->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
+				CharacterPlayer->TakeDamage(DamageToCause, DamageEvent, OwnerController, this);
 			}
 		}
 		/*// 궤적
