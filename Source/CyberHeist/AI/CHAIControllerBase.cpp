@@ -85,11 +85,6 @@ void ACHAIControllerBase::OnPossess(APawn* InPawn)
 	RunAI();
 }
 
-void ACHAIControllerBase::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
-{
-	// Check if the stimulus is sight stimulus
-	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>()) return;
-}
 
 /*void ACHAIController::HandleSoundSense(AActor* Actor, FAIStimulus Stimulus)
 {

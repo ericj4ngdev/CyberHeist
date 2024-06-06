@@ -25,7 +25,7 @@ public:
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UAIPerceptionComponent> AIPerception;
-	
+
 	UFUNCTION()
-	virtual void HandleSightSense(AActor* Actor, FAIStimulus Stimulus) override;
+	void HandleSightSense(AActor* Actor, FAIStimulus Stimulus);
 };

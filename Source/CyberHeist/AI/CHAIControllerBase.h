@@ -32,8 +32,6 @@ protected:
 
 	virtual void OnPossess(APawn* InPawn) override;
 
-	UFUNCTION()
-	virtual void HandleSightSense(AActor* Actor, FAIStimulus Stimulus);
 
 public:
 	/*TArray<AActor*> KnownSeenActors;

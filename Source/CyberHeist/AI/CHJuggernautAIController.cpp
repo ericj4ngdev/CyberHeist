@@ -50,7 +50,7 @@ ACHJuggernautAIController::ACHJuggernautAIController(const FObjectInitializer& O
 		// Set the dominant sense
 		AIPerception->SetDominantSense(SightConfig->GetSenseImplementation());
 
-		AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIControllerBase::HandleSightSense);
+		AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHJuggernautAIController::HandleSightSense);
 		// AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIController::HandleSoundSense);
 		// AIPerception->OnPerceptionUpdated.AddDynamic(this,&ACHAIController::HandleSenses);
 	}
@@ -73,7 +73,8 @@ void ACHJuggernautAIController::OnPossess(APawn* InPawn)
 
 void ACHJuggernautAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
 {
-	Super::HandleSightSense(Actor, Stimulus);
+	// Check if the stimulus is sight stimulus
+	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>()) return;
 
 	// Handle sight stimulus
 	// 플레이어가 아니면 제외
