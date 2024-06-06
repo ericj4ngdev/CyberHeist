@@ -4,7 +4,7 @@
 #include "AI/BTT_SetMovementSpeed.h"
 #include "AIController.h"
 #include "CHAI.h"
-#include "CHAIController.h"
+#include "CHAIControllerBase.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/CHCharacterNonPlayer.h"
 #include "Interface/CHCharacterAIInterface.h"

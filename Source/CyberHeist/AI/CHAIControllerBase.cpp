@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/CHAIController.h"
+#include "AI/CHAIControllerBase.h"
 
 #include <ObjectArray.h>
 
@@ -19,11 +19,11 @@
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-ACHAIController::ACHAIController(const FObjectInitializer& ObjectInitializer)
+ACHAIControllerBase::ACHAIControllerBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
 {
 	// Create AIPerceptionComponent
-	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
+	/*AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
 	if (AIPerception)
 	{
 		// Setup SightSenseConfig
@@ -49,14 +49,14 @@ ACHAIController::ACHAIController(const FObjectInitializer& ObjectInitializer)
 		// Set the dominant sense
 		AIPerception->SetDominantSense(SightConfig->GetSenseImplementation());
 
-		AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIController::HandleSightSense);
+		AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIControllerBase::HandleSightSense);
 		// AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIController::HandleSoundSense);
 		// AIPerception->OnPerceptionUpdated.AddDynamic(this,&ACHAIController::HandleSenses);
-	}
+	}*/
 	
 }
 
-void ACHAIController::RunAI()
+void ACHAIControllerBase::RunAI()
 {
 	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
 	if (UseBlackboard(BBAsset, BlackboardPtr))
@@ -69,7 +69,7 @@ void ACHAIController::RunAI()
 	}	
 }
 
-void ACHAIController::StopAI()
+void ACHAIControllerBase::StopAI()
 {
 	UBehaviorTreeComponent* BTComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
 	if (BTComponent)
@@ -79,31 +79,16 @@ void ACHAIController::StopAI()
 	}
 }
 
-void ACHAIController::OnPossess(APawn* InPawn)
+void ACHAIControllerBase::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	RunAI();
-	// SetStateAsPassive();
 }
 
-void ACHAIController::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
+void ACHAIControllerBase::HandleSightSense(AActor* Actor, FAIStimulus Stimulus)
 {
 	// Check if the stimulus is sight stimulus
 	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>()) return;
-
-	// Handle sight stimulus
-	// 플레이어가 아니면 제외
-	ACHCharacterPlayer* CharacterActor = Cast<ACHCharacterPlayer>(Actor);
-	if(CharacterActor == nullptr) return;
-	
-	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
-	UObject* TargetActor = UKismetMathLibrary::SelectObject(CharacterActor, nullptr, Stimulus.WasSuccessfullySensed());
-	
-	BlackboardPtr->SetValueAsObject(BBKEY_TARGETACTOR, TargetActor);
-	if(Stimulus.WasSuccessfullySensed())
-	{
-		BlackboardPtr->SetValueAsVector(BBKEY_LASTKNOWNLOCATION, Stimulus.StimulusLocation);
-	}
 }
 
 /*void ACHAIController::HandleSoundSense(AActor* Actor, FAIStimulus Stimulus)

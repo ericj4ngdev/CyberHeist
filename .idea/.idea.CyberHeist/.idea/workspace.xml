@@ -11,13 +11,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="47f3ba0c-b549-4d76-a4b3-3c37ce4cdc81" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/AIController/Old/BP_CHCloneAIContoller_Old.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/AIController/Old/BP_CHCloneAIContoller_Old.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Tutorial.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Tutorial.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTS_StopAttackingIfTargetIsDead.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTS_StopAttackingIfTargetIsDead.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTS_StopAttackingIfTargetIsDead.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTS_StopAttackingIfTargetIsDead.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTS_UpdateDistanceToTarget.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTS_UpdateDistanceToTarget.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTT_SetMovementSpeed.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTT_SetMovementSpeed.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTT_SetStateAsPassive.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTT_SetStateAsPassive.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIControllerBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIController.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHAIControllerBase.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/Character/CHCharacterNonPlayer.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -257,7 +258,7 @@
       <workItem from="1717556660333" duration="791000" />
       <workItem from="1717564014010" duration="1310000" />
       <workItem from="1717574429287" duration="16365000" />
-      <workItem from="1717637429273" duration="18912000" />
+      <workItem from="1717637429273" duration="22131000" />
     </task>
     <servers />
   </component>

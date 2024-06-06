@@ -4,7 +4,7 @@
 #include "AI/BTS_UpdateDistanceToTarget.h"
 #include "CHAI.h"
 #include "AIController.h"
-#include "CHAIController.h"
+#include "CHAIControllerBase.h"
 #include "Interface/CHCharacterAIInterface.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BTFunctionLibrary.h"

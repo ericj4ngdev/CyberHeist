@@ -6,22 +6,34 @@
 #include "AIController.h"
 #include "CHAI.h"
 #include "Perception/AIPerceptionTypes.h"
-#include "CHAIController.generated.h"
+#include "CHAIControllerBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERHEIST_API ACHAIController : public AAIController
+class CYBERHEIST_API ACHAIControllerBase : public AAIController
 {
 	GENERATED_BODY()
 
 public:
-	ACHAIController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	ACHAIControllerBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 public:
-	void RunAI();
-	void StopAI();
+	virtual void RunAI();
+	virtual void StopAI();
+	
+protected:
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UBlackboardData> BBAsset;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UBehaviorTree> BTAsset;
+
+	virtual void OnPossess(APawn* InPawn) override;
+
+	UFUNCTION()
+	virtual void HandleSightSense(AActor* Actor, FAIStimulus Stimulus);
 
 public:
 	/*TArray<AActor*> KnownSeenActors;
@@ -44,24 +56,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ECHAISense AISense;*/
-	
-protected:
-	virtual void OnPossess(APawn* InPawn) override;
-
-private:
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UBlackboardData> BBAsset;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UBehaviorTree> BTAsset;
-
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TObjectPtr<class UAIPerceptionComponent> AIPerception;
-
-	UFUNCTION()
-	void HandleSightSense(AActor* Actor, FAIStimulus Stimulus);
-
 	/*UFUNCTION()
 	void HandleSoundSense(AActor* Actor, FAIStimulus Stimulus);
 

@@ -4,7 +4,7 @@
 #include "AI/BTS_StopAttackingIfTargetIsDead.h"
 #include "CHAI.h"
 #include "AIController.h"
-#include "CHAIController.h"
+#include "CHAIControllerBase.h"
 #include "CyberHeist.h"
 #include "EngineUtils.h"
 #include "Interface/CHCharacterAIInterface.h"

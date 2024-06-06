@@ -6,7 +6,7 @@
 #include "BrainComponent.h"
 #include "CHCharacterMovementComponent.h"
 #include "CyberHeist.h"
-#include "AI/CHAIController.h"
+#include "AI/CHAIControllerBase.h"
 #include "AI/CHAI.h"
 #include "Animation/CHAnimInstance.h"
 #include "Components/CapsuleComponent.h"
@@ -17,7 +17,7 @@ ACHCharacterNonPlayer::ACHCharacterNonPlayer(const FObjectInitializer& ObjectIni
 {
 	// GetMesh()->SetHiddenInGame(true);
 
-	AIControllerClass = ACHAIController::StaticClass();
+	AIControllerClass = ACHAIControllerBase::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	// GetCharacterMovement()->bCanCrouch = true;
@@ -35,7 +35,7 @@ void ACHCharacterNonPlayer::SetDead()
 {
 	Super::SetDead();
 	
-	ACHAIController* CHAIController = Cast<ACHAIController>(GetController());
+	ACHAIControllerBase* CHAIController = Cast<ACHAIControllerBase>(GetController());
     if (CHAIController)
     {
     	CHAIController->StopAI();

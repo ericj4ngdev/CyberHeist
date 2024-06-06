@@ -3,7 +3,7 @@
 
 #include "AI/BTT_SetStateAsPassive.h"
 #include "AIController.h"
-#include "CHAIController.h"
+#include "CHAIControllerBase.h"
 #include "BehaviorTree/BTFunctionLibrary.h"
 #include "Interface/CHCharacterAIInterface.h"
 
