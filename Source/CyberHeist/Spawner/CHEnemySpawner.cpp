@@ -11,21 +11,31 @@ ACHEnemySpawner::ACHEnemySpawner()
 {
 	// PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
-
+	SpawnTimer = 5.0f;
 }
 
 // Called when the game starts or when spawned
 void ACHEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	if (HasAuthority())
+	/*if (HasAuthority())
 	{
-		// SpawnEnemy();
-		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACHEnemySpawner::SpawnEnemy, 10.0f, false);
-	}
+		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACHEnemySpawner::SpawnEnemyWithWeapon, SpawnTimer, false);
+	}*/
+}
+
+void ACHEnemySpawner::SpawnEnemyWithWeapon()
+{
+	GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACHEnemySpawner::SpawnEnemy, 0.1f, false);
+	SpawnGun();
 }
 
 void ACHEnemySpawner::SpawnEnemy()
 {
 	SpawnedEnemy = GetWorld()->SpawnActor<ACHCharacterNonPlayer>(EnemyType, GetActorTransform());
+}
+
+void ACHEnemySpawner::SpawnGun()
+{
+	SpawnedGun = GetWorld()->SpawnActor<ACHGunBase>(GunBaseClass, GetActorTransform());
 }

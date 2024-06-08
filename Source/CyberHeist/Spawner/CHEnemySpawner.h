@@ -22,13 +22,26 @@ protected:
 private:
 	// Timer handle for delayed spawn
 	FTimerHandle SpawnTimerHandle;
-	
-	UPROPERTY()
-	ACHCharacterNonPlayer* SpawnedEnemy;
 
+	UPROPERTY(EditAnywhere)
+	float SpawnTimer;
+	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACHCharacterNonPlayer> EnemyType;
 
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ACHGunBase> GunBaseClass;
+
+public:
+	UPROPERTY()
+	ACHGunBase* SpawnedGun;
+	
+	UPROPERTY()
+	ACHCharacterNonPlayer* SpawnedEnemy;
+	
+	void SpawnEnemyWithWeapon();
 	void SpawnEnemy();
+	void SpawnGun();
 
 };
