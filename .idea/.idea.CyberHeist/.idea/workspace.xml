@@ -11,12 +11,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="47f3ba0c-b549-4d76-a4b3-3c37ce4cdc81" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CyberHeist/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHClone.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHClone.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHJuggernaut.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/AI/BehaviorTrees/BT_CHJuggernaut.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Blueprint/BP_CHCharacterPlayer.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Enemy.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Enemy.umap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/CyberHeist/Maps/Stage1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/BTService_Detect.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/BTService_Detect.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/CyberHeist/AI/CHJuggernautAIController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/CyberHeist/AI/CHJuggernautAIController.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +117,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "C++ Project.CyberHeist.executor": "Debug",
+    "C++ Project.CyberHeist.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
@@ -266,6 +266,8 @@
       <workItem from="1717564014010" duration="1310000" />
       <workItem from="1717574429287" duration="16365000" />
       <workItem from="1717637429273" duration="27155000" />
+      <workItem from="1717770646429" duration="1223000" />
+      <workItem from="1717819033567" duration="1825000" />
     </task>
     <servers />
   </component>
