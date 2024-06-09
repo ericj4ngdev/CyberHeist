@@ -6,10 +6,13 @@
 #include "CHGameState.h"
 #include "CyberHeist.h"
 
-ACHGameMode::ACHGameMode()
+ACHGameMode::ACHGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	// DefaultPawnClass
 	// static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Script/CyberHeist.CHCharacterPlayer"));
+
+	bDelayedStart = true;
+	
 	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Script/Engine.Blueprint'/Game/CyberHeist/Blueprint/BP_CHCharacterPlayer.BP_CHCharacterPlayer_C'"));
 	
 	if (DefaultPawnClassRef.Class)
@@ -57,7 +60,12 @@ void ACHGameMode::PostLogin(APlayerController* NewPlayer)
 	
 	Super::PostLogin(NewPlayer);
 
-	UNetDriver* NetDriver = GetNetDriver();
+	if(bool bMatchFull = (MaxPlayers <= NumPlayers))
+	{
+		StartMatch();
+	}
+
+	/*UNetDriver* NetDriver = GetNetDriver();
 	if (NetDriver)
 	{
 		if (NetDriver->ClientConnections.Num() == 0)
@@ -75,7 +83,7 @@ void ACHGameMode::PostLogin(APlayerController* NewPlayer)
 	else
 	{
 		CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No NetDriver"));
-	}
+	}*/
 	
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 }

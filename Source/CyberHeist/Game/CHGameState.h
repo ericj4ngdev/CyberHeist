@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameStateBase.h"
+#include "GameFramework/GameState.h"
 #include "CHGameState.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERHEIST_API ACHGameState : public AGameStateBase
+class CYBERHEIST_API ACHGameState : public AGameState
 {
 	GENERATED_BODY()
 
