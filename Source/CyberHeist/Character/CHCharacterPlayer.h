@@ -226,7 +226,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System")
 	float CheckRange;
-
+	
+public:
+	UFUNCTION(BlueprintCallable)
+	virtual void SetDead() override;
 	
 public:
 	void PressSprint();

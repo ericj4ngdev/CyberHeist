@@ -686,6 +686,17 @@ void ACHCharacterBase::SetDead()
 	// HpBar->SetHiddenInGame(true);
 }
 
+void ACHCharacterBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors,false);
+	for (AActor*& AttachedActor : AttachedActors)
+	{
+		AttachedActor->Destroy();
+	}
+	Super::EndPlay(EndPlayReason);
+}
+
 void ACHCharacterBase::SetIsAttacking(uint8 IsAttack)
 {
 	bIsAttacking = IsAttack;

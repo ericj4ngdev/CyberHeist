@@ -105,7 +105,10 @@ void ACHGameMode::Logout(AController* Exiting)
 
 	if (HasMatchStarted() && bNobody)
 	{
-		RestartGame();
+		// RestartGame();
+		CustomInitGame();
+		
+		// InitGame();
 		// 게임 초기화. 재입장 가능.
 		// 맵 계속 유지
 	}
@@ -123,19 +126,10 @@ void ACHGameMode::Logout(AController* Exiting)
 void ACHGameMode::StartMatch()
 {
 	Super::StartMatch();
-	/*if (!HasMatchStarted())
-	{
-		// 캐릭터 생성 등의 로직
-		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-		{
-			APlayerController* PC = It->Get();
-			if (PC && PC->GetPawn() == nullptr)
-			{
-				RestartPlayer(PC);
-			}
-		}
-
-		SetMatchState(MatchState::InProgress);
-	}*/
 	CH_LOG(LogCHNetwork, Log, TEXT("Match Started"))
+}
+
+void ACHGameMode::CustomInitGame()
+{
+	SetMatchState(MatchState::EnteringMap);
 }

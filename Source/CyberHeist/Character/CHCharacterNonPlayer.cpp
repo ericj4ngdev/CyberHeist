@@ -50,7 +50,7 @@ void ACHCharacterNonPlayer::SetDead()
 			{
 				AttachedActor->Destroy();
 			}
-			Destroy();
+			Destroy();		// 자동으로 EndPlay호출
 		}
 	), DeadEventDelayTime, false);
 }

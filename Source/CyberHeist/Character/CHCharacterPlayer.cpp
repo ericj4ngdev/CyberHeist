@@ -1367,6 +1367,12 @@ bool ACHCharacterPlayer::ServerSetCoveredAttackMotion_Validate(uint8 bAim)
 	return true;
 }
 
+void ACHCharacterPlayer::SetDead()
+{
+	Super::SetDead();
+	
+}
+
 void ACHCharacterPlayer::PressSprint()
 {
 	StartSprint();

@@ -26,6 +26,8 @@ public:
 	virtual void Logout(AController* Exiting) override;
 	virtual void StartMatch() override;
 
+public:
+	void CustomInitGame();
 	int32 MaxPlayers;
 
 	// int32 NumPlayers;

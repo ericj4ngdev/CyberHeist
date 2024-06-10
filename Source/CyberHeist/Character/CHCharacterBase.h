@@ -189,6 +189,9 @@ protected:
 	// 죽는 함수
 	virtual void SetDead();
 
+	UFUNCTION()
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	// 몽타주 재생 함수
 	void PlayDeadAnimation();
 
