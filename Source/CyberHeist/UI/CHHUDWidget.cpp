@@ -5,6 +5,7 @@
 #include "Interface/CHCharacterHUDInterface.h"
 #include "CHHpBarWidget.h"
 #include "CHCharacterStatWidget.h"
+#include "CyberHeist.h"
 #include "UCHCrossHairWidget.h"
 
 UCHHUDWidget::UCHHUDWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -35,7 +36,7 @@ void UCHHUDWidget::SetCombatMode(uint8 bCombat)
 {
 	// HpBar->UpdateHpBar(NewCurrentHp);
 	CrossHair->SetCombatMode(bCombat);
-	// UE_LOG(LogTemp, Log, TEXT("UUCHCrossHairWidget"));
+	
 	bCombat ? CrossHair->SetVisibility(ESlateVisibility::Visible) : CrossHair->SetVisibility(ESlateVisibility::Hidden);
 }
 
@@ -52,10 +53,13 @@ void UCHHUDWidget::NativeConstruct()
 	
 	// CharacterStat = Cast<UCHCharacterStatWidget>(GetWidgetFromName(TEXT("WidgetCharacterStat")));
 	// ensure(CharacterStat);
+	UE_LOG(LogTemp, Log, TEXT("UCHHUDWidget::NativeConstruct()"))
 	
 	ICHCharacterHUDInterface* HUDPawn = Cast<ICHCharacterHUDInterface>(GetOwningPlayerPawn());
 	if (HUDPawn)
 	{
+		// CH_LOG(LogCHNetwork, Log, TEXT("SetupHUDWidget"))
+		UE_LOG(LogTemp, Log, TEXT("UCHHUDWidget::SetupHUDWidget"))
 		HUDPawn->SetupHUDWidget(this);		
 	}
 }

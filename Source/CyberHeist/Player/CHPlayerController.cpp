@@ -33,14 +33,14 @@ void ACHPlayerController::BeginPlay()
 	FInputModeGameOnly GameOnlyInputMode;
 	SetInputMode(GameOnlyInputMode);
 
-	if(IsLocalController())
+	/*if(IsLocalController())
 	{
 		CHHUDWidget = CreateWidget<UCHHUDWidget>(this, CHHUDWidgetClass);
 		if (CHHUDWidget)
 		{
 			CHHUDWidget->AddToViewport();
 		}
-	}	
+	}*/
 }
 
 void ACHPlayerController::PostInitializeComponents()
@@ -74,6 +74,18 @@ void ACHPlayerController::PostNetInit()
 void ACHPlayerController::OnPossess(APawn* InPawn)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
-	Super::OnPossess(InPawn);
+	Super::OnPossess(InPawn);	
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
+}
+
+void ACHPlayerController::CreateWidgetIfNeed()
+{
+	if(IsLocalController())
+	{
+		CHHUDWidget = CreateWidget<UCHHUDWidget>(this, CHHUDWidgetClass);
+		if (CHHUDWidget)
+		{
+			CHHUDWidget->AddToViewport();
+		}
+	}
 }

@@ -155,10 +155,11 @@ void ACHCharacterPlayer::BeginPlay()
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::BeginPlay();
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	ACHPlayerController* PlayerController = Cast<ACHPlayerController>(GetController());
 	if (PlayerController)
 	{
 		EnableInput(PlayerController);
+		PlayerController->CreateWidgetIfNeed();
 	}
 	// CharacterHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	// CharacterHalfHeight
@@ -1392,9 +1393,9 @@ void ACHCharacterPlayer::SetupHUDWidget(UCHHUDWidget* InHUDWidget)
 {
 	if (InHUDWidget)
 	{
+		UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::SetupHUDWidget"))
 		InHUDWidget->SetMaxHp_Test(Stat->GetMaxHp());
 		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
-
 		// Stat->OnStatChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateStat);
 		Stat->OnHpChanged.AddUObject(InHUDWidget, &UCHHUDWidget::UpdateHpBar);
 		OnCombat.AddUObject(InHUDWidget, &UCHHUDWidget::SetCombatMode);

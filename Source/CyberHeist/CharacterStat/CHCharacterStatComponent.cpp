@@ -12,7 +12,7 @@ UCHCharacterStatComponent::UCHCharacterStatComponent()
 	CurrentHp = MaxHp;
 
 	bWantsInitializeComponent = true;
-
+	// bReplicates = true;
 }
 
 void UCHCharacterStatComponent::InitializeComponent()

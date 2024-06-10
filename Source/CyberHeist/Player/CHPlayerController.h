@@ -32,5 +32,7 @@ protected:
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void PostNetInit() override;
-	virtual void OnPossess(APawn* InPawn) override;	
+	virtual void OnPossess(APawn* InPawn) override;
+public:
+	void CreateWidgetIfNeed();
 };
