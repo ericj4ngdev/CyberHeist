@@ -12,20 +12,25 @@
 #include "GameFramework/Actor.h"
 #include "VisualLogger/VisualLogger.h"
 
-namespace EQS_Query_CoverNS
-{
-	void AddCoverFilter(FBlackboardKeySelector& BlackboardKey, UObject* Owner, FName PropertyName)
-	{
-		const FString FilterName = PropertyName.ToString() + TEXT("_Cover");
-		BlackboardKey.AllowedTypes.Add(NewObject<UBlackboardKeyType_Cover>(Owner, *FilterName));
-	}
-}
+#include "AI/Tasks/BTTask_EQS_Query_Cover.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/Controller.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType.h"
+#include "VisualLogger/VisualLogger.h"
 
 UBTT_UnCoverAim::UBTT_UnCoverAim()
 {
 	NodeName = "BTT_Fixed_UnCoverAim";
+	
+	// const FString FilterName = GET_MEMBER_NAME_CHECKED(UBTT_UnCoverAim, BlackboardKey).ToString() + TEXT("_Cover");
+	// BlackboardKey.AllowedTypes.Add(NewObject<UBlackboardKeyType_Cover>(this, *FilterName));
+	AddCoverFilter(BlackboardKey, this, GET_MEMBER_NAME_CHECKED(UBTT_UnCoverAim, BlackboardKey));
+}
 
-	EQS_Query_CoverNS::AddCoverFilter(BlackboardKey, this, GET_MEMBER_NAME_CHECKED(UBTT_UnCoverAim, BlackboardKey));
+void UBTT_UnCoverAim::AddCoverFilter(FBlackboardKeySelector& NewBlackboardKey, UObject* Owner, FName PropertyName)
+{
+	const FString FilterName = PropertyName.ToString() + TEXT("_Cover");
+	NewBlackboardKey.AllowedTypes.Add(NewObject<UBlackboardKeyType_Cover>(Owner, *FilterName));
 }
 
 void UBTT_UnCoverAim::InitializeFromAsset(UBehaviorTree& Asset)
@@ -54,8 +59,6 @@ EBTNodeResult::Type UBTT_UnCoverAim::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	if (BlackboardComp != nullptr && CoverSystem != nullptr)
 	{
 		UE_LOG(LogTemp,Log,TEXT("[UBTT_UnCoverAim::ExecuteTask] 1"));
-		/*if (CoverKey.SelectedKeyType == UBlackboardKeyType_Cover::StaticClass())
-		{*/		
 		FCover Cover = BlackboardComp->GetValue<UBlackboardKeyType_Cover>(BlackboardKey.GetSelectedKeyID());
 		if(Cover.IsValid())
 		{
@@ -63,8 +66,6 @@ EBTNodeResult::Type UBTT_UnCoverAim::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 			AIPawn->UnCoverAim(Cover);
 			return EBTNodeResult::Succeeded;
 		}
-		// }
 	}	
-	
 	return EBTNodeResult::Failed;
 }

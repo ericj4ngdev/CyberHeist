@@ -22,5 +22,8 @@ void ACHWeaponSpawner::BeginPlay()
 
 void ACHWeaponSpawner::SpawnGun()
 {
-	SpawnedGun = GetWorld()->SpawnActor<ACHGunBase>(GunBaseClass, GetActorTransform());
+	FActorSpawnParameters Param;
+	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
+	
+	SpawnedGun = GetWorld()->SpawnActor<ACHGunBase>(GunBaseClass, GetActorTransform(), Param);
 }

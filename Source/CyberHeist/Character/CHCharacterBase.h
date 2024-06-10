@@ -153,17 +153,22 @@ public:
 	void SetAiming(uint8 bNewAiming);
 	
 	UFUNCTION(Server, Reliable)
-	void ServerSetAiming(bool bIsAiming);	
+	void ServerSetAiming(bool bIsAiming);
+	
 	FORCEINLINE uint8 GetAiming() const { return bAiming; }
 	
 	void SetTPAimingCloser(uint8 bNewTPAimingCloser);
+	
 	UFUNCTION(Server, Reliable)
-	void ServerSetTPAimingCloser(bool bNewTPAimingCloser);	
+	void ServerSetTPAimingCloser(bool bNewTPAimingCloser);
+	
 	FORCEINLINE uint8 GetTPAimingCloser() const { return bTPAimingCloser; }
 	
-	FORCEINLINE void SetScopeAiming(uint8 bNewFPScopeAiming);
+	void SetScopeAiming(uint8 bNewFPScopeAiming);
+	
 	UFUNCTION(Server, Reliable)
-	void ServerSetFPScopeAiming(bool bNewFPScopeAiming);	
+	void ServerSetFPScopeAiming(bool bNewFPScopeAiming);
+	
 	FORCEINLINE uint8 GetScopeAiming() const { return bFPScopeAiming; }
 
 	FORCEINLINE float GetTiltAngle() const { return TiltAngle; }

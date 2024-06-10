@@ -15,7 +15,7 @@ class CYBERHEIST_API ACHGameMode : public AGameMode
 	GENERATED_BODY()
 	
 public:
-	ACHGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	ACHGameMode();
 
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual APlayerController* Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;

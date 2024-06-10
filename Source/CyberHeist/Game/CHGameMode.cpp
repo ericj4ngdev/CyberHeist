@@ -6,12 +6,12 @@
 #include "CHGameState.h"
 #include "CyberHeist.h"
 
-ACHGameMode::ACHGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+ACHGameMode::ACHGameMode()
 {
 	// DefaultPawnClass
 	// static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Script/CyberHeist.CHCharacterPlayer"));
 
-	bDelayedStart = true;
+	// bDelayedStart = true;
 	
 	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Script/Engine.Blueprint'/Game/CyberHeist/Blueprint/BP_CHCharacterPlayer.BP_CHCharacterPlayer_C'"));
 	
@@ -50,7 +50,7 @@ APlayerController* ACHGameMode::Login(UPlayer* NewPlayer, ENetRole InRemoteRole,
 	APlayerController* NewPlayerController = Super::Login(NewPlayer, InRemoteRole, Portal, Options, UniqueId, ErrorMessage);
 	
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
-
+	 GetNetMode();
 	return NewPlayerController;
 }
 

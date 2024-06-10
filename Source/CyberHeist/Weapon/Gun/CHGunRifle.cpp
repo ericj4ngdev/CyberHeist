@@ -6,7 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/CHAnimInstance.h"
-#include "Character/CHCharacterBase.h"
+// #include "Character/CHCharacterBase.h"
 #include "Character/CHCharacterPlayer.h"
 #include "KisMet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"

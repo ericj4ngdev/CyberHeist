@@ -12,6 +12,5 @@
 UCLASS()
 class CYBERHEIST_API ACHLobbyGameMode : public AGameMode
 {
-	GENERATED_BODY()
-	
+	GENERATED_BODY()	
 };
