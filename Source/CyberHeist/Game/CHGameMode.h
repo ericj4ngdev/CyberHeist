@@ -4,6 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "Character/CHCharacterNonPlayer.h"
+#include "AI/CHAIControllerBase.h"
+#include "Weapon/Gun/CHGunBase.h"
+#include "Spawner/CHWeaponSpawner.h"
+#include "Spawner/CHSpawnTriggerArea.h"
+
 #include "CHGameMode.generated.h"
 
 /**
@@ -17,6 +23,7 @@ class CYBERHEIST_API ACHGameMode : public AGameMode
 public:
 	ACHGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	virtual void BeginPlay() override;
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
@@ -27,8 +34,31 @@ public:
 	virtual void StartMatch() override;
 
 public:
-	void CustomInitGame();
-	int32 MaxPlayers;
+	// 모두 나가면 호출되는 함수
+	void CleanUpLevel();
 
+	// 재접속하면 호출될 함수
+	void CustomResetLevel();		
+	int32 MaxPlayers;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<ACHCharacterNonPlayer*> CHAIPlayers;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<ACHAIControllerBase*> CHAIControllers;
+
+	// 무기
+	UPROPERTY()
+	TArray<ACHGunBase*> CHWeapons;
+
+	// 무기 스포너 스폰 호출하기
+	UPROPERTY()
+	TArray<ACHWeaponSpawner*> CHWeaponSpawners;
+
+	UPROPERTY()
+	TArray<ACHSpawnTriggerArea*> CHSpawnTriggerAreas;
+	
+	
+	
 	// int32 NumPlayers;
 };

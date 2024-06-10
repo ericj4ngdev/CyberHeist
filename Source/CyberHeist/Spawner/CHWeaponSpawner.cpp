@@ -3,6 +3,7 @@
 
 #include "Spawner/CHWeaponSpawner.h"
 
+#include "CyberHeist.h"
 #include "Weapon/Gun/CHGunBase.h"
 
 ACHWeaponSpawner::ACHWeaponSpawner()
@@ -22,8 +23,10 @@ void ACHWeaponSpawner::BeginPlay()
 
 void ACHWeaponSpawner::SpawnGun()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	FActorSpawnParameters Param;
 	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
 	
 	SpawnedGun = GetWorld()->SpawnActor<ACHGunBase>(GunBaseClass, GetActorTransform(), Param);
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }

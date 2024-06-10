@@ -25,6 +25,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACHGunBase> GunBaseClass;
 
+public:
 	void SpawnGun();
 
 };

@@ -5,6 +5,14 @@
 
 #include "CHGameState.h"
 #include "CyberHeist.h"
+#include "EngineUtils.h"
+#include "Components/BoxComponent.h"
+#include "Character/CHCharacterNonPlayer.h"
+#include "AI/CHAIControllerBase.h"
+#include "Weapon/Gun/CHGunBase.h"
+#include "Spawner/CHWeaponSpawner.h"
+#include "Spawner/CHSpawnTriggerArea.h"
+
 
 ACHGameMode::ACHGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), MaxPlayers(2)
 {
@@ -25,6 +33,30 @@ ACHGameMode::ACHGameMode(const FObjectInitializer& ObjectInitializer) : Super(Ob
 	}
 
 	GameStateClass = ACHGameState::StaticClass();
+}
+
+void ACHGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	UWorld* World = GetWorld();
+	for (TActorIterator<ACHWeaponSpawner> It(World); It; ++It)
+	{
+		ACHWeaponSpawner* CHWeaponSpawner = *It;
+		if (CHWeaponSpawner)
+		{
+			CHWeaponSpawners.Add(CHWeaponSpawner);
+		}
+	}
+	
+	for (TActorIterator<ACHSpawnTriggerArea> It(World); It; ++It)
+	{
+		ACHSpawnTriggerArea* CHSpawnTriggerArea = *It;
+		if (CHSpawnTriggerArea)
+		{
+			CHSpawnTriggerAreas.Add(CHSpawnTriggerArea);
+		}
+	}
+	
 }
 
 void ACHGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -106,7 +138,8 @@ void ACHGameMode::Logout(AController* Exiting)
 	if (HasMatchStarted() && bNobody)
 	{
 		// RestartGame();
-		CustomInitGame();
+		CleanUpLevel();
+		CustomResetLevel();
 		
 		// InitGame();
 		// 게임 초기화. 재입장 가능.
@@ -129,7 +162,79 @@ void ACHGameMode::StartMatch()
 	CH_LOG(LogCHNetwork, Log, TEXT("Match Started"))
 }
 
-void ACHGameMode::CustomInitGame()
+void ACHGameMode::CleanUpLevel()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	UWorld* World = GetWorld();
+	for (TActorIterator<ACHCharacterNonPlayer> It(World); It; ++It)
+	{
+		ACHCharacterNonPlayer* CHAIPlayer = *It;
+		if (CHAIPlayer)
+		{
+			CHAIPlayers.Add(CHAIPlayer);
+		}
+	}
+
+	for (TActorIterator<ACHAIControllerBase> It(World); It; ++It)
+	{
+		ACHAIControllerBase* CHAIController = *It;
+		if (CHAIController)
+		{
+			CHAIControllers.Add(CHAIController);
+		}
+	}
+
+	for (TActorIterator<ACHGunBase> It(World); It; ++It)
+	{
+		ACHGunBase* CHWeapon = *It;
+		if (CHWeapon)
+		{
+			CHWeapons.Add(CHWeapon);
+		}
+	}
+
+	CH_LOG(LogCHNetwork, Log, TEXT("Before CHAIPlayers : %d"), CHAIPlayers.Num())
+	CH_LOG(LogCHNetwork, Log, TEXT("Before CHAIControllers : %d"), CHAIControllers.Num())
+	CH_LOG(LogCHNetwork, Log, TEXT("Before CHWeapons : %d"), CHWeapons.Num())
+	
+	for (auto Element : CHAIPlayers)
+	{
+		Element->Destroy();
+	}
+	for (auto Element : CHAIControllers)
+	{
+		Element->Destroy();
+	}
+	for (auto Element : CHWeapons)
+	{
+		Element->Destroy();
+	}
+	
+	CHAIPlayers.Empty();
+	CHAIControllers.Empty();
+	CHWeapons.Empty();
+
+	CH_LOG(LogCHNetwork, Log, TEXT("After CHAIPlayers : %d"), CHAIPlayers.Num())
+	CH_LOG(LogCHNetwork, Log, TEXT("After CHAIControllers : %d"), CHAIControllers.Num())
+	CH_LOG(LogCHNetwork, Log, TEXT("After CHWeapons : %d"), CHWeapons.Num())
+	
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+void ACHGameMode::CustomResetLevel()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	CH_LOG(LogCHNetwork, Log, TEXT("Before MatchState : %s"), *GetMatchState().ToString())
 	SetMatchState(MatchState::EnteringMap);
+	CH_LOG(LogCHNetwork, Log, TEXT("After MatchState : %s"), *GetMatchState().ToString())
+	// 다시 스폰하게 만들기	
+	for (auto Element : CHWeaponSpawners)
+	{
+		Element->SpawnGun();		
+	}
+	for (auto Element : CHSpawnTriggerAreas)
+	{
+		Element->BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);;
+	}
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
