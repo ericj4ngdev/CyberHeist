@@ -208,7 +208,10 @@ void ACHCharacterBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	Stat->OnHpZero.AddUObject(this, &ACHCharacterBase::SetDead);
+	if(HasAuthority())
+	{
+		Stat->OnHpZero.AddUObject(this, &ACHCharacterBase::SetDead);		
+	}
 }
 
 float ACHCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -681,7 +684,8 @@ void ACHCharacterBase::SetDead()
 {
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	PlayDeadAnimation();
-	SetActorEnableCollision(false);
+	SetActorEnableCollision(false);	
+	
 	bIsDead = true;
 	// HpBar->SetHiddenInGame(true);
 }

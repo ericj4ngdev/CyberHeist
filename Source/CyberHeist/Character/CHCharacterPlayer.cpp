@@ -21,6 +21,7 @@
 #include "CyberHeist.h"
 #include "Net/UnrealNetwork.h"
 #include "CHCharacterMovementComponent.h"
+#include "Game/CHGameMode.h"
 
 
 ACHCharacterPlayer::ACHCharacterPlayer(const FObjectInitializer& ObjectInitializer)
@@ -1369,8 +1370,25 @@ bool ACHCharacterPlayer::ServerSetCoveredAttackMotion_Validate(uint8 bAim)
 
 void ACHCharacterPlayer::SetDead()
 {
-	Super::SetDead();
-	
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	Super::SetDead();	
+	ClientSetDead();
+	ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
+	CHGameMode->LoseCondition();		// 죽으면 바로 호출
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+void ACHCharacterPlayer::ClientSetDead_Implementation()
+{
+	APlayerController* CHPC = Cast<APlayerController>(GetController());
+	if (CHPC)
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("DisableInput"))
+		DisableInput(CHPC);
+		FInputModeUIOnly InputModeData;
+		CHPC->SetInputMode(InputModeData);
+		CHPC->SetShowMouseCursor(true);
+	}
 }
 
 void ACHCharacterPlayer::PressSprint()

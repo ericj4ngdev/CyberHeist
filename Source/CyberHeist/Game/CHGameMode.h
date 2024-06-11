@@ -38,7 +38,15 @@ public:
 	void CleanUpLevel();
 
 	// 재접속하면 호출될 함수
-	void CustomResetLevel();		
+	void CustomResetLevel();
+
+	UFUNCTION()
+	void LoseCondition();
+	
+	UFUNCTION()
+	void WinCondition();
+
+	UPROPERTY(EditAnywhere)
 	int32 MaxPlayers;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

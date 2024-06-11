@@ -137,23 +137,11 @@ void ACHGameMode::Logout(AController* Exiting)
 
 	if (HasMatchStarted() && bNobody)
 	{
-		// RestartGame();
-		CleanUpLevel();
-		CustomResetLevel();
-		
-		// InitGame();
-		// 게임 초기화. 재입장 가능.
 		// 맵 계속 유지
+		// 게임 초기화. 재입장 가능.
+		// CleanUpLevel();
+		// CustomResetLevel();
 	}
-	else
-	{
-		if (IsRunningDedicatedServer())
-		{
-			// GRPC_UpdateAddressToMatchmaker();
-			CH_LOG(LogCHNetwork, Log, TEXT("GRPC_UpdateAddressToMatchmaker"))			
-		}
-	}
-	
 }
 
 void ACHGameMode::StartMatch()
@@ -237,4 +225,14 @@ void ACHGameMode::CustomResetLevel()
 		Element->BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);;
 	}
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+void ACHGameMode::LoseCondition()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Lose"))
+}
+
+void ACHGameMode::WinCondition()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Win"))
 }
