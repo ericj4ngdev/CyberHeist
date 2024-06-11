@@ -24,10 +24,16 @@ protected:
 // HUD Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
-		TSubclassOf<class UCHHUDWidget> CHHUDWidgetClass;
+	TSubclassOf<class UCHHUDWidget> CHHUDWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
-		TObjectPtr<class UCHHUDWidget> CHHUDWidget;
+	TObjectPtr<class UCHHUDWidget> CHHUDWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
+	TSubclassOf<class UCHResultWidget> CHResultWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
+	TObjectPtr<class UCHResultWidget> CHResultWidget;
 
 protected:
 	virtual void PostInitializeComponents() override;
@@ -38,4 +44,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void ReturnToMainMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ShowResult(uint8 bWin);
+	
+	UFUNCTION(Client, Unreliable)
+	void ClientShowResult(uint8 bWin);
+	
 };

@@ -230,9 +230,6 @@ public:
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void SetDead() override;
-
-	UFUNCTION(Client, Unreliable)
-	void ClientSetDead();
 	
 public:
 	void PressSprint();

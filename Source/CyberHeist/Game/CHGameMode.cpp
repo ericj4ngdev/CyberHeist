@@ -9,9 +9,11 @@
 #include "Components/BoxComponent.h"
 #include "Character/CHCharacterNonPlayer.h"
 #include "AI/CHAIControllerBase.h"
+#include "Player/CHPlayerController.h"
 #include "Weapon/Gun/CHGunBase.h"
 #include "Spawner/CHWeaponSpawner.h"
 #include "Spawner/CHSpawnTriggerArea.h"
+#include "Player/CHPlayerController.h"
 
 
 ACHGameMode::ACHGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), MaxPlayers(2)
@@ -230,9 +232,29 @@ void ACHGameMode::CustomResetLevel()
 void ACHGameMode::LoseCondition()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Lose"))
+	// 모든 PC에게 UI띄워주기
+	for (FConstControllerIterator Iterator = GetWorld()->GetControllerIterator(); Iterator; ++Iterator)
+	{
+		AController* Controller = Iterator->Get();
+		ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller);
+		if (PlayerController)
+		{
+			// 클라 RPC로 UI 활성화.
+			PlayerController->ClientShowResult(false);
+		}
+	}
 }
 
 void ACHGameMode::WinCondition()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Win"))
+	for (FConstControllerIterator Iterator = GetWorld()->GetControllerIterator(); Iterator; ++Iterator)
+	{
+		AController* Controller = Iterator->Get();
+		ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller);
+		if (PlayerController)
+		{
+			PlayerController->ClientShowResult(true);	
+		}
+	}
 }

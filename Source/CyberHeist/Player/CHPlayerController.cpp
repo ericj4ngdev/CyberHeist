@@ -4,6 +4,7 @@
 #include "Player/CHPlayerController.h"
 #include "UI/CHHUDWidget.h"
 #include "CyberHeist.h"
+#include "UI/CHResultWidget.h"
 
 ACHPlayerController::ACHPlayerController()
 {
@@ -11,7 +12,7 @@ ACHPlayerController::ACHPlayerController()
 	if (CHHUDWidgetRef.Class)
 	{
 		CHHUDWidgetClass = CHHUDWidgetRef.Class;
-	}
+	}	
 }
 
 void ACHPlayerController::Tick(float DeltaSeconds)
@@ -87,6 +88,13 @@ void ACHPlayerController::CreateWidgetIfNeed()
 		{
 			CHHUDWidget->AddToViewport();
 		}
+		
+		CHResultWidget = CreateWidget<UCHResultWidget>(this, CHResultWidgetClass);
+		if (CHResultWidget)
+		{
+			CHResultWidget->AddToViewport();
+			CHResultWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 }
 
@@ -98,4 +106,34 @@ void ACHPlayerController::ReturnToMainMenu()
 		// Disconnect from the server
 		GetWorld()->GetFirstPlayerController()->ClientTravel("/Game/CyberHeist/Maps/TitleScreen.TitleScreen", ETravelType::TRAVEL_Absolute);
 	}
+}
+
+void ACHPlayerController::ShowResult(uint8 bWin)
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
+
+	FInputModeUIOnly InputModeData;
+	SetInputMode(InputModeData);
+	SetShowMouseCursor(true);
+
+	if(CHResultWidget)
+	{
+		// UI 표시 바꾸기
+		CHResultWidget->SetVisibility(ESlateVisibility::Visible);	
+		if(bWin)
+		{
+			CHResultWidget->ShowWinScreen();		
+		}
+		else
+		{
+			CHResultWidget->ShowLoseScreen();		
+		}
+	}
+	
+	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
+}
+
+void ACHPlayerController::ClientShowResult_Implementation(uint8 bWin)
+{
+	ShowResult(bWin);
 }

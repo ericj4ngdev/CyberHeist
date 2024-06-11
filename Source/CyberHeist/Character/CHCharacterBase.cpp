@@ -683,7 +683,8 @@ void ACHCharacterBase::NotifyComboActionEnd()
 void ACHCharacterBase::SetDead()
 {
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-	PlayDeadAnimation();
+	// PlayDeadAnimation();
+	MulticastPlayDeadAnimation();
 	SetActorEnableCollision(false);	
 	
 	bIsDead = true;
@@ -724,5 +725,10 @@ void ACHCharacterBase::PlayDeadAnimation()
 	{
 		AnimInstance->Montage_Play(DeadMontage, 1.0f);		
 	}
-	// UE_LOG(LogTemp, Log, TEXT("DeadMontage"));
+	CH_LOG(LogCHNetwork, Log, TEXT("DeadMontage"));
+}
+
+void ACHCharacterBase::MulticastPlayDeadAnimation_Implementation()
+{
+	PlayDeadAnimation();
 }

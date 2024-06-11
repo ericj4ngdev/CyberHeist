@@ -195,6 +195,9 @@ protected:
 	// 몽타주 재생 함수
 	void PlayDeadAnimation();
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayDeadAnimation();
+
 	float DeadEventDelayTime = 5.0f;
 
 	// Attack
