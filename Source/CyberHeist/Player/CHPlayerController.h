@@ -35,4 +35,7 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 public:
 	void CreateWidgetIfNeed();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ReturnToMainMenu();
 };

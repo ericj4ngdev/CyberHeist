@@ -89,3 +89,13 @@ void ACHPlayerController::CreateWidgetIfNeed()
 		}
 	}
 }
+
+void ACHPlayerController::ReturnToMainMenu()
+{
+	// Ensure this runs only on the client
+	if (IsLocalController())
+	{
+		// Disconnect from the server
+		GetWorld()->GetFirstPlayerController()->ClientTravel("/Game/CyberHeist/Maps/TitleScreen.TitleScreen", ETravelType::TRAVEL_Absolute);
+	}
+}
