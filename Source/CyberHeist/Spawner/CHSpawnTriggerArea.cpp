@@ -26,12 +26,7 @@ void ACHSpawnTriggerArea::BeginPlay()
 	BoxCollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHSpawnTriggerArea::OnBeginOverlap);
 	if(HasAuthority())
 	{		
-		for (auto EnemySpawner : EnemySpawners)
-		{
-			EnemySpawner->SpawnEnemyWithWeapon();
-			ACHAIControllerBase* EnemyController = Cast<ACHAIControllerBase>(EnemySpawner->SpawnedEnemy->GetController()); 
-			EnemyControllers.Add(EnemyController);
-		}
+		Respawn();
 	}
 	CH_LOG(LogCHNetwork, Warning, TEXT("End"));
 }
@@ -47,8 +42,11 @@ void ACHSpawnTriggerArea::OnBeginOverlap(UPrimitiveComponent* OverlappedComponen
 
 void ACHSpawnTriggerArea::Respawn()
 {
+	EnemyControllers.Empty();
 	for (auto EnemySpawner : EnemySpawners)
 	{
 		EnemySpawner->SpawnEnemyWithWeapon();
+		ACHAIControllerBase* EnemyController = Cast<ACHAIControllerBase>(EnemySpawner->SpawnedEnemy->GetController()); 
+		EnemyControllers.Add(EnemyController);
 	}
 }

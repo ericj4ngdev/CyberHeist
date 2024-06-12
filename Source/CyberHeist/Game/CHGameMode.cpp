@@ -72,6 +72,15 @@ void ACHGameMode::BeginPlay()
 			ChPlayerStarts.Add(ChPlayerStart);
 		}
 	}
+
+	for (TActorIterator<ACHEndPoint> It(World); It; ++It)
+	{
+		ACHEndPoint* CHEndPoint = *It;
+		if (CHEndPoint)
+		{
+			CHEndPoints.Add(CHEndPoint);
+		}
+	}
 	
 	CH_LOG(LogCHNetwork, Warning, TEXT("End"))
 }
@@ -260,6 +269,11 @@ void ACHGameMode::CustomResetLevel()
 	for (auto Element : CHSpawnTriggerAreas)
 	{
 		Element->Respawn();
+		Element->BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+
+	for (auto Element : CHEndPoints)
+	{
 		Element->BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);;
 	}
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
@@ -297,9 +311,41 @@ void ACHGameMode::WinCondition()
 	}
 }
 
-void ACHGameMode::RequestRespawn(ACharacter* ResetCharacter, AController* ResetController)
+void ACHGameMode::RequestRestartGame(ACharacter* ResetCharacter)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	if (ResetCharacter)
+	{
+		ResetCharacter->Reset();
+		ResetCharacter->Destroy();
+		CH_LOG(LogCHNetwork, Log, TEXT("Destroy"))
+	}
+	/*if(ResetController)
+	{
+		// UI 초기화
+		// ResetController->SetPlayerInvincible(true);
+		// 안해줘도 이미 파괴해서 상관없을 듯. 
+		CH_LOG(LogCHNetwork, Log, TEXT("MatchState : %s "), *GetMatchState().ToString())
+		RestartPlayer(ResetController);	// 이거 호출하면 폰 스폰하고 나중에 SetPlayerDefaults 호출되면서 위치 자동 정렬		
+	}*/
+	
+	for (FConstControllerIterator Iterator = GetWorld()->GetControllerIterator(); Iterator; ++Iterator)
+	{
+		AController* Controller = Iterator->Get();
+		ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller);
+		if (PlayerController)
+		{
+			PlayerController->ClientSetResultScreen();
+			RestartPlayer(PlayerController);
+			// PlayerController->SetPlayerInvincible(false);
+		}
+	}
+	
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+void ACHGameMode::RequestRespawn(ACharacter* ResetCharacter, AController* ResetController)
+{
 	if (ResetCharacter)
 	{
 		ResetCharacter->Reset();

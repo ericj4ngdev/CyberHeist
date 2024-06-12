@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CHEndPoint.h"
 #include "GameFramework/GameMode.h"
 #include "Character/CHCharacterNonPlayer.h"
 #include "AI/CHAIControllerBase.h"
@@ -51,6 +52,9 @@ public:
 	void WinCondition();
 
 	UFUNCTION()
+	void RequestRestartGame(ACharacter* ResetCharacter);
+
+	UFUNCTION()
 	void RequestRespawn(ACharacter* ResetCharacter, AController* ResetController);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -78,6 +82,9 @@ public:
 
 	UPROPERTY()
 	TArray<ACHSpawnTriggerArea*> CHSpawnTriggerAreas;
+
+	UPROPERTY()
+	TArray<ACHEndPoint*> CHEndPoints;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 CurrentNum;

@@ -153,6 +153,21 @@ void ACHPlayerController::ShowResult(uint8 bWin)
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 }
 
+void ACHPlayerController::SetResultScreen()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+
+	SetIgnoreMoveInput(false);
+	SetIgnoreLookInput(false);
+		
+	SetShowMouseCursor(false);
+	
+	FInputModeGameOnly GameOnlyInputMode;
+	SetInputMode(GameOnlyInputMode);
+
+	CHResultWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
 void ACHPlayerController::OnRestart()
 {
 	if (HasAuthority())
@@ -163,18 +178,48 @@ void ACHPlayerController::OnRestart()
 		{
 			CHGameMode->ResetLevel();
 			ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(GetPawn());
-			CHGameMode->RequestRespawn(CHPlayer,this);
+			CHGameMode->RequestRestartGame(CHPlayer);
 		}
 	}
 	else
-	{
-		CH_LOG(LogCHNetwork, Log, TEXT("Hidden"))
-		CHResultWidget->SetVisibility(ESlateVisibility::Hidden);
-		FInputModeGameOnly GameOnlyInputMode;
-		SetInputMode(GameOnlyInputMode);
+	{		
 		// If the controller is on the client, request the server to reset the level
 		ServerRestartLevel();
 	}
+}
+
+void ACHPlayerController::OnRespawn()
+{
+	if (HasAuthority())
+	{
+		// If the controller is already on the server, reset the level directly
+		ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
+		if (CHGameMode)
+		{
+			ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(GetPawn());
+			CHGameMode->RequestRespawn(CHPlayer, this);
+		}
+	}
+	else
+	{		
+		// If the controller is on the client, request the server to reset the level
+		ServerRespawn();
+	}
+}
+
+void ACHPlayerController::ServerRespawn_Implementation()
+{
+	ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
+	if (CHGameMode)
+	{
+		ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(GetPawn());
+		CHGameMode->RequestRespawn(CHPlayer, this);
+	}
+}
+
+bool ACHPlayerController::ServerRespawn_Validate()
+{
+	return true;
 }
 
 void ACHPlayerController::ServerRestartLevel_Implementation()
@@ -184,13 +229,18 @@ void ACHPlayerController::ServerRestartLevel_Implementation()
 	{
 		CHGameMode->ResetLevel();
 		ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(GetPawn());
-		CHGameMode->RequestRespawn(CHPlayer,this);
+		CHGameMode->RequestRestartGame(CHPlayer);
 	}
 }
 
 bool ACHPlayerController::ServerRestartLevel_Validate()
 {
 	return true;
+}
+
+void ACHPlayerController::ClientSetResultScreen_Implementation()
+{
+	SetResultScreen();
 }
 
 void ACHPlayerController::SetPlayerInvincible(uint8 bPlayerInvincible)

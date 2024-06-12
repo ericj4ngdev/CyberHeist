@@ -49,13 +49,26 @@ public:
 	void ShowResult(uint8 bWin);
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
+	void SetResultScreen();
+	
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	void OnRestart();
 
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void OnRespawn();
+	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRestartLevel();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRespawn();
 	
 	UFUNCTION(Client, Unreliable)
 	void ClientShowResult(uint8 bWin);
+
+	UFUNCTION(Client, Unreliable)
+	void ClientSetResultScreen();
+	
 
 public:
 	UFUNCTION()
