@@ -51,7 +51,7 @@ public:
 	void WinCondition();
 
 	UFUNCTION()
-	void RequestRespawn(ACharacter* ResetCharacter, const AController* ResetController);
+	void RequestRespawn(ACharacter* ResetCharacter, AController* ResetController);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 CurrentAIs;

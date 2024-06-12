@@ -162,10 +162,16 @@ void ACHPlayerController::OnRestart()
 		if (CHGameMode)
 		{
 			CHGameMode->ResetLevel();
+			ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(GetPawn());
+			CHGameMode->RequestRespawn(CHPlayer,this);
 		}
 	}
 	else
 	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Hidden"))
+		CHResultWidget->SetVisibility(ESlateVisibility::Hidden);
+		FInputModeGameOnly GameOnlyInputMode;
+		SetInputMode(GameOnlyInputMode);
 		// If the controller is on the client, request the server to reset the level
 		ServerRestartLevel();
 	}

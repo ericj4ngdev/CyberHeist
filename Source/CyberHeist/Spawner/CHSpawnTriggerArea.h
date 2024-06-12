@@ -22,7 +22,6 @@ protected:
 	UFUNCTION()
 	virtual void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	void Respawn();
 	
 public:
 	UPROPERTY(EditAnywhere)
@@ -33,4 +32,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TArray<ACHAIControllerBase*> EnemyControllers;	
+
+	void Respawn();
 };

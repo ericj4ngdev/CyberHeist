@@ -49,9 +49,6 @@ void ACHSpawnTriggerArea::Respawn()
 {
 	for (auto EnemySpawner : EnemySpawners)
 	{
-		if(EnemySpawner->SpawnedEnemy->GetIsDead())
-		{
-			EnemySpawner->SpawnEnemyWithWeapon();
-		}
+		EnemySpawner->SpawnEnemyWithWeapon();
 	}
 }

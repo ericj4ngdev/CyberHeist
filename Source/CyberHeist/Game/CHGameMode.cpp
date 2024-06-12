@@ -97,8 +97,7 @@ void ACHGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewP
 }
 
 
-void ACHGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId,
-                           FString& ErrorMessage)
+void ACHGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("============================================================"));
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
@@ -115,18 +114,6 @@ void ACHGameMode::PreLogin(const FString& Options, const FString& Address, const
 
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 }
-
-/*APlayerController* ACHGameMode::Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal,
-	const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
-{
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
-
-	APlayerController* NewPlayerController = Super::Login(NewPlayer, InRemoteRole, Portal, Options, UniqueId, ErrorMessage);
-	
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
-	
-	return NewPlayerController;
-}*/
 
 void ACHGameMode::PostLogin(APlayerController* NewPlayer)
 {
@@ -170,8 +157,8 @@ void ACHGameMode::StartMatch()
 void ACHGameMode::ResetLevel()
 {
 	Super::ResetLevel();
-	// CleanUpLevel();
-	// CustomResetLevel();
+	CleanUpLevel();
+	CustomResetLevel();	
 }
 
 void ACHGameMode::SetPlayerDefaults(APawn* PlayerPawn)
@@ -269,8 +256,10 @@ void ACHGameMode::CustomResetLevel()
 	{
 		Element->SpawnGun();		
 	}
+	
 	for (auto Element : CHSpawnTriggerAreas)
 	{
+		Element->Respawn();
 		Element->BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);;
 	}
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
@@ -308,17 +297,22 @@ void ACHGameMode::WinCondition()
 	}
 }
 
-void ACHGameMode::RequestRespawn(ACharacter* ResetCharacter, const AController* ResetController)
+void ACHGameMode::RequestRespawn(ACharacter* ResetCharacter, AController* ResetController)
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	if (ResetCharacter)
 	{
 		ResetCharacter->Reset();
 		ResetCharacter->Destroy();
+		CH_LOG(LogCHNetwork, Log, TEXT("Destroy"))
 	}
 	if(ResetController)
 	{
 		// UI 초기화
 		// ResetController->SetPlayerInvincible(true);
-		// RestartPlayerAtPlayerStart()
+		// 안해줘도 이미 파괴해서 상관없을 듯. 
+		CH_LOG(LogCHNetwork, Log, TEXT("MatchState : %s "), *GetMatchState().ToString())
+		RestartPlayer(ResetController);	// 이거 호출하면 폰 스폰하고 나중에 SetPlayerDefaults 호출되면서 위치 자동 정렬		
 	}
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
