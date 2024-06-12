@@ -220,7 +220,18 @@ void ACHGunRifle::Equip()
 void ACHGunRifle::UnEquip()
 {
 	Super::UnEquip();
-	
+
+	DisableWeaponInput();
+}
+
+void ACHGunRifle::DisableWeaponInput()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	Super::DisableWeaponInput();
+
+	OwningCharacter->SetAiming(false);
+	CancelPullTrigger();
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -231,18 +242,7 @@ void ACHGunRifle::UnEquip()
 				CH_LOG(LogCHNetwork, Log, TEXT("[ACHGunRifle] Removed %s"), *FireMappingContext->GetName());				
 			}
 		}
-	}	
-}
-
-void ACHGunRifle::DisableWeaponInput()
-{
-	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	Super::DisableWeaponInput();
-
-	OwningCharacter->SetAiming(false);
-	CancelPullTrigger();
-	
-	
+	}
 }
 
 void ACHGunRifle::Fire()
