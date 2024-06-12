@@ -13,9 +13,6 @@
 #include "CHCharacterPlayer.generated.h"
 
 
-
-class ACHGun;
-
 /**
  * 
  */

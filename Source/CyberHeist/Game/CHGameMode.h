@@ -7,10 +7,10 @@
 #include "GameFramework/GameMode.h"
 #include "Character/CHCharacterNonPlayer.h"
 #include "AI/CHAIControllerBase.h"
-#include "Player/CHPlayerController.h"
 #include "Weapon/Gun/CHGunBase.h"
 #include "Spawner/CHWeaponSpawner.h"
 #include "Spawner/CHSpawnTriggerArea.h"
+#include "GameFramework/PlayerStart.h"
 
 #include "CHGameMode.generated.h"
 

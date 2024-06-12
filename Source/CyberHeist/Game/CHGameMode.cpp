@@ -15,7 +15,6 @@
 #include "Weapon/Gun/CHGunBase.h"
 #include "Spawner/CHWeaponSpawner.h"
 #include "Spawner/CHSpawnTriggerArea.h"
-#include "Player/CHPlayerController.h"
 
 
 ACHGameMode::ACHGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), MaxPlayers(2)
@@ -178,7 +177,7 @@ void ACHGameMode::SetPlayerDefaults(APawn* PlayerPawn)
 	CurrentNum++;
 	CH_LOG(LogCHNetwork, Log, TEXT("CurrentNum : %d"), CurrentNum)
 	// 플레이어 state로 비교 가능한가? 
-	for (auto Element : ChPlayerStarts)
+	for (APlayerStart* Element : ChPlayerStarts)
 	{
 		int32 PlayerStartTagAsInt = FCString::Atoi(*Element->PlayerStartTag.ToString());
 		if(PlayerStartTagAsInt == CurrentNum)
@@ -230,15 +229,15 @@ void ACHGameMode::CleanUpLevel()
 	CH_LOG(LogCHNetwork, Log, TEXT("Before CHAIControllers : %d"), CHAIControllers.Num())
 	CH_LOG(LogCHNetwork, Log, TEXT("Before CHWeapons : %d"), CHWeapons.Num())
 	
-	for (auto Element : CHAIPlayers)
+	for (ACHCharacterNonPlayer* Element : CHAIPlayers)
 	{
 		Element->Destroy();
 	}
-	for (auto Element : CHAIControllers)
+	for (ACHAIControllerBase* Element : CHAIControllers)
 	{
 		Element->Destroy();
 	}
-	for (auto Element : CHWeapons)
+	for (ACHGunBase* Element : CHWeapons)
 	{
 		Element->Destroy();
 	}
@@ -261,18 +260,18 @@ void ACHGameMode::CustomResetLevel()
 	SetMatchState(MatchState::EnteringMap);
 	CH_LOG(LogCHNetwork, Log, TEXT("After MatchState : %s"), *GetMatchState().ToString())
 	// 다시 스폰하게 만들기	
-	for (auto Element : CHWeaponSpawners)
+	for (ACHWeaponSpawner* Element : CHWeaponSpawners)
 	{
 		Element->SpawnGun();		
 	}
 	
-	for (auto Element : CHSpawnTriggerAreas)
+	for (ACHSpawnTriggerArea* Element : CHSpawnTriggerAreas)
 	{
 		Element->Respawn();
 		Element->BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 
-	for (auto Element : CHEndPoints)
+	for (ACHEndPoint* Element : CHEndPoints)
 	{
 		Element->BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);;
 	}

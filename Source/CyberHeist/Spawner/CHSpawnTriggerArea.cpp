@@ -34,7 +34,7 @@ void ACHSpawnTriggerArea::BeginPlay()
 void ACHSpawnTriggerArea::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	for (auto Element : EnemyControllers)
+	for (ACHAIControllerBase* Element : EnemyControllers)
 	{
 		Element->RunAI();
 	}
@@ -43,7 +43,7 @@ void ACHSpawnTriggerArea::OnBeginOverlap(UPrimitiveComponent* OverlappedComponen
 void ACHSpawnTriggerArea::Respawn()
 {
 	EnemyControllers.Empty();
-	for (auto EnemySpawner : EnemySpawners)
+	for (ACHEnemySpawner* EnemySpawner : EnemySpawners)
 	{
 		EnemySpawner->SpawnEnemyWithWeapon();
 		ACHAIControllerBase* EnemyController = Cast<ACHAIControllerBase>(EnemySpawner->SpawnedEnemy->GetController()); 
