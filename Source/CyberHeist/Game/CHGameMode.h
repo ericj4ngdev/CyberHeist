@@ -34,6 +34,9 @@ public:
 	virtual void Logout(AController* Exiting) override;
 	virtual void StartMatch() override;
 
+	virtual void ResetLevel() override;
+	
+	virtual void SetPlayerDefaults(APawn* PlayerPawn) override;
 public:
 	// 모두 나가면 호출되는 함수
 	void CleanUpLevel();
@@ -47,8 +50,8 @@ public:
 	UFUNCTION()
 	void WinCondition();
 
-	// UFUNCTION()
-	// void CheckEnemyNum();
+	UFUNCTION()
+	void RequestRespawn(ACharacter* ResetCharacter, const AController* ResetController);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 CurrentAIs;
@@ -62,6 +65,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<ACHAIControllerBase*> CHAIControllers;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<APlayerStart*> ChPlayerStarts;
+
 	// 무기
 	UPROPERTY()
 	TArray<ACHGunBase*> CHWeapons;
@@ -72,8 +78,9 @@ public:
 
 	UPROPERTY()
 	TArray<ACHSpawnTriggerArea*> CHSpawnTriggerAreas;
-	
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 CurrentNum;
 	
 	// int32 NumPlayers;
 };

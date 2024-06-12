@@ -237,6 +237,7 @@ void ACHCharacterPlayer::PossessedBy(AController* NewController)
 	}
 
 	Super::PossessedBy(NewController);
+	
 	OwnerActor = GetOwner();
 	if (OwnerActor)
 	{
@@ -1419,5 +1420,14 @@ void ACHCharacterPlayer::SetupCrossWidget(UCHUserWidget* InUserWidget)
 	{
 		// OnCombat.AddUObject(CrossWidget, &UUCHCrossHairWidget::SetCombatMode);
 	}
+}
+
+void ACHCharacterPlayer::SetSpawnPoint(const FTransform& SpawnTransform)
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Start"))
+	FRotator Rotator = SpawnTransform.Rotator();
+	Rotator.Roll = 0;
+	SetActorLocationAndRotation(SpawnTransform.GetLocation(), Rotator);
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 

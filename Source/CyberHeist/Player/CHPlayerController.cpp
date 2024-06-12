@@ -5,6 +5,7 @@
 #include "UI/CHHUDWidget.h"
 #include "CyberHeist.h"
 #include "Character/CHCharacterPlayer.h"
+#include "Game/CHGameMode.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "UI/CHResultWidget.h"
 
@@ -150,6 +151,40 @@ void ACHPlayerController::ShowResult(uint8 bWin)
 	}
 	
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
+}
+
+void ACHPlayerController::OnRestart()
+{
+	if (HasAuthority())
+	{
+		// If the controller is already on the server, reset the level directly
+		ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
+		if (CHGameMode)
+		{
+			CHGameMode->ResetLevel();
+		}
+	}
+	else
+	{
+		// If the controller is on the client, request the server to reset the level
+		ServerRestartLevel();
+	}
+}
+
+void ACHPlayerController::ServerRestartLevel_Implementation()
+{
+	ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
+	if (CHGameMode)
+	{
+		CHGameMode->ResetLevel();
+		ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(GetPawn());
+		CHGameMode->RequestRespawn(CHPlayer,this);
+	}
+}
+
+bool ACHPlayerController::ServerRestartLevel_Validate()
+{
+	return true;
 }
 
 void ACHPlayerController::SetPlayerInvincible(uint8 bPlayerInvincible)

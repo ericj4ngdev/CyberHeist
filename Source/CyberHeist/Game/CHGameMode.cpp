@@ -9,6 +9,8 @@
 #include "Components/BoxComponent.h"
 #include "Character/CHCharacterNonPlayer.h"
 #include "AI/CHAIControllerBase.h"
+#include "Character/CHCharacterPlayer.h"
+#include "GameFramework/PlayerStart.h"
 #include "Player/CHPlayerController.h"
 #include "Weapon/Gun/CHGunBase.h"
 #include "Spawner/CHWeaponSpawner.h"
@@ -34,6 +36,8 @@ ACHGameMode::ACHGameMode(const FObjectInitializer& ObjectInitializer) : Super(Ob
 		PlayerControllerClass = PlayerControllerClassRef.Class;
 	}
 
+	CurrentNum = 0;
+	CurrentAIs = 0;
 	GameStateClass = ACHGameState::StaticClass();
 }
 
@@ -59,6 +63,16 @@ void ACHGameMode::BeginPlay()
 			CHSpawnTriggerAreas.Add(CHSpawnTriggerArea);
 		}
 	}
+
+	for (TActorIterator<APlayerStart> It(World); It; ++It)
+	{
+		APlayerStart* ChPlayerStart = *It;
+		if (ChPlayerStart)
+		{
+			ChPlayerStarts.Add(ChPlayerStart);
+		}
+	}
+	
 	CH_LOG(LogCHNetwork, Warning, TEXT("End"))
 }
 
@@ -151,6 +165,35 @@ void ACHGameMode::StartMatch()
 {
 	Super::StartMatch();
 	CH_LOG(LogCHNetwork, Log, TEXT("Match Started"))
+}
+
+void ACHGameMode::ResetLevel()
+{
+	Super::ResetLevel();
+	// CleanUpLevel();
+	// CustomResetLevel();
+}
+
+void ACHGameMode::SetPlayerDefaults(APawn* PlayerPawn)
+{
+	Super::SetPlayerDefaults(PlayerPawn);
+
+	ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(PlayerPawn);
+	CurrentNum++;
+	CH_LOG(LogCHNetwork, Log, TEXT("CurrentNum : %d"), CurrentNum)
+	// 플레이어 state로 비교 가능한가? 
+	for (auto Element : ChPlayerStarts)
+	{
+		int32 PlayerStartTagAsInt = FCString::Atoi(*Element->PlayerStartTag.ToString());
+		if(PlayerStartTagAsInt == CurrentNum)
+		{
+			if(PlayerPawn)
+			{
+				CHPlayer->SetSpawnPoint(Element->GetTransform());
+			}
+		}
+	}
+	if(CurrentNum >= MaxPlayers) CurrentNum = 0;	// 초기화
 }
 
 void ACHGameMode::CleanUpLevel()
@@ -262,5 +305,20 @@ void ACHGameMode::WinCondition()
 			PlayerController->ClientShowResult(true);
 			PlayerController->SetPlayerInvincible(true);
 		}
+	}
+}
+
+void ACHGameMode::RequestRespawn(ACharacter* ResetCharacter, const AController* ResetController)
+{
+	if (ResetCharacter)
+	{
+		ResetCharacter->Reset();
+		ResetCharacter->Destroy();
+	}
+	if(ResetController)
+	{
+		// UI 초기화
+		// ResetController->SetPlayerInvincible(true);
+		// RestartPlayerAtPlayerStart()
 	}
 }

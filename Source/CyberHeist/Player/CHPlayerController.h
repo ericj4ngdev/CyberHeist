@@ -47,6 +47,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void ShowResult(uint8 bWin);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void OnRestart();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRestartLevel();
 	
 	UFUNCTION(Client, Unreliable)
 	void ClientShowResult(uint8 bWin);

@@ -242,4 +242,6 @@ protected:
 	virtual void SetupHUDWidget(class UCHHUDWidget* InHUDWidget) override;
 	virtual void SetupCrossWidget(class UCHUserWidget* InUserWidget) override;
 
+public:
+	void SetSpawnPoint(const FTransform& SpawnTransform);
 };
