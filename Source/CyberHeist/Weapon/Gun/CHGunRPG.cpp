@@ -284,6 +284,10 @@ void ACHGunRPG::Fire()
 void ACHGunRPG::DisableWeaponInput()
 {
 	Super::DisableWeaponInput();
+
+	OwningCharacter->SetAiming(false);
+	CancelPullTrigger();
+	
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{		
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))

@@ -332,6 +332,10 @@ void ACHMinigun::Fire()
 void ACHMinigun::DisableWeaponInput()
 {
 	Super::DisableWeaponInput();
+
+	OwningCharacter->SetAiming(false);
+	CancelPullTrigger();
+	
 	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
