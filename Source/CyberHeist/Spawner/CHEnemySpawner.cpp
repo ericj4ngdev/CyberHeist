@@ -26,13 +26,18 @@ void ACHEnemySpawner::BeginPlay()
 
 void ACHEnemySpawner::SpawnEnemyWithWeapon()
 {
-	GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACHEnemySpawner::SpawnEnemy, 0.1f, false);
+	// GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACHEnemySpawner::SpawnEnemy, 0.1f, false);
 	SpawnGun();
+	SpawnEnemy();
 }
 
 void ACHEnemySpawner::SpawnEnemy()
 {
-	SpawnedEnemy = GetWorld()->SpawnActor<ACHCharacterNonPlayer>(EnemyType, GetActorTransform());
+	const FVector SpawnLocation = GetActorLocation() + GetActorUpVector() * 250.0f;
+	FTransform SpawnTransform = GetActorTransform();
+	SpawnTransform.SetLocation(SpawnLocation);
+	
+	SpawnedEnemy = GetWorld()->SpawnActor<ACHCharacterNonPlayer>(EnemyType, SpawnTransform);
 }
 
 void ACHEnemySpawner::SpawnGun()

@@ -5,6 +5,7 @@
 
 #include "CyberHeist.h"
 #include "Components/BoxComponent.h"
+#include "AI/CHAIControllerBase.h"
 
 // Sets default values
 ACHSpawnTriggerArea::ACHSpawnTriggerArea()
@@ -22,19 +23,25 @@ void ACHSpawnTriggerArea::BeginPlay()
 
 	BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	BoxCollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHSpawnTriggerArea::OnBeginOverlap);
+	if(HasAuthority())
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+		for (auto EnemySpawner : EnemySpawners)
+		{
+			EnemySpawner->SpawnEnemyWithWeapon();
+			ACHAIControllerBase* EnemyController = Cast<ACHAIControllerBase>(EnemySpawner->SpawnedEnemy->GetController()); 
+			EnemyControllers.Add(EnemyController);
+		}
+	}
 }
 
 void ACHSpawnTriggerArea::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	if(HasAuthority())
+	for (auto Element : EnemyControllers)
 	{
-		CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-		for (auto EnemySpawner : EnemySpawners)
-		{
-			EnemySpawner->SpawnEnemyWithWeapon();			
-		}
+		Element->RunAI();
 	}
 }
 

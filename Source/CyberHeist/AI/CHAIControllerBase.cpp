@@ -82,7 +82,7 @@ void ACHAIControllerBase::StopAI()
 void ACHAIControllerBase::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	RunAI();
+	// RunAI();
 }
 
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CHEnemySpawner.h"
+#include "AI/CHAIControllerBase.h"
 #include "GameFramework/Actor.h"
 #include "CHSpawnTriggerArea.generated.h"
 
@@ -30,5 +31,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UBoxComponent> BoxCollisionComp;
 
-	
+	UPROPERTY(EditAnywhere)
+	TArray<ACHAIControllerBase*> EnemyControllers;	
 };
