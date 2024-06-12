@@ -123,6 +123,7 @@ ACHCharacterBase::ACHCharacterBase(const FObjectInitializer& ObjectInitializer)
 
 	bReplicates = true;
 	bNearWall = false;
+	bInvincible = false;
 	CurrentCharacterControlType = ECharacterControlType::Third;
 }
 
@@ -216,10 +217,13 @@ void ACHCharacterBase::PostInitializeComponents()
 
 float ACHCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if(bInvincible) return DamageAmount;
+	
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	// UE_LOG(LogTemp, Log, TEXT("TakeDamage"));
+	
 	Stat->ApplyDamage(DamageAmount);
-
+	
 	return DamageAmount;
 }
 
@@ -258,6 +262,11 @@ void ACHCharacterBase::AttackHitCheck()
 FName ACHCharacterBase::GetWeaponAttachPoint() const
 {
 	return WeaponAttachPoint;
+}
+
+void ACHCharacterBase::SetInvincible(uint8 NewInvincible)
+{
+	bInvincible = NewInvincible;
 }
 
 void ACHCharacterBase::SetAiming(uint8 bNewAiming)
@@ -547,7 +556,8 @@ void ACHCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ACHCharacterBase, TiltAngle);
 	DOREPLIFETIME(ACHCharacterBase, TiltLocation);	
 	DOREPLIFETIME(ACHCharacterBase, bIsDead);
-	DOREPLIFETIME(ACHCharacterBase, CurrentCharacterControlType);	// ?
+	DOREPLIFETIME(ACHCharacterBase, CurrentCharacterControlType);
+	DOREPLIFETIME(ACHCharacterBase, bInvincible);
 }
 
 void ACHCharacterBase::EquipWeapon()

@@ -225,7 +225,14 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = Camera)
 	FVector StartingFirstPersonMeshLocation;
-	
+
+private:
+	UPROPERTY(Replicated)
+	uint8 bInvincible;
+
+public:
+	UFUNCTION()
+	void SetInvincible(uint8 NewInvincible);	
 	
 public:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, Meta = (AllowPrivateAccess = "true"))

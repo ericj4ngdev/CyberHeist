@@ -215,6 +215,10 @@ void ACHGunBase::UnEquip()
 	WeaponMesh3P->bCastHiddenShadow = false;
 }
 
+void ACHGunBase::DisableWeaponInput()
+{
+}
+
 void ACHGunBase::Fire()
 {
 	
@@ -369,13 +373,16 @@ void ACHGunBase::SetWeaponMeshVisibility(uint8 bVisible)
 
 void ACHGunBase::StartAim()
 {
-	// 총의 IMC를 기존 플레이어 IMC 보다 높게 하기
-	if(OwningCharacter->bNearWall)
+	if(OwningCharacter)
 	{
-		// 총기 접은 몽타주 재생
-		return;
-	}
-	ServerStartAim();
+		// 총의 IMC를 기존 플레이어 IMC 보다 높게 하기
+		if(OwningCharacter->bNearWall)
+		{
+			// 총기 접은 몽타주 재생
+			return;
+		}
+		ServerStartAim();		
+	}	
 }
 
 void ACHGunBase::StopAim()

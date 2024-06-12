@@ -19,13 +19,13 @@ ACHSpawnTriggerArea::ACHSpawnTriggerArea()
 // Called when the game starts or when spawned
 void ACHSpawnTriggerArea::BeginPlay()
 {
+	CH_LOG(LogCHNetwork, Warning, TEXT("Begin"));
 	Super::BeginPlay();
 
 	BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	BoxCollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHSpawnTriggerArea::OnBeginOverlap);
 	if(HasAuthority())
-	{
-		CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	{		
 		for (auto EnemySpawner : EnemySpawners)
 		{
 			EnemySpawner->SpawnEnemyWithWeapon();
@@ -33,10 +33,10 @@ void ACHSpawnTriggerArea::BeginPlay()
 			EnemyControllers.Add(EnemyController);
 		}
 	}
+	CH_LOG(LogCHNetwork, Warning, TEXT("End"));
 }
 
-void ACHSpawnTriggerArea::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ACHSpawnTriggerArea::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	for (auto Element : EnemyControllers)

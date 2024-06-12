@@ -4,6 +4,8 @@
 #include "Player/CHPlayerController.h"
 #include "UI/CHHUDWidget.h"
 #include "CyberHeist.h"
+#include "Character/CHCharacterPlayer.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "UI/CHResultWidget.h"
 
 ACHPlayerController::ACHPlayerController()
@@ -112,10 +114,27 @@ void ACHPlayerController::ShowResult(uint8 bWin)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
 
+	SetIgnoreMoveInput(true);
+	SetIgnoreLookInput(true);
+	
 	FInputModeUIOnly InputModeData;
 	SetInputMode(InputModeData);
+	
 	SetShowMouseCursor(true);
 
+	// 현재 입력 상태를 초기화합니다.
+	// 예: 현재 이동 중인 것을 멈추기 위해 캐릭터의 속도를 0으로 설정
+	if (GetPawn())
+	{
+		ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(GetPawn());
+		if(CHPlayer)
+		{
+			// CHPlayer->GetCurrentWeapon()->DisableInput();
+			CHPlayer->GetCurrentWeapon()->DisableWeaponInput();
+			CHPlayer->GetMovementComponent()->StopMovementImmediately();			
+		}
+	}
+	
 	if(CHResultWidget)
 	{
 		// UI 표시 바꾸기
@@ -131,6 +150,15 @@ void ACHPlayerController::ShowResult(uint8 bWin)
 	}
 	
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
+}
+
+void ACHPlayerController::SetPlayerInvincible(uint8 bPlayerInvincible)
+{
+	ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(GetPawn());
+	if(CHPlayer)
+	{
+		CHPlayer->SetInvincible(bPlayerInvincible);
+	}
 }
 
 void ACHPlayerController::ClientShowResult_Implementation(uint8 bWin)

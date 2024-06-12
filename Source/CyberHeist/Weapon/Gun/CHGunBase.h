@@ -277,6 +277,7 @@ public:
 	
 	virtual void Equip();
 	virtual void UnEquip();
+	virtual void DisableWeaponInput();
 	virtual void Fire();	
 	virtual void LocalFire(const FVector& HitLocation,const FTransform& MuzzleTransform);
 	virtual void PullTriggerByAI(AActor* AttackTarget);
@@ -363,6 +364,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCFire(const FVector& HitLocation, const FTransform& MuzzleTransform);
+
 	
 	/*UPROPERTY(ReplicatedUsing = OnRep_CanAttack)
 	uint8 bCanAttack : 1;

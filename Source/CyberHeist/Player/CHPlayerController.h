@@ -50,5 +50,8 @@ public:
 	
 	UFUNCTION(Client, Unreliable)
 	void ClientShowResult(uint8 bWin);
-	
+
+public:
+	UFUNCTION()
+	void SetPlayerInvincible(uint8 bPlayerInvincible);
 };

@@ -24,6 +24,7 @@ public:
 public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;
+	virtual void DisableWeaponInput() override;
 	virtual void Fire() override;
 	virtual void LocalFire(const FVector& HitLocation,const FTransform& MuzzleTransform) override;
 	virtual void PullTriggerByAI(AActor* AttackTarget) override;
@@ -45,7 +46,7 @@ public:
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter) override;
 	virtual void StopParticleSystem() override;
 	virtual void PlayFireVFX(const FTransform& HitTransform, const FTransform& MuzzleTransform) override;
-	
+		
 	UPROPERTY()
 	TObjectPtr<class AActor> AttackTargetActor;
 };

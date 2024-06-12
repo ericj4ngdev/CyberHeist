@@ -39,6 +39,7 @@ public:
 	virtual void Equip() override;
 	virtual void UnEquip() override;
 	virtual void Fire() override;
+	virtual void DisableWeaponInput() override;
 	virtual void LocalFire(const FVector& HitLocation,const FTransform& MuzzleTransform) override;
 	virtual void PullTriggerByAI(AActor* AttackTarget) override;
 	virtual void FireByAI(AActor* AttackTarget) override;

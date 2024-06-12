@@ -39,6 +39,7 @@ ACHGameMode::ACHGameMode(const FObjectInitializer& ObjectInitializer) : Super(Ob
 
 void ACHGameMode::BeginPlay()
 {
+	CH_LOG(LogCHNetwork, Warning, TEXT("Begin"))
 	Super::BeginPlay();
 	UWorld* World = GetWorld();
 	for (TActorIterator<ACHWeaponSpawner> It(World); It; ++It)
@@ -58,7 +59,7 @@ void ACHGameMode::BeginPlay()
 			CHSpawnTriggerAreas.Add(CHSpawnTriggerArea);
 		}
 	}
-	
+	CH_LOG(LogCHNetwork, Warning, TEXT("End"))
 }
 
 void ACHGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -173,7 +174,10 @@ void ACHGameMode::CleanUpLevel()
 			CHAIControllers.Add(CHAIController);
 		}
 	}
-
+	// CurrentAIs = CHAIControllers.Num();
+	// CH_LOG(LogCHNetwork, Log, TEXT("CHAIControllers : %d"), CHAIControllers.Num())
+	
+		
 	for (TActorIterator<ACHGunBase> It(World); It; ++It)
 	{
 		ACHGunBase* CHWeapon = *It;
@@ -241,12 +245,13 @@ void ACHGameMode::LoseCondition()
 		{
 			// 클라 RPC로 UI 활성화.
 			PlayerController->ClientShowResult(false);
+			PlayerController->SetPlayerInvincible(true);
 		}
 	}
 }
 
 void ACHGameMode::WinCondition()
-{
+{	
 	CH_LOG(LogCHNetwork, Log, TEXT("Win"))
 	for (FConstControllerIterator Iterator = GetWorld()->GetControllerIterator(); Iterator; ++Iterator)
 	{
@@ -254,7 +259,8 @@ void ACHGameMode::WinCondition()
 		ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller);
 		if (PlayerController)
 		{
-			PlayerController->ClientShowResult(true);	
+			PlayerController->ClientShowResult(true);
+			PlayerController->SetPlayerInvincible(true);
 		}
 	}
 }

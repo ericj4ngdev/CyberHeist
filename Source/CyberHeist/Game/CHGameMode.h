@@ -46,6 +46,12 @@ public:
 	
 	UFUNCTION()
 	void WinCondition();
+
+	// UFUNCTION()
+	// void CheckEnemyNum();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 CurrentAIs;
 	
 	UPROPERTY(EditAnywhere)
 	int32 MaxPlayers;

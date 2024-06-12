@@ -276,14 +276,7 @@ void ACHMinigun::UnEquip()
 	CannonMesh3P->SetVisibility(false, true);
 	CannonMesh3P->CastShadow = false;
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->RemoveMappingContext(FireMappingContext);
-			UE_LOG(LogTemp, Log, TEXT("[ACHMinigun] Removed %s"), *FireMappingContext->GetName());
-		}
-	}
+	DisableWeaponInput();	
 }
 
 void ACHMinigun::Fire()
@@ -334,6 +327,19 @@ void ACHMinigun::Fire()
 		LocalFire(HitLocation, SocketTransform);		// 이펙트만. 
 	}
 	ServerRPCFire(HitLocation, SocketTransform);
+}
+
+void ACHMinigun::DisableWeaponInput()
+{
+	Super::DisableWeaponInput();
+	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->RemoveMappingContext(FireMappingContext);
+			UE_LOG(LogTemp, Log, TEXT("[ACHMinigun] Removed %s"), *FireMappingContext->GetName());
+		}
+	}
 }
 
 void ACHMinigun::LocalFire(const FVector& HitLocation, const FTransform& MuzzleTransform)

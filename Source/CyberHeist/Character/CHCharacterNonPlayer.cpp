@@ -10,6 +10,7 @@
 #include "AI/CHAI.h"
 #include "Animation/CHAnimInstance.h"
 #include "Components/CapsuleComponent.h"
+#include "Game/CHGameMode.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ACHCharacterNonPlayer::ACHCharacterNonPlayer(const FObjectInitializer& ObjectInitializer)
@@ -33,7 +34,11 @@ void ACHCharacterNonPlayer::Tick(float DeltaSeconds)
 
 void ACHCharacterNonPlayer::SetDead()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::SetDead();
+	ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
+	CHGameMode->LoseCondition();		// 죽으면 바로 호출
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	
 	ACHAIControllerBase* CHAIController = Cast<ACHAIControllerBase>(GetController());
     if (CHAIController)

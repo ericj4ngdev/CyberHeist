@@ -228,17 +228,7 @@ void ACHGunRPG::UnEquip()
 	MissileMesh3P->SetVisibility(false, true);
 	MissileMesh3P->CastShadow = false;
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
-	{		
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			if(Subsystem->HasMappingContext(FireMappingContext))
-			{
-				Subsystem->RemoveMappingContext(FireMappingContext);
-				UE_LOG(LogTemp, Log, TEXT("[ACHGunRPG] Removed %s"), *FireMappingContext->GetName());
-			}			
-		}
-	}
+	DisableWeaponInput();
 }
 
 void ACHGunRPG::Fire()
@@ -289,6 +279,22 @@ void ACHGunRPG::Fire()
 		LocalFire(HitLocation, SocketTransform);		// 이펙트만. 
 	}
 	ServerRPCFire(HitLocation, SocketTransform);
+}
+
+void ACHGunRPG::DisableWeaponInput()
+{
+	Super::DisableWeaponInput();
+	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+	{		
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			if(Subsystem->HasMappingContext(FireMappingContext))
+			{
+				Subsystem->RemoveMappingContext(FireMappingContext);
+				UE_LOG(LogTemp, Log, TEXT("[ACHGunRPG] Removed %s"), *FireMappingContext->GetName());
+			}			
+		}
+	}
 }
 
 void ACHGunRPG::LocalFire(const FVector& HitLocation, const FTransform& MuzzleTransform)

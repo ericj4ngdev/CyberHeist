@@ -220,20 +220,29 @@ void ACHGunRifle::Equip()
 void ACHGunRifle::UnEquip()
 {
 	Super::UnEquip();
-	if(OwningCharacter->IsLocallyControlled())
+	
+	if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
 	{
-		if (APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+			if(Subsystem->HasMappingContext(FireMappingContext))
 			{
-				if(Subsystem->HasMappingContext(FireMappingContext))
-				{
-					Subsystem->RemoveMappingContext(FireMappingContext);
-					UE_LOG(LogTemp, Log, TEXT("[ACHGunRifle] Removed %s"), *FireMappingContext->GetName());				
-				}
+				Subsystem->RemoveMappingContext(FireMappingContext);
+				CH_LOG(LogCHNetwork, Log, TEXT("[ACHGunRifle] Removed %s"), *FireMappingContext->GetName());				
 			}
 		}
-	}
+	}	
+}
+
+void ACHGunRifle::DisableWeaponInput()
+{
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	Super::DisableWeaponInput();
+
+	OwningCharacter->SetAiming(false);
+	CancelPullTrigger();
+	
+	
 }
 
 void ACHGunRifle::Fire()
@@ -322,17 +331,6 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 	}
 	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-
-	// 여기가 문제네...
-	// 서버는 항상 3인칭으로 보여야 해서 1인칭 메시에 대해서는 항상 if(!HasAuthority() && OwningCharacter->IsLocallyControlled()) 를 붙혀야 할거 같다.
-	// 즉, 로컬만 SocketTransform을 시점에 맞게 쏘게 하고 1인칭 소켓으로
-	// 서버는 클라가 1인칭이어도 3인칭 총구에서 나가 쏜걸로 계산, 판정한다.
-	// ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ 진짜 부조리네 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
-	// 그럼 서버는 총구 시작은 3인칭 총구. 끝은 클라가 보는 화면 중심으로 계산.	
-	// 이야.. 이거 진짜 부조린뎈ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
-	// 그럼 GasShooter는 어캐함?? ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
-	// Socket
-	
 	
 	// Muzzle LineTrace
 	FHitResult MuzzleLaserHit;
@@ -371,7 +369,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 			UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
 			
 			AActor* HitActor = MuzzleLaserHit.GetActor();
-			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(MuzzleLaserHit.GetActor());
+			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(HitActor);
 			if (CharacterBase)
 			{
 				FPointDamageEvent DamageEvent(DamageToCause, MuzzleLaserHit, MuzzleLaserHit.ImpactNormal, nullptr);
@@ -1284,5 +1282,6 @@ void ACHGunRifle::PlayFireVFX(const FTransform& HitTransform, const FTransform& 
 		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
 	}		
 }
+
 
 
