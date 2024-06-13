@@ -36,9 +36,8 @@ void ACHCharacterNonPlayer::SetDead()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::SetDead();
-	ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
-	CHGameMode->LoseCondition();		// 죽으면 바로 호출
-	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+	
+	
 	
 	ACHAIControllerBase* CHAIController = Cast<ACHAIControllerBase>(GetController());
     if (CHAIController)
@@ -50,14 +49,18 @@ void ACHCharacterNonPlayer::SetDead()
 	GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda(
 		[&]() {
 			TArray<AActor*> AttachedActors;
-			GetAttachedActors(AttachedActors,false);
-			for (AActor*& AttachedActor : AttachedActors)
+			if(!AttachedActors.IsEmpty())
 			{
-				AttachedActor->Destroy();
-			}
+				GetAttachedActors(AttachedActors,false);
+				for (AActor*& AttachedActor : AttachedActors)
+				{
+					AttachedActor->Destroy();
+				}
+			}			
 			Destroy();		// 자동으로 EndPlay호출
 		}
 	), DeadEventDelayTime, false);
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
 float ACHCharacterNonPlayer::GetAIPatrolRadius()

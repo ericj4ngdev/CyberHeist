@@ -244,7 +244,7 @@ void ACHGunRPG::Fire()
 	FHitResult ScreenLaserHit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
+	// Params.AddIgnoredActor(GetOwner());
 	
 	FVector TraceStart;
 	FRotator Rotation;

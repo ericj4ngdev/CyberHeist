@@ -29,10 +29,10 @@ void ACHProjectileRocket::BeginPlay()
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::BeginPlay();
 	
-	if(!HasAuthority())
+	/*if(!HasAuthority())
     {
 		CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHProjectileRocket::OnHit);
-    }
+    }*/
 
 	SpawnTrailSystem();
 
@@ -77,13 +77,15 @@ void ACHProjectileRocket::OnHit(UPrimitiveComponent* OverlappedComponent, AActor
 		UE_LOG(LogTemp,Warning, TEXT("OtherComp = nullptr"));
 		return;
 	}
+
+	CH_LOG(LogCHNetwork, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
 	
 	/*UE_LOG(LogTemp, Warning, TEXT("FDamageEvent"));
 	UE_LOG(LogTemp, Warning, TEXT("OnHit"));
 	UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
 	UE_LOG(LogTemp, Warning, TEXT("OtherComp : %s"), *OtherComp->GetName());*/
 
-	CH_LOG(LogCHNetwork, Log, TEXT("OtherActor : %s"), *OtherActor->GetName())
+	// CH_LOG(LogCHNetwork, Log, TEXT("OtherActor : %s"), *OtherActor->GetName())
 	
 	if (OtherActor == GetOwner())
 	{

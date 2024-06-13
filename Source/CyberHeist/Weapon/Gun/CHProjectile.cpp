@@ -24,9 +24,11 @@ ACHProjectile::ACHProjectile()
 	SetRootComponent(SceneComponent);
 	
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
-	// CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
-	// ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	CollisionComp->SetupAttachment(SceneComponent);	
+
+	// ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ACHProjectile::Tick(float DeltaSeconds)
