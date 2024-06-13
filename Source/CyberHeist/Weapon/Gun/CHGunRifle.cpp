@@ -266,10 +266,24 @@ void ACHGunRifle::Fire()
 	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
 	FVector TraceEnd = TraceStart + Rotation.Vector() * MaxRange;
 	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
-	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
-	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
-	
-	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
+
+	if(OwningCharacter->HasAuthority())
+	{
+		DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);		
+	}
+	if(bScreenLaserSuccess)
+	{		
+		DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+	}
+	else
+	{
+		// 허공에 쏴서 맞는 게 없다면
+		CH_LOG(LogCHNetwork, Warning, TEXT("Sky"))
+		ScreenLaserHit.Location = TraceEnd;
+		DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+	}
+	// FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
+	FVector HitLocation = ScreenLaserHit.Location;
 	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
 
 	// 시작지점(총구)
@@ -342,16 +356,19 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 	CH_LOG(LogCHNetwork, Log, TEXT("MuzzleStart : %s"), *MuzzleStart.ToString())
 	
 	FVector MuzzleEnd;
-	MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;	
+	// MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;
+	MuzzleEnd = HitLocation;
 	CH_LOG(LogCHNetwork, Log, TEXT("MuzzleEnd : %s"), *MuzzleEnd.ToString())
 	
 	// 총구에서 레이저
-	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
-	// if(!PlayerCharacter->IsLocallyControlled() && !PlayerCharacter->HasAuthority())
+	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
+
+	MuzzleLaserHit.Location = HitLocation;
 	if(PlayerCharacter->HasAuthority())
 	{
+		// 그리는 건 서버에서만 그린다.... 
 		DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
-		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);			
+		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 20, FColor::Blue, false, 2);			
 	}
 
 	AController* OwnerController = OwnerPawn->GetController();		
@@ -366,7 +383,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 		if(OwningCharacter->HasAuthority())
 		{
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
-			UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
+			CH_LOG(LogCHNetwork, Warning, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
 			
 			AActor* HitActor = MuzzleLaserHit.GetActor();
 			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(HitActor);
@@ -382,7 +399,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 			}
 		}
 	}
-	UE_LOG(LogTemp, Log, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
+	CH_LOG(LogCHNetwork, Warning, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
 
 	// VFX
 	{

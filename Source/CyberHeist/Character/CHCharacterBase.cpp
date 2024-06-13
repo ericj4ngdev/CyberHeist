@@ -271,18 +271,18 @@ void ACHCharacterBase::SetInvincible(uint8 NewInvincible)
 
 void ACHCharacterBase::SetAiming(uint8 bNewAiming)
 {
-	CH_LOG(LogCHAI, Log, TEXT("Begin"))
+	// CH_LOG(LogCHAI, Log, TEXT("Begin"))
 	UCHCharacterMovementComponent* CHMovement = Cast<UCHCharacterMovementComponent>(GetCharacterMovement());
 	if(CHMovement)
 	{
 		bAiming = bNewAiming;
-		CH_LOG(LogCHAI, Log, TEXT("bAiming : %d"), bAiming)
+		// CH_LOG(LogCHAI, Log, TEXT("bAiming : %d"), bAiming)
 		CHMovement->SetAimingCommand(bAiming);
 	}	
 	ServerSetAiming(bAiming);
 	
 	OnCombat.Broadcast(bAiming);		// UI
-	CH_LOG(LogCHAI, Log, TEXT("End"))
+	// CH_LOG(LogCHAI, Log, TEXT("End"))
 }
 
 void ACHCharacterBase::SetTPAimingCloser(uint8 bNewTPAimingCloser)
