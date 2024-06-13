@@ -149,6 +149,10 @@ void ACHMinigun::Tick(float DeltaSeconds)
 
 void ACHMinigun::Equip()
 {
+	if(ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter))
+	{
+		if(CHPlayer->bIsCrouched) return;
+	}
 	Super::Equip();
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);

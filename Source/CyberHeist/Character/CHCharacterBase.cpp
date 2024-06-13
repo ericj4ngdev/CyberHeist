@@ -433,6 +433,17 @@ void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewWeapon, bool bEquipWe
 	// 즉, 이 함수는 서버에서만 실행된다. 
 	if (HasAuthority()) // 서버에서만 인벤토리를 수정
 	{
+		// 앉은 채로 미니건이면 추가는 되지만 장착X
+		if(bIsCrouched || bCovered)
+		{
+			if(NewWeapon->WeaponType == ECHWeaponType::MiniGun)
+			{
+				CH_LOG(LogCHNetwork,Log,TEXT("Cannot Equip minigun while crouched"))
+				Inventory.Weapons.Add(NewWeapon);
+				return;
+			}
+		}
+		
 		Inventory.Weapons.Add(NewWeapon);
 		// SetCurrentWeapon(NewWeapon, CurrentWeapon);		// 서버에서 호출이라 
 		MultiCastRPCEquipWeapon(NewWeapon, CurrentWeapon);		// 클라에게 SetCurrentWeapon + OnRep함(해제, 장착)
@@ -612,7 +623,6 @@ void ACHCharacterBase::NextWeapon()
 	
 	UE_LOG(LogTemp, Log, TEXT("NextWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
-	// UnEquipWeapon(CurrentWeapon);
 
 	int32 IndexOfNextWeapon = 0;
 	if(Inventory.Weapons.Num() == 1)
@@ -633,6 +643,14 @@ void ACHCharacterBase::NextWeapon()
 	}
 	else
 	{
+		if(bIsCrouched || bCovered)
+		{
+			if(Inventory.Weapons[IndexOfNextWeapon]->WeaponType == ECHWeaponType::MiniGun)
+			{
+				CH_LOG(LogCHNetwork,Log,TEXT("Cannot Equip minigun while crouched"))
+				return;	
+			}			
+		}
 		ServerRPCEquipWeapon(Inventory.Weapons[IndexOfNextWeapon], CurrentWeapon);
 		// SetCurrentWeapon(Inventory.Weapons[IndexOfNextWeapon], CurrentWeapon);
 	}
@@ -654,6 +672,14 @@ void ACHCharacterBase::PreviousWeapon()
 	}
 	else
 	{
+		if(bIsCrouched || bCovered)
+		{
+			if(Inventory.Weapons[IndexOfPrevWeapon]->WeaponType == ECHWeaponType::MiniGun)
+			{
+				CH_LOG(LogCHNetwork,Log,TEXT("Cannot Equip minigun while crouched"))
+				return;	
+			}			
+		}
 		ServerRPCEquipWeapon(Inventory.Weapons[IndexOfPrevWeapon], CurrentWeapon);
 		// SetCurrentWeapon(Inventory.Weapons[IndexOfPrevWeapon], CurrentWeapon);		
 	}	
