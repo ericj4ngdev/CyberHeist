@@ -39,12 +39,14 @@ void ACHEndPoint::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		if(CHPlayer && !CHPlayer->GetIsDead())
 		{
 			OverlappedPlayers++;
+			CH_LOG(LogCHNetwork, Warning, TEXT("OverlappedPlayers : %d"), OverlappedPlayers);
 		}
 		ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
 		if(CHGameMode && OverlappedPlayers == CHGameMode->MaxPlayers)
 		{
-			CHGameMode->WinCondition();		// 한번만 호출하면 되는데...
 			BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			CH_LOG(LogCHNetwork, Warning, TEXT("CHGameMode->MaxPlayers : %d"), CHGameMode->MaxPlayers);
+			CHGameMode->WinCondition();		// 한번만 호출하면 되는데...
 			// 플레이어 무적으로 만들기
 		}
 	}
