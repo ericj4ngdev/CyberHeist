@@ -132,6 +132,12 @@ protected:
 	void StartCrouch();
 	void StopCrouch();
 
+	UFUNCTION(Server, Unreliable, WithValidation)
+	void ServerStartCoverMotion(const FTransform& Destination);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastStartCoverMotion(const FTransform& Destination);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	FRotator LastCoveredRotation;
 	

@@ -796,24 +796,18 @@ void ACHCharacterPlayer::StartCover()
 			FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(HitLowCoverResult.ImpactNormal.Rotation(), FRotator(0.0f, 180.0f,0.0f));
 			LastCoveredRotation = TargetRotation;
 			ServerSetCoveredRotation(LastCoveredRotation);
-			// 여기서 LastCoveredRotation을 갱신한다.
-			// 그리고 LocalCoveredMove에서 움직일 때, LastCoveredRotation를 ServerSetActorRotation((-HitResult.ImpactNormal).Rotation()); 로 갱신
-			// UE_LOG(LogTemp, Log, TEXT("Target Location: %s"), *TargetLocation.ToString());
 
 			float Distance = FVector::Distance(TargetLocation,GetActorLocation());
 			UE_LOG(LogTemp, Log, TEXT("Distance : %f"), Distance);
-			
+
+			// 여기만 동기화.
 			if(Distance > 70.0f)
 			{
-				FMotionWarpingTarget Target;
-				Target.Name = FName("StartTakeCover");				
-				Target.Location = TargetLocation;
-				Target.Rotation = TargetRotation;
+				FTransform TargetTransform;
+				TargetTransform.SetLocation(TargetLocation);
+				TargetTransform.SetRotation(TargetRotation.Quaternion());
+				ServerStartCoverMotion(TargetTransform);			
 				
-				MotionWarpComponent->AddOrUpdateWarpTarget(Target);
-				
-				CHAnimInstance->StopAllMontages(0.0f);
-				CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
 			}/*
 			else
 			{
@@ -858,7 +852,12 @@ void ACHCharacterPlayer::StartCover()
 			// Play Cover Anim Montage
 			if(Distance > 70.0f)
 			{
-				FMotionWarpingTarget Target;
+				FTransform TargetTransform;
+				TargetTransform.SetLocation(TargetLocation);
+				TargetTransform.SetRotation(TargetRotation.Quaternion());
+				ServerStartCoverMotion(TargetTransform);
+				
+				/*FMotionWarpingTarget Target;
 				Target.Name = FName("StartTakeCover");				
 				Target.Location = TargetLocation;
 				Target.Rotation = TargetRotation;
@@ -866,7 +865,7 @@ void ACHCharacterPlayer::StartCover()
 				MotionWarpComponent->AddOrUpdateWarpTarget(Target);
 				
 				CHAnimInstance->StopAllMontages(0.0f);
-				CHAnimInstance->Montage_Play(TakeCoverMontage, 1);									
+				CHAnimInstance->Montage_Play(TakeCoverMontage, 1);*/									
 			}/*
 			else
 			{
@@ -982,6 +981,30 @@ void ACHCharacterPlayer::StopCrouch()
 		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) return;
 	}
 	UnCrouch();
+}
+
+
+void ACHCharacterPlayer::MulticastStartCoverMotion_Implementation(const FTransform& Destination)
+{
+	FMotionWarpingTarget Target;
+	Target.Name = FName("StartTakeCover");				
+	Target.Location = Destination.GetLocation();
+	Target.Rotation = Destination.GetRotation().Rotator();
+				
+	MotionWarpComponent->AddOrUpdateWarpTarget(Target);
+				
+	CHAnimInstance->StopAllMontages(0.0f);
+	CHAnimInstance->Montage_Play(TakeCoverMontage, 1);
+}
+
+void ACHCharacterPlayer::ServerStartCoverMotion_Implementation(const FTransform& Destination)
+{
+	MulticastStartCoverMotion(Destination);
+}
+
+bool ACHCharacterPlayer::ServerStartCoverMotion_Validate(const FTransform& Destination)
+{
+	return true;
 }
 
 void ACHCharacterPlayer::ServerSetCoveredRotation_Implementation(FRotator NewCoveredRotation)

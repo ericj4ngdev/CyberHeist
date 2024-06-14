@@ -334,10 +334,17 @@ public:
 	virtual void StopPrecisionAim();
 
 	virtual void StayPrecisionAim();
-	virtual void Reload();
 	virtual void SetupWeaponInputComponent();
 	virtual void SetOwningCharacter(ACHCharacterBase* InOwningCharacter);
 	virtual void StopParticleSystem();
+	virtual void Reload();
+	virtual void LocalReload();
+
+	UFUNCTION(Server, Unreliable, WithValidation)
+	void ServerReload();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastReload();
 
 	// state
 protected:

@@ -406,6 +406,28 @@ void ACHGunBase::StayPrecisionAim()
 
 void ACHGunBase::Reload()
 {
+	ServerReload();
+}
+
+void ACHGunBase::LocalReload()
+{
+}
+
+void ACHGunBase::MulticastReload_Implementation()
+{
+	LocalReload();
+	// 몽타주
+}
+
+void ACHGunBase::ServerReload_Implementation()
+{
+	MulticastReload();  // 변수들은 문제 X, 몽타주는?
+	// LocalReload();
+}
+
+bool ACHGunBase::ServerReload_Validate()
+{
+	return true;
 }
 
 void ACHGunBase::SetupWeaponInputComponent()

@@ -39,6 +39,7 @@ public:
 	virtual void StopPrecisionAim() override;
 	virtual void StayPrecisionAim() override;
 	virtual void Reload() override;
+	virtual void LocalReload() override;
 	virtual void SetupWeaponInputComponent() override;
 
 	virtual void SetWeaponMeshVisibility(uint8 bVisible) override;

@@ -1092,7 +1092,14 @@ void ACHGunRifle::StayPrecisionAim()
 
 void ACHGunRifle::Reload()
 {
+	LocalReload();
 	Super::Reload();
+	
+}
+
+void ACHGunRifle::LocalReload()
+{
+	Super::LocalReload();
 	if(bReloading) return;
 	if(bInfiniteAmmo) return;
 	// 소유한 총알 = 0
@@ -1111,30 +1118,30 @@ void ACHGunRifle::Reload()
 
 	// Reload
 	bReloading = true;
-	
-	if(ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter))
+
+	if(!OwningCharacter->HasAuthority())
 	{
-		// 조준 중이라면 해제
-		if(PlayerCharacter->IsInFirstPersonPerspective())
+		if(ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter))
 		{
-			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::First);
-		}
-		else
-		{
-			// 엄폐는 유지
-			if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+			// 조준 중이라면 해제
+			if(PlayerCharacter->IsInFirstPersonPerspective())
 			{
-				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);			
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::First);
 			}
 			else
 			{
-				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::Third);			
+				// 엄폐는 유지
+				if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
+				{
+					PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);			
+				}
+				else
+				{
+					PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::Third);			
+				}
 			}
-		}
+		}	
 	}
-	
-	
-	// if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 	
 	// 총 재장전 Animation Montage
 	if(ReloadWeaponMontage)
