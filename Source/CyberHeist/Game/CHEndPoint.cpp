@@ -49,9 +49,17 @@ void ACHEndPoint::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 			CHGameMode->WinCondition();		// 한번만 호출하면 되는데...
 			// 플레이어 무적으로 만들기
 		}
-	}
-	
+	}	
 }
+
+
+
+
+
+
+
+
+
 
 void ACHEndPoint::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
