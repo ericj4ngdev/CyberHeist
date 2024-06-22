@@ -427,6 +427,7 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 
 	
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	// UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), CurrentCharacterControlType)
 }
 

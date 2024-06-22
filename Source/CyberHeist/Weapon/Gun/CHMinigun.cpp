@@ -389,10 +389,13 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FTransform& MuzzleT
 	FVector MuzzleStart = MuzzleTransform.GetLocation();
 	FVector MuzzleEnd;
 	MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;	
-	
-	
+		
 	// 총구에서 레이저
-	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
+	bool bMuzzleHit = GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
+
+	// 최종 맞은 지점
+	MuzzleLaserHit.Location = bMuzzleHit ? MuzzleLaserHit.Location : HitLocation;
+	
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if(PlayerCharacter->HasAuthority())
 	{

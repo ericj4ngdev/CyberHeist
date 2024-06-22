@@ -356,14 +356,14 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 	CH_LOG(LogCHNetwork, Log, TEXT("MuzzleStart : %s"), *MuzzleStart.ToString())
 	
 	FVector MuzzleEnd;
-	// MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;
-	MuzzleEnd = HitLocation;
+	MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;	
 	CH_LOG(LogCHNetwork, Log, TEXT("MuzzleEnd : %s"), *MuzzleEnd.ToString())
 	
 	// 총구에서 레이저
-	GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
+	bool bMuzzleHit = GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
 
-	MuzzleLaserHit.Location = HitLocation;
+	// 최종 맞은 지점
+	MuzzleLaserHit.Location = bMuzzleHit ? MuzzleLaserHit.Location : HitLocation;
 	if(PlayerCharacter->HasAuthority())
 	{
 		// 그리는 건 서버에서만 그린다.... 
