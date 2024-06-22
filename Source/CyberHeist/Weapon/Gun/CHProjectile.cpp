@@ -103,17 +103,17 @@ void ACHProjectile::ExplodeDamage()
 		if (FiringController)
 		{
 			UGameplayStatics::ApplyRadialDamageWithFalloff(
-				this, // World context object
-				ExplosionDamage, // BaseDamage
-				MinimumDamage, // MinimumDamage
-				GetActorLocation(), // Origin
-				DamageInnerRadius, // DamageInnerRadius
-				DamageOuterRadius, // DamageOuterRadius
-				DamageFalloff, // DamageFalloff
-				UDamageType::StaticClass(), // DamageTypeClass
-				TArray<AActor*>(), // IgnoreActors
-				this, // DamageCauser
-				FiringController // InstigatorController
+				this,							// World context object
+				ExplosionDamage,				// BaseDamage
+				MinimumDamage,					// MinimumDamage
+				GetActorLocation(),				// Origin
+				DamageInnerRadius,				// DamageInnerRadius
+				DamageOuterRadius,				// DamageOuterRadius
+				DamageFalloff,					// DamageFalloff
+				UDamageType::StaticClass(), 	// DamageTypeClass
+				TArray<AActor*>(),				// IgnoreActors
+				this,							// DamageCauser
+				FiringController				// InstigatorController
 			);
 		}
 	}

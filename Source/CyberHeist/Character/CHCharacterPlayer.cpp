@@ -464,24 +464,6 @@ void ACHCharacterPlayer::SetMappingContextPriority(const UInputMappingContext* M
 	// Change IMC 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
-
-		/*UInputMappingContext* PrevMappingContext = MappingContext;
-		UInputMappingContext* NewMappingContext = MappingContext;
-		/*if(PrevMappingContext->GetName() != NewMappingContext->GetName())
-		{#1#
-		if (PrevMappingContext)
-		{
-			Subsystem->RemoveMappingContext(PrevMappingContext);			
-		}
-		
-		if (NewMappingContext)
-		{
-			Subsystem->AddMappingContext(NewMappingContext, 1);
-			
-		}
-		UE_LOG(LogTemp, Log, TEXT("Changed %s to %s"), *PrevMappingContext->GetName(), *NewMappingContext->GetName());*/
-		// ---------------------------------------------------------
-		
 		// 없는 IMC를 제거할 수는 없으므로 캐릭터가 IMC가지고 있는지 체크하기  
 		if(Subsystem->HasMappingContext(MappingContext))
 		{
@@ -984,7 +966,6 @@ void ACHCharacterPlayer::StopCrouch()
 	UnCrouch();
 }
 
-
 void ACHCharacterPlayer::MulticastStartCoverMotion_Implementation(const FTransform& Destination)
 {
 	FMotionWarpingTarget Target;
@@ -1126,12 +1107,6 @@ void ACHCharacterPlayer::TiltRight()
 		}
 		TiltingRightTimeline.PlayFromStart();
 	}
-
-	// 3인칭 몸체 이동
-	// 애니메이션도 타임라인으로 어떻게 안되나??
-	// TiltAngle		
-		
-	
 }
 
 void ACHCharacterPlayer::TiltRightRelease()

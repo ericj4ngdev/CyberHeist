@@ -99,7 +99,66 @@ void ACHGunRifle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	
+	/*if(OwningCharacter)
+	{
+		if(ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter))
+		{
+			// if(CHPlayer == nullptr) return;
+			// 클라만 그리기
+			if(OwningCharacter->HasAuthority()) return;
+		
+			/*if (MuzzleCollision1P)
+			{
+				// 캡슐의 위치와 방향 설정
+				FVector CapsuleLocation = MuzzleCollision1P->GetComponentLocation();
+				FRotator CapsuleRotation = MuzzleCollision1P->GetComponentRotation();
+
+				// 캡슐의 반지름과 높이 설정
+				float CapsuleRadius = MuzzleCollision1P->GetScaledCapsuleRadius();
+				float CapsuleHalfHeight = MuzzleCollision1P->GetScaledCapsuleHalfHeight();
+
+				// Trace 시작점과 끝점 설정
+				FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
+				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
+		
+				FHitResult HitResult;
+				FCollisionQueryParams Params(FName(TEXT("Cover")), true, this);
+				Params.AddIgnoredActor(this);
+				Params.AddIgnoredActor(GetOwner());
+
+				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
+				
+				FColor DrawColor = HitDetected ? FColor::Green : FColor::Blue;
+				// Debug 캡슐 그리기
+				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+			}#1#
+			if (MuzzleCollision3P)
+			{
+				// 캡슐의 위치와 방향 설정
+				FVector CapsuleLocation = MuzzleCollision3P->GetComponentLocation();
+				FRotator CapsuleRotation = MuzzleCollision3P->GetComponentRotation();
+
+				// 캡슐의 반지름과 높이 설정
+				float CapsuleRadius = MuzzleCollision3P->GetScaledCapsuleRadius();
+				float CapsuleHalfHeight = MuzzleCollision3P->GetScaledCapsuleHalfHeight();
+
+				// Trace 시작점과 끝점 설정
+				FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
+				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
+		
+				FHitResult HitResult;
+				FCollisionQueryParams Params(FName(TEXT("Cover")), true, this);
+				Params.AddIgnoredActor(this);
+				Params.AddIgnoredActor(GetOwner());
+				
+				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
+				
+				FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+				// Debug 캡슐 그리기
+				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+			}
+		}
+	}*/
 }
 
 void ACHGunRifle::Equip()
@@ -271,6 +330,7 @@ void ACHGunRifle::Fire()
 	{
 		DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);		
 	}
+	
 	if(bScreenLaserSuccess)
 	{		
 		DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
@@ -282,8 +342,9 @@ void ACHGunRifle::Fire()
 		ScreenLaserHit.Location = TraceEnd;
 		DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
 	}
-	// FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
-	FVector HitLocation = ScreenLaserHit.Location;
+	
+	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
+	// FVector HitLocation = ScreenLaserHit.Location;
 	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
 
 	// 시작지점(총구)
@@ -1306,6 +1367,3 @@ void ACHGunRifle::PlayFireVFX(const FTransform& HitTransform, const FTransform& 
 		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
 	}		
 }
-
-
-
