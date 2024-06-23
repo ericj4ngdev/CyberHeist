@@ -104,7 +104,6 @@ void ACHGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewP
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))	
 }
 
-
 void ACHGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("============================================================"));

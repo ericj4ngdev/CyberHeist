@@ -113,7 +113,7 @@ UAnimMontage* ACHGunBase::GetEquip3PMontage() const
 void ACHGunBase::OnNearWall(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if(OwningCharacter && !OwningCharacter->HasAuthority() && OwningCharacter->IsLocallyControlled())
+	if((OwningCharacter && !OwningCharacter->HasAuthority() && OwningCharacter->IsLocallyControlled()) || GetNetMode() == ENetMode::NM_Standalone)
 	{		
 		// 리플리로 총 내리기
 		// 변수 하나 동기화해서 총 못쏘게 하기
@@ -147,7 +147,7 @@ void ACHGunBase::OnFarFromWall(UPrimitiveComponent* OverlappedComponent, AActor*
 	{
 		// 1인칭 머즐..만 작동해야 하는데... 어캐 하지.. 이벤트를 풀었다가 할수는 없고... 
 	}*/
-	if(OwningCharacter && !OwningCharacter->HasAuthority() && OwningCharacter->IsLocallyControlled())
+	if(OwningCharacter && !OwningCharacter->HasAuthority() && OwningCharacter->IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)
 	{	
 		if(OtherActor == OwningCharacter || OtherActor == this)
 		{
@@ -365,7 +365,6 @@ void ACHGunBase::MulticastCancelPullTrigger_Implementation()
 {
 	OnCancelPullTrigger();
 }
-
 
 void ACHGunBase::SetWeaponMeshVisibility(uint8 bVisible)
 {

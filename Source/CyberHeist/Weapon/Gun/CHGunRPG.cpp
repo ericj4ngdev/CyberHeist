@@ -98,7 +98,7 @@ void ACHGunRPG::Equip()
 	{
 		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
-		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)
 		{
 			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 			{
@@ -132,7 +132,7 @@ void ACHGunRPG::Equip()
 		ScopeMesh3P->bCastHiddenShadow = true;
 		MissileMesh3P->CastShadow = true;
 		MissileMesh3P->bCastHiddenShadow = true;
-		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)
 		{
 			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 			{
@@ -494,9 +494,11 @@ void ACHGunRPG::StartAim()
 		if(!PlayerCharacter->GetCovered())
 		{
 			UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
-		}		
+		}
+		
 		PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 		PlayerCharacter->SetCoveredAttackMotion(true);
+		if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(true);
 	}
 
 	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)

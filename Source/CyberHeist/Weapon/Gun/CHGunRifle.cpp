@@ -180,7 +180,7 @@ void ACHGunRifle::Equip()
 	{
 		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		// 여기 npc가 총 들떄, 분명 null이라 에러 뜰텐데 
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
-		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)
 		{
 			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 			{
@@ -204,7 +204,7 @@ void ACHGunRifle::Equip()
 		
 		WeaponMesh3P->CastShadow = true;
 		WeaponMesh3P->bCastHiddenShadow = true;
-		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)
 		{
 			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 			{
@@ -989,10 +989,11 @@ void ACHGunRifle::StartAim()
 			if(!PlayerCharacter->GetCovered())
 			{
 				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
-			}		
+			}
+			
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 			PlayerCharacter->SetCoveredAttackMotion(true);
-			PlayerCharacter->ServerSetCoveredAttackMotion(true);
+			if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(true);
 		}
 
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)

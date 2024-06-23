@@ -168,7 +168,7 @@ void ACHMinigun::Equip()
 		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
 
-		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)
 		{
 			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 			{
@@ -195,7 +195,7 @@ void ACHMinigun::Equip()
 		WeaponMesh3P->bCastHiddenShadow = true;
 		CannonMesh3P->CastShadow = true;
 		CannonMesh3P->bCastHiddenShadow = true;
-		if(!HasAuthority() && OwningCharacter->IsLocallyControlled())
+		if(!HasAuthority() && OwningCharacter->IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)
 		{
 			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 			{

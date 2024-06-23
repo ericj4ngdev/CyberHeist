@@ -174,6 +174,10 @@ void ACHCharacterPlayer::BeginPlay()
 	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
 	// SetCharacterControl(CurrentCharacterControlType);
 
+	if(GetNetMode() == ENetMode::NM_Standalone)
+	{
+		SetPerspective(bIsFirstPersonPerspective);
+	}
 	// 클라만
 	if (!HasAuthority())
 	{
@@ -359,7 +363,7 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	// 클라만 구분하기
 	// 서버는 CCD를 못바꾸게 막는다는 표현이 맞겠다.	
 	
-	if(IsLocallyControlled() && !HasAuthority())
+	if((IsLocallyControlled() && !HasAuthority()) || GetNetMode() == ENetMode::NM_Standalone)
 	{
 		// 클라만 CCD 변경
 		SetCharacterControlData(NewCharacterControl);
@@ -388,7 +392,7 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	// if(!HasAuthority())
 	// if(!IsLocallyControlled())
 	// if(!IsLocallyControlled())
-	if(!IsLocallyControlled() && !HasAuthority())
+	if((!IsLocallyControlled() && !HasAuthority()))
 	{
 		CH_LOG(LogCHNetwork, Log, TEXT("Other Client"))
 		return;
@@ -425,8 +429,6 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 		CH_LOG(LogCHNetwork, Log, TEXT("No Controller"))
 	}
 
-	
-	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	// UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), CurrentCharacterControlType)
 }
@@ -1174,7 +1176,8 @@ void ACHCharacterPlayer::TiltLeftRelease()
 void ACHCharacterPlayer::PressV()
 {
 	TogglePerspective();
-	ServerRPC_SetPerspective(bIsFirstPersonPerspective);
+	// 로컬 모드일 땐 두 번 호출 X
+	if(!GetNetMode() == ENetMode::NM_Standalone) ServerRPC_SetPerspective(bIsFirstPersonPerspective);
 }
 
 void ACHCharacterPlayer::TogglePerspective()
@@ -1191,22 +1194,12 @@ void ACHCharacterPlayer::TogglePerspective()
 void ACHCharacterPlayer::ServerRPC_SetPerspective_Implementation(uint8 Is1PPerspective)
 {
 	TogglePerspective();
-	// bIsFirstPersonPerspective = Is1PPerspective;
-	// OnRep_FirstPersonPerspective();
-	// MulticastRPC_SetPerspective(bIsFirstPersonPerspective);	
 }
 
 bool ACHCharacterPlayer::ServerRPC_SetPerspective_Validate(uint8 Is1PPerspective)
 {
 	return true;
 }
-
-/*void ACHCharacterPlayer::MulticastRPC_SetPerspective_Implementation(bool Is1PPerspective)
-{
-	// 클라 && 서버 X => 클라 본인 제외 
-	// if(IsLocallyControlled() && !HasAuthority()) return;
-	SetPerspective(Is1PPerspective);
-}*/
 
 void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 {
@@ -1222,8 +1215,9 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 		bCovered = false;
 		
 		// 이하 동기화 X
-		if(IsLocallyControlled())
+		if(IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)		
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Changed Perspective"))
 			ThirdPersonCamera->Deactivate();
 			GetMesh()->SetVisibility(false, true);
 			GetMesh()->CastShadow = true;
