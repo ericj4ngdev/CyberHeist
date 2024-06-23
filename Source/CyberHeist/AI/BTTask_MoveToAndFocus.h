@@ -3,22 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
-#include "BTT_ClearFocus.generated.h"
+#include "BehaviorTree/Tasks/BTTask_MoveTo.h"
+#include "BTTask_MoveToAndFocus.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CYBERHEIST_API UBTT_ClearFocus : public UBTTaskNode
+class CYBERHEIST_API UBTTask_MoveToAndFocus : public UBTTask_MoveTo
 {
 	GENERATED_BODY()
 
 public:
-	UBTT_ClearFocus();
+	UBTTask_MoveToAndFocus();
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FBlackboardKeySelector FocusTarget;
+	
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 };

@@ -6,7 +6,6 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BTFunctionLibrary.h"
 #include "Interface/CHCharacterAIInterface.h"
-// #include ""
 
 UBTT_Focus::UBTT_Focus()
 {
@@ -39,23 +38,16 @@ EBTNodeResult::Type UBTT_Focus::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 	if(FocusActor)
 	{
 		OwnerController->SetFocus(FocusActor);
-		// 여기서 로테이션 바꾸기
 		FRotator Lookat = (FocusActor->GetActorLocation() - ControllingPawn->GetActorLocation()).Rotation(); 
 		OwnerController->GetPawn()->SetActorRotation(Lookat);
-		FVector End = ControllingPawn->GetActorLocation() + (FocusActor->GetActorLocation() - ControllingPawn->GetActorLocation()) * 20; 
-		DrawDebugDirectionalArrow(GetWorld(), ControllingPawn->GetActorLocation(), End,5.0f, FColor::Yellow, false, 1, 0, 1.0f);
+		// FVector End = ControllingPawn->GetActorLocation() + (FocusActor->GetActorLocation() - ControllingPawn->GetActorLocation()) * 20; 
+		// DrawDebugDirectionalArrow(GetWorld(), ControllingPawn->GetActorLocation(), End,5.0f, FColor::Yellow, false, 1, 0, 1.0f);
 		UE_LOG(LogTemp, Log, TEXT("FocusActor : %s "), *FocusActor->GetActorLocation().ToString());
 	}
 	else
-	{		
-		FVector FocusLocation = BlackboardComp->GetValueAsVector(FocusTarget.SelectedKeyName);
+	{
 		UE_LOG(LogTemp, Log, TEXT("FocusActor is null"))
-			// UBTFunctionLibrary::GetBlackboardValueAsVector(this,FocusTarget);
-		if(FAISystem::IsValidLocation(FocusLocation))
-		{
-			OwnerController->SetFocalPoint(FocusLocation);			
-		}
 	}
-	
+	UE_LOG(LogTemp, Log, TEXT("UBTT_Focus::ExecuteTask"))
 	return EBTNodeResult::Succeeded;	
 }

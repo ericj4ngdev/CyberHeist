@@ -649,6 +649,11 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 			
 		FTransform SocketTransform;
 		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
+		auto Temp = GetWeaponMesh3P();
+		if(Temp->ComponentHasTag(FName("TestTag")))
+		{
+			UE_LOG(LogTemp, Log, TEXT("Tag"))
+		}
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
 		if(MuzzleFlashSocket == nullptr) return; 
 				
@@ -663,7 +668,9 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		if (bSuccess)
 		{
 			// FVector ShotDirection = -Rotation.Vector();
-			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
+			DrawDebugPoint(GetWorld(), TraceStart, 10, FColor::Red, true);			
+			// DrawDebugDirectionalArrow(GetWorld(), ControllingPawn->GetActorLocation(), End,5.0f, FColor::Yellow, false, 1, 0, 1.0f);
+			DrawDebugDirectionalArrow(GetWorld(), TraceStart, MuzzleLaserHit.Location,5.0f, FColor::Red, false, 1, 0, 1.0f);
 			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			

@@ -3,6 +3,7 @@
 
 #include "AI/BTT_ClearFocus.h"
 #include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Interface/CHCharacterAIInterface.h"
 
 UBTT_ClearFocus::UBTT_ClearFocus()
@@ -27,7 +28,8 @@ EBTNodeResult::Type UBTT_ClearFocus::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	}
 
 	AAIController* OwnerController = OwnerComp.GetAIOwner();
-	OwnerController->ClearFocus(EAIFocusPriority::Gameplay);
+	OwnerComp.GetBlackboardComponent()->SetValueAsObject(FocusTarget.SelectedKeyName, nullptr);	
+	// OwnerController->ClearFocus(EAIFocusPriority::Gameplay);
 
 	return EBTNodeResult::Succeeded;
 }
