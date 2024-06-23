@@ -145,6 +145,7 @@ ACHCharacterPlayer::ACHCharacterPlayer(const FObjectInitializer& ObjectInitializ
 	CurrentCharacterControlType = ECharacterControlType::Third;
 	bIsFirstPersonPerspective = false;
 
+	bFreeLook = false;
 	bTiltReleaseLeft = false; 
 	bTiltReleaseRight = false;
 	// 캐릭터라서 이렇게 초기화
@@ -567,8 +568,15 @@ void ACHCharacterPlayer::ThirdMove(const FInputActionValue& Value)
 	}
 	else
 	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		// 컨트롤러 회전
+		const FRotator ControlRotation = Controller->GetControlRotation();
+		// 액터 회전
+		const FRotator CapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
+		
+		const double SelectedYaw = UKismetMathLibrary::SelectFloat(CapsuleRotation.Yaw, ControlRotation.Yaw, bFreeLook);
+		const FRotator YawRotation(0, SelectedYaw, 0);
+	
+		
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);	
 

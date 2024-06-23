@@ -177,6 +177,8 @@ protected:
 
 	uint8 bTiltReleaseLeft : 1;
 	uint8 bTiltReleaseRight : 1;
+
+	uint8 bFreeLook : 1;
 	
 	// Toggles between perspectives
 	void TogglePerspective();

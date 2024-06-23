@@ -39,6 +39,11 @@ EBTNodeResult::Type UBTT_Focus::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 	if(FocusActor)
 	{
 		OwnerController->SetFocus(FocusActor);
+		// 여기서 로테이션 바꾸기
+		FRotator Lookat = (FocusActor->GetActorLocation() - ControllingPawn->GetActorLocation()).Rotation(); 
+		OwnerController->GetPawn()->SetActorRotation(Lookat);
+		FVector End = ControllingPawn->GetActorLocation() + (FocusActor->GetActorLocation() - ControllingPawn->GetActorLocation()) * 20; 
+		DrawDebugDirectionalArrow(GetWorld(), ControllingPawn->GetActorLocation(), End,5.0f, FColor::Yellow, true, -1, 0, 5.0f);
 		UE_LOG(LogTemp, Log, TEXT("FocusActor : %s "), *FocusActor->GetActorLocation().ToString());
 	}
 	else
