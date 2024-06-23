@@ -631,7 +631,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		
 		FVector Location;
 		FRotator Rotation;
-		OwnerController->GetPlayerViewPoint(Location, Rotation);
+		// OwnerController->GetPlayerViewPoint(Location, Rotation);
 		
 		AAIController* AIController = Cast<AAIController>(OwnerPawn->GetController());
 		if(AIController)
@@ -974,6 +974,7 @@ void ACHGunRifle::StartAim()
 	}
 	bHoldGun = false;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
+	// ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OwningCharacter);
 
 	if(PlayerCharacter)
 	{

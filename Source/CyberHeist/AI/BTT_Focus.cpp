@@ -43,13 +43,13 @@ EBTNodeResult::Type UBTT_Focus::ExecuteTask(UBehaviorTreeComponent& OwnerComp, u
 		FRotator Lookat = (FocusActor->GetActorLocation() - ControllingPawn->GetActorLocation()).Rotation(); 
 		OwnerController->GetPawn()->SetActorRotation(Lookat);
 		FVector End = ControllingPawn->GetActorLocation() + (FocusActor->GetActorLocation() - ControllingPawn->GetActorLocation()) * 20; 
-		DrawDebugDirectionalArrow(GetWorld(), ControllingPawn->GetActorLocation(), End,5.0f, FColor::Yellow, true, -1, 0, 5.0f);
+		DrawDebugDirectionalArrow(GetWorld(), ControllingPawn->GetActorLocation(), End,5.0f, FColor::Yellow, false, 1, 0, 1.0f);
 		UE_LOG(LogTemp, Log, TEXT("FocusActor : %s "), *FocusActor->GetActorLocation().ToString());
 	}
 	else
 	{		
-		FVector FocusLocation =BlackboardComp->GetValueAsVector(FocusTarget.SelectedKeyName);
-		
+		FVector FocusLocation = BlackboardComp->GetValueAsVector(FocusTarget.SelectedKeyName);
+		UE_LOG(LogTemp, Log, TEXT("FocusActor is null"))
 			// UBTFunctionLibrary::GetBlackboardValueAsVector(this,FocusTarget);
 		if(FAISystem::IsValidLocation(FocusLocation))
 		{

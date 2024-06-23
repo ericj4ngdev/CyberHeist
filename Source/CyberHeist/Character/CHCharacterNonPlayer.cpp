@@ -20,7 +20,7 @@ ACHCharacterNonPlayer::ACHCharacterNonPlayer(const FObjectInitializer& ObjectIni
 
 	AIControllerClass = ACHAIControllerBase::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
+	CurrentCharacterControlType = ECharacterControlType::ThirdAim;
 	// GetCharacterMovement()->bCanCrouch = true;
 }
 

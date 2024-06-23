@@ -338,31 +338,17 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	
 	// 다른 클라는 PlayerController가 없기 때문
 	// 서버, 클라 본인 (다른 클라는 안됨)
-	// if(HasAuthority() || IsLocallyControlled())
 	UCHCharacterControlData* NewCharacterControl = CharacterControlManager[NewCharacterControlType];
 	UCHCharacterControlData* PrevCharacterControl = CharacterControlManager[CurrentCharacterControlType];
 
-	// when player take covered in Fist personview and uncovered, new = Third exception
 	if(PrevCharacterControl == CharacterControlManager[ECharacterControlType::First] && bCovered)
 	{
 		NewCharacterControl = CharacterControlManager[ECharacterControlType::First];
 	}
 	check(NewCharacterControl);
-
-	// 클라만 바뀌게 하기
-	// 시작이 3인칭
-
-	// 클라가 3->1일 떄, 서버는 SetCharacterControlData 안하고 두 가지 속성 켜주기
-	// 클라 본인은 SetCharacterControlData하기
-
-	// 클라가 1->3일 때, 서버는 두가지 속성 꺼주기
-	// 클라 본인은 SetCharacterControlData하기
-
-	// 서버는 계속 3인칭이라 이걸로 구분 X
-	// 클라만 구분하기
-	// 서버는 CCD를 못바꾸게 막는다는 표현이 맞겠다.	
 	
 	if((IsLocallyControlled() && !HasAuthority()) || GetNetMode() == ENetMode::NM_Standalone)
 	{
@@ -389,15 +375,12 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 		}
 	}
 	
-
-	// if(!HasAuthority())
-	// if(!IsLocallyControlled())
-	// if(!IsLocallyControlled())
 	if((!IsLocallyControlled() && !HasAuthority()))
 	{
 		CH_LOG(LogCHNetwork, Log, TEXT("Other Client"))
 		return;
 	}
+	
 	// ensure(GetController());
 	if(GetOwner())
 	{
