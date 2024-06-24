@@ -559,7 +559,7 @@ void ACHMinigun::PullTriggerByAI(AActor* AttackTarget)
 		Reload();
 		return;
 	}	
-	FireByAI(AttackTarget);
+	// FireByAI(AttackTarget);
 	FTimerDelegate TimerCallback = FTimerDelegate::CreateUObject(this, &ACHMinigun::AutoFireByAI, AttackTarget);
 	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, TimerCallback, FireInterval, true);		
 }
@@ -692,7 +692,7 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 			return;
 		}
 		
-		FVector Location;
+		/*FVector Location;
 		FRotator Rotation;
 		OwnerController->GetPlayerViewPoint(Location, Rotation);
 		
@@ -702,7 +702,7 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 			// Location, Rotation을 총구로 설정하기
 			Rotation = GetOwner()->GetActorRotation();
 			Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
-		}
+		}*/
 			
 		// LineTrace
 		FHitResult MuzzleLaserHit;
@@ -722,10 +722,10 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 		//FVector HitTarget = Hit.ImpactPoint;
 		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
 		bool bSuccess = GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, TraceStart, End, ECollisionChannel::ECC_GameTraceChannel4, Params);
-		UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(MuzzleLaserHit.GetActor()));
 	
 		if (bSuccess)
 		{
+			UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(MuzzleLaserHit.GetActor()));
 			// FVector ShotDirection = -Rotation.Vector();
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
 			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);

@@ -37,10 +37,15 @@ void ACHSpawnTriggerArea::BeginPlay()
 
 void ACHSpawnTriggerArea::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	for (ACHAIControllerBase* Element : EnemyControllers)
+	if(HasAuthority())
 	{
-		Element->RunAI();
+	CH_LOG(LogCHNetwork, Warning, TEXT("Begin"));
+		BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		for (ACHAIControllerBase* Element : EnemyControllers)
+		{
+			Element->RunAI();
+		}
+	CH_LOG(LogCHNetwork, Warning, TEXT("End"));
 	}
 }
 

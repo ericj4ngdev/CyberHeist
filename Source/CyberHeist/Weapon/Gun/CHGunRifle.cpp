@@ -445,6 +445,7 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 		{
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			CH_LOG(LogCHNetwork, Warning, TEXT("MuzzleLaserHit : %s "), *GetNameSafe(MuzzleLaserHit.GetActor()))
+			CH_LOG(LogCHNetwork, Warning, TEXT("BoneName : %s "), *MuzzleLaserHit.BoneName.ToString())
 			
 			AActor* HitActor = MuzzleLaserHit.GetActor();
 			ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(HitActor);
@@ -629,7 +630,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 			return;
 		}
 		
-		FVector Location;
+		/*FVector Location;
 		FRotator Rotation;
 		// OwnerController->GetPlayerViewPoint(Location, Rotation);
 		
@@ -639,7 +640,7 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 			// Location, Rotation을 총구로 설정하기
 			Rotation = GetOwner()->GetActorRotation();
 			Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
-		}
+		}*/
 			
 		// LineTrace
 		FHitResult MuzzleLaserHit;
@@ -648,17 +649,11 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		Params.AddIgnoredActor(GetOwner());
 			
 		FTransform SocketTransform;
-		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");
-		auto Temp = GetWeaponMesh3P();
-		if(Temp->ComponentHasTag(FName("TestTag")))
-		{
-			UE_LOG(LogTemp, Log, TEXT("Tag"))
-		}
+		const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh3P()->GetSocketByName("MuzzleFlash");		
 		SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh3P());
 		if(MuzzleFlashSocket == nullptr) return; 
 				
-		FVector TraceStart = SocketTransform.GetLocation();
-		//FVector End = Location + Rotation.Vector() * MaxRange;
+		FVector TraceStart = SocketTransform.GetLocation();		
 		FVector End = AttackTarget->GetActorLocation();
 		//FVector HitTarget = Hit.ImpactPoint;
 		// FVector End = TraceStart + (HitTarget - TraceStart) * 1.25f;			// 연장선
@@ -724,7 +719,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 			return;
 		}
 		
-		FVector Location;
+		/*FVector Location;
 		FRotator Rotation;
 		OwnerController->GetPlayerViewPoint(Location, Rotation);
 		
@@ -734,7 +729,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 			// Location, Rotation을 총구로 설정하기
 			Rotation = GetOwner()->GetActorRotation();
 			Location = GetOwner()->GetActorLocation() + Rotation.RotateVector(MuzzleOffset);
-		}
+		}*/
 			
 		// LineTrace
 		FHitResult MuzzleLaserHit;
@@ -748,7 +743,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 		if(MuzzleFlashSocket == nullptr) return; 
 				
 		FVector TraceStart = SocketTransform.GetLocation();
-		//FVector End = Location + Rotation.Vector() * MaxRange;
+		// FVector End = TraceStart + Rotation.Vector() * MaxRange;
 		FVector End = AttackTarget->GetActorLocation();
 		// 맞는 곳이 End이다.
 		

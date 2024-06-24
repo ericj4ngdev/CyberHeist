@@ -238,11 +238,12 @@ void ACHGunBase::PullTriggerByAI(AActor* AttackTarget)
 
 void ACHGunBase::FireByAI(AActor* AttackTarget)
 {
-
+	if(AttackTarget == nullptr) return;
 }
 
 void ACHGunBase::AutoFireByAI(AActor* AttackTarget)
 {
+	if(AttackTarget == nullptr) return;
 }
 
 void ACHGunBase::EndShoot()
