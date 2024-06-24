@@ -27,6 +27,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<ACHEnemySpawner*> EnemySpawners;
 
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UBillboardComponent> SpriteComponent;	
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UBoxComponent> BoxCollisionComp;
 

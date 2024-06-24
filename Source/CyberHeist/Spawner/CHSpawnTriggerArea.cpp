@@ -5,15 +5,19 @@
 
 #include "CyberHeist.h"
 #include "Components/BoxComponent.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Components/BillboardComponent.h"
 #include "AI/CHAIControllerBase.h"
 
 // Sets default values
 ACHSpawnTriggerArea::ACHSpawnTriggerArea()
-{ 	
+{
+	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite"));
+	RootComponent = SpriteComponent;
 	// PrimaryActorTick.bCanEverTick = true;
-	BoxCollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Root"));
+	BoxCollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
 	BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	RootComponent = BoxCollisionComp;
+	BoxCollisionComp->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
