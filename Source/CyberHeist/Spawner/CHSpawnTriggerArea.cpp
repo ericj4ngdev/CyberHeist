@@ -12,8 +12,8 @@
 // Sets default values
 ACHSpawnTriggerArea::ACHSpawnTriggerArea()
 {
-	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite"));
-	RootComponent = SpriteComponent;
+	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	SetRootComponent(SceneComponent);
 	// PrimaryActorTick.bCanEverTick = true;
 	BoxCollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
 	BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
