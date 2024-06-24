@@ -9,51 +9,16 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "CHAI.h"
-#include "Character/CHCharacterBase.h"
-#include "Character/CHCharacterPlayer.h"
-#include "Kismet/KismetMathLibrary.h"
-
-#include "Navigation/CrowdFollowingComponent.h"
-#include "Perception/AIPerceptionComponent.h"
-#include "Perception/AISenseConfig_Damage.h"
-#include "Perception/AISenseConfig_Hearing.h"
-#include "Perception/AISenseConfig_Sight.h"
+#include "CHPathFollowingComponent.h"
 
 ACHAIControllerBase::ACHAIControllerBase(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
+: Super(ObjectInitializer.SetDefaultSubobjectClass<UCHPathFollowingComponent>(TEXT("PathFollowingComponent")))
 {
-	// Create AIPerceptionComponent
-	/*AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
-	if (AIPerception)
-	{
-		// Setup SightSenseConfig
-		UAISenseConfig_Sight* SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-		SightConfig->SightRadius = 1000.0f; // Set sight radius as desired
-		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-		SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-		SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
-		AIPerception->ConfigureSense(*SightConfig);
+	// 기본 PathFollowingComponent를 UCHPathFollowingComponent로 설정
 
-		// Setup SoundSenseConfig
-		UAISenseConfig_Hearing* SoundConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("SoundConfig"));
-		SoundConfig->HearingRange = 1000.0f; // Set hearing range as desired
-		SoundConfig->DetectionByAffiliation.bDetectEnemies = true;
-		SoundConfig->DetectionByAffiliation.bDetectNeutrals = true;
-		SoundConfig->DetectionByAffiliation.bDetectFriendlies = true;
-		AIPerception->ConfigureSense(*SoundConfig);
-
-		// Setup DamageConfig
-		UAISenseConfig_Damage* DamageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>(TEXT("DamageConfig"));
-		AIPerception->ConfigureSense(*DamageConfig);
-		
-		// Set the dominant sense
-		AIPerception->SetDominantSense(SightConfig->GetSenseImplementation());
-
-		AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIControllerBase::HandleSightSense);
-		// AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACHAIController::HandleSoundSense);
-		// AIPerception->OnPerceptionUpdated.AddDynamic(this,&ACHAIController::HandleSenses);
-	}*/
 	
+	
+	bReplicates = true;
 }
 
 void ACHAIControllerBase::RunAI()

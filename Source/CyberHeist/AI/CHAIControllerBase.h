@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "CHAI.h"
 #include "Perception/AIPerceptionTypes.h"
+#include "CHPathFollowingComponent.h"
 #include "CHAIControllerBase.generated.h"
 
 /**

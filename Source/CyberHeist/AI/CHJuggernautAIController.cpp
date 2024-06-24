@@ -21,7 +21,8 @@
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-ACHJuggernautAIController::ACHJuggernautAIController(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
+ACHJuggernautAIController::ACHJuggernautAIController(const FObjectInitializer& ObjectInitializer)
+: Super(ObjectInitializer)
 {
 	// Create AIPerceptionComponent
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
