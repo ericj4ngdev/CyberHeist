@@ -221,7 +221,7 @@ float ACHCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	// UE_LOG(LogTemp, Log, TEXT("TakeDamage"));
-	
+	LastDamageInstigator = EventInstigator;
 	Stat->ApplyDamage(DamageAmount);
 	
 	return DamageAmount;

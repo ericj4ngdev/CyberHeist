@@ -6,6 +6,8 @@
 #include "CyberHeist.h"
 #include "Character/CHCharacterPlayer.h"
 #include "Game/CHGameMode.h"
+#include "Game/CHGameState.h"
+#include "Game/CHPlayerState.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "UI/CHResultWidget.h"
 
@@ -98,6 +100,11 @@ void ACHPlayerController::CreateWidgetIfNeed()
 			CHResultWidget->AddToViewport();
 			CHResultWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
+
+		// 게임 스테이트 가져와서 갱신
+		ACHGameState* CHGameState = Cast<ACHGameState>(GetWorld()->GetGameState());
+		CHGameState->OnTotalKilledEnemyCountChangedDelegate.AddUObject(CHResultWidget, &UCHResultWidget::UpdateTotalKillCount);
+		CHResultWidget->UpdateTotalKillCount(CHGameState->GetTotalKilledEnemyCount());
 	}
 }
 
@@ -135,11 +142,15 @@ void ACHPlayerController::ShowResult(uint8 bWin)
 			CHPlayer->GetMovementComponent()->StopMovementImmediately();			
 		}
 	}
-	
+	ACHPlayerState* CHPlayerState =GetPlayerState<ACHPlayerState>(); 
 	if(CHResultWidget)
 	{
 		// UI 표시 바꾸기
-		CHResultWidget->SetVisibility(ESlateVisibility::Visible);	
+		CHResultWidget->SetVisibility(ESlateVisibility::Visible);
+		
+		// 결과 정보 띄우기(공통)
+		CHResultWidget->UpdateTotalKillCount(CHPlayerState->GetKilledEnemyCount());
+		
 		if(bWin)
 		{
 			CHResultWidget->ShowWinScreen();		

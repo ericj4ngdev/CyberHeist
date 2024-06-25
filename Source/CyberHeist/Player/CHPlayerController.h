@@ -63,10 +63,10 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRespawn();
 	
-	UFUNCTION(Client, Unreliable)
+	UFUNCTION(Client, Reliable)
 	void ClientShowResult(uint8 bWin);
 
-	UFUNCTION(Client, Unreliable)
+	UFUNCTION(Client, Reliable)
 	void ClientSetResultScreen();
 	
 

@@ -6,6 +6,7 @@
 #include "CyberHeist.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 
 UCHResultWidget::UCHResultWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -66,4 +67,9 @@ void UCHResultWidget::OnRestartClicked()
 void UCHResultWidget::OnMainMenuClicked()
 {
 	// Handle return to main menu logic here
+}
+
+void UCHResultWidget::UpdateTotalKillCount(int32 TotalKilledMonsterCount)
+{
+	TotalKillCountText->SetText(FText::FromString(FString::FromInt(TotalKilledMonsterCount)));
 }

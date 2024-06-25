@@ -22,14 +22,14 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
-	FORCEINLINE const int32& GetTotalKilledMonsterCount() const { return TotalKilledMonsterCount; }
-	FORCEINLINE void SetTotalKilledMonsterCount(int32 NewTotalKilledMonsterCount) { TotalKilledMonsterCount = NewTotalKilledMonsterCount; }
+	FORCEINLINE const int32& GetTotalKilledEnemyCount() const { return TotalKilledEnemyCount; }
+	FORCEINLINE void SetTotalKilledEnemyCount(int32 NewTotalKilledEnemyCount) { TotalKilledEnemyCount = NewTotalKilledEnemyCount; }
 
-	FOnTotalKilledMonsterCountChangedDelegate OnTotalKilledMonsterCountChangedDelegate;
+	FOnTotalKilledMonsterCountChangedDelegate OnTotalKilledEnemyCountChangedDelegate;
 protected:
 	UFUNCTION()
-	virtual void OnRep_TotalKilledMonsterCount();
+	virtual void OnRep_TotalKilledEnemyCount();
 
-	UPROPERTY(ReplicatedUsing = OnRep_TotalKilledMonsterCount)
-	int32 TotalKilledMonsterCount = 0;
+	UPROPERTY(ReplicatedUsing = OnRep_TotalKilledEnemyCount)
+	int32 TotalKilledEnemyCount = 0;
 };

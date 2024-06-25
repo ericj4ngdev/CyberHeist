@@ -212,7 +212,11 @@ public:
 	
 public:	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-
+protected:
+	UPROPERTY()
+	TObjectPtr<class AController> LastDamageInstigator;
+	
+public:
 	void AttackHitCheck();
 	
 	FName GetWeaponAttachPoint() const;

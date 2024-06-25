@@ -23,10 +23,10 @@ void ACHGameState::OnRep_ReplicatedHasBegunPlay()
 void ACHGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ACHGameState, TotalKilledMonsterCount);
+	DOREPLIFETIME(ACHGameState, TotalKilledEnemyCount);
 }
 
-void ACHGameState::OnRep_TotalKilledMonsterCount()
+void ACHGameState::OnRep_TotalKilledEnemyCount()
 {
-	OnTotalKilledMonsterCountChangedDelegate.Broadcast(TotalKilledMonsterCount);
+	OnTotalKilledEnemyCountChangedDelegate.Broadcast(TotalKilledEnemyCount);
 }

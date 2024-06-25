@@ -45,6 +45,8 @@ public:
 	// 재접속하면 호출될 함수
 	void CustomResetLevel();
 
+	void OnNonPlayerCharacterDead(AController* TargetPlayerController, int32 Count);
+	
 	UFUNCTION()
 	void LoseCondition();
 	

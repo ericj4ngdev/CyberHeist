@@ -36,15 +36,17 @@ void ACHCharacterNonPlayer::SetDead()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::SetDead();
-	
-	
-	
+		
 	ACHAIControllerBase* CHAIController = Cast<ACHAIControllerBase>(GetController());
     if (CHAIController)
     {
     	CHAIController->StopAI();
     }
 	CancelAttackByAI();
+
+	ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
+	CHGameMode->OnNonPlayerCharacterDead(LastDamageInstigator, 1);
+	
 	FTimerHandle DeadTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda(
 		[&]() {

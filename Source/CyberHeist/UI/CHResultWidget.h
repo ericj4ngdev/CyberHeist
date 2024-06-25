@@ -25,6 +25,8 @@ public:
 	void OnRestartClicked();
 	UFUNCTION()
 	void OnMainMenuClicked();
+	UFUNCTION()
+	void UpdateTotalKillCount(int32 TotalKilledMonsterCount);
 protected:
 	virtual void NativeConstruct() override;
 
@@ -55,4 +57,7 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> MainMenuText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> TotalKillCountText;
 };

@@ -4,6 +4,7 @@
 #include "Game/CHGameMode.h"
 
 #include "CHGameState.h"
+#include "CHPlayerState.h"
 #include "CyberHeist.h"
 #include "EngineUtils.h"
 #include "Components/BoxComponent.h"
@@ -38,6 +39,10 @@ ACHGameMode::ACHGameMode(const FObjectInitializer& ObjectInitializer) : Super(Ob
 	CurrentNum = 0;
 	CurrentAIs = 0;
 	GameStateClass = ACHGameState::StaticClass();
+
+	// Set PlayerState
+	PlayerStateClass = ACHPlayerState::StaticClass();
+	
 }
 
 void ACHGameMode::BeginPlay()
@@ -275,6 +280,19 @@ void ACHGameMode::CustomResetLevel()
 		Element->BoxCollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);;
 	}
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+void ACHGameMode::OnNonPlayerCharacterDead(AController* TargetPlayerController, int32 Count)
+{
+	ACHPlayerState* CHPlayerState = TargetPlayerController->GetPlayerState<ACHPlayerState>();
+	if (CHPlayerState)
+	{
+		CHPlayerState->AddKilledEnemyCount(Count);
+	}
+	
+	ACHGameState* CHGameState = GetGameState<ACHGameState>();
+	int32 NewKilledEnemyCount = CHGameState->GetTotalKilledEnemyCount() + 1;
+	CHGameState->SetTotalKilledEnemyCount(NewKilledEnemyCount);
 }
 
 void ACHGameMode::LoseCondition()
