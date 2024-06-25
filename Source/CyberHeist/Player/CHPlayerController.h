@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Game/CHPlayerState.h"
 #include "GameFramework/PlayerController.h"
 #include "CHPlayerController.generated.h"
 
@@ -64,7 +65,7 @@ public:
 	void ServerRespawn();
 	
 	UFUNCTION(Client, Reliable)
-	void ClientShowResult(uint8 bWin);
+	void ClientShowResult(uint8 bWin, const FPlayStatistics& FinalPlayStatistics);
 
 	UFUNCTION(Client, Reliable)
 	void ClientSetResultScreen();

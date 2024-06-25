@@ -23,9 +23,6 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TObjectPtr<class UAIPerceptionComponent> AIPerception;
-
 	UFUNCTION()
 	void HandleSightSense(AActor* Actor, FAIStimulus Stimulus);
 };

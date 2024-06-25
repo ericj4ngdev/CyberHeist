@@ -13,7 +13,7 @@ struct FPlayStatistics
 	GENERATED_BODY()
 
 	UPROPERTY()
-	int32 KilledEnemyCount = 0;
+	int32 KilledEnemyCount = 12;
 };
 
 /**

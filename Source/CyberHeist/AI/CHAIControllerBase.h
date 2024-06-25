@@ -33,8 +33,12 @@ protected:
 
 	virtual void OnPossess(APawn* InPawn) override;
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UAIPerceptionComponent> AIPerception;
+	
 public:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class AActor> AttackTarget;
 	/*TArray<AActor*> KnownSeenActors;
 	AActor* AttackTarget;
 

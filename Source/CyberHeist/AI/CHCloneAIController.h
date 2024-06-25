@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AI/CHAIControllerBase.h"
+#include "Character/CHCharacterPlayer.h"
 #include "CHCloneAIController.generated.h"
 
 /**
@@ -21,4 +22,12 @@ public:
 	virtual void StopAI()override;
 
 	virtual void OnPossess(APawn* InPawn) override;
+
+	UFUNCTION()
+	void HandleSightSenseArray(const TArray<AActor*>& Actors);
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	TArray<ACHCharacterPlayer*> RecognizedPlayers; // Recognized players array
+	
 };

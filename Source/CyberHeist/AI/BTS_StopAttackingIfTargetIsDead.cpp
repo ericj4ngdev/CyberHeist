@@ -5,12 +5,15 @@
 #include "CHAI.h"
 #include "AIController.h"
 #include "CHAIControllerBase.h"
+#include "CHCloneAIController.h"
 #include "CyberHeist.h"
 #include "EngineUtils.h"
 #include "Interface/CHCharacterAIInterface.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BTFunctionLibrary.h"
 #include "Character/CHCharacterBase.h"
+
+class ACHCloneAIController;
 
 UBTS_StopAttackingIfTargetIsDead::UBTS_StopAttackingIfTargetIsDead()
 {
@@ -88,7 +91,9 @@ void UBTS_StopAttackingIfTargetIsDead::FindNearestAlivePlayer(UBehaviorTreeCompo
 	
 	float ClosestDistance = FLT_MAX;
 	ACHCharacterPlayer* NearestPlayer = nullptr;
-
+	
+	// ACHCloneAIController* CloneAIController = Cast<ACHCloneAIController>(AIController);
+	// for (ACHCharacterPlayer* Player : CloneAIController->RecognizedPlayers)
 	for (ACHCharacterPlayer* Player : RecognizedPlayers)
 	{
 		// 1. 죽었는지 판단

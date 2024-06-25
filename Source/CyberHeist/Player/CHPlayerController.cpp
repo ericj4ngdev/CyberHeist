@@ -142,13 +142,14 @@ void ACHPlayerController::ShowResult(uint8 bWin)
 			CHPlayer->GetMovementComponent()->StopMovementImmediately();			
 		}
 	}
-	ACHPlayerState* CHPlayerState =GetPlayerState<ACHPlayerState>(); 
+	ACHPlayerState* CHPlayerState = GetPlayerState<ACHPlayerState>(); 
 	if(CHResultWidget)
 	{
 		// UI 표시 바꾸기
 		CHResultWidget->SetVisibility(ESlateVisibility::Visible);
 		
 		// 결과 정보 띄우기(공통)
+		CH_LOG(LogCHNetwork, Log, TEXT("W : %d"), CHPlayerState->GetKilledEnemyCount())
 		CHResultWidget->UpdateTotalKillCount(CHPlayerState->GetKilledEnemyCount());
 		
 		if(bWin)
@@ -263,7 +264,9 @@ void ACHPlayerController::SetPlayerInvincible(uint8 bPlayerInvincible)
 	}
 }
 
-void ACHPlayerController::ClientShowResult_Implementation(uint8 bWin)
+void ACHPlayerController::ClientShowResult_Implementation(uint8 bWin, const FPlayStatistics& FinalPlayStatistics)
 {
+	ACHPlayerState* CHPlayerState = GetPlayerState<ACHPlayerState>();
+	CHPlayerState->SetPlayStatistics(FinalPlayStatistics);
 	ShowResult(bWin);
 }

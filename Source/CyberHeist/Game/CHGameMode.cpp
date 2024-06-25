@@ -284,12 +284,15 @@ void ACHGameMode::CustomResetLevel()
 
 void ACHGameMode::OnNonPlayerCharacterDead(AController* TargetPlayerController, int32 Count)
 {
+	// 특정 플레이어가 처치한 적 수
 	ACHPlayerState* CHPlayerState = TargetPlayerController->GetPlayerState<ACHPlayerState>();
 	if (CHPlayerState)
 	{
+		CH_LOG(LogCHNetwork, Log, TEXT("KilledEnemyCount : %d"), CHPlayerState->GetKilledEnemyCount())
 		CHPlayerState->AddKilledEnemyCount(Count);
+		CH_LOG(LogCHNetwork, Log, TEXT("KilledEnemyCount : %d"), CHPlayerState->GetKilledEnemyCount())
 	}
-	
+	// 모든 플레이어가 처치한 적 수
 	ACHGameState* CHGameState = GetGameState<ACHGameState>();
 	int32 NewKilledEnemyCount = CHGameState->GetTotalKilledEnemyCount() + 1;
 	CHGameState->SetTotalKilledEnemyCount(NewKilledEnemyCount);
@@ -299,15 +302,18 @@ void ACHGameMode::LoseCondition()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Lose"))
 	// 모든 PC에게 UI띄워주기
-	for (FConstControllerIterator Iterator = GetWorld()->GetControllerIterator(); Iterator; ++Iterator)
+	for (APlayerController* PlayerController : TActorRange<APlayerController>(GetWorld()))
 	{
-		AController* Controller = Iterator->Get();
-		ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller);
 		if (PlayerController)
 		{
-			// 클라 RPC로 UI 활성화.
-			PlayerController->ClientShowResult(false);
-			PlayerController->SetPlayerInvincible(true);
+			ACHPlayerController* CHPlayerController = Cast<ACHPlayerController>(PlayerController);
+			ACHPlayerState* CHPlayerState = CHPlayerController->GetPlayerState<ACHPlayerState>();
+			if (IsValid(CHPlayerController) && IsValid(CHPlayerState))
+			{
+				// 클라 RPC로 UI 활성화.
+				CHPlayerController->ClientShowResult(false, CHPlayerState->GetPlayStatistics());
+				CHPlayerController->SetPlayerInvincible(true);
+			}
 		}
 	}
 }
@@ -315,14 +321,18 @@ void ACHGameMode::LoseCondition()
 void ACHGameMode::WinCondition()
 {	
 	CH_LOG(LogCHNetwork, Log, TEXT("Win"))
-	for (FConstControllerIterator Iterator = GetWorld()->GetControllerIterator(); Iterator; ++Iterator)
+	for (APlayerController* PlayerController : TActorRange<APlayerController>(GetWorld()))
 	{
-		AController* Controller = Iterator->Get();
-		ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller);
 		if (PlayerController)
 		{
-			PlayerController->ClientShowResult(true);
-			PlayerController->SetPlayerInvincible(true);
+			ACHPlayerController* CHPlayerController = Cast<ACHPlayerController>(PlayerController);
+			ACHPlayerState* CHPlayerState = CHPlayerController->GetPlayerState<ACHPlayerState>();
+			if (IsValid(CHPlayerController) && IsValid(CHPlayerState))
+			{
+				// 클라 RPC로 UI 활성화.
+				CHPlayerController->ClientShowResult(true, CHPlayerState->GetPlayStatistics());
+				CHPlayerController->SetPlayerInvincible(true);
+			}
 		}
 	}
 }
