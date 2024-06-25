@@ -3,19 +3,30 @@
 
 #include "Game/CHGameState.h"
 #include "CyberHeist.h"
+#include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 
 void ACHGameState::HandleBeginPlay()
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
-	
+	// CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))	
 	Super::HandleBeginPlay();
-
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"));
+	// CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 }
 
 void ACHGameState::OnRep_ReplicatedHasBegunPlay()
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"));
+	// CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("Begin"))
 	Super::OnRep_ReplicatedHasBegunPlay();
-	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"));
+	// CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
+}
+
+void ACHGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ACHGameState, TotalKilledMonsterCount);
+}
+
+void ACHGameState::OnRep_TotalKilledMonsterCount()
+{
+	OnTotalKilledMonsterCountChangedDelegate.Broadcast(TotalKilledMonsterCount);
 }

@@ -6,6 +6,7 @@
 #include "GameFramework/GameState.h"
 #include "CHGameState.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTotalKilledMonsterCountChangedDelegate, int32);
 /**
  * 
  */
@@ -16,6 +17,19 @@ class CYBERHEIST_API ACHGameState : public AGameState
 
 public:
 	virtual void HandleBeginPlay() override;
-
 	virtual void OnRep_ReplicatedHasBegunPlay() override;
+protected:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+public:
+	FORCEINLINE const int32& GetTotalKilledMonsterCount() const { return TotalKilledMonsterCount; }
+	FORCEINLINE void SetTotalKilledMonsterCount(int32 NewTotalKilledMonsterCount) { TotalKilledMonsterCount = NewTotalKilledMonsterCount; }
+
+	FOnTotalKilledMonsterCountChangedDelegate OnTotalKilledMonsterCountChangedDelegate;
+protected:
+	UFUNCTION()
+	virtual void OnRep_TotalKilledMonsterCount();
+
+	UPROPERTY(ReplicatedUsing = OnRep_TotalKilledMonsterCount)
+	int32 TotalKilledMonsterCount = 0;
 };
