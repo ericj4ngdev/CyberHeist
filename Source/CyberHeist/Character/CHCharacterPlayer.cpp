@@ -146,8 +146,9 @@ ACHCharacterPlayer::ACHCharacterPlayer(const FObjectInitializer& ObjectInitializ
 	bIsFirstPersonPerspective = false;
 
 	bFreeLook = false;
-	bTiltReleaseLeft = false; 
-	bTiltReleaseRight = false;
+	bTiltLeft = false; 
+	bTiltRight = false;
+	bMovetoCover = false;
 	// 캐릭터라서 이렇게 초기화
 	CharacterHalfHeight = 96.f;
 }
@@ -297,7 +298,10 @@ void ACHCharacterPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	
 	DOREPLIFETIME(ACHCharacterPlayer, bIsFirstPersonPerspective);
 	DOREPLIFETIME(ACHCharacterPlayer, MoveDirection);
-	DOREPLIFETIME(ACHCharacterPlayer, LastCoveredRotation);	
+	DOREPLIFETIME(ACHCharacterPlayer, LastCoveredRotation);
+	DOREPLIFETIME(ACHCharacterPlayer, bMovetoCover);
+	DOREPLIFETIME(ACHCharacterPlayer, bTiltLeft);
+	DOREPLIFETIME(ACHCharacterPlayer, bTiltRight);
 }
 
 void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -465,6 +469,11 @@ void ACHCharacterPlayer::SetMappingContextPriority(const UInputMappingContext* M
 	}
 }
 
+void ACHCharacterPlayer::CoverEnd(UAnimMontage* AnimMontage, bool bArg)
+{
+	bMovetoCover = false;
+}
+
 void ACHCharacterPlayer::MulticastRPC_SetCharacterControl_Implementation(ECharacterControlType NewCharacterControlType)
 {
 	// CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
@@ -487,13 +496,14 @@ bool ACHCharacterPlayer::ServerRPC_SetCharacterControl_Validate(ECharacterContro
 }
 
 void ACHCharacterPlayer::Jump()
-{
-	
+{	
 	if(CurrentWeapon && CurrentWeapon->WeaponType == ECHWeaponType::MiniGun)
 	{
 		return;
 	}
 
+	
+	// 엄폐 중
 	if(bCovered)
 	{
 		return;
@@ -706,15 +716,21 @@ void ACHCharacterPlayer::LocalCoveredMove(const FInputActionValue& Value)
 }
 
 void ACHCharacterPlayer::TakeCover()
-{	
+{
 	if(CurrentWeapon)
 	{
 		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) return;
+	}
+	if(GetCharacterMovement()->IsFalling())
+	{
+		// 공중에서 엄폐 x
+		return;
 	}
 	
 	// Not Covered 
 	if(!bCovered)
 	{
+		
 		StartCover();
 	}
 	else
@@ -754,6 +770,7 @@ void ACHCharacterPlayer::StartCover()
 	// 감지
 	if (HitLowCoverDetected)
 	{
+		bMovetoCover = true;
 		// 엄폐 방향 결정
 		FVector WallParallel = FVector(HitLowCoverResult.ImpactNormal.Y, -HitLowCoverResult.ImpactNormal.X, HitLowCoverResult.ImpactNormal.Z);
 		FVector ActorForward = GetActorForwardVector();
@@ -784,12 +801,7 @@ void ACHCharacterPlayer::StartCover()
 				TargetTransform.SetRotation(TargetRotation.Quaternion());
 				ServerStartCoverMotion(TargetTransform);			
 				
-			}/*
-			else
-			{
-				SetActorRotation(LastCoveredRotation);
-				ServerSetActorRotation(LastCoveredRotation);
-			}*/
+			}
 			// 도착하면 모션 멈추기...				
 			// Crouch();
 			// 엄폐 애니메이션
@@ -832,22 +844,8 @@ void ACHCharacterPlayer::StartCover()
 				TargetTransform.SetLocation(TargetLocation);
 				TargetTransform.SetRotation(TargetRotation.Quaternion());
 				ServerStartCoverMotion(TargetTransform);
-				
-				/*FMotionWarpingTarget Target;
-				Target.Name = FName("StartTakeCover");				
-				Target.Location = TargetLocation;
-				Target.Rotation = TargetRotation;
-
-				MotionWarpComponent->AddOrUpdateWarpTarget(Target);
-				
-				CHAnimInstance->StopAllMontages(0.0f);
-				CHAnimInstance->Montage_Play(TakeCoverMontage, 1);*/									
-			}/*
-			else
-			{
-				SetActorRotation(LastCoveredRotation);
-				ServerSetActorRotation(LastCoveredRotation);
-			}*/
+											
+			}
 			
 			// 엄폐 애니메이션
 			bHighCovered = HitHighCoverDetected;
@@ -946,8 +944,14 @@ void ACHCharacterPlayer::StartCrouch()
 	{
 		if(CurrentWeapon->WeaponType == ECHWeaponType::MiniGun) return;
 	}
-	Crouch();
+
+	if(GetCharacterMovement()->IsFalling())
+	{
+		// 공중에서 앉기 X
+		return;
+	}
 	
+	Crouch();	
 }
 
 void ACHCharacterPlayer::StopCrouch()
@@ -967,9 +971,14 @@ void ACHCharacterPlayer::MulticastStartCoverMotion_Implementation(const FTransfo
 	Target.Rotation = Destination.GetRotation().Rotator();
 				
 	MotionWarpComponent->AddOrUpdateWarpTarget(Target);
-				
+	
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &ACHCharacterPlayer::CoverEnd);
+	
 	CHAnimInstance->StopAllMontages(0.0f);
 	CHAnimInstance->Montage_Play(TakeCoverMontage, 1);
+	CHAnimInstance->Montage_SetEndDelegate(EndDelegate, TakeCoverMontage);	
+	
 }
 
 void ACHCharacterPlayer::ServerStartCoverMotion_Implementation(const FTransform& Destination)
@@ -994,19 +1003,7 @@ bool ACHCharacterPlayer::ServerSetCoveredRotation_Validate(FRotator NewCoveredRo
 
 void ACHCharacterPlayer::SetTiltingRightValue(const float Value)
 {
-	if (bTiltReleaseRight)
-	{
-		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
-		CameraDesiredPosition = FVector(0,0,60);
-		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
-		CameraDesiredRotation = FRotator::ZeroRotator;
-		
-		CurrentTiltAngle = TiltAngle;
-		DesiredTiltAngle = 0;
-		CurrentTiltLocation = TiltLocation;
-		DesiredTiltLocation = FVector(0,0,0);;		
-	}
-	else
+	if (bTiltRight)
 	{
 		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
 		CameraDesiredPosition = FVector(0,50,60);
@@ -1016,7 +1013,19 @@ void ACHCharacterPlayer::SetTiltingRightValue(const float Value)
 		CurrentTiltAngle = TiltAngle;
 		DesiredTiltAngle = 30;
 		CurrentTiltLocation = TiltLocation;
-		DesiredTiltLocation = FVector(-10,0,0);;
+		DesiredTiltLocation = FVector(-10,0,0);
+	}
+	else
+	{
+		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
+		CameraDesiredPosition = FVector(0,0,60);
+		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
+		CameraDesiredRotation = FRotator::ZeroRotator;
+		
+		CurrentTiltAngle = TiltAngle;
+		DesiredTiltAngle = 0;
+		CurrentTiltLocation = TiltLocation;
+		DesiredTiltLocation = FVector(0,0,0);
 	}
 	// UE_LOG(LogTemp, Log, TEXT("[SetTiltingRightValue] bTiltReleaseRight : %d"), bTiltReleaseRight)
 
@@ -1039,22 +1048,8 @@ void ACHCharacterPlayer::SetTiltingRightValue(const float Value)
 
 void ACHCharacterPlayer::SetTiltingLeftValue(const float Value)
 {
-	if (bTiltReleaseLeft)
+	if (bTiltLeft)
 	{
-		// UE_LOG(LogTemp, Log, TEXT("[SetTiltingLeftValue] bTiltReleaseLeft : %d"), bTiltReleaseLeft);
-		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
-		CameraDesiredPosition = FVector(0,0,60);
-		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
-		CameraDesiredRotation = FRotator::ZeroRotator;
-
-		CurrentTiltAngle = TiltAngle;
-		DesiredTiltAngle = 0;
-		CurrentTiltLocation = TiltLocation;
-		DesiredTiltLocation =  FVector(0,0,0);
-	}
-	else
-	{
-		// UE_LOG(LogTemp, Log, TEXT("[SetTiltingLeftValue] bTiltReleaseLeft : %d"), bTiltReleaseLeft);
 		// 눌렀을 때, 
 		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
 		CameraDesiredPosition = FVector(0,-50,60);
@@ -1064,7 +1059,19 @@ void ACHCharacterPlayer::SetTiltingLeftValue(const float Value)
 		CurrentTiltAngle = TiltAngle;
 		DesiredTiltAngle = -30;
 		CurrentTiltLocation = TiltLocation;
-		DesiredTiltLocation = FVector(10,0,0);
+		DesiredTiltLocation = FVector(10,0,0);		
+	}
+	else
+	{
+		CameraCurrentPosition = FirstPersonCamera->GetRelativeLocation();
+		CameraDesiredPosition = FVector(0,0,60);
+		CameraCurrentRotation = FirstPersonCamera->GetRelativeRotation();
+		CameraDesiredRotation = FRotator::ZeroRotator;
+
+		CurrentTiltAngle = TiltAngle;
+		DesiredTiltAngle = 0;
+		CurrentTiltLocation = TiltLocation;
+		DesiredTiltLocation =  FVector(0,0,0);
 	}
 	// RLerp와 TimeLine Value 값을 통한 자연스러운 기울이기
 	const FRotator RLerp = UKismetMathLibrary::RLerp(CameraCurrentRotation, CameraDesiredRotation, Value, true);
@@ -1088,8 +1095,8 @@ void ACHCharacterPlayer::TiltRight()
 	if (bIsFirstPersonPerspective)
 	{
 		// UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltRight()"));
-		bTiltReleaseLeft = false;
-		bTiltReleaseRight = false;
+		bTiltLeft = true;
+		bTiltRight = true;
 		if (TiltingLeftTimeline.IsPlaying())
 		{
 			TiltingLeftTimeline.Stop();
@@ -1106,8 +1113,8 @@ void ACHCharacterPlayer::TiltRightRelease()
 {
 	if (bIsFirstPersonPerspective)
 	{
-		bTiltReleaseLeft = true;
-		bTiltReleaseRight = true;
+		bTiltLeft = false;
+		bTiltRight = false;
 		if (TiltingLeftTimeline.IsPlaying())
 		{
 			TiltingLeftTimeline.Stop();
@@ -1125,8 +1132,8 @@ void ACHCharacterPlayer::TiltLeft()
 	if (bIsFirstPersonPerspective)
 	{
 		// UE_LOG(LogTemp, Log, TEXT("ACHCharacterPlayer::TiltLeft()"));
-		bTiltReleaseLeft = false;
-		bTiltReleaseRight = false;
+		bTiltLeft = true;
+		bTiltRight = true;
 		if (TiltingLeftTimeline.IsPlaying())
 		{
 			TiltingLeftTimeline.Stop();
@@ -1150,8 +1157,8 @@ void ACHCharacterPlayer::TiltLeftRelease()
 {
 	if (bIsFirstPersonPerspective)
 	{
-		bTiltReleaseLeft = true;
-		bTiltReleaseRight = true;
+		bTiltLeft = false;
+		bTiltRight = false;
 		if (TiltingLeftTimeline.IsPlaying())
 		{
 			TiltingLeftTimeline.Stop();
@@ -1166,6 +1173,17 @@ void ACHCharacterPlayer::TiltLeftRelease()
 
 void ACHCharacterPlayer::PressV()
 {
+	if(bMovetoCover)
+	{
+		// 엄폐하는 중에는 시점 변환 X
+		return;
+	}
+
+	if(bTiltLeft || bTiltRight)
+	{
+		return;
+	}
+	
 	TogglePerspective();
 	// 로컬 모드일 땐 두 번 호출 X
 	if(!GetNetMode() == ENetMode::NM_Standalone) ServerRPC_SetPerspective(bIsFirstPersonPerspective);

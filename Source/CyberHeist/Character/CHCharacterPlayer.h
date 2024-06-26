@@ -46,9 +46,11 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetCharacterControl(ECharacterControlType NewCharacterControlType);
-	
-	
-// Camera Section
+
+	void CoverEnd(UAnimMontage* AnimMontage, bool bArg);
+
+
+	// Camera Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USpringArmComponent> CameraBoom;
@@ -161,13 +163,13 @@ protected:
 	void PressV();
 	// void StopTilt(const float Value);
 
-	UPROPERTY(EditAnywhere) // Timeline 생성
+	UPROPERTY(EditAnywhere, Category = "Tilt System") // Timeline 생성
 	FTimeline TiltingLeftTimeline;
 	
-	UPROPERTY(EditAnywhere) // Timeline 생성
+	UPROPERTY(EditAnywhere, Category = "Tilt System") // Timeline 생성
 	FTimeline TiltingRightTimeline;
 
-	UPROPERTY(EditAnywhere) // Timeline 커브
+	UPROPERTY(EditAnywhere, Category = "Tilt System") // Timeline 커브
 	TObjectPtr<UCurveFloat> TiltingCurveFloat;
 
 	FVector CameraCurrentPosition;
@@ -175,8 +177,10 @@ protected:
 	FRotator CameraCurrentRotation;
 	FRotator CameraDesiredRotation;
 
-	uint8 bTiltReleaseLeft : 1;
-	uint8 bTiltReleaseRight : 1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Tilt System")
+	uint8 bTiltLeft : 1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Tilt System")
+	uint8 bTiltRight : 1;
 
 	uint8 bFreeLook : 1;
 	
@@ -231,6 +235,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cover System")
 	float CheckRange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Cover System")
+	uint8 bMovetoCover;
 	
 public:
 	UFUNCTION(BlueprintCallable)

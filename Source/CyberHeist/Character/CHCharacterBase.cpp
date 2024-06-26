@@ -328,8 +328,6 @@ void ACHCharacterBase::StartSprint()
 			CHMovement->SetSprintCommand(bSprint);
 			return;
 		}
-	
-		UE_LOG(LogTemp, Log, TEXT("StartSprint"));
 		
 		bSprint = true;
 		CHMovement->SetSprintCommand(bSprint);
@@ -344,7 +342,6 @@ void ACHCharacterBase::StopSprint()
 		bSprint = false;
 		CHMovement->SetSprintCommand(bSprint);
 	}
-	UE_LOG(LogTemp, Log, TEXT("bSprint is %s"), bSprint ? TEXT("true") : TEXT("false"));
 }
 
 void ACHCharacterBase::ServerRPC_StartSprint_Implementation()
