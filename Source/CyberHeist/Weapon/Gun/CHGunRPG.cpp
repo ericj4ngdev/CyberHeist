@@ -244,7 +244,7 @@ void ACHGunRPG::Fire()
 	FHitResult ScreenLaserHit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
-	// Params.AddIgnoredActor(GetOwner());
+	Params.AddIgnoredActor(GetOwner());
 	
 	FVector TraceStart;
 	FRotator Rotation;
@@ -343,9 +343,9 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FTransform& MuzzleTr
 	FVector ToTarget = HitLocation - MuzzleTransform.GetLocation();	
 	SpawnRotation = ToTarget.Rotation();
 	
-	// 멀티캐스트
 	if(HasAuthority())
 	{
+		// 서버에서 생성하면 자동 리플리
 		Projectile = GetWorld()->SpawnActor<ACHProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 		if(Projectile) Projectile->SetOwner(OwningCharacter);		
 	}
