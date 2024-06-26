@@ -171,7 +171,7 @@ void ACHCharacterPlayer::BeginPlay()
 	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), AngleForEscapeCover,FMath::Cos(AngleForEscapeCover));
 	UE_LOG(LogTemp, Log, TEXT("Cos(%f) : %f"), RadianForEscapeCover,FMath::Cos(RadianForEscapeCover));
 	// CHAnimInstance = Cast<UCHAnimInstance>(GetMesh()->GetAnimInstance());
-	// InputVectorDirectionByCamera = 0.f;
+	InputVectorDirectionByCamera = 1.f;
 	StartingThirdPersonMeshLocation = GetMesh()->GetRelativeLocation();
 	StartingFirstPersonMeshLocation = FirstPersonMesh->GetRelativeLocation();
 	// SetCharacterControl(CurrentCharacterControlType);

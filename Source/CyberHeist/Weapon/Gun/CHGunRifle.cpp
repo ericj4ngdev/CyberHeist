@@ -910,7 +910,9 @@ void ACHGunRifle::CancelPullTrigger()
 void ACHGunRifle::StartAim()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	
 	Super::StartAim();
+	
 	if(!bIsEquipped) return;
 	if(bReloading)
 	{
@@ -920,7 +922,6 @@ void ACHGunRifle::StartAim()
 	}
 	bHoldGun = false;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
-	// ACHCharacterBase* CharacterBase = Cast<ACHCharacterBase>(OwningCharacter);
 
 	if(PlayerCharacter)
 	{
@@ -938,20 +939,9 @@ void ACHGunRifle::StartAim()
 			if(!PlayerCharacter->GetCovered())
 			{
 				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
-			}
-			
+			}			
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
-			
-			// 로컬
-			/*PlayerCharacter->SetCoveredAttackMotion(true);
-			// 다른 클라(로컬 제외), 솔로면 X
-			if(!GetNetMode() == ENetMode::NM_Standalone)
-			{
-				CH_LOG(LogCHNetwork, Log, TEXT("ServerSetCoveredAttackMotion"))
-				PlayerCharacter->ServerSetCoveredAttackMotion(true);
-			}*/
-
-			
+						
 			if(GetNetMode() == ENetMode::NM_Standalone)
 			{
 				PlayerCharacter->SetCoveredAttackMotion(true);
@@ -991,10 +981,9 @@ void ACHGunRifle::StartAim()
 void ACHGunRifle::StopAim()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	if(!bIsEquipped) return;
 	Super::StopAim();
 
-	if(!bIsEquipped) return;
-	// if(bReloading) return;
 	bHoldGun = true;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if(PlayerCharacter)
@@ -1009,19 +998,11 @@ void ACHGunRifle::StopAim()
 			if(PlayerCharacter->GetCovered())
 			{
 				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
-				/*// 로컬
-				PlayerCharacter->ReturnCover();
-				PlayerCharacter->SetCoveredAttackMotion(false);
-				// 다른 클라(로컬 제외), 솔로면 X	
-				if(!GetNetMode() == ENetMode::NM_Standalone)
-				{
-					PlayerCharacter->ServerSetCoveredAttackMotion(false);
-				}*/
-				
-				// 방법 2 
+
+				// 로컬일 떈 로컬 함수 
 				if(GetNetMode() == ENetMode::NM_Standalone)
 				{
-					PlayerCharacter->SetCoveredAttackMotion(false);					
+					PlayerCharacter->SetCoveredAttackMotion(false);			
 				}
 				else
 				{
@@ -1044,7 +1025,6 @@ void ACHGunRifle::StopAim()
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::First);
 			if(APlayerController* PlayerController = CastChecked<APlayerController>(OwningCharacter->GetController()))
 			{
-				UE_LOG(LogTemp, Log, TEXT("SetViewTargetWithBlend"));
 				PlayerController->SetViewTargetWithBlend(OwningCharacter,0.2f);
 				OwningCharacter->GetFirstPersonMesh()->SetVisibility(true);		// 팔 보이게 하기	
 			}
@@ -1073,11 +1053,6 @@ void ACHGunRifle::StartPrecisionAim()
 	{
 		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 		{
-			// 조준 상태인가?
-			if(PlayerCharacter->GetCovered())
-			{
-				
-			}
 			// 조준경 bool 변수 -> 애니메이션에 전달
 			PlayerCharacter->SetTPAimingCloser(true);
 			// 카메라 위치 수정

@@ -484,48 +484,55 @@ void ACHGunRPG::StartAim()
 	bHoldGun = false;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);	
 
-	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
+	if(PlayerCharacter)
+	{
+		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
 	
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
-	{
-		PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
-	}
-
-	if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
-	{
-		if(!PlayerCharacter->GetCovered())
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 		{
-			UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 		}
-		
-		PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
-		// 로컬
-		PlayerCharacter->SetCoveredAttackMotion(true);
-		// 다른 클라(로컬 제외)		
-		if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(true);
-	}
 
-	if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
-	{
-		// 조준 여부 변수 추가
-		// PlayerCharacter->SetAiming(true);  // 근데 이건 밑에 코드에서 해줌
-		if(PlayerCharacter->GetScopeAiming())
+		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdCover)
 		{
-			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstScopeAim);
-			if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+			if(!PlayerCharacter->GetCovered())
 			{
-				PlayerController->SetViewTargetWithBlend(this,0.1);
-				OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);	// 팔 보이게 하기
-				Lens->SetVisibility(true);
+				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
+			}
+
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
+			
+			if(GetNetMode() == ENetMode::NM_Standalone)
+			{
+				PlayerCharacter->SetCoveredAttackMotion(true);
+			}		
+			else
+			{
+				PlayerCharacter->ServerSetCoveredAttackMotion(true);
+			}		
+		}	
+
+		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
+		{
+			// 조준 여부 변수 추가
+			// PlayerCharacter->SetAiming(true);  // 근데 이건 밑에 코드에서 해줌
+			if(PlayerCharacter->GetScopeAiming())
+			{
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstScopeAim);
+				if(APlayerController* PlayerController = Cast<APlayerController>(OwningCharacter->GetController()))
+				{
+					PlayerController->SetViewTargetWithBlend(this,0.1);
+					OwningCharacter->GetFirstPersonMesh()->SetVisibility(false);	// 팔 보이게 하기
+					Lens->SetVisibility(true);
+				}
+			}
+			else
+			{
+				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstAim);
+				Lens->SetVisibility(false);
 			}
 		}
-		else
-		{
-			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::FirstAim);
-			Lens->SetVisibility(false);
-		}
 	}
-
 	// if Pull Triggering, pass
 	if(OwningCharacter->GetNearWall()) return;
 	if(!bTrigger) OwningCharacter->SetAiming(true);	
@@ -535,14 +542,14 @@ void ACHGunRPG::StopAim()
 {
 	if(!bIsEquipped) return;
 	Super::StopAim();
-	// if(bReloading) return;
+	
 	bHoldGun = true;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 
-	PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
-
 	if(PlayerCharacter)
 	{
+		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
+		
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 			|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 		{
@@ -550,11 +557,14 @@ void ACHGunRPG::StopAim()
 			{
 				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
 				
-				// 로컬
-				// PlayerCharacter->ReturnCover();
-				PlayerCharacter->SetCoveredAttackMotion(false);
-				// 다른 클라(로컬 제외)		
-				if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(false);
+				if(GetNetMode() == ENetMode::NM_Standalone)
+				{
+					PlayerCharacter->SetCoveredAttackMotion(false);					
+				}
+				else
+				{
+					PlayerCharacter->ServerSetCoveredAttackMotion(false);
+				}
 			}
 			else
 			{
