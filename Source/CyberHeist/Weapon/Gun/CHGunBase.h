@@ -226,27 +226,27 @@ public:
 	FName ShoulderPoint3P;
 	
 	// How much ammo in the clip the gun starts with
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Replicated, Category = "Properties|Ammo")
 	int32 CurrentAmmoInClip;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Replicated, Category = "Properties|Ammo")
 	int32 ClipSize;
 
 	// Ammo except in clip
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Replicated, Category = "Properties|Ammo")
 	int32 CurrentAmmo;
 	
 	// maximum bullet capacity
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Replicated, Category = "Properties|Ammo")
 	int32 MaxAmmoCapacity;
 	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Properties|Ammo")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Replicated, Category = "Properties|Ammo")
 	uint8 bInfiniteAmmo : 1;
 	
 	FTimerHandle DurationTimerHandle;	
 	FTimerHandle FireTimerHandle;
 	FTimerHandle ShootTimerHandle;
-	FTimerHandle ReloadTimerHandle;
+	
 
 	// Input
 public:

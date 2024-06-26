@@ -76,6 +76,7 @@ void ACHGunRPG::Tick(float DeltaSeconds)
 
 void ACHGunRPG::FireActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	StopAim();
 	Reload();
 }
@@ -366,7 +367,7 @@ void ACHGunRPG::LocalFire(const FVector& HitLocation, const FTransform& MuzzleTr
 	if (TPAnimInstance)
 	{
 		TPAnimInstance->Montage_Play(Fire3PMontage, 1);
-		FPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire3PMontage);
+		TPAnimInstance->Montage_SetEndDelegate(EndDelegate, Fire3PMontage);
 	}
 	if (FPAnimInstance)
 	{
@@ -440,6 +441,7 @@ void ACHGunRPG::PullTrigger()
 		GetWorld()->GetTimerManager().SetTimer(ShootTimerHandle, [this]()
 		{
 			Fire();
+			// 
 		}, ShootingPreparationTime, false);	
 		
 	}
@@ -547,10 +549,7 @@ void ACHGunRPG::StopAim()
 			if(PlayerCharacter->GetCovered())
 			{
 				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
-				/*// PlayerCharacter->ReturnCover();
-				// PlayerCharacter->SetCoveredAttackMotion(false);
-				if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(false);*/
-
+				
 				// 로컬
 				// PlayerCharacter->ReturnCover();
 				PlayerCharacter->SetCoveredAttackMotion(false);
@@ -672,9 +671,17 @@ void ACHGunRPG::StayPrecisionAim()
 
 void ACHGunRPG::Reload()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::Reload();
-	if(bReloading) return;
+	CH_LOG(LogCHNetwork, Log, TEXT("1"))
+	if(bReloading)
+	{
+		return;
+	}
+	
+	CH_LOG(LogCHNetwork, Log, TEXT("2"))
 	if(bInfiniteAmmo) return;
+	CH_LOG(LogCHNetwork, Log, TEXT("3"))
 	// 소유한 총알 = 0
 	if(CurrentAmmo == 0)
 	{
@@ -683,6 +690,8 @@ void ACHGunRPG::Reload()
 	}
 
 	// 탄창에 총알 가득
+	// 서버는 이게 참??
+	CH_LOG(LogCHNetwork, Log, TEXT("4"))
 	if(CurrentAmmoInClip == ClipSize)
 	{
 		UE_LOG(LogTemp,Log,TEXT("Full Ammo"));
@@ -711,8 +720,6 @@ void ACHGunRPG::Reload()
 		}
 	}
 	// 조준 중이라면 해제
-	
-	
 	// if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 	
 	// 총 재장전 Animation Montage
@@ -725,8 +732,16 @@ void ACHGunRPG::Reload()
 	// 플레이어 재장전 Animation Montage
 	UAnimInstance* TPAnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
 	UAnimInstance* FPAnimInstance = OwningCharacter->GetFirstPersonMesh()->GetAnimInstance();
-	if(FPAnimInstance) FPAnimInstance->Montage_Play(Reload1PMontage,1);
-	if(TPAnimInstance) TPAnimInstance->Montage_Play(Reload3PMontage, 1);
+	if(FPAnimInstance)
+	{
+		CH_LOG(LogCHNetwork,Log, TEXT("Reload1PMontage"))
+		FPAnimInstance->Montage_Play(Reload1PMontage,1);
+	}
+	if(TPAnimInstance)
+	{
+		CH_LOG(LogCHNetwork,Log, TEXT("Reload3PMontage"))
+		TPAnimInstance->Montage_Play(Reload3PMontage, 1);
+	}
 
 	// 탄창 증가
 
@@ -746,6 +761,8 @@ void ACHGunRPG::Reload()
 			CurrentAmmo = 0;
 		}		
 	}
+	
+	FTimerHandle ReloadTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, [this]()
 	{
 		bReloading = false;		

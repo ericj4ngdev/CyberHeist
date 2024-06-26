@@ -486,7 +486,12 @@ void ACHGunBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(ACHGunBase, bTrigger);
 	DOREPLIFETIME(ACHGunBase, bReloading);
 	DOREPLIFETIME(ACHGunBase, bHoldGun);
-	DOREPLIFETIME(ACHGunBase, OwningCharacter);	
+	DOREPLIFETIME(ACHGunBase, OwningCharacter);
+	DOREPLIFETIME(ACHGunBase, CurrentAmmoInClip);
+	DOREPLIFETIME(ACHGunBase, ClipSize);
+	DOREPLIFETIME(ACHGunBase, CurrentAmmo);
+	DOREPLIFETIME(ACHGunBase, MaxAmmoCapacity);
+	DOREPLIFETIME(ACHGunBase, bInfiniteAmmo);
 }
 
 void ACHGunBase::OnRep_Owner()

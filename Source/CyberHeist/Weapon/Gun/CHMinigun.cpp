@@ -391,7 +391,7 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FTransform& MuzzleT
 	MuzzleEnd = MuzzleStart + (HitLocation - MuzzleStart) * 1.25f;	
 		
 	// 총구에서 레이저
-	bool bMuzzleHit = GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4);
+	bool bMuzzleHit = GetWorld()->LineTraceSingleByChannel(MuzzleLaserHit, MuzzleStart, MuzzleEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
 
 	// 최종 맞은 지점
 	MuzzleLaserHit.Location = bMuzzleHit ? MuzzleLaserHit.Location : HitLocation;
@@ -822,13 +822,13 @@ void ACHMinigun::PullTrigger()
 		Cannon3pAnimInstance->Montage_Play(CannonRotateMontage, 1.f);			
 	}	
 	
-	// not aiming mode
+	// aiming mode
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim)
 	{
 		OwningCharacter->SetAiming(true);
-
+		Fire();
 		// play rotating cannon animation 
 		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHMinigun::Fire, FireInterval, true);	
 	}
@@ -1137,6 +1137,8 @@ void ACHMinigun::Reload()
 			CurrentAmmo = 0;
 		}		
 	}
+
+	FTimerHandle ReloadTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, [this]()
 	{
 		bReloading = false;		

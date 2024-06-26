@@ -826,7 +826,6 @@ void ACHGunRifle::PullTrigger()
 		return;
 	}	
 	if(OwningCharacter->GetNearWall()) return;
-	
 	OwningCharacter->bUseControllerRotationYaw = true;
 	
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
@@ -834,13 +833,17 @@ void ACHGunRifle::PullTrigger()
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::FirstScopeAim)
 	{
+		OwningCharacter->SetAiming(true);
 		if(FireMode == ECHFireMode::FullAuto)
 		{
-			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::Fire, FireInterval, true);			
+			Fire();
+			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &ACHGunRifle::Fire, FireInterval, true);
+			// CH_LOG(LogCHNetwork,Log,TEXT("Fire"));
+			// Fire();
 		}
 		if(FireMode == ECHFireMode::SemiAuto)
 		{
-			Fire();					
+			Fire();
 		}
 	}
 
@@ -1184,6 +1187,7 @@ void ACHGunRifle::LocalReload()
 		}		
 	}
 	
+	FTimerHandle ReloadTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, [this]()
 	{
 		bReloading = false;		
