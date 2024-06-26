@@ -20,6 +20,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/CHPlayerController.h"
 #include "CyberHeist.h"
+#include "Misc/OutputDeviceDebug.h"
 
 
 ACHGunRifle::ACHGunRifle() 
@@ -908,6 +909,7 @@ void ACHGunRifle::CancelPullTrigger()
 
 void ACHGunRifle::StartAim()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::StartAim();
 	if(!bIsEquipped) return;
 	if(bReloading)
@@ -922,8 +924,10 @@ void ACHGunRifle::StartAim()
 
 	if(PlayerCharacter)
 	{
+		CH_LOG(LogCHNetwork, Log, TEXT("SetMappingContextPriority Begin"))
 		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 2);
-	
+		CH_LOG(LogCHNetwork, Log, TEXT("SetMappingContextPriority End"))
+		
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::Third)
 		{
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
@@ -937,10 +941,25 @@ void ACHGunRifle::StartAim()
 			}
 			
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
+			
 			// 로컬
-			PlayerCharacter->SetCoveredAttackMotion(true);
+			/*PlayerCharacter->SetCoveredAttackMotion(true);
 			// 다른 클라(로컬 제외), 솔로면 X
-			if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(true);
+			if(!GetNetMode() == ENetMode::NM_Standalone)
+			{
+				CH_LOG(LogCHNetwork, Log, TEXT("ServerSetCoveredAttackMotion"))
+				PlayerCharacter->ServerSetCoveredAttackMotion(true);
+			}*/
+
+			
+			if(GetNetMode() == ENetMode::NM_Standalone)
+			{
+				PlayerCharacter->SetCoveredAttackMotion(true);
+			}		
+			else
+			{
+				PlayerCharacter->ServerSetCoveredAttackMotion(true);
+			}
 		}
 
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
@@ -971,6 +990,7 @@ void ACHGunRifle::StartAim()
 
 void ACHGunRifle::StopAim()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::StopAim();
 
 	if(!bIsEquipped) return;
@@ -979,19 +999,34 @@ void ACHGunRifle::StopAim()
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if(PlayerCharacter)
 	{
+		CH_LOG(LogCHNetwork, Log, TEXT("SetMappingContextPriority Begin"))
 		PlayerCharacter->SetMappingContextPriority(FireMappingContext, 0);
-	
+		CH_LOG(LogCHNetwork, Log, TEXT("SetMappingContextPriority End"))
+		
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 			|| PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim)
 		{
 			if(PlayerCharacter->GetCovered())
 			{
 				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
-				// 로컬
-				// PlayerCharacter->ReturnCover();
+				/*// 로컬
+				PlayerCharacter->ReturnCover();
 				PlayerCharacter->SetCoveredAttackMotion(false);
 				// 다른 클라(로컬 제외), 솔로면 X	
-				if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(false);
+				if(!GetNetMode() == ENetMode::NM_Standalone)
+				{
+					PlayerCharacter->ServerSetCoveredAttackMotion(false);
+				}*/
+				
+				// 방법 2 
+				if(GetNetMode() == ENetMode::NM_Standalone)
+				{
+					PlayerCharacter->SetCoveredAttackMotion(false);					
+				}
+				else
+				{
+					PlayerCharacter->ServerSetCoveredAttackMotion(false);
+				}
 			}
 			else
 			{
@@ -1038,6 +1073,11 @@ void ACHGunRifle::StartPrecisionAim()
 	{
 		if(PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim)
 		{
+			// 조준 상태인가?
+			if(PlayerCharacter->GetCovered())
+			{
+				
+			}
 			// 조준경 bool 변수 -> 애니메이션에 전달
 			PlayerCharacter->SetTPAimingCloser(true);
 			// 카메라 위치 수정

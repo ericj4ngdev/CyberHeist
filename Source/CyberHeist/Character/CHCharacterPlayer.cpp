@@ -409,8 +409,8 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 		}
 		CurrentCharacterControlType = NewCharacterControlType;
 
-		// FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
-		// CH_LOG(LogCHNetwork, Log, TEXT("%s"), *EnumAsString)
+		FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
+		CH_LOG(LogCHNetwork, Log, TEXT("%s"), *EnumAsString)
 	}
 	else
 	{
@@ -434,7 +434,7 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	ThirdPersonCamera->FieldOfView = CharacterControlData->TP_FieldOfView;
 	FirstPersonCamera->FieldOfView = CharacterControlData->FP_FieldOfView;
 	
-	CameraBoom->SocketOffset = CharacterControlData->SocketOffset;	
+	CameraBoom->SocketOffset = FVector(CharacterControlData->SocketOffset.X,CharacterControlData->SocketOffset.Y * InputVectorDirectionByCamera,CharacterControlData->SocketOffset.Z);
 	CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
 	CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
 	CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
@@ -623,12 +623,7 @@ void ACHCharacterPlayer::LocalCoveredMove(const FInputActionValue& Value)
 	
 	// case 1
 	InputVectorDirectionByCamera = FVector::DotProduct(RightHand.GetSafeNormal(), InputVector.GetSafeNormal()) > 0 ? 1 : -1;
-	// case 2
-	/*InputVectorDirectionByCamera = FVector::DotProduct(RightHand.GetSafeNormal(), InputVector.GetSafeNormal());
-	if(InputVectorDirectionByCamera > 0) InputVectorDirectionByCamera = 1;
-	else if(InputVectorDirectionByCamera < 0) InputVectorDirectionByCamera = -1;*/
 	
-	// UE_LOG(LogTemp, Log, TEXT("InputVectorDirectionByCamera : %f"), InputVectorDirectionByCamera);
 	// 각도에 따라 위치가 달라진다... 그냥 크기 1,0,-1로 고정해야 할 듯.
 	float Range = 150.0f;
 	float Radius = 5.0f;
@@ -770,7 +765,6 @@ void ACHCharacterPlayer::StartCover()
 	// 감지
 	if (HitLowCoverDetected)
 	{
-		bMovetoCover = true;
 		// 엄폐 방향 결정
 		FVector WallParallel = FVector(HitLowCoverResult.ImpactNormal.Y, -HitLowCoverResult.ImpactNormal.X, HitLowCoverResult.ImpactNormal.Z);
 		FVector ActorForward = GetActorForwardVector();
@@ -796,11 +790,12 @@ void ACHCharacterPlayer::StartCover()
 			// 여기만 동기화.
 			if(Distance > 70.0f)
 			{
+				bMovetoCover = true;
 				FTransform TargetTransform;
 				TargetTransform.SetLocation(TargetLocation);
 				TargetTransform.SetRotation(TargetRotation.Quaternion());
-				ServerStartCoverMotion(TargetTransform);			
-				
+				ServerStartCoverMotion(TargetTransform);
+				// 뒤에 자동으로 bMovetoCover = false;
 			}
 			// 도착하면 모션 멈추기...				
 			// Crouch();
@@ -840,11 +835,11 @@ void ACHCharacterPlayer::StartCover()
 			// Play Cover Anim Montage
 			if(Distance > 70.0f)
 			{
+				bMovetoCover = true;
 				FTransform TargetTransform;
 				TargetTransform.SetLocation(TargetLocation);
 				TargetTransform.SetRotation(TargetRotation.Quaternion());
-				ServerStartCoverMotion(TargetTransform);
-											
+				ServerStartCoverMotion(TargetTransform);											
 			}
 			
 			// 엄폐 애니메이션
@@ -898,7 +893,7 @@ void ACHCharacterPlayer::StopCover()
 	// OnCoverState.Broadcast(bHighCovered, bLowCovered);
 	ServerSetCoverState(bHighCovered, bLowCovered);
 	// OnCoverState.Broadcast(false,false);
-
+	InputVectorDirectionByCamera = 1;
 	// 입력 속성 변경(1인칭일 때는 변경 X)
 	if(!bIsFirstPersonPerspective)
 	{
@@ -1299,10 +1294,11 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 		{
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
 			CameraBoom->SocketOffset = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y * InputVectorDirectionByCamera,NewCharacterControl->SocketOffset.Z);
+			
 			float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
 			// CH_LOG(LogCHNetwork, Log, TEXT("MoveDirection : %s Radius : %f"), *MoveDirection.ToString(), Radius)
 			// AddMovementInput(GetActorLocation() + MoveDirection * Radius * 2);
-			SetActorLocation(GetActorLocation() + MoveDirection * Radius * 2);			
+			SetActorLocation(GetActorLocation() + MoveDirection * Radius * 2.5f);			
 			// CH_LOG(LogCHNetwork, Log, TEXT("Aimed Location : %s"), *GetActorLocation().ToString())			
 		}
 		else
@@ -1312,11 +1308,12 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 			float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
 			// CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s "), *LastCoveredRotation.ToString())
 			// AddMovementInput(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
-			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
+			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2.5f);
 			
 			// CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
 			// CH_LOG(LogCHNetwork, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
 			SetActorRotation(LastCoveredRotation);
+			// ReturnCover();
 			// CH_LOG(LogCHNetwork, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())			
 			// CH_LOG(LogCHNetwork, Log, TEXT("UnAimed Location : %s"), *GetActorLocation().ToString())
 		}
@@ -1352,7 +1349,7 @@ void ACHCharacterPlayer::MulticastSetCoveredAttackMotion_Implementation(uint8 bA
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	// 클라 본인 제외
-	if(IsLocallyControlled() && !HasAuthority()) return;
+	// if(IsLocallyControlled() && !HasAuthority()) return;
 	SetCoveredAttackMotion(bAim);
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
@@ -1360,14 +1357,9 @@ void ACHCharacterPlayer::MulticastSetCoveredAttackMotion_Implementation(uint8 bA
 void ACHCharacterPlayer::ServerSetCoveredAttackMotion_Implementation(uint8 bAim)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	// SetCoveredAttackMotion(bAim);	
 	MulticastSetCoveredAttackMotion(bAim);
+	// SetCoveredAttackMotion(bAim);
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
-}
-
-bool ACHCharacterPlayer::ServerSetCoveredAttackMotion_Validate(uint8 bAim)
-{
-	return true;
 }
 
 void ACHCharacterPlayer::SetDead()

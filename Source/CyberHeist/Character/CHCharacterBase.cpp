@@ -629,7 +629,8 @@ void ACHCharacterBase::NextWeapon()
 	if(Inventory.Weapons.Num() == 0) return;
 	// 총을 쏘는 중에 무기 전환 X
 	if(bAiming)	{ return; }
-	if(CurrentWeapon->GetReloading()) return;
+	
+	if(CurrentWeapon && CurrentWeapon->GetReloading()) return;
 	
 	UE_LOG(LogTemp, Log, TEXT("NextWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);
@@ -671,7 +672,7 @@ void ACHCharacterBase::PreviousWeapon()
 {
 	if(Inventory.Weapons.Num() == 0) return;
 	if(bAiming)	{ return; }
-	if(CurrentWeapon->GetReloading()) return;
+	if(CurrentWeapon && CurrentWeapon->GetReloading()) return;
 	
 	UE_LOG(LogTemp, Log, TEXT("PreviousWeapon"));
 	int32 CurrentWeaponIndex = Inventory.Weapons.Find(CurrentWeapon);

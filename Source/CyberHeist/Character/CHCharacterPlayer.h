@@ -205,7 +205,7 @@ public:
 public:	
 	void SetCoveredAttackMotion(uint8 bAim);
 	
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Unreliable)
 	void ServerSetCoveredAttackMotion(uint8 bAim);
 
 	UFUNCTION(NetMulticast, Reliable)
