@@ -440,6 +440,16 @@ void ACHCharacterBase::AddWeaponToInventory(ACHGunBase* NewWeapon, bool bEquipWe
 				return;
 			}
 		}
+
+		// 중복 체크하는 로직. 인벤토리의 무기와 NewWeapon->WeaponType이 같다면 Add하지 않고 return;
+		for (const ACHGunBase* Weapon : Inventory.Weapons)
+		{
+			if (Weapon && Weapon->WeaponType == NewWeapon->WeaponType)
+			{
+				CH_LOG(LogCHNetwork, Log, TEXT("Weapon of same type already exists in inventory"))
+				return; // 같은 타입의 무기가 이미 인벤토리에 있으면 추가하지 않음
+			}
+		}
 		
 		Inventory.Weapons.Add(NewWeapon);
 		// SetCurrentWeapon(NewWeapon, CurrentWeapon);		// 서버에서 호출이라 
