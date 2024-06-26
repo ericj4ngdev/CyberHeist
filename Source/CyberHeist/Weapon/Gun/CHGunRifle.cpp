@@ -827,7 +827,8 @@ void ACHGunRifle::PullTrigger()
 		return;
 	}	
 	if(OwningCharacter->GetNearWall()) return;
-	OwningCharacter->bUseControllerRotationYaw = true;
+	// 엄폐중이면 안되게 하기
+	if(!OwningCharacter->GetCovered()){	OwningCharacter->bUseControllerRotationYaw = true;}
 	
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
 		|| OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdPrecisionAim

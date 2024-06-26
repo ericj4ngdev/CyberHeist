@@ -501,7 +501,6 @@ void ACHCharacterPlayer::Jump()
 	{
 		return;
 	}
-
 	
 	// 엄폐 중
 	if(bCovered)

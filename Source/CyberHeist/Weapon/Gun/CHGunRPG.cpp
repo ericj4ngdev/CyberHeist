@@ -411,7 +411,8 @@ void ACHGunRPG::PullTrigger()
 	MissileMesh3P->SetVisibility(false);
 	
 	if(OwningCharacter->GetNearWall()) return;
-	OwningCharacter->bUseControllerRotationYaw = true;
+	// 엄폐중이면 안되게 하기
+	if(!OwningCharacter->GetCovered()){	OwningCharacter->bUseControllerRotationYaw = true;}
 
 	// not aiming mode
 	if (OwningCharacter->CurrentCharacterControlType == ECharacterControlType::ThirdAim
