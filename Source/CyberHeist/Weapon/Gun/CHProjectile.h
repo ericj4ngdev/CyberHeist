@@ -85,10 +85,8 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UParticleSystem> Tracer;
-
-	FTimerHandle DestroyTimer;
+	TObjectPtr<UParticleSystem> Tracer;	
 
 	UPROPERTY(EditAnywhere)
-	float DestroyTime = 3.f;
+	float DestroyTime = 4.f;
 };

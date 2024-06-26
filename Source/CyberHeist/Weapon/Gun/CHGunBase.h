@@ -359,6 +359,10 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Replicated, Category = "Properties|State")
 	uint8 bHoldGun : 1;
+
+public:
+	uint8 GetReloading() {return bReloading;}
+	
 	
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

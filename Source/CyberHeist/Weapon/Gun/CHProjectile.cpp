@@ -60,11 +60,13 @@ void ACHProjectile::BeginPlay()
 	if (HasAuthority())
 	{
 		CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ACHProjectile::OnHit);
+		StartDestroyTimer();
 	}	
 }
 
 void ACHProjectile::StartDestroyTimer()
 {
+	FTimerHandle DestroyTimer;
 	GetWorldTimerManager().SetTimer(
 		DestroyTimer,
 		this,
@@ -122,7 +124,7 @@ void ACHProjectile::ExplodeDamage()
 void ACHProjectile::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	Destroy();
+	Destroyed();
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
