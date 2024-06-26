@@ -2,20 +2,10 @@
 
 
 #include "AI/CHJuggernautAIController.h"
-
-#include "Navigation/CrowdFollowingComponent.h"
-
-
-#include <ObjectArray.h>
-
-#include "BehaviorTree/BehaviorTree.h"
-#include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "CHAI.h"
-#include "Character/CHCharacterBase.h"
 #include "Character/CHCharacterPlayer.h"
 #include "Kismet/KismetMathLibrary.h"
-
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Hearing.h"

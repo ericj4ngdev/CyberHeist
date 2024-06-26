@@ -185,7 +185,7 @@ USkeletalMeshComponent* ACHCharacterBase::GetThirdPersonMesh() const
 
 void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	// Pawn
 	bUseControllerRotationYaw = CharacterControlData->bUseControllerRotationYaw;
 	bUseControllerRotationPitch = CharacterControlData->bUseControllerRotationPitch;
@@ -196,7 +196,7 @@ void ACHCharacterBase::SetCharacterControlData(const UCHCharacterControlData* Ch
 	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
 	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
 
-	CH_LOG(LogCHNetwork, Log, TEXT("End"))	
+	// CH_LOG(LogCHNetwork, Log, TEXT("End"))	
 }
 
 void ACHCharacterBase::SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority)

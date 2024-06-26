@@ -497,7 +497,9 @@ void ACHGunRPG::StartAim()
 		}
 		
 		PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
+		// 로컬
 		PlayerCharacter->SetCoveredAttackMotion(true);
+		// 다른 클라(로컬 제외)		
 		if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(true);
 	}
 
@@ -545,8 +547,15 @@ void ACHGunRPG::StopAim()
 			if(PlayerCharacter->GetCovered())
 			{
 				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
-				PlayerCharacter->ReturnCover();
-				PlayerCharacter->SetCoveredAttackMotion(false);			
+				/*// PlayerCharacter->ReturnCover();
+				// PlayerCharacter->SetCoveredAttackMotion(false);
+				if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(false);*/
+
+				// 로컬
+				// PlayerCharacter->ReturnCover();
+				PlayerCharacter->SetCoveredAttackMotion(false);
+				// 다른 클라(로컬 제외)		
+				if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(false);
 			}
 			else
 			{

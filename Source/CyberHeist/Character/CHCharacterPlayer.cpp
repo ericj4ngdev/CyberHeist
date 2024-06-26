@@ -337,7 +337,7 @@ void ACHCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterControlType)
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	
 	// 다른 클라는 PlayerController가 없기 때문
 	// 서버, 클라 본인 (다른 클라는 안됨)
@@ -362,7 +362,7 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 		// 3인칭 엄폐->1일때는 왜 문제지?
 		if(bIsFirstPersonPerspective)
 		{
-			CH_LOG(LogCHNetwork, Log, TEXT("1pp"))
+			// CH_LOG(LogCHNetwork, Log, TEXT("1pp"))
 			// 서버 CCD는 3인칭 엄폐.. 인가??
 			bUseControllerRotationYaw = true;
 			bUseControllerRotationPitch = true;
@@ -405,21 +405,21 @@ void ACHCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 		}
 		CurrentCharacterControlType = NewCharacterControlType;
 
-		FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
-		CH_LOG(LogCHNetwork, Log, TEXT("%s"), *EnumAsString)
+		// FString EnumAsString = UEnum::GetValueAsString<ECharacterControlType>(CurrentCharacterControlType);
+		// CH_LOG(LogCHNetwork, Log, TEXT("%s"), *EnumAsString)
 	}
 	else
 	{
 		CH_LOG(LogCHNetwork, Log, TEXT("No Controller"))
 	}
 
-	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("End"))
 	// UE_LOG(LogTemp, Log, TEXT("CurrentCharacterControlType : %s"), CurrentCharacterControlType)
 }
 
 void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* CharacterControlData)
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	Super::SetCharacterControlData(CharacterControlData);
 
 	FirstPersonCamera->bUsePawnControlRotation = CharacterControlData->bFPP_UsePawnControlRotation;
@@ -438,7 +438,7 @@ void ACHCharacterPlayer::SetCharacterControlData(const UCHCharacterControlData* 
 	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
 	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
 	CameraBoom->bDoCollisionTest = CharacterControlData->bDoCollisionTest;
-	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
 void ACHCharacterPlayer::SetMappingContextPriority(const UInputMappingContext* MappingContext, int32 Priority)
@@ -467,18 +467,18 @@ void ACHCharacterPlayer::SetMappingContextPriority(const UInputMappingContext* M
 
 void ACHCharacterPlayer::MulticastRPC_SetCharacterControl_Implementation(ECharacterControlType NewCharacterControlType)
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	
 	SetCharacterControl(NewCharacterControlType);		
 	
-	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
 void ACHCharacterPlayer::ServerRPC_SetCharacterControl_Implementation(ECharacterControlType NewCharacterControlType)
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
 	MulticastRPC_SetCharacterControl(NewCharacterControlType);
-	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+	// CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
 
 bool ACHCharacterPlayer::ServerRPC_SetCharacterControl_Validate(ECharacterControlType NewCharacterControlType)
@@ -914,11 +914,11 @@ void ACHCharacterPlayer::StopCover()
 
 void ACHCharacterPlayer::ReturnCover()
 {
-	CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
+	// CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
 	
-	CH_LOG(LogCHNetwork, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
+	// CH_LOG(LogCHNetwork, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
 	SetActorRotation(LastCoveredRotation);
-	CH_LOG(LogCHNetwork, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())
+	// CH_LOG(LogCHNetwork, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())
 	
 }
 
@@ -1266,13 +1266,13 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 		if(bAim)
 		{
 			UnCrouch();
-			CH_LOG(LogCHNetwork, Log, TEXT("UnCrouch"))
+			// CH_LOG(LogCHNetwork, Log, TEXT("UnCrouch"))
 		}
 		else
 		{
 			Crouch();
 			ReturnCover();
-			CH_LOG(LogCHNetwork, Log, TEXT("Crouch"))
+			// CH_LOG(LogCHNetwork, Log, TEXT("Crouch"))
 		}
 		break;
 	case ECoverState::High:
@@ -1282,11 +1282,10 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
 			CameraBoom->SocketOffset = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y * InputVectorDirectionByCamera,NewCharacterControl->SocketOffset.Z);
 			float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
-			CH_LOG(LogCHNetwork, Log, TEXT("MoveDirection : %s Radius : %f"), *MoveDirection.ToString(), Radius)
+			// CH_LOG(LogCHNetwork, Log, TEXT("MoveDirection : %s Radius : %f"), *MoveDirection.ToString(), Radius)
 			// AddMovementInput(GetActorLocation() + MoveDirection * Radius * 2);
-			SetActorLocation(GetActorLocation() + MoveDirection * Radius * 2);
-			// 도는 방향 정하기
-			CH_LOG(LogCHNetwork, Log, TEXT("Aimed Location : %s"), *GetActorLocation().ToString())			
+			SetActorLocation(GetActorLocation() + MoveDirection * Radius * 2);			
+			// CH_LOG(LogCHNetwork, Log, TEXT("Aimed Location : %s"), *GetActorLocation().ToString())			
 		}
 		else
 		{
@@ -1297,13 +1296,11 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 			// AddMovementInput(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
 			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
 			
-			CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
-			CH_LOG(LogCHNetwork, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
+			// CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
+			// CH_LOG(LogCHNetwork, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
 			SetActorRotation(LastCoveredRotation);
-			CH_LOG(LogCHNetwork, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())
-
-			
-			CH_LOG(LogCHNetwork, Log, TEXT("UnAimed Location : %s"), *GetActorLocation().ToString())
+			// CH_LOG(LogCHNetwork, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())			
+			// CH_LOG(LogCHNetwork, Log, TEXT("UnAimed Location : %s"), *GetActorLocation().ToString())
 		}
 		break;
 	case ECoverState::None:
@@ -1336,6 +1333,8 @@ bool ACHCharacterPlayer::ServerSetMoveDirection_Validate(FVector NewMoveDirectio
 void ACHCharacterPlayer::MulticastSetCoveredAttackMotion_Implementation(uint8 bAim)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	// 클라 본인 제외
+	if(IsLocallyControlled() && !HasAuthority()) return;
 	SetCoveredAttackMotion(bAim);
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }
@@ -1343,7 +1342,7 @@ void ACHCharacterPlayer::MulticastSetCoveredAttackMotion_Implementation(uint8 bA
 void ACHCharacterPlayer::ServerSetCoveredAttackMotion_Implementation(uint8 bAim)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	// SetCoveredAttackMotion(bAim);
+	// SetCoveredAttackMotion(bAim);	
 	MulticastSetCoveredAttackMotion(bAim);
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
 }

@@ -98,67 +98,6 @@ void ACHGunRifle::BeginPlay()
 void ACHGunRifle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	/*if(OwningCharacter)
-	{
-		if(ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter))
-		{
-			// if(CHPlayer == nullptr) return;
-			// 클라만 그리기
-			if(OwningCharacter->HasAuthority()) return;
-		
-			/*if (MuzzleCollision1P)
-			{
-				// 캡슐의 위치와 방향 설정
-				FVector CapsuleLocation = MuzzleCollision1P->GetComponentLocation();
-				FRotator CapsuleRotation = MuzzleCollision1P->GetComponentRotation();
-
-				// 캡슐의 반지름과 높이 설정
-				float CapsuleRadius = MuzzleCollision1P->GetScaledCapsuleRadius();
-				float CapsuleHalfHeight = MuzzleCollision1P->GetScaledCapsuleHalfHeight();
-
-				// Trace 시작점과 끝점 설정
-				FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
-				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
-		
-				FHitResult HitResult;
-				FCollisionQueryParams Params(FName(TEXT("Cover")), true, this);
-				Params.AddIgnoredActor(this);
-				Params.AddIgnoredActor(GetOwner());
-
-				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
-				
-				FColor DrawColor = HitDetected ? FColor::Green : FColor::Blue;
-				// Debug 캡슐 그리기
-				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
-			}#1#
-			if (MuzzleCollision3P)
-			{
-				// 캡슐의 위치와 방향 설정
-				FVector CapsuleLocation = MuzzleCollision3P->GetComponentLocation();
-				FRotator CapsuleRotation = MuzzleCollision3P->GetComponentRotation();
-
-				// 캡슐의 반지름과 높이 설정
-				float CapsuleRadius = MuzzleCollision3P->GetScaledCapsuleRadius();
-				float CapsuleHalfHeight = MuzzleCollision3P->GetScaledCapsuleHalfHeight();
-
-				// Trace 시작점과 끝점 설정
-				FVector Start = CapsuleLocation - FVector(0, 0, CapsuleHalfHeight);
-				FVector End = CapsuleLocation + FVector(0, 0, CapsuleHalfHeight);
-		
-				FHitResult HitResult;
-				FCollisionQueryParams Params(FName(TEXT("Cover")), true, this);
-				Params.AddIgnoredActor(this);
-				Params.AddIgnoredActor(GetOwner());
-				
-				bool HitDetected = GetWorld()->SweepSingleByChannel(HitResult, Start, End,FQuat::Identity, ECC_GameTraceChannel1, FCollisionShape::MakeSphere(CapsuleRadius), Params);
-				
-				FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-				// Debug 캡슐 그리기
-				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
-			}
-		}
-	}*/
 }
 
 void ACHGunRifle::Equip()
@@ -180,7 +119,7 @@ void ACHGunRifle::Equip()
 	{
 		WeaponMesh1P->AttachToComponent(OwningCharacter->GetFirstPersonMesh(), AttachmentRules, AttachPoint1P);		// 여기 npc가 총 들떄, 분명 null이라 에러 뜰텐데 
 		WeaponMesh1P->SetRelativeRotation(FRotator(0, 0, -90.0f));
-		if(!HasAuthority() && OwningCharacter->IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)
+		if((!HasAuthority() && OwningCharacter->IsLocallyControlled()) || GetNetMode() == ENetMode::NM_Standalone)
 		{
 			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 			{
@@ -204,7 +143,7 @@ void ACHGunRifle::Equip()
 		
 		WeaponMesh3P->CastShadow = true;
 		WeaponMesh3P->bCastHiddenShadow = true;
-		if(!HasAuthority() && OwningCharacter->IsLocallyControlled() || GetNetMode() == ENetMode::NM_Standalone)
+		if((!HasAuthority() && OwningCharacter->IsLocallyControlled()) || GetNetMode() == ENetMode::NM_Standalone)
 		{
 			if(OwningCharacter->CurrentCharacterControlType == ECharacterControlType::First)
 			{
@@ -995,7 +934,9 @@ void ACHGunRifle::StartAim()
 			}
 			
 			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
+			// 로컬
 			PlayerCharacter->SetCoveredAttackMotion(true);
+			// 다른 클라(로컬 제외), 솔로면 X
 			if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(true);
 		}
 
@@ -1043,11 +984,11 @@ void ACHGunRifle::StopAim()
 			if(PlayerCharacter->GetCovered())
 			{
 				PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdCover);
-				// PlayerCharacter->ReturnCover();			// 이것도 동기화.
-				// PlayerCharacter->ServerSetActorRotation
-				PlayerCharacter->ServerSetCoveredAttackMotion(false);	// 서버에서 return
-				// PlayerCharacter->SetCoveredAttackMotion(false);			// 얘가 가장 먼저 실행됨... 해서 클라만 먼저 돈다. 그런데 제대로 못돈다... 
-				// 이 후 LastCoveredRotation는 동기화됨
+				// 로컬
+				// PlayerCharacter->ReturnCover();
+				PlayerCharacter->SetCoveredAttackMotion(false);
+				// 다른 클라(로컬 제외), 솔로면 X	
+				if(!GetNetMode() == ENetMode::NM_Standalone) PlayerCharacter->ServerSetCoveredAttackMotion(false);
 			}
 			else
 			{
