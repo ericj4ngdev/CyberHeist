@@ -911,7 +911,7 @@ void ACHGunRifle::CancelPullTrigger()
 void ACHGunRifle::StartAim()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	
+	if (!bCoolDown) return; // 쿨다운 중이면 조준 불가
 	Super::StartAim();
 	
 	if(!bIsEquipped) return;
@@ -982,8 +982,9 @@ void ACHGunRifle::StartAim()
 void ACHGunRifle::StopAim()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	if(!bIsEquipped) return;
+	
 	Super::StopAim();
+	if(!bIsEquipped) return;
 
 	bHoldGun = true;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);

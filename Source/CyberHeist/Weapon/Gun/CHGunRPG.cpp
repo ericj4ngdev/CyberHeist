@@ -473,6 +473,7 @@ void ACHGunRPG::CancelPullTrigger()
 
 void ACHGunRPG::StartAim()
 {
+	if (!bCoolDown) return; // 쿨다운 중이면 조준 불가
 	Super::StartAim();
 
 	if(!bIsEquipped) return;

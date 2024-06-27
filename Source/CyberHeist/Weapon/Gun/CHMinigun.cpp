@@ -884,6 +884,7 @@ void ACHMinigun::CancelPullTrigger()
 
 void ACHMinigun::StartAim()
 {
+	if (!bCoolDown) return; // 쿨다운 중이면 조준 불가
 	if(!bIsEquipped) return;
 	if(bReloading)
 	{
