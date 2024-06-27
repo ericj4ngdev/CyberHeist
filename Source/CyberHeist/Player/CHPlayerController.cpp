@@ -188,6 +188,9 @@ void ACHPlayerController::OnRestart()
 	{
 		// If the controller is already on the server, reset the level directly
 		ACHGameMode* CHGameMode = Cast<ACHGameMode>(GetWorld()->GetAuthGameMode());
+		
+		ACHPlayerState* CHPlayerState = GetPlayerState<ACHPlayerState>();
+		// CHPlayerState->ResetKilledEnemyCount();
 		if (CHGameMode)
 		{
 			CHGameMode->ResetLevel();
