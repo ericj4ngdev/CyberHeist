@@ -361,6 +361,11 @@ void ACHGameMode::RequestRestartGame(ACharacter* ResetCharacter)
 		ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller);
 		if (PlayerController)
 		{
+			// 추가
+			PlayerController->SetIgnoreMoveInput(false);
+			PlayerController->SetIgnoreLookInput(false);
+
+			// 
 			PlayerController->ClientSetResultScreen();
 			RestartPlayer(PlayerController);
 			// PlayerController->SetPlayerInvincible(false);

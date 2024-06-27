@@ -37,6 +37,7 @@ void ACHPlayerController::BeginPlay()
 
 	CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("End"))
 	FInputModeGameOnly GameOnlyInputMode;
+	// GameOnlyInputMode.SetMouseLockMode(EMouseLockMode::DoNotLock);
 	SetInputMode(GameOnlyInputMode);
 
 	/*if(IsLocalController())
@@ -135,7 +136,7 @@ void ACHPlayerController::ShowResult(uint8 bWin)
 	if (GetPawn())
 	{
 		ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(GetPawn());
-		if(CHPlayer)
+		if(CHPlayer && CHPlayer->GetCurrentWeapon())
 		{
 			// CHPlayer->GetCurrentWeapon()->DisableInput();
 			CHPlayer->GetCurrentWeapon()->DisableWeaponInput();
@@ -175,6 +176,7 @@ void ACHPlayerController::SetResultScreen()
 	SetShowMouseCursor(false);
 	
 	FInputModeGameOnly GameOnlyInputMode;
+	// GameOnlyInputMode.SetMouseLockMode(EMouseLockMode::DoNotLock);
 	SetInputMode(GameOnlyInputMode);
 
 	CHResultWidget->SetVisibility(ESlateVisibility::Hidden);
