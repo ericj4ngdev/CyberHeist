@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "Weapon/Gun/CHGunBase.h"
+#include "Components/TimelineComponent.h"
 #include "CHGunRifle.generated.h"
 
 /**
@@ -50,4 +51,38 @@ public:
 		
 	UPROPERTY()
 	TObjectPtr<class AActor> AttackTargetActor;
+
+protected:
+	UFUNCTION()
+	void SetCoverAimRightValue(float Output);
+	UFUNCTION()
+	void SetCoverAimLeftValue(float Output);
+	void CoverAimRight();
+	void CoverAimRightRelease();
+	void CoverAimLeft();
+	void CoverAimLeftRelease();
+
+	UPROPERTY(EditAnywhere, Category = "Cover System") // Timeline 생성
+	FTimeline CoverAimLeftTimeline;
+	
+	UPROPERTY(EditAnywhere, Category = "Cover System") // Timeline 생성
+	FTimeline CoverAimRightTimeline;
+
+	UPROPERTY(EditAnywhere, Category = "Cover System") // Timeline 커브
+	TObjectPtr<UCurveFloat> CoverAimCurveFloat;
+
+	FVector CameraCurrentPosition;
+	FVector CameraDesiredPosition;
+	FRotator CameraCurrentRotation;
+	FRotator CameraDesiredRotation;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Cover System")
+	uint8 bCoverLeft : 1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Category = "Cover System")
+	uint8 bCoverRight : 1;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	// ======================== Base
+	
+	
 };

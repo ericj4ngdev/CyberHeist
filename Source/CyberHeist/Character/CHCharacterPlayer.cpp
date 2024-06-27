@@ -1272,6 +1272,14 @@ void ACHCharacterPlayer::SetPerspective(uint8 Is1PPerspective)
 void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+
+	// 이미 이동 중인 경우에는 새로운 이동을 시작하지 않도록 합니다.
+	/*if (bIsMovingToLocation)
+	{
+		CH_LOG(LogCHNetwork, Log, TEXT("Already moving to location"))
+		return;
+	}*/
+	FVector NewLocation;
 	switch (CHAnimInstance->GetCurrentCoverState())
 	{
 	case ECoverState::Low:
@@ -1292,30 +1300,25 @@ void ACHCharacterPlayer::SetCoveredAttackMotion(uint8 bAim)
 		if(bAim)
 		{
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
+
+			// 카메라 이동
 			CameraBoom->SocketOffset = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y * InputVectorDirectionByCamera,NewCharacterControl->SocketOffset.Z);
-			
+
+			// 캐릭터 이동 
 			float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
-			// CH_LOG(LogCHNetwork, Log, TEXT("MoveDirection : %s Radius : %f"), *MoveDirection.ToString(), Radius)
-			// AddMovementInput(GetActorLocation() + MoveDirection * Radius * 2);
-			SetActorLocation(GetActorLocation() + MoveDirection * Radius * 2.5f);			
-			// CH_LOG(LogCHNetwork, Log, TEXT("Aimed Location : %s"), *GetActorLocation().ToString())			
+			NewLocation = GetActorLocation() + MoveDirection * Radius * 2.5f;
+			// SetActorLocation(GetActorLocation() + MoveDirection * Radius * 2.5f);
 		}
 		else
 		{
 			UCHCharacterControlData* NewCharacterControl = CharacterControlManager[ECharacterControlType::ThirdCover];
 			CameraBoom->SocketOffset = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y * InputVectorDirectionByCamera,NewCharacterControl->SocketOffset.Z);
 			float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
-			// CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s "), *LastCoveredRotation.ToString())
-			// AddMovementInput(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2);
-			SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2.5f);
+			NewLocation = GetActorLocation() - MoveDirection * Radius * 2.5f;
+			// SetActorLocation(GetActorLocation() - MoveDirection * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2.5f);
 			
-			// CH_LOG(LogCHNetwork, Log, TEXT("LastCoveredRotation : %s"), *LastCoveredRotation.ToString())
-			// CH_LOG(LogCHNetwork, Log, TEXT("Before ActorRotation : %s"), *GetActorRotation().ToString())
 			SetActorRotation(LastCoveredRotation);
-			// ReturnCover();
-			// CH_LOG(LogCHNetwork, Log, TEXT("After ActorRotation : %s"), *GetActorRotation().ToString())			
-			// CH_LOG(LogCHNetwork, Log, TEXT("UnAimed Location : %s"), *GetActorLocation().ToString())
-		}
+		}		
 		break;
 	case ECoverState::None:
 		break;
@@ -1359,6 +1362,28 @@ void ACHCharacterPlayer::ServerSetCoveredAttackMotion_Implementation(uint8 bAim)
 	MulticastSetCoveredAttackMotion(bAim);
 	// SetCoveredAttackMotion(bAim);
 	CH_LOG(LogCHNetwork, Log, TEXT("End"))
+}
+
+void ACHCharacterPlayer::UpdateLocationLerp()
+{
+	CurrentLerpTime += GetWorld()->GetDeltaSeconds();
+	float Alpha = FMath::Clamp(CurrentLerpTime / MoveDuration, 0.0f, 1.0f);
+
+	// Lerp를 사용하여 캐릭터 위치를 업데이트합니다.
+	FVector NewLocation = FMath::Lerp(StartLocation, TargetCoverLocation, Alpha);
+	SetActorLocation(NewLocation);
+
+	if (Alpha >= 1.0f)
+	{
+		FinishMoveToLocation();
+	}
+}
+
+void ACHCharacterPlayer::FinishMoveToLocation()
+{
+	// 타이머를 정지하고 이동 상태를 초기화합니다.
+	GetWorld()->GetTimerManager().ClearTimer(MoveToLocationTimerHandle);
+	// bIsMovingToLocation = false;
 }
 
 void ACHCharacterPlayer::SetDead()

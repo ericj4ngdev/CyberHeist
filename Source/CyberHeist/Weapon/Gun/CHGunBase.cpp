@@ -492,11 +492,25 @@ void ACHGunBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(ACHGunBase, CurrentAmmo);
 	DOREPLIFETIME(ACHGunBase, MaxAmmoCapacity);
 	DOREPLIFETIME(ACHGunBase, bInfiniteAmmo);
+
+	DOREPLIFETIME(ACHGunBase, PlayerRotation);
+	DOREPLIFETIME(ACHGunBase, PlayerLocation);
+	
 }
 
 void ACHGunBase::OnRep_Owner()
 {
 	Super::OnRep_Owner();
+}
+
+void ACHGunBase::ServerSetPlayerLocation_Implementation(FVector NewLocation)
+{
+	PlayerLocation = NewLocation;
+}
+
+void ACHGunBase::ServerSetPlayerRotation_Implementation(float NewRotation)
+{
+	PlayerRotation = NewRotation;
 }
 
 void ACHGunBase::MulticastRPCFire_Implementation(const FVector& HitLocation, const FTransform& MuzzleTransform)

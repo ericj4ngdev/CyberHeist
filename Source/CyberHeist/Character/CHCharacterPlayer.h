@@ -149,6 +149,8 @@ protected:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CharacterHalfHeight;
+
+	FRotator GetLastCoveredRotation(){return LastCoveredRotation;}
 	
 	void ReturnCover();
 protected:
@@ -238,6 +240,17 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Cover System")
 	uint8 bMovetoCover;
+
+private:
+	FTimerHandle MoveToLocationTimerHandle;
+	FVector TargetCoverLocation;
+	FVector StartLocation;
+	float MoveDuration;
+	float CurrentLerpTime;
+	uint8 bIsMovingToLocation;
+
+	void UpdateLocationLerp();
+	void FinishMoveToLocation();
 	
 public:
 	UFUNCTION(BlueprintCallable)

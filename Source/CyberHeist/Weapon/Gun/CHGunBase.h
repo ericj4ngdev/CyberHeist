@@ -382,4 +382,23 @@ public:
 
 	UFUNCTION()
 	void OnRep_CanAttack();*/
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = Aim)
+	float PlayerRotation;
+
+	UFUNCTION(Server, Unreliable)
+	void ServerSetPlayerRotation(float NewRotation);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category = Aim)
+	FVector PlayerLocation;
+	
+	UFUNCTION(Server, Unreliable)
+	void ServerSetPlayerLocation(FVector NewLocation);
+	
+	FRotator CurrentPlayerRotation;
+	FRotator DesiredPlayerRotation;
+	FVector CurrentPlayerLocation;
+	FVector DesiredPlayerLocation;
+	
 };
