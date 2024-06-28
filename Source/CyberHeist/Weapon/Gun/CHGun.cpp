@@ -338,7 +338,7 @@ void ACHGun::FireLine()
 	if (bSuccess)
 	{
 		FVector ShotDirection = -Rotation.Vector();
-		DrawDebugPoint(GetWorld(), Hit.Location, 20, FColor::Red, true);
+		DrawDebugPoint(GetWorld(), Hit.Location, 5, FColor::Red, true);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),ImpactEffect, Hit.Location, ShotDirection.Rotation());
 
 		AActor* HitActor = Hit.GetActor();

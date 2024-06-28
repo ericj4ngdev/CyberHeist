@@ -306,7 +306,7 @@ void ACHMinigun::Fire()
 	FVector TraceEnd = TraceStart + Rotation.Vector() * MaxRange;
 	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
 	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
-	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 3, FColor::Red, false, 2);
 	
 	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
 	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
@@ -400,7 +400,7 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FTransform& MuzzleT
 	if(PlayerCharacter->HasAuthority())
 	{
 		DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
-		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);
+		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Blue, false, 2);
 	}
 	
 	AController* OwnerController = OwnerPawn->GetController();
@@ -641,7 +641,7 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
 		{
 			// FVector ShotDirection = -Rotation.Vector();
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			ACHCharacterPlayer* CharacterPlayer = Cast<ACHCharacterPlayer>(MuzzleLaserHit.GetActor());
@@ -728,7 +728,7 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 			UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(MuzzleLaserHit.GetActor()));
 			// FVector ShotDirection = -Rotation.Vector();
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 
 			ACHCharacterPlayer* CharacterPlayer = Cast<ACHCharacterPlayer>(MuzzleLaserHit.GetActor());
