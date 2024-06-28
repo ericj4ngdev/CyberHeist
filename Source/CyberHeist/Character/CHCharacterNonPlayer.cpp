@@ -29,7 +29,7 @@ void ACHCharacterNonPlayer::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	FVector Start = GetActorUpVector() * 10.0f + GetActorLocation();
 	FVector End = GetActorForwardVector() * 50.0f + Start;
-	DrawDebugDirectionalArrow(GetWorld(),Start, End, 10.0f, FColor::Red, false, -1, 0 ,10.0f);	
+	// DrawDebugDirectionalArrow(GetWorld(),Start, End, 10.0f, FColor::Red, false, -1, 0 ,10.0f);	
 }
 
 void ACHCharacterNonPlayer::SetDead()

@@ -268,19 +268,19 @@ void ACHGunRifle::Fire()
 
 	if(OwningCharacter->HasAuthority())
 	{
-		DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);		
+		// DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);		
 	}
 	
 	if(bScreenLaserSuccess)
 	{		
-		DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 3, FColor::Red, false, 2);
+		// DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 3, FColor::Red, false, 2);
 	}
 	else
 	{
 		// 허공에 쏴서 맞는 게 없다면
 		CH_LOG(LogCHNetwork, Warning, TEXT("Sky"))
 		ScreenLaserHit.Location = TraceEnd;
-		DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 3, FColor::Red, false, 2);
+		// DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 3, FColor::Red, false, 2);
 	}
 	
 	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
@@ -368,8 +368,8 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 	if(PlayerCharacter->HasAuthority())
 	{
 		// 그리는 건 서버에서만 그린다.... 
-		DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
-		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 5, FColor::Blue, false, 2);			
+		// DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
+		// DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 5, FColor::Blue, false, 2);			
 	}
 
 	AController* OwnerController = OwnerPawn->GetController();		
@@ -603,10 +603,10 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		if (bSuccess)
 		{
 			// FVector ShotDirection = -Rotation.Vector();
-			DrawDebugPoint(GetWorld(), TraceStart, 3, FColor::Red, true);			
+			// DrawDebugPoint(GetWorld(), TraceStart, 3, FColor::Red, true);			
 			// DrawDebugDirectionalArrow(GetWorld(), ControllingPawn->GetActorLocation(), End,5.0f, FColor::Yellow, false, 1, 0, 1.0f);
-			DrawDebugDirectionalArrow(GetWorld(), TraceStart, MuzzleLaserHit.Location,5.0f, FColor::Red, false, 1, 0, 1.0f);
-			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
+			// DrawDebugDirectionalArrow(GetWorld(), TraceStart, MuzzleLaserHit.Location,5.0f, FColor::Red, false, 1, 0, 1.0f);
+			// DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			// 맞은 부위 효과
@@ -694,7 +694,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 	
 		if (bSuccess)
 		{
-			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
+			// DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			// 맞은 부위 효과
