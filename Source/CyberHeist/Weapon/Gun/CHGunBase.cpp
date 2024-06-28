@@ -62,6 +62,8 @@ ACHGunBase::ACHGunBase()
 	CoveredAimDelay = 0.1f;
 }
 
+
+
 // Called when the game starts or when spawned
 void ACHGunBase::BeginPlay()
 {
