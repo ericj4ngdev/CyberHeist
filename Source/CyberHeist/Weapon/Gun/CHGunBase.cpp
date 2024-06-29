@@ -57,7 +57,12 @@ ACHGunBase::ACHGunBase()
 	
 	bReloading = false;	
 	bHoldGun = true;
+
+	bCoolDown = true;
+	CoveredAimDelay = 0.1f;
 }
+
+
 
 // Called when the game starts or when spawned
 void ACHGunBase::BeginPlay()
@@ -372,7 +377,7 @@ void ACHGunBase::SetWeaponMeshVisibility(uint8 bVisible)
 }
 
 void ACHGunBase::StartAim()
-{
+{	
 	if(OwningCharacter)
 	{
 		// 총의 IMC를 기존 플레이어 IMC 보다 높게 하기
@@ -387,6 +392,19 @@ void ACHGunBase::StartAim()
 
 void ACHGunBase::StopAim()
 {
+	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
+	if(bCoolDown)
+	{
+		bCoolDown = false; // 쿨다운 시작
+		CH_LOG(LogCHNetwork, Log, TEXT("bCoolDown : %d"),bCoolDown )
+	
+		// 누를 떄마다 false가 되니... 계속 못쏜다.
+		
+	
+		// 타이머 설정
+		GetWorld()->GetTimerManager().SetTimer(CoolDownTimerHandle, this, &ACHGunBase::CoolDownFinished, CoveredAimDelay, false);
+	}
+	
 	ServerStopAim();
 }
 
@@ -411,6 +429,14 @@ void ACHGunBase::Reload()
 
 void ACHGunBase::LocalReload()
 {
+	
+}
+
+void ACHGunBase::CoolDownFinished()
+{
+	
+	bCoolDown = true;
+	CH_LOG(LogCHNetwork, Log, TEXT("bCoolDown : %d"),bCoolDown )
 }
 
 void ACHGunBase::MulticastReload_Implementation()
@@ -493,24 +519,12 @@ void ACHGunBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(ACHGunBase, MaxAmmoCapacity);
 	DOREPLIFETIME(ACHGunBase, bInfiniteAmmo);
 
-	DOREPLIFETIME(ACHGunBase, PlayerRotation);
-	DOREPLIFETIME(ACHGunBase, PlayerLocation);
-	
+	DOREPLIFETIME(ACHGunBase, bCoolDown);
 }
 
 void ACHGunBase::OnRep_Owner()
 {
 	Super::OnRep_Owner();
-}
-
-void ACHGunBase::ServerSetPlayerLocation_Implementation(FVector NewLocation)
-{
-	PlayerLocation = NewLocation;
-}
-
-void ACHGunBase::ServerSetPlayerRotation_Implementation(float NewRotation)
-{
-	PlayerRotation = NewRotation;
 }
 
 void ACHGunBase::MulticastRPCFire_Implementation(const FVector& HitLocation, const FTransform& MuzzleTransform)

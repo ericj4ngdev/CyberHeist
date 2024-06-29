@@ -170,7 +170,21 @@ void ACHGameMode::ResetLevel()
 {
 	Super::ResetLevel();
 	CleanUpLevel();
-	CustomResetLevel();	
+	CustomResetLevel();
+
+	for (APlayerController* PlayerController : TActorRange<APlayerController>(GetWorld()))
+	{
+		if (PlayerController)
+		{
+			ACHPlayerController* CHPlayerController = Cast<ACHPlayerController>(PlayerController);
+			ACHPlayerState* CHPlayerState = CHPlayerController->GetPlayerState<ACHPlayerState>();
+			if (IsValid(CHPlayerController) && IsValid(CHPlayerState))
+			{
+				// 초기화
+				CHPlayerState->ResetKilledEnemyCount();				
+			}
+		}
+	}
 }
 
 void ACHGameMode::SetPlayerDefaults(APawn* PlayerPawn)
@@ -346,6 +360,8 @@ void ACHGameMode::RequestRestartGame(ACharacter* ResetCharacter)
 		ResetCharacter->Destroy();
 		CH_LOG(LogCHNetwork, Log, TEXT("Destroy"))
 	}
+	
+	
 	/*if(ResetController)
 	{
 		// UI 초기화
@@ -361,6 +377,12 @@ void ACHGameMode::RequestRestartGame(ACharacter* ResetCharacter)
 		ACHPlayerController* PlayerController = Cast<ACHPlayerController>(Controller);
 		if (PlayerController)
 		{
+			// 추가
+			PlayerController->SetIgnoreMoveInput(false);
+			PlayerController->SetIgnoreLookInput(false);
+
+			
+			// 
 			PlayerController->ClientSetResultScreen();
 			RestartPlayer(PlayerController);
 			// PlayerController->SetPlayerInvincible(false);

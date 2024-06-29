@@ -20,10 +20,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/CHPlayerController.h"
 #include "CyberHeist.h"
-#include "Character/CHCharacterControlData.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Misc/OutputDeviceDebug.h"
-#include "Net/UnrealNetwork.h"
 
 
 ACHGunRifle::ACHGunRifle() 
@@ -54,9 +51,6 @@ ACHGunRifle::ACHGunRifle()
 
 	MuzzleCollision3P->SetRelativeLocation(FVector(0,50,10));
 	MuzzleCollision3P->InitCapsuleSize(5.0f, 40.0f);
-
-	bCoverLeft = false;
-	bCoverRight = false;	
 }
 
 void ACHGunRifle::BeginPlay()
@@ -100,29 +94,11 @@ void ACHGunRifle::BeginPlay()
 			CH_LOG(LogCHNetwork, Log, TEXT("%s"), TEXT("No Owner"))
 		}
 	}
-
-	// Tilting Timeline Binding
-	if (CoverAimCurveFloat)
-	{		
-		FOnTimelineFloat CoverAimLeftTimelineProgress;
-		FOnTimelineFloat CoverAimRightTimelineProgress;
-		CoverAimLeftTimelineProgress.BindDynamic(this, &ACHGunRifle::SetCoverAimLeftValue);
-		CoverAimRightTimelineProgress.BindDynamic(this, &ACHGunRifle::SetCoverAimRightValue);
-		CoverAimLeftTimeline.AddInterpFloat(CoverAimCurveFloat, CoverAimLeftTimelineProgress);
-		CoverAimRightTimeline.AddInterpFloat(CoverAimCurveFloat, CoverAimRightTimelineProgress);
-	}
 }
 
 void ACHGunRifle::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	// 조준하는 동안에만 
-	if (OwningCharacter && OwningCharacter->GetAiming())
-	{
-		CoverAimLeftTimeline.TickTimeline(DeltaSeconds);
-		CoverAimRightTimeline.TickTimeline(DeltaSeconds);
-	}	
 }
 
 void ACHGunRifle::Equip()
@@ -292,19 +268,19 @@ void ACHGunRifle::Fire()
 
 	if(OwningCharacter->HasAuthority())
 	{
-		DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);		
+		// DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);		
 	}
 	
 	if(bScreenLaserSuccess)
 	{		
-		DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+		// DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 3, FColor::Red, false, 2);
 	}
 	else
 	{
 		// 허공에 쏴서 맞는 게 없다면
 		CH_LOG(LogCHNetwork, Warning, TEXT("Sky"))
 		ScreenLaserHit.Location = TraceEnd;
-		DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+		// DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 3, FColor::Red, false, 2);
 	}
 	
 	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
@@ -392,8 +368,8 @@ void ACHGunRifle::LocalFire(const FVector& HitLocation, const FTransform& Muzzle
 	if(PlayerCharacter->HasAuthority())
 	{
 		// 그리는 건 서버에서만 그린다.... 
-		DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
-		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 20, FColor::Blue, false, 2);			
+		// DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
+		// DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 5, FColor::Blue, false, 2);			
 	}
 
 	AController* OwnerController = OwnerPawn->GetController();		
@@ -627,10 +603,10 @@ void ACHGunRifle::FireByAI(AActor* AttackTarget)
 		if (bSuccess)
 		{
 			// FVector ShotDirection = -Rotation.Vector();
-			DrawDebugPoint(GetWorld(), TraceStart, 10, FColor::Red, true);			
+			// DrawDebugPoint(GetWorld(), TraceStart, 3, FColor::Red, true);			
 			// DrawDebugDirectionalArrow(GetWorld(), ControllingPawn->GetActorLocation(), End,5.0f, FColor::Yellow, false, 1, 0, 1.0f);
-			DrawDebugDirectionalArrow(GetWorld(), TraceStart, MuzzleLaserHit.Location,5.0f, FColor::Red, false, 1, 0, 1.0f);
-			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			// DrawDebugDirectionalArrow(GetWorld(), TraceStart, MuzzleLaserHit.Location,5.0f, FColor::Red, false, 1, 0, 1.0f);
+			// DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			// 맞은 부위 효과
@@ -718,7 +694,7 @@ void ACHGunRifle::AutoFireByAI(AActor* AttackTarget)
 	
 		if (bSuccess)
 		{
-			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			// DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			// 맞은 부위 효과
@@ -935,7 +911,7 @@ void ACHGunRifle::CancelPullTrigger()
 void ACHGunRifle::StartAim()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	
+	if (!bCoolDown) return; // 쿨다운 중이면 조준 불가
 	Super::StartAim();
 	
 	if(!bIsEquipped) return;
@@ -965,24 +941,16 @@ void ACHGunRifle::StartAim()
 			{
 				UE_LOG(LogTemp,Warning,TEXT("Cover variable is not correct"));
 			}			
+			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 						
 			if(GetNetMode() == ENetMode::NM_Standalone)
 			{
-				// 여기서 카메라, 캐릭터 이동
-				// 아래 함수가 지속적으로 호출되면서 캐릭터 이동. 그런데 목적지를 플레이어가 가지고 있어서
-				// 플레이어에게 계속 접근해야 한다..
-				// 왼쪽 오른쪽도 구분해야 한다. 
-				CoverAimRight();
-				CoverAimLeft();
 				PlayerCharacter->SetCoveredAttackMotion(true);
 			}		
 			else
 			{
 				PlayerCharacter->ServerSetCoveredAttackMotion(true);
 			}
-
-			// 얘도 같이 딜레이 줘야 할거 같은데 
-			PlayerCharacter->ServerRPC_SetCharacterControl(ECharacterControlType::ThirdAim);
 		}
 
 		if (PlayerCharacter->CurrentCharacterControlType == ECharacterControlType::First)
@@ -1014,8 +982,9 @@ void ACHGunRifle::StartAim()
 void ACHGunRifle::StopAim()
 {
 	CH_LOG(LogCHNetwork, Log, TEXT("Begin"))
-	if(!bIsEquipped) return;
+	
 	Super::StopAim();
+	if(!bIsEquipped) return;
 
 	bHoldGun = true;
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
@@ -1035,8 +1004,6 @@ void ACHGunRifle::StopAim()
 				// 로컬일 떈 로컬 함수 
 				if(GetNetMode() == ENetMode::NM_Standalone)
 				{
-					CoverAimRightRelease();
-					CoverAimLeftRelease();
 					PlayerCharacter->SetCoveredAttackMotion(false);			
 				}
 				else
@@ -1256,13 +1223,10 @@ void ACHGunRifle::SetupWeaponInputComponent()
 			{
 				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRifle::PullTrigger);	
 				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRifle::CancelPullTrigger);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartAim);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHGunRifle::StopAim);
-				
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRifle::StartAim);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRifle::StopAim);
 				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StartPrecisionAim);
 				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRifle::StopPrecisionAim);
-
-				
 				// EnhancedInputComponent->BindAction(FirstLookAction, ETriggerEvent::Triggered, this, &ACHGunRifle::FirstLook);
 				EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ACHGunRifle::Reload);
 			}
@@ -1368,170 +1332,4 @@ void ACHGunRifle::PlayFireVFX(const FTransform& HitTransform, const FTransform& 
 	{
 		TPAnimInstance->Montage_Play(Fire3PMontage, 1);		
 	}		
-}
-
-void ACHGunRifle::SetCoverAimRightValue(const float Value)
-{
-	ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter);
-	UCHCharacterControlData* NewCharacterControl = CHPlayer->GetCharacterControlManager()[ECharacterControlType::ThirdCover];
-	float Radius = CHPlayer->GetCapsuleComponent()->GetScaledCapsuleRadius();
-	FVector Direction = CHPlayer->MoveDirection;
-	if (bCoverRight)
-	{
-		// 카메라
-		CameraCurrentPosition = CHPlayer->GetSpringArm()->SocketOffset; 	
-		CameraDesiredPosition = FVector(NewCharacterControl->SocketOffset.X,NewCharacterControl->SocketOffset.Y, NewCharacterControl->SocketOffset.Z);
-		
-		// 위치 이동
-		CurrentPlayerLocation = CHPlayer->GetActorLocation();
-		DesiredPlayerLocation = GetActorLocation() + Direction * Radius * 2.5f;
-		
-		// 회전		
-		// CurrentPlayerRotation = CHPlayer->GetActorRotation();
-		// DesiredPlayerRotation = CHPlayer->GetLastCoveredRotation();		
-	}
-	else
-	{
-		CameraCurrentPosition = CHPlayer->GetSpringArm()->SocketOffset; 	
-		CameraDesiredPosition = FVector(50,50,60);		
-		
-		CurrentPlayerLocation = CHPlayer->GetActorLocation();
-		DesiredPlayerLocation = GetActorLocation() - Direction * Radius * 2.5f;
-		
-		CurrentPlayerRotation = CHPlayer->GetActorRotation();
-		DesiredPlayerRotation = CHPlayer->GetLastCoveredRotation();
-	}
-	// UE_LOG(LogTemp, Log, TEXT("[SetTiltingRightValue] bTiltReleaseRight : %d"), bTiltReleaseRight)
-
-	// RLerp와 TimeLine Value 값을 통한 자연스러운 엄폐 공격
-	const FRotator RLerp = UKismetMathLibrary::RLerp(CurrentPlayerRotation, DesiredPlayerRotation, Value, true);
-	const FVector VLerp = UKismetMathLibrary::VLerp(CurrentPlayerLocation, DesiredPlayerLocation, Value);
-	const FTransform TLerp = UKismetMathLibrary::MakeTransform(VLerp, RLerp);
-
-	const FVector CameraVLerp = UKismetMathLibrary::VLerp(CameraCurrentPosition, CameraDesiredPosition, Value);
-	// 해당 트랜스폼 할당
-	// CHPlayer->GetThirdPersonCamera()->SetRelativeTransform(TLerp);
-	CHPlayer->SetActorRelativeTransform(TLerp);
-	CHPlayer->GetSpringArm()->SocketOffset = FVector(CameraVLerp);
-	
-	// 애님에게 값 전달.
-	/*const float TiltValue = UKismetMathLibrary::Lerp(CurrentPlayerRotation, DesiredPlayerRotation,Value);
-	PlayerRotation = TiltValue;
-	ServerSetPlayerRotation(PlayerRotation);
-
-	const FVector TiltLocationValue = UKismetMathLibrary::VLerp(CurrentPlayerLocation, DesiredPlayerLocation,Value);
-	PlayerLocation = TiltLocationValue;
-	ServerSetPlayerLocation(PlayerLocation);*/
-}
-
-void ACHGunRifle::SetCoverAimLeftValue(const float Value)
-{
-	ACHCharacterPlayer* CHPlayer = Cast<ACHCharacterPlayer>(OwningCharacter);
-	if (bCoverLeft)
-	{
-		// 눌렀을 때, 
-		CameraCurrentPosition = CHPlayer->GetThirdPersonCamera()->GetRelativeLocation();
-		CameraDesiredPosition = FVector(0,-50,60);
-		CameraCurrentRotation = CHPlayer->GetThirdPersonCamera()->GetRelativeRotation();
-		CameraDesiredRotation = FRotator(0, 0, -20);
-
-		CurrentPlayerRotation = PlayerRotation;
-		DesiredPlayerRotation = -30;
-		CurrentPlayerLocation = PlayerLocation;
-		DesiredPlayerLocation = FVector(10,0,0);		
-	}
-	else
-	{
-		CameraCurrentPosition = CHPlayer->GetThirdPersonCamera()->GetRelativeLocation();
-		CameraDesiredPosition = FVector(0,0,60);
-		CameraCurrentRotation = CHPlayer->GetThirdPersonCamera()->GetRelativeRotation();
-		CameraDesiredRotation = FRotator::ZeroRotator;
-
-		CurrentPlayerRotation = PlayerRotation;
-		DesiredPlayerRotation = 0;
-		CurrentPlayerLocation = PlayerLocation;
-		DesiredPlayerLocation =  FVector(0,0,0);
-	}
-	// RLerp와 TimeLine Value 값을 통한 자연스러운 기울이기
-	const FRotator RLerp = UKismetMathLibrary::RLerp(CameraCurrentRotation, CameraDesiredRotation, Value, true);
-	const FVector VLerp = UKismetMathLibrary::VLerp(CameraCurrentPosition, CameraDesiredPosition, Value);
-	const FTransform TLerp = UKismetMathLibrary::MakeTransform(VLerp, RLerp);
-	// 해당 트랜스폼 할당
-	CHPlayer->GetThirdPersonCamera()->SetRelativeTransform(TLerp);
-	
-	// 애님에게 값 전달.
-	const float TiltValue = UKismetMathLibrary::Lerp(CurrentPlayerRotation, DesiredPlayerRotation,Value);
-	PlayerRotation = TiltValue;
-	ServerSetPlayerRotation(PlayerRotation);
-
-	const FVector TiltLocationValue = UKismetMathLibrary::VLerp(CurrentPlayerLocation, DesiredPlayerLocation,Value);
-	PlayerLocation = TiltLocationValue;
-	ServerSetPlayerLocation(PlayerLocation);
-}
-
-void ACHGunRifle::CoverAimRight()
-{
-	bCoverLeft = true;
-	bCoverRight = true;
-	if (CoverAimLeftTimeline.IsPlaying())
-	{
-		CoverAimLeftTimeline.Stop();
-	}
-	if (CoverAimRightTimeline.IsPlaying())
-	{
-		CoverAimRightTimeline.Stop();
-	}
-	CoverAimRightTimeline.PlayFromStart();
-}
-
-void ACHGunRifle::CoverAimRightRelease()
-{
-	bCoverLeft = false;
-	bCoverRight = false;
-	if (CoverAimLeftTimeline.IsPlaying())
-	{
-		CoverAimLeftTimeline.Stop();
-	}
-	if (CoverAimRightTimeline.IsPlaying())
-	{
-		CoverAimRightTimeline.Stop();
-	}
-	CoverAimRightTimeline.PlayFromStart();
-}
-
-void ACHGunRifle::CoverAimLeft()
-{
-	bCoverLeft = true;
-	bCoverRight = true;
-	if (CoverAimLeftTimeline.IsPlaying())
-	{
-		CoverAimLeftTimeline.Stop();
-	}
-	if (CoverAimRightTimeline.IsPlaying())
-	{
-		CoverAimRightTimeline.Stop();
-	}
-	CoverAimLeftTimeline.PlayFromStart();
-}
-
-void ACHGunRifle::CoverAimLeftRelease()
-{
-	bCoverLeft = false;
-	bCoverRight = false;
-	if (CoverAimLeftTimeline.IsPlaying())
-	{
-		CoverAimLeftTimeline.Stop();
-	}
-	if (CoverAimRightTimeline.IsPlaying())
-	{
-		CoverAimRightTimeline.Stop();
-	}
-	CoverAimLeftTimeline.PlayFromStart();
-}
-
-void ACHGunRifle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ACHGunRifle, bCoverLeft);
-	DOREPLIFETIME(ACHGunRifle, bCoverRight);
 }

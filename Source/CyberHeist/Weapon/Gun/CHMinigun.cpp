@@ -116,7 +116,7 @@ void ACHMinigun::Tick(float DeltaSeconds)
 				
 				FColor DrawColor = HitDetected ? FColor::Green : FColor::Blue;
 				// Debug 캡슐 그리기
-				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+				// DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 			}
 			if (MuzzleCollision3P)
 			{
@@ -141,7 +141,7 @@ void ACHMinigun::Tick(float DeltaSeconds)
 				
 				FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
 				// Debug 캡슐 그리기
-				DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
+				// DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, CapsuleRotation.Quaternion(), DrawColor);
 			}
 		}
 	}
@@ -305,8 +305,8 @@ void ACHMinigun::Fire()
 	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
 	FVector TraceEnd = TraceStart + Rotation.Vector() * MaxRange;
 	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
-	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
-	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+	// DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
+	// DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 3, FColor::Red, false, 2);
 	
 	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
 	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
@@ -399,8 +399,8 @@ void ACHMinigun::LocalFire(const FVector& HitLocation, const FTransform& MuzzleT
 	ACHCharacterPlayer* PlayerCharacter = Cast<ACHCharacterPlayer>(OwningCharacter);
 	if(PlayerCharacter->HasAuthority())
 	{
-		DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
-		DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Blue, false, 2);
+		// DrawDebugLine(GetWorld(), MuzzleStart, MuzzleEnd, FColor::Blue, false, 2);
+		// DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Blue, false, 2);
 	}
 	
 	AController* OwnerController = OwnerPawn->GetController();
@@ -641,7 +641,7 @@ void ACHMinigun::FireByAI(AActor* AttackTarget)
 		{
 			// FVector ShotDirection = -Rotation.Vector();
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			// DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 			
 			ACHCharacterPlayer* CharacterPlayer = Cast<ACHCharacterPlayer>(MuzzleLaserHit.GetActor());
@@ -728,7 +728,7 @@ void ACHMinigun::AutoFireByAI(AActor* AttackTarget)
 			UE_LOG(LogTemp, Log, TEXT("AttackTarget : %s , HitActor : %s"), *GetNameSafe(AttackTarget),*GetNameSafe(MuzzleLaserHit.GetActor()));
 			// FVector ShotDirection = -Rotation.Vector();
 			// DrawDebugPoint(GetWorld(), Hit.ImpactPoint, 10, FColor::Red, true);
-			DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 10, FColor::Red, true);
+			// DrawDebugPoint(GetWorld(), MuzzleLaserHit.Location, 3, FColor::Red, true);
 			const float DamageToCause = MuzzleLaserHit.BoneName.ToString() == FString("Head") ? HeadShotDamage : Damage;
 
 			ACHCharacterPlayer* CharacterPlayer = Cast<ACHCharacterPlayer>(MuzzleLaserHit.GetActor());
@@ -884,6 +884,7 @@ void ACHMinigun::CancelPullTrigger()
 
 void ACHMinigun::StartAim()
 {
+	if (!bCoolDown) return; // 쿨다운 중이면 조준 불가
 	if(!bIsEquipped) return;
 	if(bReloading)
 	{

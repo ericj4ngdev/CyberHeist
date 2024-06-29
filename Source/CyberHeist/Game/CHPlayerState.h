@@ -13,7 +13,7 @@ struct FPlayStatistics
 	GENERATED_BODY()
 
 	UPROPERTY()
-	int32 KilledEnemyCount = 12;
+	int32 KilledEnemyCount = 0;
 };
 
 /**
@@ -27,6 +27,7 @@ class CYBERHEIST_API ACHPlayerState : public APlayerState
 public:
 	ACHPlayerState();
 
+	void ResetKilledEnemyCount() { PlayStatistics.KilledEnemyCount = 0; }
 	FORCEINLINE const int32& GetKilledEnemyCount() const { return PlayStatistics.KilledEnemyCount; }
 	FORCEINLINE void AddKilledEnemyCount(int32 Count) { PlayStatistics.KilledEnemyCount = PlayStatistics.KilledEnemyCount + Count; }
 

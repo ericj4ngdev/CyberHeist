@@ -339,7 +339,16 @@ public:
 	virtual void StopParticleSystem();
 	virtual void Reload();
 	virtual void LocalReload();
+	virtual void CoolDownFinished();
+	// 추가할 멤버 변수들
+protected:
+	UPROPERTY(Replicated)
+	uint8 bCoolDown : 1;
 
+	float CoveredAimDelay;
+
+	FTimerHandle CoolDownTimerHandle;
+	
 	UFUNCTION(Server, Unreliable, WithValidation)
 	void ServerReload();
 

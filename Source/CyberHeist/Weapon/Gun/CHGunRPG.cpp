@@ -253,8 +253,8 @@ void ACHGunRPG::Fire()
 	// DrawDebugCamera(GetWorld(), Location, Rotation, 90, 2, FColor::Red, true);
 	FVector TraceEnd = TraceStart + Rotation.Vector() * MaxRange;
 	bool bScreenLaserSuccess = GetWorld()->LineTraceSingleByChannel(ScreenLaserHit, TraceStart, TraceEnd, ECollisionChannel::ECC_GameTraceChannel4, Params);
-	DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
-	DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 10, FColor::Red, false, 2);
+	// DrawDebugLine(GetWorld(),TraceStart, TraceEnd,FColor::Red,false, 2);
+	// DrawDebugPoint(GetWorld(), ScreenLaserHit.Location, 3, FColor::Red, false, 2);
 	
 	FVector HitLocation = bScreenLaserSuccess ? ScreenLaserHit.Location : TraceEnd;
 	UE_LOG(LogTemp, Log, TEXT("HitLocation : %s "), *HitLocation.ToString());
@@ -473,6 +473,7 @@ void ACHGunRPG::CancelPullTrigger()
 
 void ACHGunRPG::StartAim()
 {
+	if (!bCoolDown) return; // 쿨다운 중이면 조준 불가
 	Super::StartAim();
 
 	if(!bIsEquipped) return;
@@ -792,8 +793,8 @@ void ACHGunRPG::SetupWeaponInputComponent()
 			{		
 				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ACHGunRPG::PullTrigger);	
 				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &ACHGunRPG::CancelPullTrigger);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartAim);
-				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACHGunRPG::StopAim);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACHGunRPG::StartAim);
+				EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Canceled, this, &ACHGunRPG::StopAim);
 				EnhancedInputComponent->BindAction(PrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StartPrecisionAim);
 				EnhancedInputComponent->BindAction(CancelPrecisionAimAction, ETriggerEvent::Triggered, this, &ACHGunRPG::StopPrecisionAim);			
 			}
